@@ -12,20 +12,26 @@ export asComplex,
        lang2,
        lang3,
        library,
-       printValue,
-       Rtype,
-       tryEval
+       mkString,
+       Reval,
+       Rparse,
+       Rprint
 
 @doc "evaluate an R symbol or language object (i.e. a function call) in an R try/catch block"->
-function tryEval(expr::SEXP, env::SEXP{4})
+function Reval(expr::SEXP, env::SEXP{4})
     errorOccurred = Array(Cint,1)
     val = asSEXP(ccall((:R_tryEval,libR),Ptr{Void},
-                       (Ptr{Void},Ptr{Void},Ptr{Cint}),expr.p,env.p,errorOccurred))
-    Bool(errorOccurred[1]) && error("Error occurred in R_tryEval")
+                       (Ptr{Void},Ptr{Void},Ptr{Cint}),expr,env,errorOccurred))
+    Bool(errorOccurred[1]) && error("Error occurred in R_Reval")
     val
 end
-tryEval(expr::SEXP) = tryEval(expr,globalEnv)
-tryEval(sym::Symbol) = tryEval(install(string(sym)),globalEnv)
+
+@doc "expression objects (the result of Rparse) have a special Reval method"->
+function Reval(expr::SEXP{20}, env::SEXP{4}) # evaluate result of R_ParseVector
+    Reval(asSEXP(ccall((:VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Int),expr,0)),env)
+end
+Reval(s::SEXP) = Reval(s,globalEnv)
+Reval(sym::Symbol) = Reval(install(string(sym)),globalEnv)
 
 @doc "return the first element of an SEXP as an Complex128 value" ->
 asComplex(s::SEXP) = ccall((:Rf_asComplex,libR),Complex128,(Ptr{Void},),s.p)
@@ -48,10 +54,6 @@ findVar(sym::SEXP,env::SEXP{4}=globalEnv) =
     asSEXP(ccall((:Rf_findVar,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),sym.p,env.p))
 findVar(nm::ASCIIString,env::SEXP{4}) = findVar(install(nm),env)
 findVar(nm::ASCIIString) = findVar(install(nm),globalEnv)
-
-@doc "Check for S3 inheritance (I think only S3)"->
-inherits(s::SEXP,cls::ASCIIString) =
-    ccall((:Rf_inherits,libR),Bool,(Ptr{Void},Ptr{Uint8}),s.p,cls)
 
 ## predicates applied to an SEXP (many of these are unneeded for templated SEXP)
 for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
@@ -76,17 +78,24 @@ lang3(s1::SEXP,s2::SEXP,s3::SEXP) =
     asSEXP(ccall((:Rf_lang3,libR),Ptr{Void},
                  (Ptr{Void},Ptr{Void},Ptr{Void}),s1.p,s2.p,s3.p))
 
-@doc "attach an R package"->
-library(sym::Symbol) = tryEval(lang2(install(:library),install(sym)))
-
 @doc "Create a string SEXP of length 1" ->
-mkString(st::ASCIIString) = asSEXP(ccall((:Rf_mkString,libR),SEXP,(Ptr{Uint8},),st))
+mkString(st::ASCIIString) = asSEXP(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
 
 @doc "Protect an SEXP from garbage collection"->
 protect(s::SEXP) = asSEXP(ccall((:Rf_protect,libR),Ptr{Void},(Ptr{Void},),s.p))
 
-@doc "print the value of an SEXP"->
-printValue(s::SEXP) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s.p)
+@doc "Parse a string as an R expression"->
+function Rparse(st::ASCIIString)
+    ParseStatus = Array(Cint,1)
+    val = ccall((:R_ParseVector,libR),Ptr{Void},
+                (Ptr{Void},Cint,Ptr{Cint},Ptr{Void}),
+                mkString(st),length(st),ParseStatus,nilValue)
+    ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
+    asSEXP(val)
+end
+
+@doc "print the value of an SEXP using R's printing mechanism"->
+Rprint(s::SEXP) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s.p)
 
 @doc "Create an integer SEXP of length 1" ->
 scalarInteger(i::Integer) = SEXP{13}(ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Cint,),i))

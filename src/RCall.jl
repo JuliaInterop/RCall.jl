@@ -22,6 +22,8 @@ end
 
 asSEXP(p::Ptr{Void}) = SEXP{unsafe_load(convert(Ptr{Cint},p)) & 0x1f}(p)
 
+Base.convert(::Type{Ptr{Void}},s::SEXP) = s.p  # for convenience in ccall
+
 SXPtype(s::SEXP{0}) = :NILSXP        # NULL in R
 SXPtype(s::SEXP{1}) = :SYMSXP        # R Symbol
 SXPtype(s::SEXP{2}) = :LISTSXP       # internal "pairs list", the R list type is 19
@@ -52,12 +54,13 @@ function __init__()
     argv = ["Rembed","--silent"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
     i > 0 || error("initEmbeddedR failed")
-    global const globalEnv = asSEXP(unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{Void}),1))
-    global const emptyEnv = asSEXP(unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{Void}),1))
-    global const namesSymbol = asSEXP(unsafe_load(cglobal((:R_NamesSymbol,libR),Ptr{Void}),1))
-    global const classSymbol = asSEXP(unsafe_load(cglobal((:R_ClassSymbol,libR),Ptr{Void}),1))
-    global const R_NaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble),1)
     global const R_NaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint),1)
+    global const R_NaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble),1)
+    global const classSymbol = asSEXP(unsafe_load(cglobal((:R_ClassSymbol,libR),Ptr{Void}),1))
+    global const emptyEnv = asSEXP(unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{Void}),1))
+    global const globalEnv = asSEXP(unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{Void}),1))
+    global const namesSymbol = asSEXP(unsafe_load(cglobal((:R_NamesSymbol,libR),Ptr{Void}),1))
+    global const nilValue = asSEXP(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void}),1))
 end
 
 function Base.getindex(s::SEXP{19},I::Integer)
@@ -69,25 +72,27 @@ Base.length(s::SEXP) = ccall((:Rf_length,libR),Int,(Ptr{Void},),s.p)
 
 value(s::SEXP{0}) = nothing             # NULL in R
 # R's (internal) CHARSXP type
-value(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s.p))
+value(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s))
 # R's LGLSXP (logical type)  typemin(Int32) is NA, other non-zeros are true, 0 is false
 value(s::SEXP{10}) = pointer_to_array(ccall((:LOGICAL,libR),Ptr{Cint},
-                                            (Ptr{Void},),s.p),length(s))
+                                            (Ptr{Void},),s),length(s))
 # INTEGER (i.e. Int32) vector typemin(Int32) is NA
 value(s::SEXP{10}) = pointer_to_array(ccall((:INTEGER,libR),Ptr{Cint},
-                                            (Ptr{Void},),s.p),length(s))
+                                            (Ptr{Void},),s),length(s))
 # REAL (i.e. Float64) vector
 value(s::SEXP{14}) = pointer_to_array(ccall((:REAL,libR),
-                                            Ptr{Cdouble},(Ptr{Void},),s.p),length(s))
+                                            Ptr{Cdouble},(Ptr{Void},),s),length(s))
 # COMPLEX (i.e. Complex128) vector
 value(s::SEXP{15}) = pointer_to_array(ccall((:COMPLEX,libR),
-                                            Ptr{Complex128},(Ptr{Void},),s.p),length(s))
+                                            Ptr{Complex128},(Ptr{Void},),s),length(s))
 value(s::SEXP{16}) = 
     ASCIIString[copy(value(asSEXP(ccall((:STRING_ELT,libR),Ptr{Void},(Ptr{Void},Cint),
-                                              s.p,i-1)))) for i in 1:length(s)]
+                                              s,i-1)))) for i in 1:length(s)]
 
 Base.names(s::SEXP) = value(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
-                                         (Ptr{Void},Ptr{Void}),s.p,namesSymbol.p)))
+                                         (Ptr{Void},Ptr{Void}),s,namesSymbol)))
 
 include("interface.jl")
+include("Rfuns.jl")
+
 end # module
