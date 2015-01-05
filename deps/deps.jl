@@ -1,15 +1,8 @@
 # This is an auto-generated file; do not edit
 
-# Pre-hooks
-
-# Macro to load a library
-macro checked_lib(libname, path)
-    (dlopen_e(path) == C_NULL) && error("Unable to load \n\n$libname ($path)\n\nPlease re-run Pkg.build(package), and restart Julia.")
-    quote const $(esc(libname)) = $path end
-end
-
-# Load dependencies
-@checked_lib libR "/usr/lib/libR.so"
-
-# Load-hooks
-
+const libR="/usr/lib/R/lib/libR.so"
+ENV["R_HOME"]="/usr/lib/R"
+ENV["R_DOC_DIR"]="/usr/share/R/doc"
+ENV["R_INCLUDE_DIR"]="/usr/share/R/include"
+ENV["R_SHARE_DIR"]="/usr/share/R/share"
+ENV["LD_LIBRARY_PATH"]="/usr/lib/R/lib:/usr/lib/x86_64-linux-gnu:/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server"
