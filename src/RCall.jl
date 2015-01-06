@@ -1,4 +1,5 @@
 module RCall
+    using DataArrays,DataFrames
     export globalEnv,
            libR,
            R,
@@ -60,38 +61,51 @@ function __init__()
     global const classSymbol = asSEXP(unsafe_load(cglobal((:R_ClassSymbol,libR),Ptr{Void}),1))
     global const emptyEnv = asSEXP(unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{Void}),1))
     global const globalEnv = asSEXP(unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{Void}),1))
+    global const levelsSymbol = asSEXP(unsafe_load(cglobal((:R_LevelsSymbol,libR),Ptr{Void}),1))
     global const namesSymbol = asSEXP(unsafe_load(cglobal((:R_NamesSymbol,libR),Ptr{Void}),1))
     global const nilValue = asSEXP(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void}),1))
+    rone = scalarReal(1.)
+    ## offsets (in bytes) from the Ptr{Void} to an R object and its vector contents
+    global const voffset = Int(ccall((:REAL,libR),Ptr{Void},(Ptr{Void},),rone) - rone.p)
+    ## offsets (in bytes) from the Ptr{Void} to an R object and its length
+    global const loffset = voffset - 2*sizeof(Cint)
 end
 
 function Base.getindex(s::SEXP{19},I::Integer)
     0 < I ≤ length(s) || throw(BoundsError())
-    asSEXP(ccall((:VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Cptrdiff_t),s.p,I-1))
+    asSEXP(ccall((:VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Cint),s.p,I-1))
 end
 
-Base.length(s::SEXP) = ccall((:Rf_length,libR),Int,(Ptr{Void},),s.p)
+for N in [10,13:16,19]                  # only vector types of SEXP's have a length
+    @eval Base.length(s::SEXP{$N}) = unsafe_load(convert(Ptr{Cint},s.p+loffset),1)
+end
 
-value(s::SEXP{0}) = nothing             # NULL in R
+isNA(x::Cdouble) = x == R_NaReal
+isNA(x::Cint) = x == R_NaInt
+isNA(a::Array) = reshape(BitArray([isNA(aa) for aa in a]),size(a))
+
+for (N,typ) in ((10,:Int32),(13,:Int32),(14,:Float64),(15,:Complex128))
+    @eval rawvector(s::SEXP{$N}) = pointer_to_array(convert(Ptr{$typ},s.p+voffset),length(s))
+end
+
+for N in [10,14,15]
+    @eval DataArrays.DataArray(s::SEXP{$N}) = (rv = rawvector(s);DataArray(rv,isNA(rv)))
+end
+
+function DataArrays.DataArray(s::SEXP{13}) # could be a factor
+    rv = rawvector(s)
+    isFactor(s) ? PooledDataArray(DataArrays.RefArray(rv),R.levels(s)) : rv
+end
+
 # R's (internal) CHARSXP type
-value(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s))
-# R's LGLSXP (logical type)  typemin(Int32) is NA, other non-zeros are true, 0 is false
-value(s::SEXP{10}) = pointer_to_array(ccall((:LOGICAL,libR),Ptr{Cint},
-                                            (Ptr{Void},),s),length(s))
-# INTEGER (i.e. Int32) vector typemin(Int32) is NA
-value(s::SEXP{10}) = pointer_to_array(ccall((:INTEGER,libR),Ptr{Cint},
-                                            (Ptr{Void},),s),length(s))
-# REAL (i.e. Float64) vector
-value(s::SEXP{14}) = pointer_to_array(ccall((:REAL,libR),
-                                            Ptr{Cdouble},(Ptr{Void},),s),length(s))
-# COMPLEX (i.e. Complex128) vector
-value(s::SEXP{15}) = pointer_to_array(ccall((:COMPLEX,libR),
-                                            Ptr{Complex128},(Ptr{Void},),s),length(s))
-value(s::SEXP{16}) = 
-    ASCIIString[copy(value(asSEXP(ccall((:STRING_ELT,libR),Ptr{Void},(Ptr{Void},Cint),
-                                              s,i-1)))) for i in 1:length(s)]
+Base.string(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s))
 
-Base.names(s::SEXP) = value(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
-                                         (Ptr{Void},Ptr{Void}),s,namesSymbol)))
+rawvector(s::SEXP{16}) = 
+    ASCIIString[copy(string(asSEXP(ccall((:STRING_ELT,libR),Ptr{Void},(Ptr{Void},Cint),
+                                         s,i-1)))) for i in 1:length(s)]
+
+Base.names(s::SEXP) = rawvector(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
+                                             (Ptr{Void},Ptr{Void}),s,namesSymbol)))
 
 include("interface.jl")
 include("Rfuns.jl")

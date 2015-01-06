@@ -2,6 +2,7 @@ export asComplex,
        asInteger,
        asLogical,
        asReal,
+       dataset,
        findVar,
        inherits,
        install,
@@ -11,11 +12,16 @@ export asComplex,
        lang1,
        lang2,
        lang3,
-       library,
+       lang4,
+       lang5,
+       lang6,
        mkString,
        Reval,
        Rparse,
-       Rprint
+       Rprint,
+       scalarInteger,
+       scalarLogical,
+       scalarReal
 
 @doc "evaluate an R symbol or language object (i.e. a function call) in an R try/catch block"->
 function Reval(expr::SEXP, env::SEXP{4})
@@ -34,19 +40,26 @@ Reval(s::SEXP) = Reval(s,globalEnv)
 Reval(sym::Symbol) = Reval(install(string(sym)),globalEnv)
 
 @doc "return the first element of an SEXP as an Complex128 value" ->
-asComplex(s::SEXP) = ccall((:Rf_asComplex,libR),Complex128,(Ptr{Void},),s.p)
+asComplex(s::SEXP) = ccall((:Rf_asComplex,libR),Complex128,(Ptr{Void},),s)
 
 @doc "return the first element of an SEXP as an Cint (i.e. Int32)" ->
-asInteger(s::SEXP) = ccall((:Rf_asInteger,libR),Cint,(Ptr{Void},),s.p)
+asInteger(s::SEXP) = ccall((:Rf_asInteger,libR),Cint,(Ptr{Void},),s)
 
 @doc "return the first element of an SEXP as a Bool" ->
-asLogical(s::SEXP) = ccall((:Rf_asLogical,libR),Bool,(Ptr{Void},),s.p)
+asLogical(s::SEXP) = ccall((:Rf_asLogical,libR),Bool,(Ptr{Void},),s)
 
 @doc "return the first element of an SEXP as a Cdouble (i.e. Float64)" ->
-asReal(s::SEXP) = ccall((:Rf_asReal,libR),Cdouble,(Ptr{Void},),s.p)
+asReal(s::SEXP) = ccall((:Rf_asReal,libR),Cdouble,(Ptr{Void},),s)
+
+@doc "convert a symbol or ASCIIString to a dataset"->
+function dataset(sym::Symbol)
+    vv = Reval(sym)
+    R.inherits(vv,"data.frame") || error("Needs a data frame")
+    DataFrame([DataArray(vv[i]) for i in 1:length(vv)],convert(Vector{Symbol},names(vv)))
+end
 
 @doc "Symbol lookup for R, installing the symbol if necessary" ->
-install(nm::ASCIIString) = SEXP{1}(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),nm))
+install(nm::ASCIIString) = asSEXP(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),nm))
 install(sym::Symbol) = install(string(sym))
 
 @doc "find object with name sym in environment env"->
@@ -63,26 +76,42 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isReal,:isS4,:isString,:isTs,:isUnordered,:isUnsorted,
             :isUserBinop,:isValidString,:isValidStringF,:isVector,
             :isVectorAtomic,:isVectorizable,:isVectorList)
-    @eval $sym(s::SEXP) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{Void},),s.p)
+    @eval $sym(s::SEXP) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{Void},),s)
 end
 
 @doc "Create a 0-argument function call from a symbol"->
-lang1(s::SEXP) = asSEXP(ccall((:Rf_lang1,libR),Ptr{Void},(Ptr{Void},),s.p))
+lang1(s::SEXP) = asSEXP(ccall((:Rf_lang1,libR),Ptr{Void},(Ptr{Void},),s))
 
 @doc "Create a 1-argument function call from a symbol and the argument"->
 lang2(s1::SEXP,s2::SEXP) =
-    asSEXP(ccall((:Rf_lang2,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s1.p,s2.p))
+    asSEXP(ccall((:Rf_lang2,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s1,s2))
 
 @doc "Create a 2-argument function call from a symbol and the arguments"->
 lang3(s1::SEXP,s2::SEXP,s3::SEXP) =
     asSEXP(ccall((:Rf_lang3,libR),Ptr{Void},
-                 (Ptr{Void},Ptr{Void},Ptr{Void}),s1.p,s2.p,s3.p))
+                 (Ptr{Void},Ptr{Void},Ptr{Void}),s1,s2,s3))
+
+@doc "Create a 3-argument function call from a symbol and the arguments"->
+lang4(s1::SEXP,s2::SEXP,s3::SEXP,s4::SEXP) =
+    asSEXP(ccall((:Rf_lang3,libR),Ptr{Void},
+                 (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}),s1,s2,s3,s4))
+
+@doc "Create a 4-argument function call from a symbol and the arguments"->
+lang5(s1::SEXP,s2::SEXP,s3::SEXP,s4::SEXP,s5::SEXP) =
+    asSEXP(ccall((:Rf_lang3,libR),Ptr{Void},
+                 (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}),s1,s2,s3,s4,s5))
+
+@doc "Create a 5-argument function call from a symbol and the arguments"->
+lang6(s1::SEXP,s2::SEXP,s3::SEXP,s4::SEXP,s5::SEXP,s6::SEXP) =
+    asSEXP(ccall((:Rf_lang3,libR),Ptr{Void},
+                 (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}),
+                 s1,s2,s3,s4,s5,s6))
 
 @doc "Create a string SEXP of length 1" ->
 mkString(st::ASCIIString) = asSEXP(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
 
 @doc "Protect an SEXP from garbage collection"->
-protect(s::SEXP) = asSEXP(ccall((:Rf_protect,libR),Ptr{Void},(Ptr{Void},),s.p))
+protect(s::SEXP) = asSEXP(ccall((:Rf_protect,libR),Ptr{Void},(Ptr{Void},),s))
 
 @doc "Parse a string as an R expression"->
 function Rparse(st::ASCIIString)
@@ -95,7 +124,7 @@ function Rparse(st::ASCIIString)
 end
 
 @doc "print the value of an SEXP using R's printing mechanism"->
-Rprint(s::SEXP) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s.p)
+Rprint(s::SEXP) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s)
 
 @doc "Create an integer SEXP of length 1" ->
 scalarInteger(i::Integer) = SEXP{13}(ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Cint,),i))
