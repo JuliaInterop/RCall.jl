@@ -1,6 +1,7 @@
 module RCall
     export globalEnv,
            libR,
+           R,
            SEXP,
            SXPtype
 

@@ -1,4 +1,3 @@
-
 # RCall.jl
 
 ## Embedded R within Julia.
@@ -36,7 +35,7 @@ There are several types of `SEXPREC`.  The type is determined by a numeric code 
 julia> using RCall
 
 julia> form = Reval(:Formaldehyde)
-RCall.SEXP{19}(Ptr{Void} @0x000000000ab09a98)
+RCall.SEXP{19}(Ptr{Void} @0x0000000007cec668)
 
 ````
 
@@ -44,18 +43,20 @@ RCall.SEXP{19}(Ptr{Void} @0x000000000ab09a98)
 
 
 
-It happens that 19 is the code for an `R` `list` object.  Initially I would recommend applying `str` to an `SEXP` value in the package to get a brief printed summary (from R) of the object.
+It happens that 19 is the code for an `R` `list` object.  Initially I would recommend applying `R.str` to an `SEXP` value in the package to get a brief printed summary (from R) of the object.
 ````julia
-julia> str(form);
-
+julia> R.str(form);
 'data.frame':   6 obs. of  2 variables:
  $ carb  : num  0.1 0.3 0.5 0.6 0.7 0.9
  $ optden: num  0.086 0.269 0.446 0.538 0.626 0.782
 ````
+
+
+
+
 R's `str` function is extremely versatile.
 ````julia
-julia> str(Reval(:ls));
-
+julia> R.str(Reval(:ls));
 function (name, pos = -1L, envir = as.environment(pos), all.names = FALSE, pattern)
 ````
 
@@ -66,7 +67,7 @@ The `RCall` package uses the `Rf_tryEval` function in the `R` API to evaluate ex
 An R symbol is accessed (installing the symbol in the symbol table, if necessary) with the Julia function `install`.
 ````julia
 julia> search = Reval(lang1(install(:search)))
-RCall.SEXP{16}(Ptr{Void} @0x000000000a1f9658)
+RCall.SEXP{16}(Ptr{Void} @0x0000000007cd1228)
 
 ````
 
@@ -78,15 +79,15 @@ The value of an R object can be imported into Julia using the (currently unexpor
 ````julia
 julia> RCall.value(search)
 9-element Array{ASCIIString,1}:
- ".GlobalEnv"       
- "package:stats"    
- "package:graphics" 
+ ".GlobalEnv"
+ "package:stats"
+ "package:graphics"
  "package:grDevices"
- "package:utils"    
+ "package:utils"
  "package:datasets" 
- "package:methods"  
- "Autoloads"        
- "package:base"     
+ "package:methods"
+ "Autoloads"
+ "package:base"
 
 ````
 
@@ -97,11 +98,14 @@ julia> RCall.value(search)
 There is also a function `Rprint` that uses R's printing mechanism.
 ````julia
 julia> Rprint(search)
-
 [1] ".GlobalEnv"        "package:stats"     "package:graphics" 
 [4] "package:grDevices" "package:utils"     "package:datasets" 
-[7] "package:methods"   "Autoloads"         "package:base"     
+[7] "package:methods"   "Autoloads"         "package:base"
 ````
+
+
+
+
 
 To parse a string as an R expression, use `Rparse`.
 ````julia

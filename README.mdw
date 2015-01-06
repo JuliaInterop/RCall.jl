@@ -36,13 +36,13 @@ using RCall
 form = Reval(:Formaldehyde)
 @ 
 
-It happens that 19 is the code for an `R` `list` object.  Initially I would recommend applying `str` to an `SEXP` value in the package to get a brief printed summary (from R) of the object.
+It happens that 19 is the code for an `R` `list` object.  Initially I would recommend applying `R.str` to an `SEXP` value in the package to get a brief printed summary (from R) of the object.
 <<term=true>>=
-str(form);
+R.str(form);
 @ 
 R's `str` function is extremely versatile.
 <<term=true>>=
-str(Reval(:ls));
+R.str(Reval(:ls));
 @ 
 
 Remember, this output is being generated in `R`.  The semicolon at the end of the Julia expression does not suppress the output from R.
