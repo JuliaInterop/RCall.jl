@@ -100,7 +100,7 @@ end
 # R's (internal) CHARSXP type
 Base.string(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s))
 
-rawvector(s::SEXP{16}) = 
+rawvector(s::SEXP{16}) =
     ASCIIString[copy(string(asSEXP(ccall((:STRING_ELT,libR),Ptr{Void},(Ptr{Void},Cint),
                                          s,i-1)))) for i in 1:length(s)]
 
