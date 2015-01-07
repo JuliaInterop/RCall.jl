@@ -51,7 +51,7 @@ SXPtype(s::SEXP{22}) = :EXTPTRSXP     # external pointer
 SXPtype(s::SEXP{23}) = :WEAKREFSXP    # weak references
 SXPtype(s::SEXP{24}) = :RAWSXP        # raw bytes
 SXPtype(s::SEXP{25}) = :S4SXP          # S4 non-vector
- 
+
 function __init__()
     argv = ["Rembed","--silent"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
@@ -76,7 +76,7 @@ function Base.getindex(s::SEXP{19},I::Integer)
     asSEXP(ccall((:VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Cint),s.p,I-1))
 end
 
-for N in [10,13:16,19]                  # only vector types of SEXP's have a length
+for N in [10,13:16,19,20]                  # only vector types of SEXP's have a length
     @eval Base.length(s::SEXP{$N}) = unsafe_load(convert(Ptr{Cint},s.p+loffset),1)
 end
 

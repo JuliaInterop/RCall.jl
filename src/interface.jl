@@ -34,7 +34,11 @@ end
 
 @doc "expression objects (the result of Rparse) have a special Reval method"->
 function Reval(expr::SEXP{20}, env::SEXP{4}) # evaluate result of R_ParseVector
-    Reval(asSEXP(ccall((:VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Int),expr,0)),env)
+    local val
+    for I in 1:length(expr)
+        val = Reval(asSEXP(ccall((:VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Int),expr,I-1)),env)
+    end
+    val
 end
 Reval(s::SEXP) = Reval(s,globalEnv)
 Reval(sym::Symbol) = Reval(install(string(sym)),globalEnv)
