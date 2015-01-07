@@ -34,9 +34,9 @@ end
 
 @doc "expression objects (the result of Rparse) have a special Reval method"->
 function Reval(expr::SEXP{20}, env::SEXP{4}) # evaluate result of R_ParseVector
-    local val
-    for I in 1:length(expr)
-        val = Reval(asSEXP(ccall((:VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Int),expr,I-1)),env)
+    local val           # the value of the last expression is returned
+    for e in expr
+        val = Reval(e,env)
     end
     val
 end

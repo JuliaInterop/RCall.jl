@@ -2,7 +2,7 @@ module R
 
 using ..RCall
 if VERSION < v"0.4-"
-    using Docile   # I thought this would be propagated but apparently not.
+    using Docile   # I thought this would be propagated from RCall but apparently not.
 end
 
 export
