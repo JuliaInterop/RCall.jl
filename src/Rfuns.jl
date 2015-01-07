@@ -1,6 +1,9 @@
 module R
 
 using ..RCall
+if VERSION < v"0.4-"
+    using Docile   # I thought this would be propagated but apparently not.
+end
 
 export
     class,
