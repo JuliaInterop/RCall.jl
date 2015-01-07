@@ -10,6 +10,7 @@ export
     inherits,
     levels,
     library,
+    ls,
     str
 
 @doc "Query the class of an SEXP (should work for S3 and S4)"->
@@ -28,5 +29,12 @@ library(sym::Symbol) = Reval(lang2(install(:library),install(sym)))
 @doc "examine the structure of an R object"->
 str(s::SEXP) = Reval(lang2(install(:str),s))
 str(s::Symbol) = Reval(lang2(install(:str),install(s)))
+
+@doc "list the objects in the global environment or in a package that is already attached"->
+ls(;printR::Bool=true) = (v = Reval(lang1(install(:ls))); printR ? Rprint(v) : v)
+function ls(pkg::ASCIIString;printR::Bool=true)
+    v = Reval(lang2(install(:ls),mkString(string("package:",pkg))))
+    printR ? Rprint(v) : v
+end
 
 end
