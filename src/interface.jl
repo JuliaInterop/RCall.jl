@@ -141,3 +141,8 @@ unprotect(k::Integer) = ccall((:Rf_unprotect,libR),Void,(Cint,),k)
 @doc "unprotect an SEXP"->
 unprotect(s::SEXP) = ccall((:Rf_unprotect_ptr,libR),Void,(Ptr{Void},),s.p)
 
+@doc "release an SEXP"->
+ReleaseObject(s::SEXP) = ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),s.p)
+
+@doc "preserve an SEXP"->
+PreserveObject(s::SEXP) = ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s.p)
