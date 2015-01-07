@@ -35,7 +35,7 @@ There are several types of `SEXPREC`.  The type is determined by a numeric code 
 julia> using RCall
 
 julia> form = Reval(:Formaldehyde)
-RCall.SEXP{19}(Ptr{Void} @0x0000000007cec668)
+RCall.SEXP{19}(Ptr{Void} @0x000000000f89c500)
 
 ````
 
@@ -60,6 +60,10 @@ julia> R.str(Reval(:ls));
 function (name, pos = -1L, envir = as.environment(pos), all.names = FALSE, pattern)
 ````
 
+
+
+
+
 Remember, this output is being generated in `R`.  The semicolon at the end of the Julia expression does not suppress the output from R.
 
 The `RCall` package uses the `Rf_tryEval` function in the `R` API to evaluate expressions, so that errors in R are caught.  As seen above, evaluating a symbol returns the value of that symbol in R's global environment.  Simple function calls can be created using functions named `lang<k>`, where `k` is the number of arguments to the R function plus 1.  The first argument to `lang<k>` is a R symbol giving the name of the R function.
@@ -67,7 +71,7 @@ The `RCall` package uses the `Rf_tryEval` function in the `R` API to evaluate ex
 An R symbol is accessed (installing the symbol in the symbol table, if necessary) with the Julia function `install`.
 ````julia
 julia> search = Reval(lang1(install(:search)))
-RCall.SEXP{16}(Ptr{Void} @0x0000000007cd1228)
+RCall.SEXP{16}(Ptr{Void} @0x000000000f90caa8)
 
 ````
 
@@ -75,11 +79,15 @@ RCall.SEXP{16}(Ptr{Void} @0x0000000007cd1228)
 
 
 
-The value of an R object can be imported into Julia using the (currently unexported) `value` function.  This function is not exported because I don't like the name but haven't thought of a better one.
+The value of an R object can be imported into Julia using the (currently unexported) `rawvector`` function.  This function is not exported because I don't like the name but haven't thought of a better one.  Also, it will be important to settle on who protects the contents and who unprotects them.
 ````julia
-julia> RCall.value(search)
-9-element Array{ASCIIString,1}:
+julia> RCall.rawvector(search)
+13-element Array{ASCIIString,1}:
  ".GlobalEnv"
+ "package:mlmRev"
+ "package:lme4"
+ "package:Rcpp"
+ "package:Matrix"
  "package:stats"
  "package:graphics"
  "package:grDevices"
@@ -88,7 +96,6 @@ julia> RCall.value(search)
  "package:methods"
  "Autoloads"
  "package:base"
-
 ````
 
 
@@ -98,9 +105,11 @@ julia> RCall.value(search)
 There is also a function `Rprint` that uses R's printing mechanism.
 ````julia
 julia> Rprint(search)
-[1] ".GlobalEnv"        "package:stats"     "package:graphics" 
-[4] "package:grDevices" "package:utils"     "package:datasets" 
-[7] "package:methods"   "Autoloads"         "package:base"
+ [1] ".GlobalEnv"        "package:mlmRev"    "package:lme4"
+ [4] "package:Rcpp"      "package:Matrix"    "package:stats"
+ [7] "package:graphics"  "package:grDevices" "package:utils"
+[10] "package:datasets"  "package:methods"   "Autoloads"
+[13] "package:base"
 ````
 
 
@@ -109,7 +118,7 @@ julia> Rprint(search)
 
 To parse a string as an R expression, use `Rparse`.
 ````julia
-julia> RCall.value(Reval(Rparse("2+2")))
+julia> RCall.rawvector(Reval(Rparse("2+2")))
 1-element Array{Float64,1}:
  4.0
 

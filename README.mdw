@@ -54,9 +54,9 @@ An R symbol is accessed (installing the symbol in the symbol table, if necessary
 search = Reval(lang1(install(:search)))
 @ 
 
-The value of an R object can be imported into Julia using the (currently unexported) `value` function.  This function is not exported because I don't like the name but haven't thought of a better one.
+The value of an R object can be imported into Julia using the (currently unexported) `rawvector`` function.  This function is not exported because I don't like the name but haven't thought of a better one.  Also, it will be important to settle on who protects the contents and who unprotects them.
 <<term=true>>=
-RCall.value(search)
+RCall.rawvector(search)
 @ 
 
 There is also a function `Rprint` that uses R's printing mechanism.
@@ -66,5 +66,5 @@ Rprint(search)
 
 To parse a string as an R expression, use `Rparse`.
 <<term=true>>=
-RCall.value(Reval(Rparse("2+2")))
+RCall.rawvector(Reval(Rparse("2+2")))
 @
