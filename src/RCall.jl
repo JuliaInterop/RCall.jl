@@ -1,5 +1,9 @@
 module RCall
     using DataArrays,DataFrames
+if VERSION < v"v0.4-"
+    using Docile                        # for the @doc macro
+end
+
     export globalEnv,
            libR,
            R,
