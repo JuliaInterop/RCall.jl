@@ -50,6 +50,8 @@ isNA(x::Cdouble) = x == R_NaReal
 isNA(x::Cint) = x == R_NaInt
 isNA(a::Array) = reshape(BitArray([isNA(aa) for aa in a]),size(a))
 
+rawvector(s::SEXP{0}) = nothing
+
 for (N,typ) in ((10,:Int32),(13,:Int32),(14,:Float64),(15,:Complex128))
     @eval rawvector(s::SEXP{$N}) = pointer_to_array(convert(Ptr{$typ},s.p+voffset),length(s))
 end
@@ -60,7 +62,7 @@ end
 
 function DataArrays.DataArray(s::SEXP{13}) # could be a factor
     rv = rawvector(s)
-    isFactor(s) ? PooledDataArray(DataArrays.RefArray(rv),R.levels(s)) : DataArray(rv,isNA(rv))
+    isFactor(s) ? compact(PooledDataArray(DataArrays.RefArray(rv),R.levels(s))) : DataArray(rv,isNA(rv))
 end
 
 # R's (internal) CHARSXP type
