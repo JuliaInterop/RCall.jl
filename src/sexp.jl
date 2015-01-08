@@ -53,6 +53,21 @@ isNA(x::Cdouble) = x == R_NaReal
 isNA(x::Cint) = x == R_NaInt
 isNA(a::Array) = reshape(BitArray([isNA(aa) for aa in a]),size(a))
 
+## bytestring copies the contents of the 0-terminated string at the Ptr{Uint8} address
+Base.bytestring(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s.p))
+
+for N in [10,13:16,19,20]
+    @eval begin
+        function Base.size(s::SEXP{$N})
+            dd = Reval(lang2(dimSymbol,s))
+            isa(dd,SEXP{13}) || return (int64(length(s)),)
+            vv = vec(dd)
+            ntuple(length(vv),i->Int64(vv[i]))
+        end
+    end
+end
+
+Base.vec(s::SEXP{16}) = [bytestring(ss) for ss in s]
 
 for (N,typ) in ((10,:Int32),(13,:Int32),(14,:Float64),(15,:Complex128))
     @eval begin
@@ -65,35 +80,29 @@ for (N,typ) in ((10,:Int32),(13,:Int32),(14,:Float64),(15,:Complex128))
     end
 end
 
+## Not sure what to do about R's Logical vectors (SEXP{10}) They are stored as Int32 and can
+## have missing values.  The DataArray method must copy the values if it is to produce Bool's.
+## For the time being, I will leave them as Int32's.
 for N in [10,13:15]
-    @eval DataArrays.DataArray(s::SEXP{$N}) = (rv = reshape(vec(s),size(s));DataArray(rv,isNA(rv)))
-end
-
-for N in [10,13:16]
     @eval begin
-        function Base.size(s::SEXP{$N})
-            dd = Reval(lang2(dimSymbol,s))
-            isa(dd,SEXP{13}) || return (int64(length(s)),)
-            ntuple(length(dd),i->Int64(dd[i]))
-        end
+        DataArrays.DataArray(s::SEXP{$N}) = (rv = reshape(vec(s),size(s));DataArray(rv,isNA(rv)))
+        dataset(s::SEXP{$N}) = DataArray(s)
     end
 end
 
-function DataArrays.PooledDataArray(s::SEXP{13})
-    isFactor(s) || error("s is not a pointer to a factor")
-    compact(PooledDataArray(DataArrays.RefArray(rv),R.levels(s)))
-end
+## ToDo: expand these definitions to check for names and produce NamedArrays?
 
-## bytestring copies the contents of the 0-terminated string at the Ptr{Uint8} address
-Base.bytestring(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s.p))
-
-Base.vec(s::SEXP{16}) = [bytestring(ss) for ss in s]
+# make dataset more general for integer vectors, which can be factors
+dataset(s::SEXP{13}) =
+    isFactor(s) ? compact(PooledDataArray(DataArrays.RefArray(vec(s)),R.levels(s))) : DataArray(s)
 
 Base.names(s::SEXP) = vec(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
                                        (Ptr{Void},Ptr{Void}),s,namesSymbol)))
 
-function DataFrames.DataFrame(s::SEXP{19})
-    R.inherits(s,"data.frame") || error("s is not a pointer to a data.frame")
-    DataFrame([isFactor(v) ? PooledDataArray(v) : DataArray(v) for v in s],
-              Symbol[symbol(nm) for nm in names(s)])
+function dataset(s::SEXP{19})
+    val = [dataset(v) for v in s]
+    R.inherits(s,"data.frame") ? DataFrame(val,Symbol[symbol(nm) for nm in names(s)]) : val
 end
+
+@doc "convert a symbol or ASCIIString to a dataset"->
+dataset(s::Symbol) = dataset(Reval(s))

@@ -55,13 +55,6 @@ asLogical(s::SEXP) = ccall((:Rf_asLogical,libR),Bool,(Ptr{Void},),s)
 @doc "return the first element of an SEXP as a Cdouble (i.e. Float64)" ->
 asReal(s::SEXP) = ccall((:Rf_asReal,libR),Cdouble,(Ptr{Void},),s)
 
-@doc "convert a symbol or ASCIIString to a dataset"->
-function dataset(sym::Symbol)
-    vv = Reval(sym)
-    R.inherits(vv,"data.frame") || error("Needs a data frame")
-    DataFrame([DataArray(vv[i]) for i in 1:length(vv)],convert(Vector{Symbol},names(vv)))
-end
-
 @doc "Symbol lookup for R, installing the symbol if necessary" ->
 install(nm::ASCIIString) = asSEXP(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),nm))
 install(sym::Symbol) = install(string(sym))
