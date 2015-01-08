@@ -44,7 +44,7 @@ function __init__()
     global const nilValue = asSEXP(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void}),1))
     rone = scalarReal(1.)
     ## offsets (in bytes) from the Ptr{Void} to an R object and its vector contents
-    global const voffset = Int(ccall((:REAL,libR),Ptr{Void},(Ptr{Void},),rone) - rone.p)
+    global const voffset = int(ccall((:REAL,libR),Ptr{Void},(Ptr{Void},),rone) - rone.p)
     ## offsets (in bytes) from the Ptr{Void} to an R object and its length
     global const loffset = voffset - 2*sizeof(Cint)
 end
