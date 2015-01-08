@@ -27,11 +27,13 @@ SXPtype(s::SEXP{25}) = :S4SXP          # S4 non-vector
 
 
 ## length methods for the vector types of SEXP's.  To handle long vectors the length method
-## should be extended to check for a value of typemin(Cint) and then extract the long length
+## should be extended to check for the sentinal value (typemin(Cint)) followed by extraction
+## of the Int64 length.
 for N in [10,13:16,19,20]
     @eval Base.length(s::SEXP{$N}) = unsafe_load(convert(Ptr{Cint},s.p+loffset),1)
 end
 
+## Element extraction and iterators
 for (N,elt) in ((16,:STRING_ELT),(19,:VECTOR_ELT),(20,:VECTOR_ELT))
     @eval begin
         function Base.getindex(s::SEXP{$N},I::Number)  # extract a single element
@@ -46,29 +48,52 @@ for (N,elt) in ((16,:STRING_ELT),(19,:VECTOR_ELT),(20,:VECTOR_ELT))
 end
 Base.eltype(s::SEXP{16}) = SEXP{9}      # be more specific for STRSXP
 
+## ToDo: write an isNA method for Complex128 - not sure how it is defined though.
 isNA(x::Cdouble) = x == R_NaReal
 isNA(x::Cint) = x == R_NaInt
 isNA(a::Array) = reshape(BitArray([isNA(aa) for aa in a]),size(a))
 
-rawvector(s::SEXP{0}) = nothing
 
 for (N,typ) in ((10,:Int32),(13,:Int32),(14,:Float64),(15,:Complex128))
-    @eval rawvector(s::SEXP{$N}) = pointer_to_array(convert(Ptr{$typ},s.p+voffset),length(s))
+    @eval begin
+        function Base.vec(s::SEXP{$N})
+            ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)
+            rv = pointer_to_array(convert(Ptr{$typ},s.p+voffset),length(s))
+            finalizer(rv,x->ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),s.p))
+            rv
+        end
+    end
 end
 
-for N in [10,14,15]
-    @eval DataArrays.DataArray(s::SEXP{$N}) = (rv = rawvector(s);DataArray(rv,isNA(rv)))
+for N in [10,13:15]
+    @eval DataArrays.DataArray(s::SEXP{$N}) = (rv = reshape(vec(s),size(s));DataArray(rv,isNA(rv)))
 end
 
-function DataArrays.DataArray(s::SEXP{13}) # could be a factor
-    rv = rawvector(s)
-    isFactor(s) ? compact(PooledDataArray(DataArrays.RefArray(rv),R.levels(s))) : DataArray(rv,isNA(rv))
+for N in [10,13:16]
+    @eval begin
+        function Base.size(s::SEXP{$N})
+            dd = Reval(lang2(dimSymbol,s))
+            isa(dd,SEXP{13}) || return (int64(length(s)),)
+            ntuple(length(dd),i->Int64(dd[i]))
+        end
+    end
 end
 
-# R's (internal) CHARSXP type
-Base.string(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s))
+function DataArrays.PooledDataArray(s::SEXP{13})
+    isFactor(s) || error("s is not a pointer to a factor")
+    compact(PooledDataArray(DataArrays.RefArray(rv),R.levels(s)))
+end
 
-rawvector(s::SEXP{16}) = ASCIIString[copy(string(ss)) for ss in s]
+## bytestring copies the contents of the 0-terminated string at the Ptr{Uint8} address
+Base.bytestring(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s.p))
 
-Base.names(s::SEXP) = rawvector(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
-                                             (Ptr{Void},Ptr{Void}),s,namesSymbol)))
+Base.vec(s::SEXP{16}) = [bytestring(ss) for ss in s]
+
+Base.names(s::SEXP) = vec(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
+                                       (Ptr{Void},Ptr{Void}),s,namesSymbol)))
+
+function DataFrames.DataFrame(s::SEXP{19})
+    R.inherits(s,"data.frame") || error("s is not a pointer to a data.frame")
+    DataFrame([isFactor(v) ? PooledDataArray(v) : DataArray(v) for v in s],
+              Symbol[symbol(nm) for nm in names(s)])
+end
