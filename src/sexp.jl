@@ -51,6 +51,7 @@ Base.eltype(s::SEXP{16}) = SEXP{9}      # be more specific for STRSXP
 ## ToDo: write an isNA method for Complex128 - not sure how it is defined though.
 isNA(x::Cdouble) = x == R_NaReal
 isNA(x::Cint) = x == R_NaInt
+isNA(x::Union(ASCIIString,UTF8String)) = x == bytestring(R_NaString)
 isNA(a::Array) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
 
 ## bytestring copies the contents of the 0-terminated string at the Ptr{Uint8} address
@@ -62,7 +63,7 @@ for N in [10,13:16,19,20]
             dd = Reval(lang2(dimSymbol,s))
             isa(dd,SEXP{13}) || return (int64(length(s)),)
             vv = vec(dd)
-            ntuple(length(vv),i->Int64(vv[i]))
+            ntuple(length(vv),i->int64(vv[i]))
         end
     end
 end
@@ -83,7 +84,7 @@ end
 ## Not sure what to do about R's Logical vectors (SEXP{10}) They are stored as Int32 and can
 ## have missing values.  The DataArray method must copy the values if it is to produce Bool's.
 ## For the time being, I will leave them as Int32's.
-for N in [10,13:15]
+for N in [10,13:16]
     @eval begin
         DataArrays.DataArray(s::SEXP{$N}) = (rv = reshape(vec(s),size(s));DataArray(rv,isNA(rv)))
         dataset(s::SEXP{$N}) = DataArray(s)
@@ -117,3 +118,34 @@ end
 
 @doc "convert a symbol or ASCIIString to a dataset"->
 dataset(s::Symbol) = dataset(Reval(s))
+
+@doc "assign value v to symbol s in the environment e"->
+Base.setindex!(e::SEXP{4},v::SEXP,s::Symbol) =
+    ccall((:Rf_setVar,libR),Void,(Ptr{Void},Ptr{Void},Ptr{Void}),install(s),v,e)
+Base.setindex!{T<:Number}(e::SEXP{4},v::Array{T},s::Symbol) = setindex!(e,asSEXP(v),s)
+Base.setindex!(e::SEXP{4},v::Real,s::Symbol) = setindex!(e,asSEXP(v),s)
+
+
+Base.getindex(e::SEXP{4},s::Symbol) =
+    asSEXP(ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,install(s)))
+
+asSEXP(v::Integer) = scalarInteger(v)
+
+asSEXP(v::Real) = scalarReal(v)
+
+asSEXP(v::Bool) = scalarLogical(v)
+
+function asSEXP{T<:Integer}(v::Vector{T})
+    l = length(v)
+    vv = asSEXP(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),13,l))
+    copy!(pointer_to_array(convert(Ptr{Cint},vv.p+voffset),l),v)
+    vv
+end
+
+function asSEXP{T<:Real}(v::Vector{T})
+    l = length(v)
+    vv = asSEXP(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),14,l))
+    copy!(pointer_to_array(convert(Ptr{Cdouble},vv.p+voffset),l),v)
+    vv
+end
+
