@@ -51,7 +51,7 @@ Base.eltype(s::SEXP{16}) = SEXP{9}      # be more specific for STRSXP
 ## ToDo: write an isNA method for Complex128 - not sure how it is defined though.
 isNA(x::Cdouble) = x == R_NaReal
 isNA(x::Cint) = x == R_NaInt
-isNA(a::Array) = reshape(BitArray([isNA(aa) for aa in a]),size(a))
+isNA(a::Array) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
 
 ## bytestring copies the contents of the 0-terminated string at the Ptr{Uint8} address
 Base.bytestring(s::SEXP{9}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s.p))
