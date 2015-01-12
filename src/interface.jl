@@ -25,10 +25,9 @@ export asComplex,
 
 @doc "evaluate an R symbol or language object (i.e. a function call) in an R try/catch block"->
 function Reval(expr::SEXP, env::SEXP{4})
-    errorOccurred = Array(Cint,1)
-    val = ccall((:R_tryEval,libR),Ptr{Void},
-                (Ptr{Void},Ptr{Void},Ptr{Cint}),expr,env,errorOccurred)
-    bool(errorOccurred[1]) && error("Error occurred in R_tryEval")
+    err = Array(Cint,1)
+    val = ccall((:R_tryEval,libR),Ptr{Void},(Ptr{Void},Ptr{Void},Ptr{Cint}),expr,env,err)
+    bool(err[1]) && error("Error occurred in R_tryEval")
     asSEXP(val)
 end
 
