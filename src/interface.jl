@@ -28,7 +28,7 @@ function Reval(expr::SEXP, env::SEXP{4})
     errorOccurred = Array(Cint,1)
     val = ccall((:R_tryEval,libR),Ptr{Void},
                 (Ptr{Void},Ptr{Void},Ptr{Cint}),expr,env,errorOccurred)
-    Bool(errorOccurred[1]) && error("Error occurred in R_tryEval")
+    bool(errorOccurred[1]) && error("Error occurred in R_tryEval")
     asSEXP(val)
 end
 
