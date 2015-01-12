@@ -92,9 +92,20 @@ end
 
 ## ToDo: expand these definitions to check for names and produce NamedArrays?
 
+function Base.replace{T<:Number}(v::AbstractArray{T},pat::T,r::T)
+    for i in 1:length(v)
+        v[i] == pat && (v[i] = r)
+    end
+    v
+end
+
 # make dataset more general for integer vectors, which can be factors
-dataset(s::SEXP{13}) =
-    isFactor(s) ? compact(PooledDataArray(DataArrays.RefArray(vec(s)),R.levels(s))) : DataArray(s)
+@doc "dataset method for SEXP{13} must check if the argument is a factor"->
+function dataset(s::SEXP{13})
+    isFactor(s) || return DataArray(s)
+    refs = DataArrays.RefArray(replace(vec(s),R_NaInt,zero(Int32)))
+    compact(PooledDataArray(refs,R.levels(s)))
+end
 
 Base.names(s::SEXP) = vec(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
                                        (Ptr{Void},Ptr{Void}),s,namesSymbol)))
