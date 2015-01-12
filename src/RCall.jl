@@ -53,6 +53,6 @@ end
 
 include("sexp.jl")
 include("interface.jl")
-include("Rfuns.jl")
+include("rfuns.jl")
 
 end # module
