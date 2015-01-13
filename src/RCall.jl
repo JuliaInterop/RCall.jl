@@ -18,12 +18,12 @@ end
 
 # Instead of trying to reconstruct the internal representation of
 # R's SEXPREC structure (and possibly get it wrong), just go through
-# the R API from $R_INCLUDE_DIR/Rinternals.h.
+# the R API from ENV["R_INCLUDE_DIR"]/Rinternals.h.
 
-immutable SEXP{N}                       # N is the R type value (e.g. 1=>SYMSXP)
+type SEXP{N}                    # N is the R SEXPREC type (see R_h.jl)
     p::Ptr{Void}
 end
-
+                                # determine the R SEXPREC type from the Ptr{Void}
 asSEXP(p::Ptr{Void}) = SEXP{unsafe_load(convert(Ptr{Cint},p)) & 0x1f}(p)
 
 Base.convert(::Type{Ptr{Void}},s::SEXP) = s.p  # for convenience in ccall
@@ -31,7 +31,7 @@ Base.convert(::Type{Ptr{Void}},s::SEXP) = s.p  # for convenience in ccall
 function __init__()
     argv = ["Rembed","--silent"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
-    i > 0 || error("initEmbeddedR failed")
+    i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
     global const R_NaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint),1)
     global const R_NaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble),1)
     global const R_NaString = asSEXP(unsafe_load(cglobal((:R_NaString,libR),Ptr{Void}),1))
@@ -51,8 +51,9 @@ end
 
 ## Should there be a a function that cleans up and closes the current embedded R?
 
-include("sexp.jl")
+include("R_h.jl")
 include("interface.jl")
+include("sexp.jl")
 include("rfuns.jl")
 
 end # module
