@@ -123,22 +123,22 @@ end
 Rprint(s::SEXP) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s)
 
 @doc "Create an integer SEXP of length 1" ->
-scalarInteger(i::Integer) = SEXP{13}(ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Cint,),i))
+scalarInteger(i::Integer) = SEXP{INTSXP}(ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Cint,),i))
 
 @doc "Create a logical SEXP of length 1" ->
-scalarLogical(i::Integer) = SEXP{10}(ccall((:Rf_ScalarLogical,libR),Ptr{Void},(Cint,),i))
+scalarLogical(i::Integer) = SEXP{LGLSXP}(ccall((:Rf_ScalarLogical,libR),Ptr{Void},(Cint,),i))
 
 @doc "Create a REAL SEXP of length 1"->
-scalarReal(x::Real) = SEXP{14}(ccall((:Rf_ScalarReal,libR),Ptr{Void},(Cdouble,),x))
+scalarReal(x::Real) = SEXP{REALSXP}(ccall((:Rf_ScalarReal,libR),Ptr{Void},(Cdouble,),x))
 
 @doc "Pop k elements off the protection stack"->
 unprotect(k::Integer) = ccall((:Rf_unprotect,libR),Void,(Cint,),k)
 
 @doc "unprotect an SEXP"->
-unprotect(s::SEXP) = ccall((:Rf_unprotect_ptr,libR),Void,(Ptr{Void},),s.p)
+unprotect(s::SEXP) = ccall((:Rf_unprotect_ptr,libR),Void,(Ptr{Void},),s)
 
 @doc "release an SEXP"->
-ReleaseObject(s::SEXP) = ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),s.p)
+ReleaseObject(s::SEXP) = ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),s)
 
 @doc "preserve an SEXP"->
-PreserveObject(s::SEXP) = ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s.p)
+PreserveObject(s::SEXP) = ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)

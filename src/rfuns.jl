@@ -18,10 +18,10 @@ class(s::SEXP) = vec(Reval(lang2(RCall.classSymbol,s)))
 
 @doc "Check S3 inheritance (I think only S3)"->
 inherits(s::SEXP,cls::ASCIIString) =
-    ccall((:Rf_inherits,libR),Bool,(Ptr{Void},Ptr{Uint8}),s.p,cls)
+    ccall((:Rf_inherits,libR),Bool,(Ptr{Void},Ptr{Uint8}),s,cls)
 
 @doc "return the levels vector from a factor"->
-levels(s::SEXP{13}) = vec(Reval(lang2(RCall.levelsSymbol,s)))
+levels(s::SEXP{INTSXP}) = vec(Reval(lang2(RCall.levelsSymbol,s)))
 
 @doc "attach an R package"->
 library(sym::Symbol) = Reval(lang2(install(:library),install(sym)))
