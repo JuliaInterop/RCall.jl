@@ -90,9 +90,6 @@ lang6(s1::SEXP,s2::SEXP,s3::SEXP,s4::SEXP,s5::SEXP,s6::SEXP) =
                  (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}),
                  s1,s2,s3,s4,s5,s6))
 
-@doc "Create a string SEXP of length 1" ->
-mkString(st::ASCIIString) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
-
 @doc "Protect an SEXP from garbage collection"->
 protect(s::SEXP) = sexp(ccall((:Rf_protect,libR),Ptr{Void},(Ptr{Void},),s))
 
@@ -101,7 +98,7 @@ function rparse(st::ASCIIString)
     ParseStatus = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),Ptr{Void},
                 (Ptr{Void},Cint,Ptr{Cint},Ptr{Void}),
-                mkString(st),length(st),ParseStatus,nilValue)
+                sexp(st),length(st),ParseStatus,nilValue)
     ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
     sexp(val)
 end

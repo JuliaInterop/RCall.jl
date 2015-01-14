@@ -29,7 +29,7 @@ library(sym::Symbol) = reval(lang2(sexp(:library),sexp(sym)))
 @doc "list the objects in the global environment or in a package that is already attached"->
 ls(;printR::Bool=true) = (v = reval(lang1(sexp(:ls))); printR ? rprint(v) : v)
 function ls(pkg::ASCIIString;printR::Bool=true)
-    v = reval(lang2(sexp(:ls),mkString(string("package:",pkg))))
+    v = reval(lang2(sexp(:ls),sexp(string("package:",pkg))))
     printR ? rprint(v) : v
 end
 

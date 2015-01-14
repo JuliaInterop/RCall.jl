@@ -80,16 +80,18 @@ function dataset(s::SEXP{VECSXP})
     R.inherits(s,"data.frame") ? DataFrame(val,Symbol[symbol(nm) for nm in names(s)]) : val
 end
 
+dataset(st::ASCIIString) = dataset(reval(rparse(st)))
+
 @doc "Evaluate Symbol s as an R dataset"->
 dataset(s::Symbol) = dataset(reval(s))
 
 @doc "extract the value of symbol s in the environment e"->
 Base.getindex(e::SEXP{ENVSXP},s::Symbol) =
-    sexp(ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,install(s)))
+    sexp(ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,sexp(s)))
 
 @doc "assign value v to symbol s in the environment e"->
 Base.setindex!(e::SEXP{ENVSXP},v::SEXP,s::Symbol) =
-    ccall((:Rf_setVar,libR),Void,(Ptr{Void},Ptr{Void},Ptr{Void}),install(s),v,e)
+    ccall((:Rf_setVar,libR),Void,(Ptr{Void},Ptr{Void},Ptr{Void}),sexp(s),v,e)
 Base.setindex!{T<:Number}(e::SEXP{ENVSXP},v::Array{T},s::Symbol) = setindex!(e,sexp(v),s)
 Base.setindex!(e::SEXP{ENVSXP},v::Number,s::Symbol) = setindex!(e,sexp(v),s)
 Base.setindex!(e::SEXP{ENVSXP},v::Real,s::Symbol) = setindex!(e,sexp(v),s)
@@ -105,7 +107,9 @@ for (typ,rnm,tag,rtyp) in ((:Bool,:Logical,LGLSXP,:Int32),
                            (:Integer,:Integer,INTSXP,:Int32),
                            (:Real,:Real,REALSXP,:Float64))
     @eval begin
-        sexp(v::$typ) = preserve($(symbol(string("scalar",rnm)))(v)) # scalarInteger, etc.
+        function sexp(v::$typ)
+            preserve(sexp(ccall(($(string("Rf_Scalar",rnm)),libR),Ptr{Void},($rtyp,),v)))
+        end
         function sexp{T<:$typ}(v::Vector{T})
             l = length(v)
             vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),$tag,l))
