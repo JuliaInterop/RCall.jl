@@ -78,4 +78,5 @@ Conversion an R SEXP to a Julia type is usually performed by methods for `vec` o
 
 The functions `rparse` and `reval` provide direct access to the parse/eval mechanism in `R`.
 
-There are also several utilities for creating R symbols (`install`) and R function calls (`lang1`,...,`lang6`).
+There are several utilities (`lang1` to `lang6`) for creating R function calls.
+When in doubt, the simplest course is to use `reval(rparse(str))` where `str` is a string.

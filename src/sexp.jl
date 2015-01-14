@@ -102,6 +102,13 @@ function preserve(s::SEXP)
     s
 end
 
+function sexp(v::BitVector)             # handled separately
+    l = length(v)
+    vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),LGLSXP,l))
+    copy!(pointer_to_array(convert(Ptr{Int32},vv.p+voffset),l),v)
+    preserve(vv)
+end
+
 for (typ,rnm,tag,rtyp) in ((:Bool,:Logical,LGLSXP,:Int32),
                            (:Complex128,:Complex,CPLXSXP,:Complex128),
                            (:Integer,:Integer,INTSXP,:Int32),
