@@ -7,7 +7,7 @@ for N in [LGLSXP,INTSXP,REALSXP,CPLXSXP,STRSXP,VECSXP,EXPRSXP]
     @eval begin
         Base.length(s::SEXP{$N}) = unsafe_load(convert(Ptr{Cint},s.p+loffset),1)
         function Base.size(s::SEXP{$N})
-            dd = Reval(lang2(dimSymbol,s))
+            dd = reval(lang2(dimSymbol,s))
             isa(dd,SEXP{INTSXP}) || return (int64(length(s)),)
             vv = vec(dd)
             ntuple(length(vv),i->int64(vv[i]))
@@ -20,7 +20,7 @@ for (N,elt) in ((STRSXP,:STRING_ELT),(VECSXP,:VECTOR_ELT),(EXPRSXP,:VECTOR_ELT))
     @eval begin
         function Base.getindex(s::SEXP{$N},I::Number)  # extract a single element
             0 < I ≤ length(s) || throw(BoundsError())
-            asSEXP(ccall(($(string(elt)),libR),Ptr{Void},(Ptr{Void},Cint),s,I-1))
+            sexp(ccall(($(string(elt)),libR),Ptr{Void},(Ptr{Void},Cint),s,I-1))
         end
         Base.start(s::SEXP{$N}) = 0  # start,next,done and eltype provide an iterator
         Base.next(s::SEXP{$N},state) = (state += 1;(s[state],state))
@@ -72,7 +72,7 @@ function dataset(s::SEXP{INTSXP})
     compact(PooledDataArray(refs,R.levels(s)))
 end
 
-Base.names(s::SEXP) = vec(asSEXP(ccall((:Rf_getAttrib,libR),Ptr{Void},
+Base.names(s::SEXP) = vec(sexp(ccall((:Rf_getAttrib,libR),Ptr{Void},
                                        (Ptr{Void},Ptr{Void}),s,namesSymbol)))
 
 function dataset(s::SEXP{VECSXP})
@@ -81,18 +81,18 @@ function dataset(s::SEXP{VECSXP})
 end
 
 @doc "Evaluate Symbol s as an R dataset"->
-dataset(s::Symbol) = dataset(Reval(s))
+dataset(s::Symbol) = dataset(reval(s))
 
 @doc "extract the value of symbol s in the environment e"->
 Base.getindex(e::SEXP{ENVSXP},s::Symbol) =
-    asSEXP(ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,install(s)))
+    sexp(ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,install(s)))
 
 @doc "assign value v to symbol s in the environment e"->
 Base.setindex!(e::SEXP{ENVSXP},v::SEXP,s::Symbol) =
     ccall((:Rf_setVar,libR),Void,(Ptr{Void},Ptr{Void},Ptr{Void}),install(s),v,e)
-Base.setindex!{T<:Number}(e::SEXP{ENVSXP},v::Array{T},s::Symbol) = setindex!(e,asSEXP(v),s)
-Base.setindex!(e::SEXP{ENVSXP},v::Number,s::Symbol) = setindex!(e,asSEXP(v),s)
-Base.setindex!(e::SEXP{ENVSXP},v::Real,s::Symbol) = setindex!(e,asSEXP(v),s)
+Base.setindex!{T<:Number}(e::SEXP{ENVSXP},v::Array{T},s::Symbol) = setindex!(e,sexp(v),s)
+Base.setindex!(e::SEXP{ENVSXP},v::Number,s::Symbol) = setindex!(e,sexp(v),s)
+Base.setindex!(e::SEXP{ENVSXP},v::Real,s::Symbol) = setindex!(e,sexp(v),s)
 
 function preserve(s::SEXP)
     ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)
@@ -105,30 +105,33 @@ for (typ,rnm,tag,rtyp) in ((:Bool,:Logical,LGLSXP,:Int32),
                            (:Integer,:Integer,INTSXP,:Int32),
                            (:Real,:Real,REALSXP,:Float64))
     @eval begin
-        asSEXP(v::$typ) = preserve($(symbol(string("scalar",rnm)))(v)) # scalarInteger, etc.
-        function asSEXP{T<:$typ}(v::Vector{T})
+        sexp(v::$typ) = preserve($(symbol(string("scalar",rnm)))(v)) # scalarInteger, etc.
+        function sexp{T<:$typ}(v::Vector{T})
             l = length(v)
-            vv = asSEXP(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),$tag,l))
+            vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),$tag,l))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),v)
             preserve(vv)
         end
-        function asSEXP{T<:$typ}(m::Matrix{T})
+        function sexp{T<:$typ}(m::Matrix{T})
             p,q = size(m)
-            vv = asSEXP(ccall((:Rf_allocMatrix,libR),Ptr{Void},(Cint,Cint,Cint),$tag,p,q))
+            vv = sexp(ccall((:Rf_allocMatrix,libR),Ptr{Void},(Cint,Cint,Cint),$tag,p,q))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),m)
             preserve(vv)
         end
-        function asSEXP{T<:$typ}(a::Array{T,3})
+        function sexp{T<:$typ}(a::Array{T,3})
             p,q,r = size(a)
-            vv = asSEXP(ccall((:Rf_alloc3DArray,libR),Ptr{Void},(Cint,Cint,Cint,Cint),$tag,p,q,r))
+            vv = sexp(ccall((:Rf_alloc3DArray,libR),Ptr{Void},(Cint,Cint,Cint,Cint),$tag,p,q,r))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),a)
             preserve(vv)
         end
-        function asSEXP{T<:$typ}(a::Array{T})
-            rdims = asSEXP([size(a)...])
-            vv = asSEXP(ccall((:Rf_allocArray,libR),Ptr{Void},(Cint,Ptr{Void}),$tag,rdims))
+        function sexp{T<:$typ}(a::Array{T})
+            rdims = sexp([size(a)...])
+            vv = sexp(ccall((:Rf_allocArray,libR),Ptr{Void},(Cint,Ptr{Void}),$tag,rdims))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),a)
             preserve(vv)
         end
     end
 end
+
+sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s)))
+sexp(st::Union(ASCIIString,UTF8String)) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
