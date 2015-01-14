@@ -1,5 +1,9 @@
 using RCall
-using Base.Test
+using Base.Test,DataArrays,DataFrames
 
 # write your own tests here
-@test 1 == 1
+attenu = dataset(:attenu)
+@test typeof(attenu) == DataFrame
+dist = attenu[:dist]
+@test typeof(dist) == DataVector{Float64}
+
