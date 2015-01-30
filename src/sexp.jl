@@ -126,7 +126,7 @@ for (typ,rnm,tag,rtyp) in ((:Bool,:Logical,LGLSXP,:Int32),
         function sexp{T<:$typ}(m::Matrix{T})
             p,q = size(m)
             vv = sexp(ccall((:Rf_allocMatrix,libR),Ptr{Void},(Cint,Cint,Cint),$tag,p,q))
-            copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),m)
+            copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),p*q),m)
             preserve(vv)
         end
         function sexp{T<:$typ}(a::Array{T,3})
