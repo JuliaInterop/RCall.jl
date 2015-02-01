@@ -76,17 +76,17 @@ lang3(s1::SEXP,s2::SEXP,s3::SEXP) =
 
 @doc "Create a 3-argument function call from a symbol and the arguments"->
 lang4(s1::SEXP,s2::SEXP,s3::SEXP,s4::SEXP) =
-    sexp(ccall((:Rf_lang3,libR),Ptr{Void},
+    sexp(ccall((:Rf_lang4,libR),Ptr{Void},
                  (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}),s1,s2,s3,s4))
 
 @doc "Create a 4-argument function call from a symbol and the arguments"->
 lang5(s1::SEXP,s2::SEXP,s3::SEXP,s4::SEXP,s5::SEXP) =
-    sexp(ccall((:Rf_lang3,libR),Ptr{Void},
+    sexp(ccall((:Rf_lang5,libR),Ptr{Void},
                  (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}),s1,s2,s3,s4,s5))
 
 @doc "Create a 5-argument function call from a symbol and the arguments"->
 lang6(s1::SEXP,s2::SEXP,s3::SEXP,s4::SEXP,s5::SEXP,s6::SEXP) =
-    sexp(ccall((:Rf_lang3,libR),Ptr{Void},
+    sexp(ccall((:Rf_lang6,libR),Ptr{Void},
                  (Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void},Ptr{Void}),
                  s1,s2,s3,s4,s5,s6))
 
