@@ -91,10 +91,11 @@ Base.getindex(e::SEXP{ENVSXP},s::Symbol) =
 
 @doc "assign value v to symbol s in the environment e"->
 Base.setindex!(e::SEXP{ENVSXP},v::SEXP,s::Symbol) =
+    # This should be done more carefully.  First check for the symbol in the frame.  If it is
+    # defined call Rf_setVar, otherwise call Rf_defineVar.  As it stands this segfaults if
+    # the symbol is bound in, say, the base environment.
     ccall((:Rf_setVar,libR),Void,(Ptr{Void},Ptr{Void},Ptr{Void}),sexp(s),v,e)
-Base.setindex!{T<:Number}(e::SEXP{ENVSXP},v::Array{T},s::Symbol) = setindex!(e,sexp(v),s)
-Base.setindex!(e::SEXP{ENVSXP},v::Number,s::Symbol) = setindex!(e,sexp(v),s)
-Base.setindex!(e::SEXP{ENVSXP},v::Real,s::Symbol) = setindex!(e,sexp(v),s)
+Base.setindex!(e::SEXP{ENVSXP},v,s::Symbol) = setindex!(e,sexp(v),s)
 
 function preserve(s::SEXP)
     ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)
@@ -110,7 +111,7 @@ function sexp(v::BitVector)             # handled separately
 end
 
 for (typ,rnm,tag,rtyp) in ((:Bool,:Logical,LGLSXP,:Int32),
-                           (:Complex128,:Complex,CPLXSXP,:Complex128),
+                           (:Complex,:Complex,CPLXSXP,:Complex128),
                            (:Integer,:Integer,INTSXP,:Int32),
                            (:Real,:Real,REALSXP,:Float64))
     @eval begin
@@ -132,13 +133,13 @@ for (typ,rnm,tag,rtyp) in ((:Bool,:Logical,LGLSXP,:Int32),
         function sexp{T<:$typ}(a::Array{T,3})
             p,q,r = size(a)
             vv = sexp(ccall((:Rf_alloc3DArray,libR),Ptr{Void},(Cint,Cint,Cint,Cint),$tag,p,q,r))
-            copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),a)
+            copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),length(a)),a)
             preserve(vv)
         end
         function sexp{T<:$typ}(a::Array{T})
             rdims = sexp([size(a)...])
             vv = sexp(ccall((:Rf_allocArray,libR),Ptr{Void},(Cint,Ptr{Void}),$tag,rdims))
-            copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),a)
+            copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),length(a)),a)
             preserve(vv)
         end
     end
