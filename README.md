@@ -6,7 +6,7 @@
 To add the package, first ensure that both `R` and `Rscript` are on your search path, then start
 `julia` and use
 ```julia
-Pkg.add("RCall.jl")
+Pkg.add("RCall")
 ```
 
 Adding or re-building the package should write a file whose name is the value of
