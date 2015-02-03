@@ -9,7 +9,7 @@ for N in [LGLSXP,INTSXP,REALSXP,CPLXSXP,STRSXP,VECSXP,EXPRSXP]
         function Base.size(s::SEXP{$N})
             dd = reval(lang2(dimSymbol,s))
             isa(dd,SEXP{INTSXP}) || return (int64(length(s)),)
-            vv = vec(dd)
+            vv = copyvec(dd)
             ntuple(length(vv),i->int64(vv[i]))
         end
     end
@@ -39,25 +39,34 @@ isNA(a::Array) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
 ## bytestring copies the contents of the 0-terminated string at the Ptr{Uint8} address
 Base.bytestring(s::SEXP{CHARSXP}) = bytestring(ccall((:R_CHAR,libR),Ptr{Uint8},(Ptr{Void},),s))
 
-Base.vec(s::SEXP{STRSXP}) = [bytestring(ss) for ss in s]
+copyvec(s::SEXP{STRSXP}) = [bytestring(ss) for ss in s]
 
-for (N,typ) in ((LGLSXP,:Int32),(INTSXP,:Int32),(REALSXP,:Float64),(CPLXSXP,:Complex128))
+for (N,typ) in ((INTSXP,:Int32),(REALSXP,:Float64),(CPLXSXP,:Complex128))
     @eval begin
-        function Base.vec(s::SEXP{$N})
-            ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)
-            rv = pointer_to_array(convert(Ptr{$typ},s.p+voffset),length(s))
-            finalizer(rv,x->ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),s))
-            rv
-        end
+        copyvec(s::SEXP{$N}) = copy(pointer_to_array(convert(Ptr{$typ},s.p+voffset),length(s)))
     end
 end
 
-## Not sure what to do about R's Logical vectors (SEXP{10}) They are stored as Int32 and can
-## have missing values.  The DataArray method must copy the values if it is to produce Bool's.
-## For the time being, I will leave them as Int32's.
-for N in [LGLSXP,INTSXP,REALSXP,CPLXSXP,STRSXP]
+function DataArrays.DataArray(s::SEXP{LGLSXP})
+    sz = size(s)
+    n = length(s)
+    NAs = falses(sz)
+    dest = Array(Bool,sz)
+    src = pointer_to_array(convert(Ptr{Cint},s.p+voffset),n)
+    for i in 1:n
+        if ((s = src[i]) == R_NaInt)
+            NAs[i] = true
+            dest[i] = false
+            next
+        end
+        dest[i] = src[i]
+    end
+    dest
+end
+
+for N in [INTSXP,REALSXP,CPLXSXP,STRSXP]
     @eval begin
-        DataArrays.DataArray(s::SEXP{$N}) = (rv = reshape(vec(s),size(s));DataArray(rv,isNA(rv)))
+        DataArrays.DataArray(s::SEXP{$N}) = (rv = reshape(copyvec(s),size(s));DataArray(rv,isNA(rv)))
         dataset(s::SEXP{$N}) = DataArray(s)
     end
 end
@@ -68,12 +77,12 @@ end
 function dataset(s::SEXP{INTSXP})
     isFactor(s) || return DataArray(s)
     ## refs array uses a zero index where R has a missing value, R_NaInt
-    refs = DataArrays.RefArray(map!(x -> x == R_NaInt ? zero(Int32) : x,vec(s)))
+    refs = DataArrays.RefArray(map!(x -> x == R_NaInt ? zero(Int32) : x,copyvec(s)))
     compact(PooledDataArray(refs,R.levels(s)))
 end
 
-Base.names(s::SEXP) = vec(sexp(ccall((:Rf_getAttrib,libR),Ptr{Void},
-                                       (Ptr{Void},Ptr{Void}),s,namesSymbol)))
+Base.names(s::SEXP) = copyvec(sexp(ccall((:Rf_getAttrib,libR),Ptr{Void},
+                                         (Ptr{Void},Ptr{Void}),s,namesSymbol)))
 
 function dataset(s::SEXP{VECSXP})
     val = [dataset(v) for v in s]

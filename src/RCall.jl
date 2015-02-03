@@ -1,35 +1,43 @@
 module RCall
     using Compat,DataArrays,DataFrames
-if VERSION < v"v0.4-"
-    using Docile                        # for the @doc macro
-#    @docstrings(manual=["../doc/manual.md"])
-end
+
+    if VERSION < v"v0.4-"
+        using Docile                    # for the @doc macro
+    end
 
     export globalEnv,
            R,
            SEXP,
            libR
 
-
-if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
-    include("../deps/deps.jl")
-else
-    error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
-end
+    if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
+        include("../deps/deps.jl")
+    else
+        error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
+    end
 
 # Instead of trying to reconstruct the internal representation of
 # R's SEXPREC structure (and possibly get it wrong), just go through
 # the R API from ENV["R_INCLUDE_DIR"]/Rinternals.h.
 
-type SEXP{N}                    # N is the R SEXPREC type (see R_h.jl)
-    p::Ptr{Void}
-end
+    type SEXP{N}                # N is the R SEXPREC type (see R_h.jl)
+        p::Ptr{Void}
+    end
                                 # determine the R SEXPREC type from the Ptr{Void}
-sexp(p::Ptr{Void}) = SEXP{unsafe_load(convert(Ptr{Cint},p)) & 0x1f}(p)
+    sexp(p::Ptr{Void}) = SEXP{unsafe_load(convert(Ptr{Cint},p)) & 0x1f}(p)
 
-Base.convert(::Type{Ptr{Void}},s::SEXP) = s.p  # for convenience in ccall
+    Base.convert(::Type{Ptr{Void}},s::SEXP) = s.p  # for convenience in ccall
 
-function __init__()
+@doc """
+  Initialize the module.
+
+  Start an embedded R and create global values from several built-ins.
+  In particular, globalEnv must be defined if any R expression is to be evaluated.
+
+  The integer constant voffset is the number of bytes from the pointer to a
+  vector SEXP to the beginning of its contents.  loffset is the offset to its length.
+"""->
+function __init__()                     
     argv = ["Rembed","--silent"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
     i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
@@ -50,11 +58,11 @@ function __init__()
     global const loffset = voffset - 2*sizeof(Cint)
 end
 
-## Should there be a a function that cleans up and closes the current embedded R?
+## Should there be a function that cleans up and closes the current embedded R?
 
-include("R_h.jl")
-include("interface.jl")
-include("sexp.jl")
-include("rfuns.jl")
+    include("R_h.jl")
+    include("interface.jl")
+    include("sexp.jl")
+    include("rfuns.jl")
 
 end # module
