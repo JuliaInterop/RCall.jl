@@ -156,3 +156,12 @@ end
 
 sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s)))
 sexp(st::Union(ASCIIString,UTF8String)) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
+function sexp{T<:Union(ASCIIString,UTF8String)}(v::Vector{T})
+    l = length(v)
+    vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),STRSXP,l))
+    for i in 1:l
+        ccall((:SET_STRING_ELT,libR),Void,(Ptr{Void},Cint,Ptr{Void}),
+              vv,i-1,ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),v[i]))
+    end
+    preserve(vv)
+end

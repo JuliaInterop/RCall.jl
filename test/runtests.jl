@@ -20,3 +20,12 @@ attenu = dataset(:attenu)
 dist = attenu[:dist]
 @test isa(dist,DataArray{Float64})
 
+psexp = sexp("p")
+@test isa(psexp,SEXP{16})
+@test length(psexp) == 1
+@test bytestring(psexp[1]) = "p"
+
+pqsexp = sexp(["p","q"])
+@test isa(psexp,SEXP{16})
+@test length(psexp) == 2
+@test bytestring(psexp[1]) = "p"
