@@ -1,5 +1,7 @@
 # RCall.jl
 
+[![RCall](http://pkg.julialang.org/badges/RCall_release.svg)](http://pkg.julialang.org/?pkg=RCall&ver=release)
+
 ## Embedded R within Julia.
 
 ### Installation
