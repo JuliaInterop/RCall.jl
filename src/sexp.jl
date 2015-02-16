@@ -5,7 +5,7 @@
 ## of the Int64 length.  The size methods check for a dim attribute and return a tuple.
 for N in [LGLSXP,INTSXP,REALSXP,CPLXSXP,STRSXP,VECSXP,EXPRSXP]
     @eval begin
-        Base.length(s::SEXP{$N}) = unsafe_load(convert(Ptr{Cint},s.p+loffset),1)
+        Base.length(s::SEXP{$N}) = unsafe_load(convert(Ptr{Cint},s.p+loffset))
         function Base.size(s::SEXP{$N})
             dd = reval(lang2(dimSymbol,s))
             isa(dd,SEXP{INTSXP}) || return (int64(length(s)),)
@@ -47,6 +47,19 @@ for (N,typ) in ((INTSXP,:Int32),(REALSXP,:Float64),(CPLXSXP,:Complex128))
     end
 end
 
+## ToDo: expand these definitions to check for names and produce NamedArrays?
+
+for N in [LGLSXP,INTSXP,REALSXP,CPLXSXP,STRSXP]
+    @eval begin
+        function DataArrays.DataArray(s::SEXP{$N})
+            rv = reshape(copyvec(s),size(s))
+            DataArray(rv,isNA(rv))
+        end
+        dataset(s::SEXP{$N}) = DataArray(s)
+    end
+end
+
+## overwrite the DataArray method for LGLSXP
 function DataArrays.DataArray(s::SEXP{LGLSXP})
     sz = size(s)
     n = length(s)
@@ -54,25 +67,17 @@ function DataArrays.DataArray(s::SEXP{LGLSXP})
     dest = Array(Bool,sz)
     src = pointer_to_array(convert(Ptr{Cint},s.p+voffset),n)
     for i in 1:n
-        if ((s = src[i]) == R_NaInt)
+        if (src[i] == R_NaInt)
             NAs[i] = true
             dest[i] = false
-            next
+        else
+            dest[i] = src[i]
         end
-        dest[i] = src[i]
     end
     dest
 end
 
-for N in [INTSXP,REALSXP,CPLXSXP,STRSXP]
-    @eval begin
-        DataArrays.DataArray(s::SEXP{$N}) = (rv = reshape(copyvec(s),size(s));DataArray(rv,isNA(rv)))
-        dataset(s::SEXP{$N}) = DataArray(s)
-    end
-end
-
-## ToDo: expand these definitions to check for names and produce NamedArrays?
-
+## overwrite the dataset method for INTSXP to check for factors.
 @doc "dataset method for SEXP{INTSXP} must check if the argument is a factor"->
 function dataset(s::SEXP{INTSXP})
     isFactor(s) || return DataArray(s)
@@ -86,7 +91,7 @@ Base.names(s::SEXP) = copyvec(sexp(ccall((:Rf_getAttrib,libR),Ptr{Void},
 
 function dataset(s::SEXP{VECSXP})
     val = [dataset(v) for v in s]
-    R.inherits(s,"data.frame") ? DataFrame(val,Symbol[symbol(nm) for nm in names(s)]) : val
+    isFrame(s) ? DataFrame(val,Symbol[symbol(nm) for nm in names(s)]) : val
 end
 
 dataset(st::ASCIIString) = dataset(reval(rparse(st)))

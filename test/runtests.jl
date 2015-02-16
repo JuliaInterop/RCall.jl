@@ -23,9 +23,9 @@ dist = attenu[:dist]
 psexp = sexp("p")
 @test isa(psexp,SEXP{16})
 @test length(psexp) == 1
-@test bytestring(psexp[1]) = "p"
+@test bytestring(psexp[1]) == "p"
 
 pqsexp = sexp(["p","q"])
-@test isa(psexp,SEXP{16})
-@test length(psexp) == 2
-@test bytestring(psexp[1]) = "p"
+@test isa(pqsexp,SEXP{16})
+@test length(pqsexp) == 2
+@test bytestring(pqsexp[1]) == "p"
