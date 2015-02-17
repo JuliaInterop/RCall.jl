@@ -38,7 +38,7 @@ module RCall
   vector SEXP to the beginning of its contents.  loffset is the offset to its length.
 """->
 function __init__()                     
-    argv = ["Rembed","--silent"]
+    argv = ["Rembed","--silent","--vanilla"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
     i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
     global const R_NaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint))

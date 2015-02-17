@@ -1,18 +1,10 @@
 ## Methods related to the SEXP (pointer to SEXPREC type) in R
 
-## length methods for the vector types of SEXP's.  To handle long vectors the length method
-## should be extended to check for the sentinal value (typemin(Cint)) followed by extraction
-## of the Int64 length.  The size methods check for a dim attribute and return a tuple.
-for N in [LGLSXP,INTSXP,REALSXP,CPLXSXP,STRSXP,VECSXP,EXPRSXP]
-    @eval begin
-        Base.length(s::SEXP{$N}) = unsafe_load(convert(Ptr{Cint},s.p+loffset))
-        function Base.size(s::SEXP{$N})
-            dd = reval(lang2(dimSymbol,s))
-            isa(dd,SEXP{INTSXP}) || return (int64(length(s)),)
-            vv = copyvec(dd)
-            ntuple(length(vv),i->int64(vv[i]))
-        end
-    end
+Base.length(s::SEXP) = ccall((:Rf_length,libR),Int,(Ptr{Void},),s)
+function Base.size(s::SEXP)
+    isArray(s) || return (length(s),) # size returns a tuple
+    vv = copyvec(getAttrib(s,dimSymbol))
+    ntuple(length(vv),i->convert(Int,vv[i]))
 end
 
 ## Element extraction and iterators

@@ -51,6 +51,12 @@ findVar(sym::SEXP,env::SEXP{ENVSXP}=globalEnv) =
 findVar(nm::ASCIIString,env::SEXP{ENVSXP}) = findVar(sexp(symbol(nm)),env)
 findVar(nm::ASCIIString) = findVar(sexp(symbol(nm)),globalEnv)
 
+function getAttrib(s::SEXP,sym::SEXP{SYMSXP})
+    sexp(ccall((:Rf_getAttrib,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,sym))
+end
+getAttrib(s::SEXP,sym::Symbol) = getAttrib(s,sexp(sym))
+getAttrib(s::SEXP,str::ASCIIString) = getAttrib(s,symbol(str))
+
 ## predicates applied to an SEXP (many of these are unneeded for templated SEXP)
 for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isFrame,:isFree,:isFunction,:isInteger,:isLanguage,:isList,
