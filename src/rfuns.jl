@@ -21,9 +21,6 @@ class(s::Symbol) = class(sexp(s))
 inherits(s::SEXP,cls::ASCIIString) =
     ccall((:Rf_inherits,libR),Bool,(Ptr{Void},Ptr{Uint8}),s,cls)
 
-@doc "return the levels vector from a factor"->
-levels(s::SEXP{RCall.INTSXP}) = RCall.copyvec(reval(lang2(RCall.levelsSymbol,s)))
-
 @doc "attach an R package"->
 library(sym::Symbol) = reval(lang2(sexp(:library),sexp(sym)))
 library(pkg::ASCIIString) = library(symbol(pkg))

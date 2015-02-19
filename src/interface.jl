@@ -1,19 +1,3 @@
-export dataset,
-       findVar,
-       isArray,
-       isFactor,
-       isMatrix,
-       lang1,
-       lang2,
-       lang3,
-       lang4,
-       lang5,
-       lang6,
-       reval,
-       rparse,
-       rprint,
-       sexp
-
 @doc "evaluate an R symbol or language object (i.e. a function call) in an R try/catch block"->
 function reval(expr::SEXP, env::SEXP{ENVSXP})
     err = Array(Cint,1)
@@ -32,6 +16,7 @@ function reval(expr::SEXP{EXPRSXP}, env::SEXP{ENVSXP}) # evaluate result of R_Pa
 end
 reval(s::SEXP) = reval(s,globalEnv)
 reval(sym::Symbol) = reval(sexp(sym))
+reval(str::ASCIIString) = reval(rparse(str))
 
 @doc "return the first element of an SEXP as an Complex128 value" ->
 asComplex(s::SEXP) = ccall((:Rf_asComplex,libR),Complex128,(Ptr{Void},),s)
@@ -123,3 +108,56 @@ ReleaseObject(s::SEXP) = ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),s)
 
 @doc "preserve an SEXP"->
 PreserveObject(s::SEXP) = ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)
+
+typealias Closure SEXP{CLOSXP}
+
+typealias Environment SEXP{ENVSXP}
+
+@doc "SEXP types for which CAR, CDR, ... are meaningful"->
+typealias PairList Union(SEXP{NILSXP},SEXP{LISTSXP},SEXP{LANGSXP})
+
+@doc "SEXP types that are primitive functions"->
+typealias Primitive Union(SEXP{BUILTINSXP},SEXP{SPECIALSXP})
+
+typealias Sym SEXP{SYMSXP}  # can't use Symbol b/c it is a basic Julia type
+
+typealias VectorList Union(SEXP{VECSXP},SEXP{EXPRSXP})
+
+typealias VectorAtomic Union(SEXP{LGLSXP},SEXP{INTSXP},SEXP{REALSXP},SEXP{CPLXSXP},SEXP{STRSXP},SEXP{RAWSXP})
+
+for (nm,typ) in ((:ATTRIB,:SEXP),
+                 (:BODY,:Closure),
+                 (:CAR,:PairList),
+                 (:CDR,:PairList),
+                 (:CAAR,:PairList),
+                 (:CDAR,:PairList),
+                 (:CCCR,:PairList),
+                 (:CLOENV,:Closure),
+                 (:ENCLOS,:Environment),
+                 (:FRAME,:Environment),
+                 (:FORMALS,:Closure),
+                 (:HASHTAB,:Environment),
+                 (:INTERNAL,:Sym),
+                 (:PRINTNAME,:Sym),
+                 (:SYMVALUE,:Sym),
+                 (:TAG,:PairList),
+                 )
+    @eval $nm(s::$typ) = sexp(ccall(($(string(nm)),libR),Ptr{Void},(Ptr{Void},),s))
+end
+
+for Rfnm in (:CreateTag,
+             :DropDims,
+             :GetArrayDimnames,
+             :GetColNames,
+             :GetOption1,
+             :GetRowNames,
+             :PairToVectorList,
+             :VectorToPairList,
+             :asChar,
+             :asCharacterFactor,
+             :duplicate,
+             :lazy_duplicate,
+             :protect,
+             :shallow_duplicate)
+    @eval $Rfnm(s::SEXP) = sexp(ccall(($(string("Rf_",Rfnm)),libR),Ptr{Void},(Ptr{Void},),s))
+end
