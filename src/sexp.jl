@@ -150,13 +150,12 @@ function DataArrays.DataArray(s::LglSxp)
     DataArray(convert(Array{Bool},src), src .== R_NaInt)
 end
 
-@doc """
-`DataArray` method for `IntSxp` returns a `PooledDataArray` for factors
 
-May not be the best idea because PooledDataArray is not a subtype of
-DataArray. Technically, returning a PooledDataArray from a DataArray
-method is a no-no.
-"""->
+## `DataArray` method for `IntSxp` returns a `PooledDataArray` for factors
+
+## May not be the best idea because PooledDataArray is not a subtype of
+## DataArray. Technically, returning a PooledDataArray from a DataArray
+## method is a no-no.
 function DataArrays.DataArray(s::IntSxp)
     if isFactor(s)
         ## refs array uses a zero index where R has a missing value, R_NaInt
@@ -172,10 +171,10 @@ function DataFrames.DataFrame(s::VecSxp)
     DataFrame(map(DataArray,s),map(symbol,names(s)))
 end
 
-@doc "Evaluate a string and try to convert to a dataset"->
+## Evaluate a string and try to convert to a dataset
 DataFrames.DataFrame(st::ASCIIString) = DataFrame(reval(st))
 
-@doc "Evaluate Symbol s as an R dataset"->
+## Evaluate Symbol s as an R dataset
 DataFrames.DataFrame(s::Symbol) = DataFrame(reval(s))
 
 @doc "extract the value of symbol s in the environment e"->

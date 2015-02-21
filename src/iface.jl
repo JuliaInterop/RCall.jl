@@ -31,4 +31,4 @@ end
 rprint(s::SEXPREC) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s)
 
 rcopy(str::ByteString) = rcopy(reval(str))
-rcopy(sym::Symbol) = rcopy(reval(str))
+rcopy(sym::Symbol) = rcopy(reval(sym))
