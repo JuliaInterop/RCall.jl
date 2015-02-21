@@ -5,24 +5,19 @@ module RCall
         using Docile                    # for the @doc macro
     end
 
-    export R,
-           SEXP,
-           dataset,
-           findVar,
+    export SEXPREC,
            getAttrib,
            globalEnv,
-           isArray,
            isFactor,
-           isFrame,
-           isMatrix,
-           isNumeric,
-           isNumber,
            isOrdered,
            isTs,
            libR,
+           rcopy,
            reval,
+           rparse,
            rprint,
            sexp
+
 
     if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
         include("../deps/deps.jl")
@@ -30,13 +25,10 @@ module RCall
         error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
     end
 
-    type SEXP{N}                # N is the R SEXPREC type (see R_h.jl)
-        p::Ptr{Void}
-    end
-                                # determine the R SEXPREC type from the Ptr{Void}
-    sexp(p::Ptr{Void}) = SEXP{unsafe_load(convert(Ptr{Cint},p)) & 0x1f}(p)
+    @doc "R symbolic expression"->
+    abstract SEXPREC
 
-    Base.convert(::Type{Ptr{Void}},s::SEXP) = s.p  # for convenience in ccall
+    Base.convert(::Type{Ptr{Void}},s::SEXPREC) = s.p  # for convenience in ccall
 
     type Rinstance                    # attach a finalizer to clean up
         i::Cint
@@ -53,12 +45,14 @@ module RCall
   In particular, globalEnv must be defined if any R expression is to be evaluated.
 """->
 function __init__()                     
-    argv = ["Rembed","--silent","--vanilla"]
+    argv = ["Rembed","--silent","--no-save"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
     i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
     global const Rproc = Rinstance(i)
     global const R_NaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint))
     global const R_NaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble))
+    ip = ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Int32,),0)
+    global const voffset = ccall((:INTEGER,libR),Ptr{Void},(Ptr{Void},),ip) - ip
     global const R_NaString = sexp(unsafe_load(cglobal((:R_NaString,libR),Ptr{Void})))
     global const classSymbol = sexp(unsafe_load(cglobal((:R_ClassSymbol,libR),Ptr{Void})))
     global const emptyEnv = sexp(unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{Void})))
@@ -69,9 +63,9 @@ function __init__()
     global const nilValue = sexp(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})))
 end
 
-    include("R_h.jl")
-    include("interface.jl")
+    include("types.jl")                 # define the various types of SEXPREC
     include("sexp.jl")
-    include("rfuns.jl")
+    include("iface.jl")
+    include("show.jl")
 
 end # module
