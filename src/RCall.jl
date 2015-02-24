@@ -12,6 +12,7 @@ module RCall
            isOrdered,
            isTs,
            libR,
+           named,
            rcopy,
            reval,
            rparse,
@@ -27,8 +28,6 @@ module RCall
 
     @doc "R symbolic expression"->
     abstract SEXPREC
-
-    Base.convert(::Type{Ptr{Void}},s::SEXPREC) = s.p  # for convenience in ccall
 
     type Rinstance                    # attach a finalizer to clean up
         i::Cint

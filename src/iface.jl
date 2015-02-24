@@ -29,6 +29,8 @@ end
 
 @doc "print the value of an SEXP using R's printing mechanism"->
 rprint(s::SEXPREC) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s)
+rprint(str::ByteString) = rprint(reval(str))
+rprint(sym::Symbol) = rprint(reval(sym))
 
 rcopy(str::ByteString) = rcopy(reval(str))
 rcopy(sym::Symbol) = rcopy(reval(sym))

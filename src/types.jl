@@ -234,15 +234,22 @@ end
 @doc "Vector types in R"->
 typealias RVector Union(CharSxp,LglSxp,IntSxp,RealSxp,CplxSxp,StrSxp,VecSxp,ExprSxp,RawSxp)
 
-typealias VectorAtomic Union(LglSxp,IntSxp,RealSxp,CplxSxp,StrSxp,RawSxp)
+typealias VectorAtomic Union(LglSxp,IntSxp,RealSxp,CplxSxp,RawSxp,CharSxp)
 
-typealias VectorList Union(VecSxp,ExprSxp)
+typealias VectorList Union(VecSxp,StrSxp,ExprSxp)
 
 typealias PairList Union(NilSxp,ListSxp,LangSxp)
 
 typealias Primitive Union(BuiltinSxp,SpecialSxp)
 
 typealias RFunction Union(ClosSxp,BuiltinSxp,SpecialSxp)
+
+@doc """
+Extract the original SEXP (pointer to an R SEXPREC)
+
+Written as a `convert` method for convenience in `ccall`
+"""->
+Base.convert(::Type{Ptr{Void}},s::SEXPREC) = s.p
 
 @doc """
 SEXPREC methods for `length` return the R length.

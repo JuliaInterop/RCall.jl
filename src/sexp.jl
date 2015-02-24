@@ -9,10 +9,10 @@ const typs = [NilSxp,SymSxp,ListSxp,ClosSxp,EnvSxp,PromSxp,LangSxp,SpecialSxp,Bu
 Convert a `Ptr{Void}` to the appropriate type that inherits from `SEXPREC`
 
 The SEXPTYPE, determined from the trailing 5 bits of the first 32-bit word, is a 0-based
-index into the typs vector.  A suitable SEXPREC type is instantiated.  The R SEXPREC
+index into the `typs` vector.  A suitable SEXPREC type is instantiated.  The R SEXPREC
 contains two pointers that are used by the generational garbage collector.  Those pointers
-are not used in Julia and are overwritten by the original pointer to the SEXPREC and,
-for those types in the vtyp union, a pointer to the contents of the vector.
+are not used in Julia and are overwritten by the original `Ptr{Void}` and,
+for those types in the RVector union, a pointer to the contents of the vector.
 """->
 function sexp(p::Ptr{Void})
     typ = (unsafe_load(convert(Ptr{Uint32},p)) & 0x1f)
@@ -23,6 +23,7 @@ function sexp(p::Ptr{Void})
     jtyp <: RVector && (vv.pv = p + voffset)
     vv
 end
+sexp(v::Array{Ptr{Void}}) = map(sexp,v)
 
 @doc "Create a `SymSxp` from a `Symbol`"->
 sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s)))
@@ -31,21 +32,18 @@ sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s
 sexp(st::ByteString) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
 
 @doc """
-Create a `ChrSxp` from a `ByteString`
+Create a `CharSxp` from a `ByteString`
 
-Note that a `ChrSxp` is an internal R representation of a character string.
+Note that a `CharSxp` is an internal R representation of a character string.
 An R assignment like `ff <- "foo"` creates a StrSxp which is a vector of
 character strings.
 """->
-ChrSxp(st::ByteString) = sexp(ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),st))
+CharSxp(st::ByteString) = sexp(ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),st))
 
 function sexp{T<:ByteString}(v::Array{T})
-    l = length(v)
-    vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),STRSXP,l))
-    for i in 1:l
-        ccall((:SET_STRING_ELT,libR),Void,(Ptr{Void},Cint,Ptr{Void}),vv,i-1,ChrSxp(v[i]))
-    end
-    vv
+    rv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),STRSXP,length(v)))
+    map(x->ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),x),vec(rv),v)
+    rv
 end
 
 ## Predicates applied to an SEXPREC
@@ -77,6 +75,17 @@ represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 `-2147483648` is `NA` and all other values represent `true`.
 """->
 Base.vec(s::RVector) = pointer_to_array(s.pv,s.length)
+#Base.vec(s::VectorList) = map(sexp,pointer_to_array(s.pv,s.length))
+#Base.vec(s::CharSxp) = bytestring(pointer_to_array(s.pv,s.length))
+
+@doc """
+Indexing into `RVector` types uses Julia indexing into the `vec` result,
+except for `StrSxp` and the `VectorList` types, which must apply `sexp`
+to the `Ptr{Void}` obtained by indexing into the `vec` result.
+"""->
+Base.getindex(s::VectorAtomic,I::Number) = getindex(vec(s),I)
+Base.getindex(s::VectorList,I::Number) = sexp(getindex(vec(s),I))
+Base.getindex(s::StrSxp,I::Number) = sexp(getindex(vec(s),I))
 
 @doc """
 `eltype` methods for RVector types are needed for v"0.3.x" and earlier.
@@ -84,23 +93,15 @@ Base.vec(s::RVector) = pointer_to_array(s.pv,s.length)
 In v"0.4" and later these can be expressed as `eltype(s.pv)`
 """->
 Base.eltype(s::VectorAtomic) = eltype(vec(s))
+Base.eltype(s::VectorList) = SEXPREC
+Base.eltype(s::StrSxp) = CharSxp
 
-Base.getindex(s::VectorAtomic,I::Number) = getindex(vec(s),I)
+Base.start(s::RVector) = 0
+Base.next(s::RVector,state) = (state += 1;(s[state],state))
+Base.done(s::RVector,state) = state ≥ length(s)
 
-## `getindex` and iterators for R vectors of pointers to `SEXPREC`s
-for (typ,fnm) in ((StrSxp,"STRING_ELT"),(VecSxp,"VECTOR_ELT"),(ExprSxp,"VECTOR_ELT"))
-    @eval begin
-        function Base.getindex(s::$typ,I::Number)  # extract a single element
-            0 < I ≤ length(s) || throw(BoundsError())
-            sexp(ccall(($fnm,libR),Ptr{Void},(Ptr{Void},Cint),s,I-1))
-        end
-        Base.start(s::$typ) = 0  # start,next,done and eltype provide an iterator
-        Base.next(s::$typ,state) = (state += 1;(s[state],state))
-        Base.done(s::$typ,state) = state ≥ length(s)
-        Base.eltype(s::$typ) = SEXPREC
-    end
-end
-Base.eltype(s::StrSxp) = ChrSxp         # be more specific for StrSxp
+@doc "The R NAMED property, represented by 2 bits in the info field"->
+named(s::SEXPREC) = (s.info >>> 6) & 0x03
 
 function getAttrib(s::SEXPREC,sym::SymSxp)
     sexp(ccall((:Rf_getAttrib,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,sym))
@@ -110,7 +111,7 @@ getAttrib(s::SEXPREC,str::ASCIIString) = getAttrib(s,symbol(str))
 
 function Base.size(s::SEXPREC)
     isArray(s) || return (length(s),)
-    tuple(vec(getAttrib(s,dimSymbol))...)
+    tuple(convert(Array{Int},vec(getAttrib(s,dimSymbol)))...)
 end
 
 @doc """
@@ -126,6 +127,7 @@ rcopy(s::CharSxp) = bytestring(vec(s))
 rcopy(s::SymSxp) = symbol(rcopy(sexp(s.pname)))
 rcopy(s::StrSxp) = map(rcopy,vec(s))
 rcopy(s::VecSxp) = map(rcopy,vec(s))
+rcopy(s::NilSxp) = nothing
 
 @doc """
 Defines Julia `names` methods for `SEXPREC` types to return the R
