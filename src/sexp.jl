@@ -41,8 +41,11 @@ sexp(st::ByteString) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st
 CharSxp(st::ByteString) = sexp(ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),st))
 
 function sexp{T<:ByteString}(v::Array{T})
-    rv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),STRSXP,length(v)))
-    map(x->ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),x),vec(rv),v)
+    rv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),16,length(v)))
+    vrv = vec(rv)
+    for i in 1:length(v)
+        vrv[i] = ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),v[i])
+    end
     rv
 end
 
@@ -146,7 +149,7 @@ isNA(a::Array) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
 
 DataArrays.DataArray(s::RVector) = (rc = rcopy(s);DataArray(rc,isNA(rc)))
 
-## DataArray for an LGLSXP converts from Cint to Bool
+## DataArray for an LglSxp converts from Cint to Bool
 function DataArrays.DataArray(s::LglSxp)
     src = rcopy(s)
     DataArray(convert(Array{Bool},src), src .== R_NaInt)
