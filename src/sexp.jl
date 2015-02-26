@@ -31,13 +31,13 @@ sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s
 @doc "Create a `StrSxp` from a `ByteString`"->
 sexp(st::ByteString) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
 
-@doc """
-Create a `CharSxp` from a `ByteString`
 
-Note that a `CharSxp` is an internal R representation of a character string.
-An R assignment like `ff <- "foo"` creates a StrSxp which is a vector of
-character strings.
-"""->
+##Create a `CharSxp` from a `ByteString`
+
+##Note that a `CharSxp` is an internal R representation of a character string.
+##An R assignment like `ff <- "foo"` creates a StrSxp which is a vector of
+##character strings.
+
 CharSxp(st::ByteString) = sexp(ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),st))
 
 function sexp{T<:ByteString}(v::Array{T})
