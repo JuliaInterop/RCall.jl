@@ -43,7 +43,7 @@ module RCall
   Start an embedded R and create global values from several built-ins.
   In particular, globalEnv must be defined if any R expression is to be evaluated.
 """->
-function __init__()                     
+function __init__()
     argv = ["Rembed","--silent","--no-save"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
     i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
