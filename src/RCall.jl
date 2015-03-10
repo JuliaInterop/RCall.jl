@@ -18,7 +18,9 @@ module RCall
            reval,
            rparse,
            rprint,
-           sexp
+           sexp,
+           @rimport,
+           @rusing
 
 
     if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
@@ -68,5 +70,6 @@ end
     include("iface.jl")
     include("show.jl")
     include("functions.jl")
+    include("library.jl")
 
 end # module
