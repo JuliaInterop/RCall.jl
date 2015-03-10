@@ -30,3 +30,14 @@ pqsexp = sexp(["p","q"])
 @test isa(pqsexp,RCall.StrSxp)
 @test length(pqsexp) == 2
 @test rcopy(pqsexp[1]) == "p"
+
+langsexp = RCall.lang(:solve, sexp([1 2; 0 4]))
+@test length(langsexp) == 2
+@test rcopy(reval(langsexp)) == [1 -0.5; 0 0.25]
+
+globalEnv[:x] = sexp([1,2,3])
+globalEnv[:y] = sexp([4,5,6])
+@test rcopy(rcall(symbol("+"),:x,:y)) == [5,7,9]
+
+@rimport MASS as mass
+@test round(rcopy(rcall(mass.ginv, sexp([1 2; 0 4]))),5) == [1 -0.5; 0 0.25]
