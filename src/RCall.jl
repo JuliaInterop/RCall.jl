@@ -13,11 +13,14 @@ module RCall
            isTs,
            libR,
            named,
+           rcall,
            rcopy,
            reval,
            rparse,
            rprint,
-           sexp
+           sexp,
+           @rimport,
+           @rusing
 
 
     if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
@@ -66,5 +69,7 @@ end
     include("sexp.jl")
     include("iface.jl")
     include("show.jl")
+    include("functions.jl")
+    include("library.jl")
 
 end # module
