@@ -7,7 +7,7 @@ lsv = reval("ls()")
 
 lsd = reval("ls(\"package:datasets\")")
 @test isa(lsv, RCall.StrSxp)
-@test length(lsd) == 103
+@test length(lsd) > 50
 @test rcopy(lsd[2]) == "airmiles"
 
 v110 = DataArray(reval("x <- 1:10"))
