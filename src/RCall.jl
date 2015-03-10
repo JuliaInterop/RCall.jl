@@ -13,6 +13,7 @@ module RCall
            isTs,
            libR,
            named,
+           rcall,
            rcopy,
            reval,
            rparse,
@@ -66,5 +67,6 @@ end
     include("sexp.jl")
     include("iface.jl")
     include("show.jl")
+    include("functions.jl")
 
 end # module
