@@ -244,12 +244,21 @@ typealias Primitive Union(BuiltinSxp,SpecialSxp)
 
 typealias RFunction Union(ClosSxp,BuiltinSxp,SpecialSxp)
 
-@doc """
-Extract the original SEXP (pointer to an R SEXPREC)
+if VERSION < v"v0.4-"
+    @doc """
+    Extract the original SEXP (pointer to an R SEXPREC)
 
-Written as a `convert` method for convenience in `ccall`
-"""->
-Base.convert(::Type{Ptr{Void}},s::SEXPREC) = s.p
+    Written as a `convert` method for convenience in `ccall`
+    """->
+    Base.convert(::Type{Ptr{Void}},s::SEXPREC) = s.p
+else
+    @doc """
+    Extract the original SEXP (pointer to an R SEXPREC)
+
+    Written as a `unsafe_convert` method for convenience in `ccall`
+    """->
+    Base.unsafe_convert(::Type{Ptr{Void}},s::SEXPREC) = s.p
+end
 
 @doc """
 SEXPREC methods for `length` return the R length.
