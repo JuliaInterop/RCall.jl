@@ -46,13 +46,14 @@ module RCall
   Start an embedded R and create global values from several built-ins.
   In particular, globalEnv must be defined if any R expression is to be evaluated.
 """->
-function __init__()                     
+function __init__()
     argv = ["Rembed","--silent","--no-save"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
     i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
     global const Rproc = Rinstance(i)
     global const R_NaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint))
     global const R_NaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble))
+    global const R_UnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),Ptr{Void}))
     ip = ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Int32,),0)
     global const voffset = ccall((:INTEGER,libR),Ptr{Void},(Ptr{Void},),ip) - ip
     global const R_NaString = sexp(unsafe_load(cglobal((:R_NaString,libR),Ptr{Void})))
