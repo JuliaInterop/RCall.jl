@@ -1,5 +1,5 @@
 @doc "Create a function call from a list of arguments"->
-function lang(f::Union(RFunction,SymSxp),args...;kwargs...)
+function lang(f::SEXPREC,args...;kwargs...)
     argn = length(args)+length(kwargs)
     l = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Int),6,argn+1)))
     s = l.p
@@ -29,4 +29,5 @@ lang(s::Symbol,args...;kwargs...) = lang(sexp(s),args...;kwargs...)
 Evaluate a function in the global environment. The first argument corresponds
 to the function to be called. It can be either a RFunction type, a SymSxp or
 a Symbol."""->
-rcall(f::Union(RFunction,SymSxp,Symbol),args...;kwargs...) = reval(lang(f,args...,kwargs...))
+rcall(f::SEXPREC,args...;kwargs...) = reval(lang(f,args...,kwargs...))
+rcall(f::Symbol,args...;kwargs...) = reval(lang(f,args...,kwargs...))
