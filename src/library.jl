@@ -5,7 +5,7 @@ for w in ("while", "if", "for", "try", "return", "break",
           "global", "const", "abstract", "typealias", "type",
           "bitstype", "immutable", "ccall", "do", "module",
           "baremodule", "using", "import", "export", "importall",
-          "pymember", "false", "true")
+          "false", "true")
     push!(reserved, w) # construct Set this way for compat with Julia 0.2/0.3
 end
 

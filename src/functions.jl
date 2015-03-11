@@ -8,7 +8,7 @@ function lang(f::SEXPREC,args...;kwargs...)
         if typeof(argv) <: Symbol
             argv = sexp(argv)
         end
-        typeof(argv) <: SEXPREC || throw(MethodError("expect SEXPREC arguments"))
+        typeof(argv) <: SEXPREC || throw(MethodError("unexpected arguments"))
         s = ccall((:CDR,libR),Ptr{Void},(Ptr{Void},),s)
         ccall((:SETCAR,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,argv)
     end
@@ -16,7 +16,7 @@ function lang(f::SEXPREC,args...;kwargs...)
         if typeof(argv) <: Symbol
             argv = sexp(argv)
         end
-        typeof(argv) <: SEXPREC || throw(MethodError("expect SEXPREC arguments"))
+        typeof(argv) <: SEXPREC || throw(MethodError("unexpected arguments"))
         s = ccall((:CDR,libR),Ptr{Void},(Ptr{Void},),s)
         ccall((:SET_TAG,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,sexp(key))
         ccall((:SETCAR,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,argv)
@@ -31,3 +31,7 @@ to the function to be called. It can be either a RFunction type, a SymSxp or
 a Symbol."""->
 rcall(f::SEXPREC,args...;kwargs...) = reval(lang(f,args...,kwargs...))
 rcall(f::Symbol,args...;kwargs...) = reval(lang(f,args...,kwargs...))
+
+if VERSION >= v"v0.4-"
+    Base.call(f::Union(SymSxp,LangSxp,RFunction),args...;kwargs...) = rcall(f,args...;kwargs...)
+end
