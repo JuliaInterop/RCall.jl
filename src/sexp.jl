@@ -141,8 +141,8 @@ behave differently than all other `names` methods in `Julia`.
 """->
 Base.names(s::SEXPREC) = ByteString[rcopy(nm) for nm in getAttrib(s,namesSymbol)]
 
-isNA(s::Complex128) = x == R_NaReal + R_NaReal*im
-isNA(x::Float64) = x == R_NaReal
+isNA(x::Complex128) = real(x) === R_NaReal && imag(x) === R_NaReal
+isNA(x::Float64) = x === R_NaReal
 isNA(x::Int32) = x == R_NaInt
 isNA(x::ByteString) = x == bytestring(R_NaString)
 isNA(a::Array) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
