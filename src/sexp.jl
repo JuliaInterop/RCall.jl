@@ -200,10 +200,10 @@ function preserve(s::SEXPREC)
     s
 end
 
-for (typ,rtyp,rsnm) in ((:Bool, :Int32, "LOGICAL"),
-                        (:Complex, :Complex128, "COMPLEX"),
-                        (:Integer, :Int32, "INTEGER"),
-                        (:Real, :Float64, "REAL"))
+for (typ,rtyp,rsnm) in ((:Bool, :Int32, "Logical"),
+                        (:Complex, :Complex128, "Complex"),
+                        (:Integer, :Int32, "Integer"),
+                        (:Real, :Float64, "Real"))
     @eval sexp(v::$typ) = preserve(sexp(ccall(($(string("Rf_Scalar",rsnm)),libR),Ptr{Void},($rtyp,),v)))
 end
 
