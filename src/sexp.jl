@@ -227,6 +227,13 @@ for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,15))
             copy!(vec(vv),a)
             vv
         end
+    end
+end
+
+## To get rid of ambiguity, first define `sexp` for array with definite dimensions
+## then arbitrary dimensions.
+for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,15))
+    @eval begin
         function sexp{T<:$typ}(a::Array{T})
             rdims = sexp([size(a)...])
             vv = preserve(sexp(ccall((:Rf_allocArray,libR),Ptr{Void},(Cint,Ptr{Void}),$tag,rdims)))
