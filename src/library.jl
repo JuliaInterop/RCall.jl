@@ -5,7 +5,7 @@ for w in ("while", "if", "for", "try", "return", "break",
           "global", "const", "abstract", "typealias", "type",
           "bitstype", "immutable", "ccall", "do", "module",
           "baremodule", "using", "import", "export", "importall",
-          "pymember", "false", "true")
+          "false", "true")
     push!(reserved, w) # construct Set this way for compat with Julia 0.2/0.3
 end
 
@@ -13,12 +13,16 @@ function rwrap(pkg::ASCIIString,s::Symbol)
     reval("library($pkg)")
     env = rcall(symbol("as.environment"),sexp("package:$pkg"))
     !isNull(env) || error("The package has nothing!")
-    members = [(n, reval(env[symbol(n)])) for n in rcopy(rcall(:ls,env))]
-    filter!(x -> !(x[1] in reserved), members)
+    members = rcopy(rcall(:ls,env))
+    filter!(x -> !(x in reserved), members)
     m = Module(s)
-    consts = [Expr(:const, Expr(:(=), symbol(x[1]), x[2])) for x in members]
+    consts = [Expr(:const,
+                    Expr(:(=),
+                    symbol(x),
+                    lang(symbol("::"),symbol(pkg),symbol(x)))
+                ) for x in members]
     id = Expr(:(=), :__package__, pkg)
-    exports = [symbol(x[1]) for x in members]
+    exports = [symbol(x) for x in members]
     eval(m, Expr(:toplevel, consts..., Expr(:export, exports...), id))
     m
 end

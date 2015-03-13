@@ -1,5 +1,5 @@
 @doc "Create a function call from a list of arguments"->
-function lang(f::Union(RFunction,SymSxp),args...;kwargs...)
+function lang(f::SEXPREC,args...;kwargs...)
     argn = length(args)+length(kwargs)
     l = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Int),6,argn+1)))
     s = l.p
@@ -8,7 +8,7 @@ function lang(f::Union(RFunction,SymSxp),args...;kwargs...)
         if typeof(argv) <: Symbol
             argv = sexp(argv)
         end
-        typeof(argv) <: SEXPREC || throw(MethodError("expect SEXPREC arguments"))
+        typeof(argv) <: SEXPREC || throw(MethodError("unexpected arguments"))
         s = ccall((:CDR,libR),Ptr{Void},(Ptr{Void},),s)
         ccall((:SETCAR,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,argv)
     end
@@ -16,7 +16,7 @@ function lang(f::Union(RFunction,SymSxp),args...;kwargs...)
         if typeof(argv) <: Symbol
             argv = sexp(argv)
         end
-        typeof(argv) <: SEXPREC || throw(MethodError("expect SEXPREC arguments"))
+        typeof(argv) <: SEXPREC || throw(MethodError("unexpected arguments"))
         s = ccall((:CDR,libR),Ptr{Void},(Ptr{Void},),s)
         ccall((:SET_TAG,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,sexp(key))
         ccall((:SETCAR,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),s,argv)
@@ -29,4 +29,9 @@ lang(s::Symbol,args...;kwargs...) = lang(sexp(s),args...;kwargs...)
 Evaluate a function in the global environment. The first argument corresponds
 to the function to be called. It can be either a RFunction type, a SymSxp or
 a Symbol."""->
-rcall(f::Union(RFunction,SymSxp,Symbol),args...;kwargs...) = reval(lang(f,args...,kwargs...))
+rcall(f::SEXPREC,args...;kwargs...) = reval(lang(f,args...,kwargs...))
+rcall(f::Symbol,args...;kwargs...) = reval(lang(f,args...,kwargs...))
+
+if VERSION >= v"v0.4-"
+    Base.call(f::Union(SymSxp,LangSxp,RFunction),args...;kwargs...) = rcall(f,args...;kwargs...)
+end
