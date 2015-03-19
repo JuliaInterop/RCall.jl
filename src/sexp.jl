@@ -183,8 +183,11 @@ DataFrames.DataFrame(st::ASCIIString) = DataFrame(reval(st))
 DataFrames.DataFrame(s::Symbol) = DataFrame(reval(s))
 
 @doc "extract the value of symbol s in the environment e"->
-Base.getindex(e::EnvSxp,s::Symbol) =
-    sexp(ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,sexp(s)))
+function Base.getindex(e::EnvSxp,s::Symbol)
+    v = ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,sexp(s))
+    v == R_UnboundValue && throw(BoundsError())
+    sexp(v)
+end
 
 @doc "assign value v to symbol s in the environment e"->
 Base.setindex!(e::EnvSxp,v::SEXPREC,s::Symbol) =
