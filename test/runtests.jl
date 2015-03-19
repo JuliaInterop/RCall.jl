@@ -31,6 +31,7 @@ pqsexp = sexp(["p","q"])
 @test length(pqsexp) == 2
 @test rcopy(pqsexp[1]) == "p"
 
+@test DataArray(reval("c(NA,TRUE)")).na == @data([NA,true]).na
 @test DataArray(reval("c(NA,1)")).na == @data([NA,1.0]).na
 @test DataArray(reval("c(NA,1+0i)")).na == @data([NA,1.0+0.0*im]).na
 @test DataArray(reval("c(NA,1L)")).na == @data([NA,one(Int32)]).na
@@ -38,6 +39,13 @@ pqsexp = sexp(["p","q"])
 @test_throws ErrorException DataArray(reval("as.factor(c('a','a','c'))"))
 @test PooledDataArray(reval("as.factor(c('a','a','c'))")).pool == ["a","c"]
 
+@test DataArray(sexp(@data([NA,true]))).na == @data([NA,true]).na
+@test DataArray(sexp(@data([NA,1]))).na == @data([NA,1]).na
+@test DataArray(sexp(@data([NA,1.]))).na == @data([NA,1.]).na
+@test DataArray(sexp(@data([NA,1.+0*im]))).na == @data([NA,1.+0*im]).na
+@test DataArray(sexp(@data([NA,NA,"a","b"]))).na == @data([NA,NA,"a","b"]).na
+pda = PooledDataArray(repeat(["a", "b"], inner = [5]))
+@test PooledDataArray(sexp(pda)).refs == repeat([1,2], inner = [5])
 
 langsexp = RCall.lang(:solve, sexp([1 2; 0 4]))
 @test length(langsexp) == 2

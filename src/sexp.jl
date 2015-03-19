@@ -42,15 +42,6 @@ sexp(st::ByteString) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st
 
 CharSxp(st::ByteString) = sexp(ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),st))
 
-function sexp{T<:ByteString}(v::Array{T})
-    rv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),16,length(v)))
-    vrv = vec(rv)
-    for i in 1:length(v)
-        vrv[i] = ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),v[i])
-    end
-    rv
-end
-
 ## Predicates applied to an SEXPREC
 ##
 ## Many of these are unneeded but a few extra definitions is not a big deal
@@ -113,6 +104,12 @@ function getAttrib(s::SEXPREC,sym::SymSxp)
 end
 getAttrib(s::SEXPREC,sym::Symbol) = getAttrib(s,sexp(sym))
 getAttrib(s::SEXPREC,str::ASCIIString) = getAttrib(s,symbol(str))
+
+function setAttrib(s::SEXPREC,sym::SymSxp,t::SEXPREC)
+    sexp(ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{Void},Ptr{Void},Ptr{Void}),s,sym,t))
+end
+setAttrib(s::SEXPREC,sym::Symbol,t::SEXPREC) = setAttrib(s,sexp(sym),t)
+setAttrib(s::SEXPREC,str::ASCIIString,t::SEXPREC) = setAttrib(s,symbol(str),t)
 
 function Base.size(s::SEXPREC)
     isArray(s) || return (length(s),)
@@ -206,14 +203,25 @@ function preserve(s::SEXPREC)
     s
 end
 
+## Array to sexp conversions.
+
+function sexp{T<:ByteString}(v::Array{T})
+    rv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),16,length(v))))
+    vrv = vec(rv)
+    for i in 1:length(v)
+        vrv[i] = ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),v[i])
+    end
+    rv
+end
+
 for (typ,rtyp,rsnm) in ((:Bool, :Int32, "Logical"),
-                        (:Complex, :Complex128, "Complex"),
                         (:Integer, :Int32, "Integer"),
-                        (:Real, :Float64, "Real"))
+                        (:Real, :Float64, "Real"),
+                        (:Complex, :Complex128, "Complex"))
     @eval sexp(v::$typ) = preserve(sexp(ccall(($(string("Rf_Scalar",rsnm)),libR),Ptr{Void},($rtyp,),v)))
 end
 
-for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,14))
+for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
     @eval begin
         function sexp{T<:$typ}(v::Vector{T})
             vv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Int),$tag,length(v))))
@@ -238,7 +246,7 @@ end
 
 ## To get rid of ambiguity, first define `sexp` for array with definite dimensions
 ## then arbitrary dimensions.
-for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,14))
+for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
     @eval begin
         function sexp{T<:$typ}(a::Array{T})
             rdims = sexp([size(a)...])
@@ -247,6 +255,46 @@ for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,14))
             vv
         end
     end
+end
+
+## DataArray to sexp conversions.
+
+function sexp{T<:ByteString}(v::DataArray{T})
+    rv = sexp(v.data)
+    for i in find(v.na)
+        ccall((:SET_STRING_ELT,libR),Ptr{Void},(Ptr{Void},Cint,Ptr{Void}),rv,i-1,R_NaString)
+    end
+    rv
+end
+
+for (typ,na_sym) in ((:Bool,:R_NaInt),(:Integer,:R_NaInt),(:Real,:R_NaReal))
+    @eval begin
+        function sexp{T<:$typ}(a::DataArray{T})
+            vv = sexp(a.data)
+            vec(vv)[a.na] = $na_sym
+            vv
+        end
+    end
+end
+
+## handle complex numnbers separately
+function sexp{T<:Complex}(a::DataArray{T})
+    vv = sexp(a.data)
+    p = convert(Ptr{Float64}, vv.pv)
+    for i in find(a.na)
+        unsafe_store!(p,R_NaReal,2i-1) # real part
+        unsafe_store!(p,R_NaReal,2i) # imaginary part
+    end
+    vv
+end
+
+## PooledDataArray to sexp conversions.
+
+function sexp{T<:ByteString,R<:Integer}(v::PooledDataArray{T,R})
+    rv = sexp(v.refs)
+    setAttrib(rv, levelsSymbol, sexp(v.pool))
+    setAttrib(rv, classSymbol, sexp("factor"))
+    rv
 end
 
 function sexp(v::BitVector)             # handled separately
