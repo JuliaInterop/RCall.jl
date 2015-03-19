@@ -144,7 +144,8 @@ Base.names(s::SEXPREC) = ByteString[rcopy(nm) for nm in getAttrib(s,namesSymbol)
 isNA(x::Complex128) = real(x) === R_NaReal && imag(x) === R_NaReal
 isNA(x::Float64) = x === R_NaReal
 isNA(x::Int32) = x == R_NaInt
-isNA(x::ByteString) = x == bytestring(R_NaString)
+## it is wrong, but it works
+isNA(x::ByteString) = x == "NA"
 isNA(a::Array) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
 
 DataArrays.DataArray(s::RVector) = (rc = rcopy(s);DataArray(rc,isNA(rc)))
