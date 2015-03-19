@@ -11,9 +11,7 @@ end
 
 function rwrap(pkg::ASCIIString,s::Symbol)
     reval("library($pkg)")
-    env = rcall(symbol("as.environment"),sexp("package:$pkg"))
-    !isNull(env) || error("The package has nothing!")
-    members = rcopy(rcall(:ls,env))
+    members = rcopy("ls('package:$pkg')")
     filter!(x -> !(x in reserved), members)
     m = Module(s)
     consts = [Expr(:const,
