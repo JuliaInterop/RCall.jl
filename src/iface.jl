@@ -18,7 +18,7 @@ reval(sym::Symbol) = reval(sexp(sym))
 reval(str::ByteString) = reval(rparse(str))
 
 @doc "Parse a string as an R expression"->
-function rparse(st::ASCIIString)
+function rparse(st::ByteString)
     ParseStatus = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),Ptr{Void},
                 (Ptr{Void},Cint,Ptr{Cint},Ptr{Void}),
