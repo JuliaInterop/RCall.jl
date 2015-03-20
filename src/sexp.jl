@@ -185,7 +185,7 @@ DataFrames.DataFrame(s::Symbol) = DataFrame(reval(s))
 @doc "extract the value of symbol s in the environment e"->
 function Base.getindex(e::EnvSxp,s::Symbol)
     v = ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,sexp(s))
-    v == R_UnboundValue && throw(BoundsError())
+    v == unboundValue.p && throw(BoundsError("s is not defined in the environment"))
     sexp(v)
 end
 
