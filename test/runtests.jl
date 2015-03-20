@@ -34,6 +34,7 @@ pqsexp = sexp(["p","q"])
 @test DataArray(reval("c(NA,1)")).na == @data([NA,1.0]).na
 @test DataArray(reval("c(NA,1+0i)")).na == @data([NA,1.0+0.0*im]).na
 @test DataArray(reval("c(NA,1L)")).na == @data([NA,one(Int32)]).na
+@test DataArray(reval("c(NA,'1')")).na == @data([NA,'1']).na
 
 langsexp = RCall.lang(:solve, sexp([1 2; 0 4]))
 @test length(langsexp) == 2
