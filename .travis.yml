@@ -1,13 +1,21 @@
-language: julia
-os:
-  - linux
-  - osx
-julia:
-  - release
-  - nightly
+language: cpp
+compiler:
+  - clang
 notifications:
   email: false
-# uncomment the following lines to override the default test script
-#script:
-#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#  - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("RCall"); Pkg.test("RCall"; coverage=true)'
+env:
+  matrix:
+    - JULIAVERSION="juliareleases"
+    - JULIAVERSION="julianightlies"
+before_install:
+    - sudo add-apt-repository ppa:staticfloat/julia-deps -y
+    - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
+    - sudo apt-get update -qq -y
+    - sudo apt-get install git libpcre3-dev julia r-base r-base-dev r-recommended -y
+    - git config --global user.name "Travis User"
+    - git config --global user.email "travis@example.net"
+    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+script:
+    - julia -e 'versioninfo(); Pkg.clone(pwd())'
+    - if [ $JULIAVERSION = "julianightlies" ]; then julia -e 'Pkg.test("RCall"; coverage=true)'; fi
+    - if [ $JULIAVERSION = "juliareleases" ]; then julia -e 'Pkg.test("RCall")'; fi
