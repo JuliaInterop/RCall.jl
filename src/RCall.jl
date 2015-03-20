@@ -53,7 +53,6 @@ function __init__()
     global const Rproc = Rinstance(i)
     global const R_NaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint))
     global const R_NaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble))
-    global const R_UnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),Ptr{Void}))
     ip = ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Int32,),0)
     global const voffset = ccall((:INTEGER,libR),Ptr{Void},(Ptr{Void},),ip) - ip
     global const R_NaString = sexp(unsafe_load(cglobal((:R_NaString,libR),Ptr{Void})))
@@ -64,6 +63,7 @@ function __init__()
     global const levelsSymbol = sexp(unsafe_load(cglobal((:R_LevelsSymbol,libR),Ptr{Void})))
     global const namesSymbol = sexp(unsafe_load(cglobal((:R_NamesSymbol,libR),Ptr{Void})))
     global const nilValue = sexp(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})))
+    global const unboundValue = sexp(unsafe_load(cglobal((:R_UnboundValue,libR),Ptr{Void})))
 end
 
     include("types.jl")                 # define the various types of SEXPREC
