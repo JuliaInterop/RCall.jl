@@ -2,7 +2,7 @@
 function reval(expr::SEXPREC, env::EnvSxp)
     err = Array(Cint,1)
     val = ccall((:R_tryEval,libR),Ptr{Void},(Ptr{Void},Ptr{Void},Ptr{Cint}),expr,env,err)
-    bool(err[1]) && error("Error occurred in R_tryEval")
+    @compat(Bool(err[1])) && error("Error occurred in R_tryEval")
     sexp(val)
 end
 @doc "expression objects (the result of rparse) have a special reval method"->

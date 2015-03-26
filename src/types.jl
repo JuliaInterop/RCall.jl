@@ -267,4 +267,7 @@ SEXPREC methods for `length` return the R length.
 "long vectors", which have a negative value for the `length` member.
 """->
 Base.length(s::SEXPREC) = ccall((:Rf_length,libR),Int,(Ptr{Void},),s)
-Base.length(s::RVector) = (l = int(s.length); l < 0 ? ccall((:Rf_length,libR),Int,(Ptr{Void},),s) : l)
+function Base.length(s::RVector)
+    l = @compat(Int(s.length))
+    l < 0 ? ccall((:Rf_length,libR),Int,(Ptr{Void},),s) : l
+end

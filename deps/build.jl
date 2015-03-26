@@ -7,9 +7,11 @@ if any(x->!haskey(ENV,x), envkeys)
     end
 end
 
+using Compat, BinDeps
+
 ## Create and test the libR path
-const libR = joinpath(ENV["R_HOME"],"lib",string("libR.",Base.Sys.shlib_ext))
-dlopen_e(libR) == C_NULL && error("Unable to load $libR\n\nPlease re-run Pkg.build(package), and restart Julia.")
+const libR = joinpath(ENV["R_HOME"],"lib",string("libR.",BinDeps.shlib_ext))
+Libdl.dlopen_e(libR) == C_NULL && error("Unable to load $libR\n\nPlease re-run Pkg.build(package), and restart Julia.")
 
 ## Write the deps.jl file
 open("./deps.jl","w") do io
