@@ -1,6 +1,6 @@
 # RCall.jl
 
-[![Build Status](https://travis-ci.org/JuliaStats/RCall.jl.svg)](https://travis-ci.org/JuliaStats/RCall.jl.svg)
+[![Build Status](https://travis-ci.org/JuliaStats/RCall.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/RCall.jl)
 [![RCall](http://pkg.julialang.org/badges/RCall_release.svg)](http://pkg.julialang.org/?pkg=RCall&ver=release)
 
 ## Embedded R within Julia.
