@@ -47,7 +47,7 @@ module RCall
   In particular, globalEnv must be defined if any R expression is to be evaluated.
 """->
 function __init__()
-    argv = ["Rembed","--silent","--no-save"]
+    argv = ["R","--silent","--no-save"]
     i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
     i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
     global const Rproc = Rinstance(i)
@@ -72,5 +72,6 @@ end
     include("show.jl")
     include("functions.jl")
     include("library.jl")
+    include("IJulia.jl")
 
 end # module
