@@ -5,6 +5,8 @@ const typs = [NilSxp,SymSxp,ListSxp,ClosSxp,EnvSxp,PromSxp,LangSxp,SpecialSxp,Bu
               CharSxp,LglSxp,Void,Void,IntSxp,RealSxp,CplxSxp,StrSxp,DotSxp,AnySxp,
               VecSxp,ExprSxp,BcodeSxp,ExtPtrSxp,WeakRefSxp,RawSxp,S4Sxp]
 
+sexp(s::SEXPREC) = s
+
 @doc """
 Convert a `Ptr{Void}` to the appropriate type that inherits from `SEXPREC`
 
