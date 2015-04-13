@@ -214,7 +214,7 @@ for (typ,rtyp,rsnm) in ((:Bool, :Int32, "Logical"),
     @eval sexp(v::$typ) = preserve(sexp(ccall(($(string("Rf_Scalar",rsnm)),libR),Ptr{Void},($rtyp,),v)))
 end
 
-for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,15))
+for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,14))
     @eval begin
         function sexp{T<:$typ}(v::Vector{T})
             vv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Int),$tag,length(v))))
@@ -239,7 +239,7 @@ end
 
 ## To get rid of ambiguity, first define `sexp` for array with definite dimensions
 ## then arbitrary dimensions.
-for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,15))
+for (typ,tag) in ((:Bool,10),(:Complex,15),(:Integer,13),(:Real,14))
     @eval begin
         function sexp{T<:$typ}(a::Array{T})
             rdims = sexp([size(a)...])
