@@ -159,25 +159,24 @@ function DataArrays.DataArray(s::LglSxp)
     DataArray(convert(Array{Bool},src), src .== R_NaInt)
 end
 
-
-## `DataArray` method for `IntSxp` returns a `PooledDataArray` for factors
-
-## May not be the best idea because PooledDataArray is not a subtype of
-## DataArray. Technically, returning a PooledDataArray from a DataArray
-## method is a no-no.
+## `DataArray` method for `IntSxp` throws error message for factors
 function DataArrays.DataArray(s::IntSxp)
-    if isFactor(s)
-        ## refs array uses a zero index where R has a missing value, R_NaInt
-        refs = DataArrays.RefArray(map!(x -> x == R_NaInt ? zero(Int32) : x,vec(s)))
-        return compact(PooledDataArray(refs,rcopy(getAttrib(s,levelsSymbol))))
-    end
+    isFactor(s) && error("R is a R factor, use `PooledDataArray` instead")
     rc = rcopy(s)
     DataArray(rc,isNA(rc))
 end
 
+## `PooledDataArray` method for `IntSxp` returns a `PooledDataArray` for factors
+function DataArrays.PooledDataArray(s::IntSxp)
+    isFactor(s) || error("R is not a R factor")
+    ## refs array uses a zero index where R has a missing value, R_NaInt
+    refs = DataArrays.RefArray(map!(x -> x == R_NaInt ? zero(Int32) : x,vec(s)))
+    return compact(PooledDataArray(refs,rcopy(getAttrib(s,levelsSymbol))))
+end
+
 function DataFrames.DataFrame(s::VecSxp)
     isFrame(s) || error("s is not a R data frame")
-    DataFrame(map(DataArray,s),map(symbol,names(s)))
+    DataFrame(map((x)->isFactor(x)? PooledDataArray(x) : DataArray(x) ,s), map(symbol,names(s)))
 end
 
 ## Evaluate a string and try to convert to a dataset
