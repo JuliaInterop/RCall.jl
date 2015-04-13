@@ -3,10 +3,12 @@
 if isdefined(Main, :IJulia) && Main.IJulia.inited
     import IPythonDisplay: InlineDisplay
 
+    export rplot_set
+
     const rplot_active = Bool[false]
     const rplot_file = tempname()
 
-    const rplot_opts = Any[MIME"image/png"(),(480,360),()]
+    const rplot_opts = Any[MIME"image/png"(),(480,400),()]
 
     @doc """
         Set options for R plotting with IJulia.
@@ -24,8 +26,8 @@ if isdefined(Main, :IJulia) && Main.IJulia.inited
         rplot_opts[3] = kwargs
         nothing
     end
-    rplot_set(m::MIME"image/png") = rplot_set(m,480,360)
-    rplot_set(m::MIME"image/svg+xml") = rplot_set(m,6,4)
+    rplot_set(m::MIME"image/png") = rplot_set(m,480,400)
+    rplot_set(m::MIME"image/svg+xml") = rplot_set(m,6,5)
 
     rplot_device(m::MIME"image/png") = :png
     rplot_device(m::MIME"image/svg+xml") = :svg
