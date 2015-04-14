@@ -203,7 +203,7 @@ function preserve(s::SEXPREC)
     s
 end
 
-## Array to sexp conversions.
+## Array to sexp conversion.
 
 function sexp{T<:ByteString}(v::Array{T})
     rv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),16,length(v))))
@@ -257,8 +257,7 @@ for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
     end
 end
 
-## DataArray to sexp conversions.
-
+## DataArray to sexp conversion.
 function sexp{T<:ByteString}(v::DataArray{T})
     rv = sexp(v.data)
     for i in find(v.na)
@@ -288,13 +287,26 @@ function sexp{T<:Complex}(a::DataArray{T})
     vv
 end
 
-## PooledDataArray to sexp conversions.
-
+## PooledDataArray to sexp conversion.
 function sexp{T<:ByteString,R<:Integer}(v::PooledDataArray{T,R})
     rv = sexp(v.refs)
     setAttrib(rv, levelsSymbol, sexp(v.pool))
     setAttrib(rv, classSymbol, sexp("factor"))
     rv
+end
+
+## DataFrame to sexp conversion.
+function sexp(d::DataFrames.DataFrame)
+    nr,nc = size(d)
+    rd = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),19,nc)))
+    for i in 1:nc
+        col_values = d[d.colindex.names[i]]
+        ccall((:SET_VECTOR_ELT,libR),Ptr{Void},(Ptr{Void},Cint,Ptr{Void}),rd,i-1,sexp(col_values))
+    end
+    setAttrib(rd,namesSymbol,sexp(ByteString[string(n) for n in d.colindex.names]))
+    setAttrib(rd,classSymbol, sexp("data.frame"))
+    setAttrib(rd,rowNamesSymbol, sexp(convert(Array,1:nr)))
+    rd
 end
 
 function sexp(v::BitVector)             # handled separately

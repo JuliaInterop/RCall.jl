@@ -63,6 +63,7 @@ function __init__()
     global const levelsSymbol = sexp(unsafe_load(cglobal((:R_LevelsSymbol,libR),Ptr{Void})))
     global const namesSymbol = sexp(unsafe_load(cglobal((:R_NamesSymbol,libR),Ptr{Void})))
     global const nilValue = sexp(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})))
+    global const rowNamesSymbol = sexp(unsafe_load(cglobal((:R_RowNamesSymbol,libR),Ptr{Void})))
     global const unboundValue = sexp(unsafe_load(cglobal((:R_UnboundValue,libR),Ptr{Void})))
 end
 

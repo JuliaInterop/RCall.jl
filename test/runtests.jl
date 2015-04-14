@@ -47,6 +47,8 @@ pqsexp = sexp(["p","q"])
 pda = PooledDataArray(repeat(["a", "b"], inner = [5]))
 @test PooledDataArray(sexp(pda)).refs == repeat([1,2], inner = [5])
 
+@test rcopy(rcall(:dim,sexp(attenu))) == [182,5]
+
 langsexp = RCall.lang(:solve, sexp([1 2; 0 4]))
 @test length(langsexp) == 2
 @test rcopy(reval(langsexp)) == [1 -0.5; 0 0.25]
