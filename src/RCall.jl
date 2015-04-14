@@ -66,12 +66,14 @@ function __init__()
     global const unboundValue = sexp(unsafe_load(cglobal((:R_UnboundValue,libR),Ptr{Void})))
 end
 
-    include("types.jl")                 # define the various types of SEXPREC
-    include("sexp.jl")
-    include("iface.jl")
-    include("show.jl")
-    include("functions.jl")
-    include("library.jl")
-    include("IJulia.jl")
+include("types.jl")                 # define the various types of SEXPREC
+include("sexp.jl")
+include("iface.jl")
+include("show.jl")
+include("functions.jl")
+include("library.jl")
+
+# only if using IJulia
+isdefined(Main, :IJulia) && Main.IJulia.inited && include("IJulia.jl")
 
 end # module
