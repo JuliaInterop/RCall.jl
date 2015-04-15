@@ -146,7 +146,7 @@ isNA(x::Int32) = x == R_NaInt
 ## it is still wrong, as it doesn't handle NA and 'NA' properly
 ## e.g. DataArray(reval("c(NA,'NA','foo')"))
 isNA(x::ByteString) = x == rcopy(R_NaString)
-isNA(a::Array) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
+isNA(a::AbstractArray) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
 
 DataArrays.DataArray(s::RVector) = (rc = rcopy(s);DataArray(rc,isNA(rc)))
 
@@ -203,9 +203,9 @@ function preserve(s::SEXPREC)
     s
 end
 
-## Array to sexp conversion.
+## AbstractArray to sexp conversion.
 
-function sexp{T<:ByteString}(v::Array{T})
+function sexp{T<:ByteString}(v::AbstractArray{T})
     rv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),16,length(v))))
     vrv = vec(rv)
     for i in 1:length(v)
@@ -223,18 +223,18 @@ end
 
 for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
     @eval begin
-        function sexp{T<:$typ}(v::Vector{T})
+        function sexp{T<:$typ}(v::AbstractVector{T})
             vv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Int),$tag,length(v))))
             copy!(vec(vv),v)
             vv
         end
-        function sexp{T<:$typ}(m::Matrix{T})
+        function sexp{T<:$typ}(m::AbstractMatrix{T})
             p,q = size(m)
             vv = preserve(sexp(ccall((:Rf_allocMatrix,libR),Ptr{Void},(Int,Cint,Cint),$tag,p,q)))
             copy!(vec(vv),m)
             vv
         end
-        function sexp{T<:$typ}(a::Array{T,3})
+        function sexp{T<:$typ}(a::AbstractArray{T,3})
             p,q,r = size(a)
             vv = preserve(sexp(ccall((:Rf_alloc3DArray,libR),Ptr{Void},
                                      (Cint,Cint,Cint,Cint),$tag,p,q,r)))
@@ -244,22 +244,11 @@ for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
     end
 end
 
-## Range to sexp conversion
-for (typ,tag) in ((:Integer,13),(:Real,14))
-    @eval begin
-        function sexp{T<:$typ}(v::Range{T})
-            vv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Int),$tag,length(v))))
-            copy!(vec(vv),v)
-            vv
-        end
-    end
-end
-
 ## To get rid of ambiguity, first define `sexp` for array with definite dimensions
 ## then arbitrary dimensions.
 for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
     @eval begin
-        function sexp{T<:$typ}(a::Array{T})
+        function sexp{T<:$typ}(a::AbstractArray{T})
             rdims = sexp([size(a)...])
             vv = preserve(sexp(ccall((:Rf_allocArray,libR),Ptr{Void},(Cint,Ptr{Void}),$tag,rdims)))
             copy!(vec(vv),a)
