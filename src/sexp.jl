@@ -158,14 +158,14 @@ end
 
 ## `DataArray` method for `IntSxp` throws error message for factors
 function DataArrays.DataArray(s::IntSxp)
-    isFactor(s) && error("R is a R factor, use `PooledDataArray` instead")
+    isFactor(s) && error("s is a R factor, use `PooledDataArray` instead")
     rc = rcopy(s)
     DataArray(rc,isNA(rc))
 end
 
 ## `PooledDataArray` method for `IntSxp` returns a `PooledDataArray` for factors
 function DataArrays.PooledDataArray(s::IntSxp)
-    isFactor(s) || error("R is not a R factor")
+    isFactor(s) || error("s is not a R factor")
     ## refs array uses a zero index where R has a missing value, R_NaInt
     refs = DataArrays.RefArray(map!(x -> x == R_NaInt ? zero(Int32) : x,vec(s)))
     return compact(PooledDataArray(refs,rcopy(getAttrib(s,levelsSymbol))))
