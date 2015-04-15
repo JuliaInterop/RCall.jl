@@ -63,6 +63,6 @@ globalEnv[:y] = sexp([4,5,6])
 # graphics
 f = tempname()
 rcall(:png,f)
-rcall(:plot,collect(1:10))
+rcall(:plot,1:10)
 rcall(symbol("dev.off"))
 @test isfile(f)

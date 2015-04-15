@@ -244,6 +244,17 @@ for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
     end
 end
 
+## Range to sexp conversion
+for (typ,tag) in ((:Integer,13),(:Real,14))
+    @eval begin
+        function sexp{T<:$typ}(v::Range{T})
+            vv = preserve(sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Int),$tag,length(v))))
+            copy!(vec(vv),v)
+            vv
+        end
+    end
+end
+
 ## To get rid of ambiguity, first define `sexp` for array with definite dimensions
 ## then arbitrary dimensions.
 for (typ,tag) in ((:Bool,10),(:Integer,13),(:Real,14),(:Complex,15))
@@ -305,7 +316,7 @@ function sexp(d::DataFrames.DataFrame)
     end
     setAttrib(rd,namesSymbol,sexp(ByteString[string(n) for n in d.colindex.names]))
     setAttrib(rd,classSymbol, sexp("data.frame"))
-    setAttrib(rd,rowNamesSymbol, sexp(convert(Array,1:nr)))
+    setAttrib(rd,rowNamesSymbol, sexp(1:nr))
     rd
 end
 
