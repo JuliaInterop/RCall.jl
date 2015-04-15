@@ -37,6 +37,7 @@ module RCall
         function Rinstance(i::Integer)
             v = new(convert(Cint,i))
             finalizer(v,i->ccall((:Rf_endEmbeddedR,libR),Void,(Cint,),0))
+            v
         end
     end
 
