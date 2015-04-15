@@ -59,3 +59,10 @@ globalEnv[:y] = sexp([4,5,6])
 
 @rimport MASS as mass
 @test round(rcopy(rcall(mass.ginv, sexp([1 2; 0 4]))),5) == [1 -0.5; 0 0.25]
+
+# graphics
+f = tempname()
+rcall(:png,f)
+rcall(:plot,collect(1:10))
+rcall(symbol("dev.off"))
+@test isfile(f)
