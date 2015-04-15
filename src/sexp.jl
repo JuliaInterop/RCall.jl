@@ -158,21 +158,21 @@ end
 
 ## `DataArray` method for `IntSxp` throws error message for factors
 function DataArrays.DataArray(s::IntSxp)
-    isFactor(s) && error("s is a R factor, use `PooledDataArray` instead")
+    isFactor(s) && error("$s is a R factor, use `PooledDataArray` instead")
     rc = rcopy(s)
     DataArray(rc,isNA(rc))
 end
 
 ## `PooledDataArray` method for `IntSxp` returns a `PooledDataArray` for factors
 function DataArrays.PooledDataArray(s::IntSxp)
-    isFactor(s) || error("s is not a R factor")
+    isFactor(s) || error("$s is not a R factor")
     ## refs array uses a zero index where R has a missing value, R_NaInt
     refs = DataArrays.RefArray(map!(x -> x == R_NaInt ? zero(Int32) : x,vec(s)))
     return compact(PooledDataArray(refs,rcopy(getAttrib(s,levelsSymbol))))
 end
 
 function DataFrames.DataFrame(s::VecSxp)
-    isFrame(s) || error("s is not a R data frame")
+    isFrame(s) || error("$s is not a R data frame")
     DataFrame(map((x)->isFactor(x)? PooledDataArray(x) : DataArray(x) ,s), map(symbol,names(s)))
 end
 
@@ -185,7 +185,7 @@ DataFrames.DataFrame(s::Symbol) = DataFrame(reval(s))
 @doc "extract the value of symbol s in the environment e"->
 function Base.getindex(e::EnvSxp,s::Symbol)
     v = ccall((:Rf_findVarInFrame,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),e,sexp(s))
-    v == unboundValue.p && throw(BoundsError("s is not defined in the environment"))
+    v == unboundValue.p && error("$s is not defined in the environment")
     sexp(v)
 end
 
