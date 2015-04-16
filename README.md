@@ -29,6 +29,6 @@ Please file an issue at the [github repository](https://github.com/JuliaStats/RC
 
 ## Documentation
 
-- [RCall](https://cdn.rawgit.com/JuliaStats/RCall.jl/master/doc/RCall.html)
-- [Mapping API](https://cdn.rawgit.com/JuliaStats/RCall.jl/master/doc/MappingAPI.html)
-- [Graphics](https://cdn.rawgit.com/JuliaStats/RCall.jl/master/doc/graphics.html)
+- [RCall](https://rawgit.com/JuliaStats/RCall.jl/master/doc/RCall.html)
+- [Mapping API](https://rawgit.com/JuliaStats/RCall.jl/master/doc/MappingAPI.html)
+- [Graphics](https://rawgit.com/JuliaStats/RCall.jl/master/doc/graphics.html)
