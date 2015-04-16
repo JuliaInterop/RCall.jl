@@ -27,22 +27,8 @@ should start an embedded R.
 
 Please file an issue at the [github repository](https://github.com/JuliaStats/RCall.jl) for the package if this fails.
 
-## Usage
+## Documentation
 
-### Accessing R data sets
-
-The simplest usage of the `RCall` package is to access datasets included with `R` packages.
-
-For example, R's `datasets` package, which is one of the standard packages attached to an `R` session, contains a dataset called `attenu`.
-```julia
-attenu = DataFrame(:attenu)
-```
-imports the data set into a `julia` session.
-
-### Assigning and accessing values from the R global environment
-
-R objects can be assigned to an environment in `R` (typically the `globalEnv`) and accessed from that environment using Julia indexing operations.  It often helps to assign a shorter name than `globalEnv`, as in
-```julia
-g = globalEnv
-g[:x] = 1
-```
+- [RCall](https://cdn.rawgit.com/JuliaStats/RCall.jl/master/doc/RCall.html)
+- [Mapping API](https://cdn.rawgit.com/JuliaStats/RCall.jl/master/doc/MappingAPI.html)
+- [Graphics](https://cdn.rawgit.com/JuliaStats/RCall.jl/master/doc/graphics.html)
