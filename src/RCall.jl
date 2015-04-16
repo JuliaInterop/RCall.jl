@@ -74,6 +74,7 @@ include("iface.jl")
 include("show.jl")
 include("functions.jl")
 include("library.jl")
+include("eventloop.jl")
 
 # only if using IJulia
 isdefined(Main, :IJulia) && Main.IJulia.inited && include("IJulia.jl")
