@@ -11,7 +11,7 @@ function reval(expr::ExprSxp, env::EnvSxp) # evaluate result of R_ParseVector
     for e in expr
         val = reval(e,env)
     end
-    val
+    preserve(val)
 end
 reval(s::SEXPREC) = reval(s,globalEnv)
 reval(sym::Symbol) = reval(sexp(sym))
@@ -24,7 +24,7 @@ function rparse(st::ByteString)
                 (Ptr{Void},Cint,Ptr{Cint},Ptr{Void}),
                 sexp(st),length(st),ParseStatus,nilValue)
     ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
-    sexp(val)
+    preserve(sexp(val))
 end
 
 @doc "print the value of an SEXP using R's printing mechanism"->
