@@ -52,6 +52,10 @@ pda = PooledDataArray(repeat(["a", "b"], inner = [5]))
 langsexp = RCall.lang(:solve, sexp([1 2; 0 4]))
 @test length(langsexp) == 2
 @test rcopy(reval(langsexp)) == [1 -0.5; 0 0.25]
+@test rcopy(langsexp[1]) == :solve
+langsexp[1] = sexp(:det)
+langsexp[2] = sexp([1 2; 0 0])
+@test rcopy(reval(langsexp))[1] == 0
 
 globalEnv[:x] = sexp([1,2,3])
 globalEnv[:y] = sexp([4,5,6])

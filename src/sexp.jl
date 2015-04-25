@@ -197,12 +197,6 @@ Base.setindex!(e::EnvSxp,v::SEXPREC,s::Symbol) =
     ccall((:Rf_setVar,libR),Void,(Ptr{Void},Ptr{Void},Ptr{Void}),sexp(s),v,e)
 Base.setindex!(e::EnvSxp,v,s::Symbol) = setindex!(e,sexp(v),s)
 
-function preserve(s::SEXPREC)
-    ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)
-    finalizer(s,x -> ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),x))
-    s
-end
-
 @doc "extract the i-th element of LangSxp l"->
 function Base.getindex(l::LangSxp,I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
@@ -212,6 +206,23 @@ function Base.getindex(l::LangSxp,I::Integer)
         end
     end
     sexp(ccall((:CAR,libR),Ptr{Void},(Ptr{Void},),l))
+end
+
+@doc "assign value v to the i-th element of LangSxp l"->
+function Base.setindex!(l::LangSxp,v::SEXPREC,I::Integer)
+    1 ≤ I ≤ length(l) || throw(BoundsError())
+    if I ≥ 2
+        for i in 2:I
+            l = ccall((:CDR,libR),Ptr{Void},(Ptr{Void},),l)
+        end
+    end
+    sexp(ccall((:SETCAR,libR),Ptr{Void},(Ptr{Void},Ptr{Void}),l,v))
+end
+
+function preserve(s::SEXPREC)
+    ccall((:R_PreserveObject,libR),Void,(Ptr{Void},),s)
+    finalizer(s,x -> ccall((:R_ReleaseObject,libR),Void,(Ptr{Void},),x))
+    s
 end
 
 ## AbstractArray to sexp conversion.
