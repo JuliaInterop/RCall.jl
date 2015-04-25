@@ -155,7 +155,12 @@ end
 ## DataArray for an LglSxp converts from Cint to Bool
 function DataArrays.DataArray(s::LglSxp)
     src = rcopy(s)
-    DataArray(convert(Array{Bool},src), src .== R_NaInt)
+    na = src .== R_NaInt
+    ## R_NaInt is -2147483648 and
+    ## in v.0.4, convert(Array{Bool}, [-2147483648]) throws InexactError(),
+    ## those values need to be set to zero or one.
+    src[na] = 0
+    DataArray(convert(Array{Bool},src), na)
 end
 
 ## `DataArray` method for `IntSxp` throws error message for factors
