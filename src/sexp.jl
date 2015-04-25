@@ -203,6 +203,17 @@ function preserve(s::SEXPREC)
     s
 end
 
+@doc "extract the i-th element of LangSxp l"->
+function Base.getindex(l::LangSxp,I::Integer)
+    1 ≤ I ≤ length(l) || throw(BoundsError())
+    if I ≥ 2
+        for i in 2:I
+            l = ccall((:CDR,libR),Ptr{Void},(Ptr{Void},),l)
+        end
+    end
+    sexp(ccall((:CAR,libR),Ptr{Void},(Ptr{Void},),l))
+end
+
 ## AbstractArray to sexp conversion.
 
 function sexp{T<:ByteString}(v::AbstractArray{T})
