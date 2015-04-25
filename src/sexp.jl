@@ -143,12 +143,14 @@ Base.names(s::SEXPREC) = ByteString[rcopy(nm) for nm in getAttrib(s,namesSymbol)
 isNA(x::Complex128) = real(x) === R_NaReal && imag(x) === R_NaReal
 isNA(x::Float64) = x === R_NaReal
 isNA(x::Int32) = x == R_NaInt
-## it is still wrong, as it doesn't handle NA and 'NA' properly
-## e.g. DataArray(reval("c(NA,'NA','foo')"))
-isNA(x::ByteString) = x == rcopy(R_NaString)
 isNA(a::AbstractArray) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
 
 DataArrays.DataArray(s::RVector) = (rc = rcopy(s);DataArray(rc,isNA(rc)))
+## handle StrSxp seperately
+function DataArrays.DataArray(s::StrSxp)
+    na = Bool[x.p == R_NaString.p for x in s]
+    DataArray(rcopy(s), na)
+end
 
 ## DataArray for an LglSxp converts from Cint to Bool
 function DataArrays.DataArray(s::LglSxp)

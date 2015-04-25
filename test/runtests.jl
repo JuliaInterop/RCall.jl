@@ -35,7 +35,7 @@ pqsexp = sexp(["p","q"])
 @test DataArray(reval("c(NA,1)")).na == @data([NA,1.0]).na
 @test DataArray(reval("c(NA,1+0i)")).na == @data([NA,1.0+0.0*im]).na
 @test DataArray(reval("c(NA,1L)")).na == @data([NA,one(Int32)]).na
-@test DataArray(reval("c(NA,'1')")).na == @data([NA,'1']).na
+@test DataArray(reval("c(NA,'NA')")).na == @data([NA,"NA"]).na
 @test_throws ErrorException DataArray(reval("as.factor(c('a','a','c'))"))
 @test PooledDataArray(reval("as.factor(c('a','a','c'))")).pool == ["a","c"]
 
