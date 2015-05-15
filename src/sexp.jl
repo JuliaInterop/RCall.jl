@@ -30,17 +30,39 @@ sexp(v::Array{Ptr{Void}}) = map(sexp,v)
 @doc "Create a `SymSxp` from a `Symbol`"->
 sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s)))
 
+@doc """
+Create a `CharSxp` from a String.
+
+Note that a `CharSxp` is an internal R representation of a character string.
+An R assignment like `ff <- \"foo\"` creates a StrSxp which is a vector of
+character strings.
+"""->
+CharSxp(st::ASCIIString) = sexp(ccall((:Rf_mkCharLen,libR),Ptr{Void},(Ptr{Uint8},Cint),st,sizeof(st)))
+CharSxp(st::UTF8String) = sexp(ccall((:Rf_mkCharLenCE,libR),Ptr{Void},(Ptr{Uint8},Cint,Cint),st,sizeof(st),1))
+CharSxp(st::String) = CharSxp(bytestring(st))
+
+@doc """
+Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).
+ * 0x00_0002_00 (bit 1): set of bytes (no known encoding)
+ * 0x00_0004_00 (bit 2): Latin-1
+ * 0x00_0008_00 (bit 3): UTF-8
+ * 0x00_4000_00 (bit 6): ASCII
+"""->
+function encoding(s::CharSxp)
+    if s.info & 0x00_0040_00 != 0
+        return ASCIIString
+    elseif s.info & 0x00_0008_00 != 0
+        return UTF8String
+    else
+        error("Unknown string type")
+    end
+end
+
+StrSxp(s::CharSxp) = sexp(ccall((:Rf_ScalarString,libR),Ptr{Void},(Ptr{Void},),s.p))
+
 @doc "Create a `StrSxp` from a `ByteString`"->
-sexp(st::ByteString) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
+sexp(st::String) = StrSxp(CharSxp(bytestring(st)))
 
-
-##Create a `CharSxp` from a `ByteString`
-
-##Note that a `CharSxp` is an internal R representation of a character string.
-##An R assignment like `ff <- "foo"` creates a StrSxp which is a vector of
-##character strings.
-
-CharSxp(st::ByteString) = sexp(ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),st))
 
 ## Predicates applied to an SEXPREC
 ##
@@ -138,12 +160,13 @@ names, if any.
 This may not be the best idea because it makes these `names` methods
 behave differently than all other `names` methods in `Julia`.
 """->
-Base.names(s::SEXPREC) = ByteString[rcopy(nm) for nm in getAttrib(s,namesSymbol)]
+Base.names(s::SEXPREC) = rcopy(getAttrib(s,namesSymbol))
 
 isNA(x::Complex128) = real(x) === R_NaReal && imag(x) === R_NaReal
 isNA(x::Float64) = x === R_NaReal
 isNA(x::Int32) = x == R_NaInt
 isNA(a::AbstractArray) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
+isNA(s::CharSxp) = s.p == R_NaString.p
 
 DataArrays.DataArray(s::RVector) = (rc = rcopy(s);DataArray(rc,isNA(rc)))
 
