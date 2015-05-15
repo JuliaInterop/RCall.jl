@@ -32,5 +32,18 @@ rprint(s::SEXPREC) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s)
 rprint(str::ByteString) = rprint(reval(str))
 rprint(sym::Symbol) = rprint(reval(sym))
 
+function rprint(io::IO, s)
+    oldout = STDOUT
+    (rd,wr) = redirect_stdout()
+    start_reading(rd)
+    rprint(s)
+    flush_cstdio()
+    redirect_stdout(oldout)
+    close(wr)
+    print(io, rstrip(readall(rd)))
+    close(rd)
+    nothing
+end
+
 rcopy(str::ByteString) = rcopy(reval(str))
 rcopy(sym::Symbol) = rcopy(reval(sym))
