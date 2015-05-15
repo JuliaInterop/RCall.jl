@@ -30,13 +30,13 @@ sexp(v::Array{Ptr{Void}}) = map(sexp,v)
 @doc "Create a `SymSxp` from a `Symbol`"->
 sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s)))
 
-@doc """
-Create a `CharSxp` from a String.
+# @doc """
+# Create a `CharSxp` from a String.
 
-Note that a `CharSxp` is an internal R representation of a character string.
-An R assignment like `ff <- \"foo\"` creates a StrSxp which is a vector of
-character strings.
-"""->
+# Note that a `CharSxp` is an internal R representation of a character string.
+# An R assignment like `ff <- \"foo\"` creates a StrSxp which is a vector of
+# character strings.
+# """->
 CharSxp(st::ASCIIString) = sexp(ccall((:Rf_mkCharLen,libR),Ptr{Void},(Ptr{Uint8},Cint),st,sizeof(st)))
 CharSxp(st::UTF8String) = sexp(ccall((:Rf_mkCharLenCE,libR),Ptr{Void},(Ptr{Uint8},Cint,Cint),st,sizeof(st),1))
 CharSxp(st::String) = CharSxp(bytestring(st))
