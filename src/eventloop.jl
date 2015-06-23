@@ -13,14 +13,12 @@ function process_events()
     nothing
 end
 
-global timeout = Timer((x)-> process_events())
-global eventloop_is_running = 0
+global timeout = nothing
 
 function rgui_start()
-    global eventloop_is_running, timeout
-    if eventloop_is_running == 0
-        eventloop_is_running = 1
-        Base.start_timer(timeout, 0.05, 0.05)
+    global timeout
+    if timeout == nothing
+        timeout = Base.Timer(x -> process_events(), 0.05, 0.05)
     else
         error("eventloop is running.")
     end
@@ -28,10 +26,10 @@ function rgui_start()
 end
 
 function rgui_stop()
-    global eventloop_is_running, timeout
-    if eventloop_is_running == 1
-        eventloop_is_running = 0
-        Base.stop_timer(timeout)
+    global timeout
+    if timeout != nothing
+        close(timeout)
+        timeout = nothing
     else
         error("eventloop is not running.")
     end
