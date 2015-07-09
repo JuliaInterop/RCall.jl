@@ -7,6 +7,8 @@ julia:
 notifications:
   email: false
 before_install:
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+  - echo "deb http://cran.rstudio.com/bin/linux/ubuntu precise/" | sudo tee -a /etc/apt/sources.list
   - sudo apt-get update -qq -y
   - sudo apt-get install git r-base r-base-dev r-recommended -y
 script:
