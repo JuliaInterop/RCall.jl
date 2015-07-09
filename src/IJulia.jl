@@ -11,7 +11,7 @@ const rplot_opts = Any[MIME"image/png"(),(480,400),()]
 @doc """
 Set options for R plotting with IJulia.
 
-The first argument should be a MIME object: currently supported are 
+The first argument should be a MIME object: currently supported are
 * `MIME("image/png")` [default]
 * `MIME("image/svg+xml")`
 
@@ -31,7 +31,7 @@ rplot_device(m::MIME"image/png") = :png
 rplot_device(m::MIME"image/svg+xml") = :svg
 
 @doc """
-Called before cell evaluation. 
+Called before cell evaluation.
 Opens new graphics device.
 """->
 function new_rplot()
@@ -57,7 +57,7 @@ Called after cell evaluation.
 Closes graphics device and displays file in notebook.
 """->
 function disp_rplot()
-    d = rplot_devno[1] 
+    d = rplot_devno[1]
     if d != 1
         rcall(symbol("dev.off"),d)
         rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
@@ -70,7 +70,7 @@ end
 
 # cleanup png device on error
 function clean_rplot()
-    d = rplot_devno[1] 
+    d = rplot_devno[1]
     if d != 1
         rprint("dev.list()")
         rcall(symbol("dev.off"),d)
