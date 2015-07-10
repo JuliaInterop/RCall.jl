@@ -132,7 +132,7 @@ rcopy{T<:String}(::Type{T},s::Ptr{StrSxp}) = convert(T,s[1])
 
 
 # LglSxp, IntSxp, RealSxp, CplxSxp
-for (J,Jc,rsnm,S) in ((:(Union(Bool,Cint)), :Cint, "Logical", :LglSxp),
+for (J,Jc,rsnm,S) in ((:Bool, :Cint, "Logical", :LglSxp),
                       (:Integer, :Cint, "Integer", :IntSxp),
                       (:Real, :Float64, "Real", :RealSxp),
                       (:Complex, :Complex128, "Complex", :CplxSxp))
@@ -156,9 +156,39 @@ for (J,Jc,rsnm,S) in ((:(Union(Bool,Cint)), :Cint, "Logical", :LglSxp),
     end
 end
 
+# Handle LglSxp seperately
+sexp(::Type{LglSxp},v::Union(Bool,Cint)) =
+    ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
+function sexp{T<:Union(Bool,Cint)}(::Type{LglSxp}, a::AbstractArray{T})
+    ra = allocArray(LglSxp, size(a)...)
+    copy!(unsafe_vec(ra),a)
+    ra
+end
+sexp(v::Bool) = sexp(LglSxp,v)
+sexp(a::AbstractArray{Bool}) = sexp(LglSxp,a)
+
+rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(T,s[1])
+rcopy(::Type{Bool},s::Ptr{LglSxp}) = convert(T,s[1]!=0)
+
+function rcopy(::Type{Array{Cint}},s::Ptr{LglSxp})
+    a = Array(Cint,size(s)...)
+    copy!(a,unsafe_vec(s))
+    a
+end
+function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
+    a = Array(Bool,size(s)...)
+    v = unsafe_vec(s)
+    for i = 1:length(a)
+        a[i] = v[i] != 0
+    end
+    a
+end
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a = BitArray(size(s)...)
-    copy!(a,unsafe_vec(s))
+    v = unsafe_vec(s)
+    for i = 1:length(a)
+        a[i] = v[i] != 0
+    end
     a
 end
 rcopy(s::Ptr{LglSxp}) = rcopy(BitArray,s)

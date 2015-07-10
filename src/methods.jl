@@ -8,8 +8,11 @@ The R NAMED property, represented by 2 bits in the info field. This can take
 values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more
 symbols. See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
-"""-> function named{S<:SEXPREC}(s::Ptr{S}) u =
-unsafe_load(convert(Ptr{SxpHead},s)) (u.info >>> 6) & 0x03 end
+"""->
+function named{S<:SEXPREC}(s::Ptr{S})
+    u = unsafe_load(convert(Ptr{SxpHead},s))
+    (u.info >>> 6) & 0x03
+end
 
 
 @doc """
