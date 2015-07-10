@@ -4,7 +4,7 @@ try/catch block, returning a SxpRec pointer.
 """->
 function reval_p{S<:SxpRec}(expr::Ptr{S}, env::Ptr{EnvSxpRec})
     err = Array(Cint,1)
-    val = ccall((:R_tryEval,libR),Ptr{SxpRecHead},(Ptr{S},Ptr{EnvSxpRec},Ptr{Cint}),expr,env,err)
+    val = ccall((:R_tryEval,libR),UnknownSxp,(Ptr{S},Ptr{EnvSxpRec},Ptr{Cint}),expr,env,err)
     err[1]==0 || error("Error occurred in R_tryEval")
     sexp(val)
 end
@@ -40,8 +40,8 @@ rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 @doc "Parse a string as an R expression, returning a SxpRec pointer."->
 function rparse_p(st::Ptr{StrSxpRec})
     ParseStatus = Array(Cint,1)
-    val = ccall((:R_ParseVector,libR),Ptr{SxpRecHead},
-                (Ptr{StrSxpRec},Cint,Ptr{Cint},Ptr{SxpRecHead}),
+    val = ccall((:R_ParseVector,libR),UnknownSxp,
+                (Ptr{StrSxpRec},Cint,Ptr{Cint},UnknownSxp),
                 st,-1,ParseStatus,rNilValue)
     ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
     sexp(val)

@@ -10,7 +10,7 @@ symbols. See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
 """->
 function named{S<:SxpRec}(s::Ptr{S})
-    u = unsafe_load(convert(Ptr{SxpRecHead},s))
+    u = unsafe_load(convert(UnknownSxp,s))
     (u.info >>> 6) & 0x03
 end
 
@@ -88,10 +88,10 @@ end
 function setindex!{S<:VectorAtomicSxpRec}(s::Ptr{S}, value, key)
     setindex!(unsafe_vec(s), value, key)
 end
-function setindex!(s::Ptr{StrSxpRec}, value::Ptr{CharSxpRec}, key::Integer)
+function setindex!(s::Ptr{StrSxpRec}, value::CharSxp, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_STRING_ELT,libR), Void,
-          (Ptr{StrSxpRec},Cptrdiff_t, Ptr{CharSxpRec}),
+          (Ptr{StrSxpRec},Cptrdiff_t, CharSxp),
           s, key-1, value)
     return value
 end
@@ -127,9 +127,9 @@ done{S<:VectorSxpRec}(s::Ptr{S},state) = state ≥ length(s)
 
 # PairListSxpRecs
 
-cdr{S<:PairListSxpRec}(s::Ptr{S}) = sexp(ccall((:CDR,libR),Ptr{SxpRecHead},(Ptr{S},),s))
-car{S<:PairListSxpRec}(s::Ptr{S}) = sexp(ccall((:CAR,libR),Ptr{SxpRecHead},(Ptr{S},),s))
-tag{S<:PairListSxpRec}(s::Ptr{S}) = sexp(ccall((:TAG,libR),Ptr{SxpRecHead},(Ptr{S},),s))
+cdr{S<:PairListSxpRec}(s::Ptr{S}) = sexp(ccall((:CDR,libR),UnknownSxp,(Ptr{S},),s))
+car{S<:PairListSxpRec}(s::Ptr{S}) = sexp(ccall((:CAR,libR),UnknownSxp,(Ptr{S},),s))
+tag{S<:PairListSxpRec}(s::Ptr{S}) = sexp(ccall((:TAG,libR),UnknownSxp,(Ptr{S},),s))
 
 setcar!{S<:PairListSxpRec,T<:SxpRec}(s::Ptr{S}, c::Ptr{T}) = (ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c); return nothing)
 settag!{S<:PairListSxpRec,T<:SxpRec}(s::Ptr{S}, c::Ptr{T}) = ccall((:SET_TAG,libR),Void,(Ptr{S},Ptr{T}),s,c)
@@ -164,7 +164,7 @@ end
 
 
 function getAttrib{S<:SxpRec}(s::Ptr{S}, sym::Ptr{SymSxpRec})
-    sexp(ccall((:Rf_getAttrib,libR),Ptr{SxpRecHead},(Ptr{S},Ptr{SymSxpRec}),s,sym))
+    sexp(ccall((:Rf_getAttrib,libR),UnknownSxp,(Ptr{S},Ptr{SymSxpRec}),s,sym))
 end
 getAttrib{S<:SxpRec}(s::Ptr{S}, sym::Symbol) = getAttrib(s,sexp(SymSxpRec,sym))
 getAttrib{S<:SxpRec}(s::Ptr{S}, sym::String) = getAttrib(s,sexp(SymSxpRec,sym))
@@ -242,7 +242,7 @@ isNA(x::Complex128) = real(x) === rNaReal && imag(x) === rNaReal
 isNA(x::Float64) = x === rNaReal
 isNA(x::Int32) = x == rNaInt
 isNA(a::AbstractArray) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
-isNA(s::Ptr{CharSxpRec}) = s === rNaString
+isNA(s::CharSxp) = s === rNaString
 
 # this doesn't allow us to check VecSxpRec s
 function isNA{S<:VectorSxpRec}(s::Ptr{S})
@@ -274,7 +274,7 @@ end
 
 @doc "extract the value of symbol s in the environment e"->
 function getindex(e::Ptr{EnvSxpRec},s::Ptr{SymSxpRec})
-    v = ccall((:Rf_findVarInFrame,libR),Ptr{SxpRecHead},(Ptr{EnvSxpRec},Ptr{SymSxpRec}),e,s)
+    v = ccall((:Rf_findVarInFrame,libR),UnknownSxp,(Ptr{EnvSxpRec},Ptr{SymSxpRec}),e,s)
     v == rUnboundValue && error("$s is not defined in the environment")
     sexp(v)
 end

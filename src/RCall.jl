@@ -62,8 +62,8 @@ function __init__()
     global const rNaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint))
     global const rNaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble))
 
-    global const rNaString = unsafe_load(cglobal((:R_NaString,libR),Ptr{CharSxpRec}))
-    global const rBlankString = unsafe_load(cglobal((:R_BlankString,libR),Ptr{CharSxpRec}))
+    global const rNaString = unsafe_load(cglobal((:R_NaString,libR),CharSxp))
+    global const rBlankString = unsafe_load(cglobal((:R_BlankString,libR),CharSxp))
     global const rBlankScalarString = unsafe_load(cglobal((:R_BlankScalarString,libR),Ptr{StrSxpRec}))
 
     for s in [:BaseSymbol,         # base
@@ -106,7 +106,7 @@ function __init__()
     global const rGlobalEnv = unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{EnvSxpRec}))
 
     global const rNilValue = unsafe_load(cglobal((:R_NilValue,libR),Ptr{NilSxpRec}))
-    global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),Ptr{SxpRecHead}))
+    global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),UnknownSxp))
     global const rMissingArg =  unsafe_load(cglobal((:R_MissingArg,libR),Ptr{SymSxpRec}))
 
 end

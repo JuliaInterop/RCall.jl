@@ -64,17 +64,17 @@ rcopy(s::Ptr{SymSxpRec}) = rcopy(Symbol,s)
 Create a `CharSxpRec` from a String.
 """->
 sexp(::Type{CharSxpRec},st::ASCIIString) =
-    ccall((:Rf_mkCharLen,libR),Ptr{CharSxpRec},(Ptr{UInt8},Cint),st,sizeof(st))
+    ccall((:Rf_mkCharLen,libR),CharSxp,(Ptr{UInt8},Cint),st,sizeof(st))
 sexp(::Type{CharSxpRec},st::UTF8String) =
-    ccall((:Rf_mkCharLenCE,libR),Ptr{CharSxpRec},(Ptr{UInt8},Cint,Cint),st,sizeof(st),1)
+    ccall((:Rf_mkCharLenCE,libR),CharSxp,(Ptr{UInt8},Cint,Cint),st,sizeof(st),1)
 
 sexp(::Type{CharSxpRec},st::String) = sexp(CharSxpRec,bytestring(st))
 sexp(::Type{CharSxpRec},sym::Symbol) = sexp(CharSxpRec,string(sym))
 
 
-rcopy{T<:String}(::Type{T},s::Ptr{CharSxpRec}) = convert(T, bytestring(unsafe_vec(s)))
-rcopy(::Type{Symbol},s::Ptr{CharSxpRec}) = symbol(rcopy(String,s))
-rcopy(s::Ptr{CharSxpRec}) = rcopy(String,s)
+rcopy{T<:String}(::Type{T},s::CharSxp) = convert(T, bytestring(unsafe_vec(s)))
+rcopy(::Type{Symbol},s::CharSxp) = symbol(rcopy(String,s))
+rcopy(s::CharSxp) = rcopy(String,s)
 
 
 
@@ -94,11 +94,11 @@ function encoding(s::CharSxpRec)
         error("Unknown string type")
     end
 end
-encoding(s::Ptr{CharSxpRec}) = encoding(unsafe_load(s))
+encoding(s::CharSxp) = encoding(unsafe_load(s))
 
 @doc "Create a `StrSxpRec` from a `String`"->
-sexp(::Type{StrSxpRec}, s::Ptr{CharSxpRec}) =
-    ccall((:Rf_ScalarString,libR),Ptr{StrSxpRec},(Ptr{CharSxpRec},),s)
+sexp(::Type{StrSxpRec}, s::CharSxp) =
+    ccall((:Rf_ScalarString,libR),Ptr{StrSxpRec},(CharSxp,),s)
 
 sexp(::Type{StrSxpRec},st::String) = sexp(StrSxpRec,sexp(CharSxpRec,st))
 sexp(st::String) = sexp(StrSxpRec,st)

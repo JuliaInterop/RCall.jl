@@ -14,6 +14,7 @@ immutable SxpRecHead <: SxpRec # SEXPREC_HEADER
     gc_next::Ptr{SxpRecHead}
     gc_prev::Ptr{SxpRecHead}
 end
+typealias UnknownSxp Ptr{SxpRecHead}
 
 @doc "R NULL value"->
 immutable NilSxpRec <: SxpRec   # type tag 0
@@ -24,45 +25,45 @@ typealias NilSxp Ptr{NilSxpRec}
 @doc "R pairs (cons) list cell"->
 immutable ListSxpRec <: SxpRec  # type tag 2
     head::SxpRecHead
-    car::Ptr{SxpRecHead}
-    cdr::Ptr{SxpRecHead}
-    tag::Ptr{SxpRecHead}
+    car::UnknownSxp
+    cdr::UnknownSxp
+    tag::UnknownSxp
 end
 typealias ListSxp Ptr{ListSxpRec}
 
 @doc "R function closure"->
 immutable ClosSxpRec <: SxpRec  # type tag 3
     head::SxpRecHead
-    formals::Ptr{ListSxpRec}
-    body::Ptr{SxpRecHead}
-    env::Ptr{SxpRecHead}
+    formals::ListSxp
+    body::UnknownSxp
+    env::UnknownSxp
 end
 typealias ClosSxp Ptr{ClosSxpRec}
 
 @doc "R environment"->
 immutable EnvSxpRec <: SxpRec  # type tag 4
     head::SxpRecHead
-    frame::Ptr{SxpRecHead}
-    enclos::Ptr{SxpRecHead}
-    hashtab::Ptr{SxpRecHead}
+    frame::UnknownSxp
+    enclos::UnknownSxp
+    hashtab::UnknownSxp
 end
 typealias EnvSxp Ptr{EnvSxpRec}
 
 @doc "R promise"->
 immutable PromSxpRec <: SxpRec  # type tag 5
     head::SxpRecHead
-    value::Ptr{SxpRecHead}
-    expr::Ptr{SxpRecHead}
-    env::Ptr{SxpRecHead}
+    value::UnknownSxp
+    expr::UnknownSxp
+    env::UnknownSxp
 end
 typealias PromSxp Ptr{PromSxpRec}
 
 @doc "R function call"->
 immutable LangSxpRec <: SxpRec  # type tag 6
     head::SxpRecHead
-    car::Ptr{SxpRecHead}
-    cdr::Ptr{SxpRecHead}
-    tag::Ptr{SxpRecHead}
+    car::UnknownSxp
+    cdr::UnknownSxp
+    tag::UnknownSxp
 end
 typealias LangSxp Ptr{LangSxpRec}
 
@@ -89,9 +90,9 @@ typealias CharSxp Ptr{CharSxpRec}
 @doc "R symbol"->
 immutable SymSxpRec <: SxpRec   # type tag 1
     head::SxpRecHead
-    name::Ptr{CharSxpRec}
-    value::Ptr{SxpRecHead}
-    internal::Ptr{SxpRecHead}
+    name::CharSxp
+    value::UnknownSxp
+    internal::UnknownSxp
 end
 typealias SymSxp Ptr{SymSxpRec}
 
@@ -174,7 +175,7 @@ immutable ExtPtrSxpRec <: SxpRec  # type tag 22
     head::SxpRecHead
     ptr::Ptr{Void}
     prot::Ptr{Void}
-    tag::Ptr{SxpRecHead}
+    tag::UnknownSxp
 end
 typealias ExtPtrSxp Ptr{ExtPtrSxpRec}
 
@@ -233,8 +234,8 @@ eltype(::Type{CharSxpRec}) = UInt8
 eltype(::Type{RawSxpRec}) = UInt8
 
 eltype(::Type{StrSxpRec}) = Ptr{CharSxpRec}
-eltype(::Type{VecSxpRec}) = Ptr{SxpRecHead}
-eltype(::Type{ExprSxpRec}) = Ptr{SxpRecHead}
+eltype(::Type{VecSxpRec}) = UnknownSxp
+eltype(::Type{ExprSxpRec}) = UnknownSxp
 
 
 
@@ -313,9 +314,9 @@ end
 
 
 @doc """
-Convert a `Ptr{SxpRecHead}` to an approptiate `Sxp`.
+Convert a `UnknownSxp` to an approptiate `Sxp`.
 """->
-function sexp(p::Ptr{SxpRecHead})
+function sexp(p::UnknownSxp)
     typ = sexpnum(p)
     0 ≤ typ ≤ 10 || 13 ≤ typ ≤ 25 || error("Unknown SEXPTYPE $typ")
     styp = typs[typ+1]
