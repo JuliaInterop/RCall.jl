@@ -1,15 +1,15 @@
 @doc """
 Evaluate an R symbol or language object (i.e. a function call) in an R
-try/catch block, returning a SEXPREC pointer.
+try/catch block, returning a SxpRec pointer.
 """->
-function reval_p{S<:SEXPREC}(expr::Ptr{S}, env::Ptr{EnvSxp})
+function reval_p{S<:SxpRec}(expr::Ptr{S}, env::Ptr{EnvSxpRec})
     err = Array(Cint,1)
-    val = ccall((:R_tryEval,libR),Ptr{SxpHead},(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
+    val = ccall((:R_tryEval,libR),Ptr{SxpRecHead},(Ptr{S},Ptr{EnvSxpRec},Ptr{Cint}),expr,env,err)
     err[1]==0 || error("Error occurred in R_tryEval")
     sexp(val)
 end
 
-function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
+function reval_p(expr::Ptr{ExprSxpRec}, env::Ptr{EnvSxpRec})
     local val           # the value of the last expression is returned
     for e in expr
         val = reval_p(e,env)
@@ -17,7 +17,7 @@ function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     val
 end
 
-reval_p{S<:SEXPREC}(s::Ptr{S}) = reval_p(s,rGlobalEnv)
+reval_p{S<:SxpRec}(s::Ptr{S}) = reval_p(s,rGlobalEnv)
 
 @doc """
 Evaluate an R symbol or language object (i.e. a function call) in an R
@@ -37,11 +37,11 @@ rcopy{T}(::Type{T}, str::String) = rcopy(T, reval_p(rparse_p(str)))
 rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
-@doc "Parse a string as an R expression, returning a SEXPREC pointer."->
-function rparse_p(st::Ptr{StrSxp})
+@doc "Parse a string as an R expression, returning a SxpRec pointer."->
+function rparse_p(st::Ptr{StrSxpRec})
     ParseStatus = Array(Cint,1)
-    val = ccall((:R_ParseVector,libR),Ptr{SxpHead},
-                (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{SxpHead}),
+    val = ccall((:R_ParseVector,libR),Ptr{SxpRecHead},
+                (Ptr{StrSxpRec},Cint,Ptr{Cint},Ptr{SxpRecHead}),
                 st,-1,ParseStatus,rNilValue)
     ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
     sexp(val)
@@ -52,11 +52,11 @@ rparse_p(st::String) = rparse_p(sexp(st))
 rparse(st::String) = RObject(rparse_p(st))
 
 
-@doc "Print the value of an SEXPREC using R's printing mechanism"->
-function rprint{S<:SEXPREC}(s::Ptr{S})
+@doc "Print the value of an SxpRec using R's printing mechanism"->
+function rprint{S<:SxpRec}(s::Ptr{S})
     ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
 end
-function rprint{S<:SEXPREC}(io::IO, s::Ptr{S})
+function rprint{S<:SxpRec}(io::IO, s::Ptr{S})
     oldout = STDOUT
     (rd,wr) = redirect_stdout()
     start_reading(rd)

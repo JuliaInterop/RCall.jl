@@ -4,10 +4,10 @@ using Base.Test,DataArrays,DataFrames
 
 lsv = reval("ls()")
 @test length(lsv) == 0
-@test isa(lsv, RObject{StrSxp})
+@test isa(lsv, RObject{StrSxpRec})
 
 lsd = reval("ls(\"package:datasets\")")
-@test isa(lsv, RObject{StrSxp})
+@test isa(lsv, RObject{StrSxpRec})
 @test length(lsd) > 50
 @test rcopy(lsd[2]) == "airmiles"
 
@@ -23,12 +23,12 @@ dist = attenu[:dist]
 @test isa(dist,DataArray{Float64})
 
 psexp = RObject("p")
-@test isa(psexp,RObject{StrSxp})
+@test isa(psexp,RObject{StrSxpRec})
 @test length(psexp) == 1
 @test rcopy(psexp[1]) == "p"
 
 pqsexp = RObject(["p","q"])
-@test isa(pqsexp,RObject{StrSxp})
+@test isa(pqsexp,RObject{StrSxpRec})
 @test length(pqsexp) == 2
 @test rcopy(pqsexp[1]) == "p"
 
