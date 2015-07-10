@@ -33,6 +33,8 @@ include("functions.jl")
 include("library.jl")
 include("eventloop.jl")
 
+include("callback.jl")
+
 # only if using IJulia
 # TODO: move to __init__
 isdefined(Main, :IJulia) && Main.IJulia.inited && include("IJulia.jl")
@@ -108,6 +110,15 @@ function __init__()
     global const rNilValue = unsafe_load(cglobal((:R_NilValue,libR),Ptr{NilSxpRec}))
     global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),UnknownSxp))
     global const rMissingArg =  unsafe_load(cglobal((:R_MissingArg,libR),Ptr{SymSxpRec}))
+
+
+
+    # set up function callbacks
+    global const pJuliaCallback = cfunction(callJuliaExtPtr,UnknownSxp,(ListSxp,))
+    global const rJuliaCallback = RObject(makeNativeSymbol(pJuliaCallback))
+    global const pJuliaDecref = cfunction(decrefExtPtr,Void,(ExtPtrSxp,))
+
+    
 
 end
 

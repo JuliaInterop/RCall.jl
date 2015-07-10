@@ -59,9 +59,9 @@ end
 function rprint{S<:SxpRec}(io::IO, s::Ptr{S})
     oldout = STDOUT
     (rd,wr) = redirect_stdout()
-    start_reading(rd)
+    #start_reading(rd)
     rprint(s)
-    flush_cstdio()
+    Libc.flush_cstdio()
     redirect_stdout(oldout)
     close(wr)
     print(io, rstrip(readall(rd)))

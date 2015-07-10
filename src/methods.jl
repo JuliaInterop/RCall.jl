@@ -83,7 +83,7 @@ function getindex{S<:VectorSxpRec}(s::Ptr{S}, label::String)
     throw(BoundsError())
     unprotect(1)
 end
-
+getindex{S<:VectorSxpRec}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
 
 function setindex!{S<:VectorAtomicSxpRec}(s::Ptr{S}, value, key)
     setindex!(unsafe_vec(s), value, key)
@@ -108,11 +108,11 @@ setindex!{S<:Union(VecSxpRec,ExprSxpRec)}(s::Ptr{S}, value, key::Integer) =
     setindex!(s,sexp(value),key)
 
 
-getindex{S<:VectorAtomicSxpRec}(r::RObject{S}, I::Real) = getindex(r.p, I)
 getindex{S<:VectorAtomicSxpRec}(r::RObject{S}, I) = getindex(r.p, I)
+getindex{S<:VectorAtomicSxpRec}(r::RObject{S}, I::AbstractArray) = getindex(r.p, I)
 
-getindex(r::RObject, I::Real) = RObject(getindex(r.p,I))
-getindex(r::RObject, I) = map(RObject,getindex(r.p,I))
+getindex(r::RObject, I) = RObject(getindex(r.p,I))
+getindex(r::RObject, I::AbstractArray) = map(RObject,getindex(r.p,I))
 
 setindex!(r::RObject, value::RObject, key) = setindex!(r.p,value.p,key)
 
