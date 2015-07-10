@@ -32,12 +32,8 @@ include("iface.jl")
 include("functions.jl")
 include("library.jl")
 include("eventloop.jl")
-
 include("callback.jl")
-
-# only if using IJulia
-# TODO: move to __init__
-isdefined(Main, :IJulia) && Main.IJulia.inited && include("IJulia.jl")
+include("IJulia.jl")
 
 
 type Rinstance                    # attach a finalizer to clean up
@@ -118,8 +114,15 @@ function __init__()
     global const rJuliaCallback = RObject(makeNativeSymbol(pJuliaCallback))
     global const pJuliaDecref = cfunction(decrefExtPtr,Void,(ExtPtrSxp,))
 
-    
 
+    # IJulia hooks
+    if isdefined(Main, :IJulia) && Main.IJulia.inited
+        Main.IJulia.push_preexecute_hook(new_rplot)
+        Main.IJulia.push_postexecute_hook(disp_rplot)
+        Main.IJulia.push_posterror_hook(clean_rplot)
+
+        global InlineDisplay = Main.IPythonDisplay.InlineDisplay
+    end
 end
 
 

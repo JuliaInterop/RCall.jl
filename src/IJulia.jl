@@ -1,10 +1,10 @@
 # IJulia hooks for displaying plots with RCall
-import IPythonDisplay: InlineDisplay
 
 export rplot_set
 
 const rplot_devno = Int32[1]
-const rplot_file = tempname()
+const rplot_file_base = joinpath(tempdir(),"IJulia_RCall")
+const rplot_file_arg = rplot_file_base*"%03d"
 
 const rplot_opts = Any[MIME"image/png"(),(480,400),()]
 
@@ -35,7 +35,7 @@ Called before cell evaluation.
 Opens new graphics device.
 """->
 function new_rplot()
-    rcall(rplot_device(rplot_opts[1]),rplot_file,rplot_opts[2]...;rplot_opts[3]...)
+    rcall(rplot_device(rplot_opts[1]),rplot_file_arg,rplot_opts[2]...;rplot_opts[3]...)
     rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
 end
 
@@ -54,16 +54,23 @@ end
 
 @doc """
 Called after cell evaluation.
-Closes graphics device and displays file in notebook.
+Closes graphics device and displays files in notebook.
 """->
 function disp_rplot()
     d = rplot_devno[1]
     if d != 1
         rcall(symbol("dev.off"),d)
         rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
-        if isfile(rplot_file)
-            displayfile(rplot_opts[1],rplot_file)
-            rm(rplot_file)
+        i = 1
+        while true
+            rplot_file = @sprintf "%s%03d" rplot_file_base i           
+            if isfile(rplot_file)
+                displayfile(rplot_opts[1],rplot_file)
+                rm(rplot_file)
+            else
+                break
+            end
+            i += 1
         end
     end
 end
@@ -72,13 +79,18 @@ end
 function clean_rplot()
     d = rplot_devno[1]
     if d != 1
-        rprint("dev.list()")
         rcall(symbol("dev.off"),d)
         rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
     end
-    isfile(rplot_file) && rm(rplot_file)
+    i = 1
+    while true
+        rplot_file = @sprintf "%s%03d" rplot_file_base i           
+        if isfile(rplot_file)
+            rm(rplot_file)
+        else
+            break
+        end
+        i += 1
+    end
 end
 
-Main.IJulia.push_preexecute_hook(new_rplot)
-Main.IJulia.push_postexecute_hook(disp_rplot)
-Main.IJulia.push_posterror_hook(clean_rplot)
