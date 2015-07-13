@@ -32,10 +32,7 @@ rGlobalEnv[:y] = RObject([4,5,6])
 @rimport MASS as mass
 @test round(rcopy(rcall(mass.ginv, RObject([1 2; 0 4]))),5) == [1 -0.5; 0 0.25]
 
-io = IOBuffer()
-rprint(io, RObject([1,2,3]))
-seek(io,0)
-@test readall(io) == "[1] 1 2 3"
+@test sprint(io -> rprint(io,RObject([1,2,3]))) == "[1] 1 2 3\n"
 
 # callbacks
 function testfn(x,y;a=3,b=4)

@@ -6,6 +6,10 @@ function reval_p{S<:SxpRec}(expr::Ptr{S}, env::Ptr{EnvSxpRec})
     err = Array(Cint,1)
     val = ccall((:R_tryEval,libR),UnknownSxp,(Ptr{S},Ptr{EnvSxpRec},Ptr{Cint}),expr,env,err)
     err[1]==0 || error("Error occurred in R_tryEval")
+    if unsafe_load(cglobal((:R_CollectWarnings,RCall.libR),Cint)) > 0        
+        ccall((:Rf_PrintWarnings,libR),Void,())
+        warn("RCall.jl ",takebuf_string(errorBuffer))
+    end
     sexp(val)
 end
 
@@ -53,28 +57,19 @@ rparse(st::String) = RObject(rparse_p(st))
 
 
 @doc "Print the value of an SxpRec using R's printing mechanism"->
-function rprint{S<:SxpRec}(s::Ptr{S})
-    ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
-end
 function rprint{S<:SxpRec}(io::IO, s::Ptr{S})
-    oldout = STDOUT
-    (rd,wr) = redirect_stdout()
-    #start_reading(rd)
-    rprint(s)
-    Libc.flush_cstdio()
-    redirect_stdout(oldout)
-    close(wr)
-    print(io, rstrip(readall(rd)))
-    close(rd)
+    ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
+    write(io,takebuf_string(printBuffer))
     nothing
 end
-
-rprint(r::RObject) = rprint(r.p)
 rprint(io::IO,r::RObject) = rprint(io,r.p)
+
+rprint(s) = rprint(STDOUT,s)
+
 
 
 @doc """
 Parse, evaluate and print the result of a string as an R expression.
 """->
-rprint(str::ByteString) = rprint(reval(str))
-rprint(sym::Symbol) = rprint(reval(sym))
+rprint(io::IO,str::ByteString) = rprint(io,reval(str))
+rprint(io::IO,sym::Symbol) = rprint(io,reval(sym))
