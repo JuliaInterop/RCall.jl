@@ -27,7 +27,7 @@ end
 include("types.jl")
 include("methods.jl")
 include("conversions.jl")
-include("dataframes.jl")
+include("dframes.jl")
 include("iface.jl")
 include("functions.jl")
 include("library.jl")
