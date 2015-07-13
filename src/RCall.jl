@@ -123,7 +123,12 @@ function __init__()
         rs = RStart()
         ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
         rs.rhome = ccall((:get_R_HOME,libR),Ptr{Cchar},())
-        rs.home = ccall((:get_RUser,libR),Ptr{Cchar},())
+        rs.home = ccall((:getRUser,libR),Ptr{Cchar},())
+        rs.ReadConsole = cglobal((:R_ReadConsole,libR),Void)
+        rs.CallBack = cglobal((:R_CallBack,libR),Void)
+        rs.ShowMessage = cglobal((:R_ShowMessage,libR),Void)
+        rs.YesNoCancel = cglobal((:R_YesNoCancel,libR),Void)
+        rs.Busy = cglobal((:R_Busy,libR),Void)
         rs.WriteConsoleEx = pWriteConsoleEx
         ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)        
     else
