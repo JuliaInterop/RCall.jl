@@ -10,6 +10,17 @@ function writeConsoleEx(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
+eventCallBack() = nothing
+
+function askYesNoCancel(prompt::Ptr{Cchar})
+	println(bytestring(prompt))
+	query = readline(STDIN)
+	c = uppercase(query[1])
+	r::Cint
+	r = (c=='Y' ? 1 : c=='N' ? -1 : 0)
+    return r
+end
+
 # if OS_NAME == :Windows
     type RStart # mirror structRstart in R_ext/RStartup.h
         R_Quiet::Cint
@@ -44,5 +55,5 @@ end
                       C_NULL,C_NULL,
                       C_NULL,C_NULL,C_NULL,C_NULL,
                       C_NULL,C_NULL,2,C_NULL)
-                      
+
 # end

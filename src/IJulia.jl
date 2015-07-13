@@ -63,7 +63,7 @@ function disp_rplot()
         rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
         i = 1
         while true
-            rplot_file = @sprintf "%s%03d" rplot_file_base i           
+            rplot_file = @sprintf "%s%03d" rplot_file_base i
             if isfile(rplot_file)
                 displayfile(rplot_opts[1],rplot_file)
                 rm(rplot_file)
@@ -84,7 +84,7 @@ function clean_rplot()
     end
     i = 1
     while true
-        rplot_file = @sprintf "%s%03d" rplot_file_base i           
+        rplot_file = @sprintf "%s%03d" rplot_file_base i
         if isfile(rplot_file)
             rm(rplot_file)
         else

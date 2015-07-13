@@ -274,7 +274,7 @@ Release object that has been gc protected by `preserve`.
 release{S<:SxpRec}(p::Ptr{S}) = ccall((:R_ReleaseObject,libR),Void,(Ptr{S},),p)
 release{S<:SxpRec}(r::RObject{S}) = release(r.p)
 
-@doc """ 
+@doc """
 
 Stack-based protection of garbage collection of R objects. Objects are
 released via `unprotect`. Returns the same pointer, allowing inline use.

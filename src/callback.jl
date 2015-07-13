@@ -54,7 +54,7 @@ function callJuliaExtPtr(p::ListSxp)
 
         # call function
         y = f(args...;kwargs...)
-        
+
         # return appropriate sexp
         return p = convert(UnknownSxp,sexp(y))::UnknownSxp
     catch e
@@ -120,8 +120,8 @@ function sexp(::Type{ClosSxpRec}, f)
                            rJuliaCallback,
                            sexp(ExtPtrSxpRec,f),
                            rDotsSymbol))
-    
-    lang = rlang_p(:function, args, body)    
+
+    lang = rlang_p(:function, args, body)
     clos = reval_p(lang)
     unprotect(2)
     clos
