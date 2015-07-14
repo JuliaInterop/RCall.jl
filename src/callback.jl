@@ -6,7 +6,7 @@ use R_registerRoutines, but this is _much_ easier for just 1 function.
 """ ->
 function makeNativeSymbol(fptr::Ptr{Void})
     # Rdynpriv.h
-    rexfn = ccall((:R_MakeExternalPtrFn,libR), ExtPtrSxp,
+    rexfn = ccall((:R_MakeExternalPtrFn,libR), ExtPtrSxpPtr,
                      (Ptr{Void}, Ptr{Void}, Ptr{Void}),
                      fptr, sexp(symbol("native symbol")), rNilValue)
     setAttrib!(rexfn, rClassSymbol, sexp("NativeSymbol"))
@@ -14,27 +14,27 @@ function makeNativeSymbol(fptr::Ptr{Void})
 end
 
 
-@doc "Create an ExtPtrSxp object"->
+@doc "Create an ExtPtrSxpPtr object"->
 makeExternalPtr(ptr::Ptr{Void}, tag=rNilValue, prot=rNilValue) =
-    ccall((:R_MakeExternalPtr,libR), ExtPtrSxp,
-          (Ptr{Void}, UnknownSxp, UnknownSxp),
+    ccall((:R_MakeExternalPtr,libR), ExtPtrSxpPtr,
+          (Ptr{Void}, UnknownSxpPtr, UnknownSxpPtr),
           ptr, tag, prot)
 
 
 @doc """
 The function called by R .External for Julia callbacks.
 
-It receives a `ListSxp` containing
- - a pointer to the function itself (`ExtPtrSxp`)
- - a pointer to the Julia function (`ExtPtrSxp`)
- - any arguments (as `Sxp`)
+It receives a `ListSxpPtr` containing
+ - a pointer to the function itself (`ExtPtrSxpPtr`)
+ - a pointer to the Julia function (`ExtPtrSxpPtr`)
+ - any arguments (as `SxpPtr`)
 """->
-function callJuliaExtPtr(p::ListSxp)
+function callJuliaExtPtr(p::ListSxpPtr)
     try
         l = cdr(p) # skip callback pointer
 
         # julia function pointer
-        f_sxp = car(l)::ExtPtrSxp
+        f_sxp = car(l)::ExtPtrSxpPtr
         f_sxprec = unsafe_load(f_sxp)
         f = unsafe_pointer_to_objref(f_sxprec.ptr)
         l = cdr(l)
@@ -56,24 +56,24 @@ function callJuliaExtPtr(p::ListSxp)
         y = f(args...;kwargs...)
 
         # return appropriate sexp
-        return p = convert(UnknownSxp,sexp(y))::UnknownSxp
+        return p = convert(UnknownSxpPtr,sexp(y))::UnknownSxpPtr
     catch e
         ccall((:Rf_error,libR),Ptr{Void},(Ptr{Cchar},),string(e))
-        return convert(UnknownSxp,rNilValue)::UnknownSxp
+        return convert(UnknownSxpPtr,rNilValue)::UnknownSxpPtr
     end
 end
 
 
 @doc """
-Julia types (typically functions) which are wrapped in `ExtPtrSxp` are
+Julia types (typically functions) which are wrapped in `ExtPtrSxpPtr` are
 stored here to prevent garbage collection by Julia.
 """->
-const jtypExtPtrs = Dict{ExtPtrSxp, Any}()
+const jtypExtPtrs = Dict{ExtPtrSxpPtr, Any}()
 
 @doc """
 Called by the R finalizer.
 """->
-function decrefExtPtr(p::ExtPtrSxp)
+function decrefExtPtr(p::ExtPtrSxpPtr)
     delete(jtypExtPtrs, p)
     return nothing
 end
@@ -82,19 +82,19 @@ end
 @doc """
 Register finalizer to be called by the R GC.
 """->
-function registerFinalizer(s::ExtPtrSxp)
+function registerFinalizer(s::ExtPtrSxpPtr)
     ccall((:R_RegisterCFinalizerEx,libR),Void,
-          (Ptr{ExtPtrSxpRec}, Ptr{Void}, Cint),
+          (Ptr{ExtPtrSxp}, Ptr{Void}, Cint),
           s,pJuliaDecref,0)
 end
 
 @doc """
-Wrap a Julia object an a R `ExtPtrSxp`.
+Wrap a Julia object an a R `ExtPtrSxpPtr`.
 
 We store the pointer and the object in a const Dict to prevent it being
 removed by the Julia GC.
 """->
-function sexp(::Type{ExtPtrSxpRec}, j)
+function sexp(::Type{ExtPtrSxp}, j)
     jptr = pointer_from_objref(j)
     s = makeExternalPtr(jptr)
     jtypExtPtrs[s] = j
@@ -103,22 +103,22 @@ function sexp(::Type{ExtPtrSxpRec}, j)
 end
 
 @doc """
-Wrap a callable Julia object `f` an a R `ClosSxp`.
+Wrap a callable Julia object `f` an a R `ClosSxpPtr`.
 
 Constructs the following R code
 
     function(...) .External(rJuliaCallback, fExPtr, ...)
 
 """->
-function sexp(::Type{ClosSxpRec}, f)
-    # TODO: is there a way to construct a ClosSxpRec directly?
+function sexp(::Type{ClosSxp}, f)
+    # TODO: is there a way to construct a ClosSxp directly?
     args = protect(allocList(1))
     setcar!(args, rMissingArg)
     settag!(args, rDotsSymbol)
 
     body = protect(rlang_p(symbol(".External"),
                            rJuliaCallback,
-                           sexp(ExtPtrSxpRec,f),
+                           sexp(ExtPtrSxp,f),
                            rDotsSymbol))
 
     lang = rlang_p(:function, args, body)
@@ -127,4 +127,4 @@ function sexp(::Type{ClosSxpRec}, f)
     clos
 end
 
-sexp(f::Function) = sexp(ClosSxpRec, f)
+sexp(f::Function) = sexp(ClosSxp, f)

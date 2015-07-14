@@ -1,241 +1,241 @@
 @doc """
-R symbolic expression (`Sxp`): these are represented by a pointer to a
-symbolic expression record (`SxpRec`).
+R symbolic expression (`SxpPtr`): these are represented by a pointer to a
+symbolic expression record (`Sxp`).
 """->
-abstract SxpRec # SEXPREC
-typealias Sxp{S<:SxpRec} Ptr{S} # SEXP
+abstract Sxp # SEXPREC
+typealias SxpPtr{S<:Sxp} Ptr{S} # SEXP
 
-typealias SxpInfo UInt32 # sxpinfo_struct
+typealias SxpPtrInfo UInt32 # sxpinfo_struct
 
-@doc "R SxpRec header: a pointer to this is used for unknown types."->
-immutable SxpRecHead <: SxpRec # SEXPREC_HEADER
-    info::SxpInfo
-    attrib::Ptr{SxpRecHead}
-    gc_next::Ptr{SxpRecHead}
-    gc_prev::Ptr{SxpRecHead}
+@doc "R Sxp header: a pointer to this is used for unknown types."->
+immutable SxpHead <: Sxp # SEXPREC_HEADER
+    info::SxpPtrInfo
+    attrib::Ptr{SxpHead}
+    gc_next::Ptr{SxpHead}
+    gc_prev::Ptr{SxpHead}
 end
-typealias UnknownSxp Ptr{SxpRecHead}
+typealias UnknownSxpPtr Ptr{SxpHead}
 
 @doc "R NULL value"->
-immutable NilSxpRec <: SxpRec   # type tag 0
-    head::SxpRecHead
+immutable NilSxp <: Sxp   # type tag 0
+    head::SxpHead
 end
-typealias NilSxp Ptr{NilSxpRec}
+typealias NilSxpPtr Ptr{NilSxp}
 
 @doc "R pairs (cons) list cell"->
-immutable ListSxpRec <: SxpRec  # type tag 2
-    head::SxpRecHead
-    car::UnknownSxp
-    cdr::UnknownSxp
-    tag::UnknownSxp
+immutable ListSxp <: Sxp  # type tag 2
+    head::SxpHead
+    car::UnknownSxpPtr
+    cdr::UnknownSxpPtr
+    tag::UnknownSxpPtr
 end
-typealias ListSxp Ptr{ListSxpRec}
+typealias ListSxpPtr Ptr{ListSxp}
 
 @doc "R function closure"->
-immutable ClosSxpRec <: SxpRec  # type tag 3
-    head::SxpRecHead
-    formals::ListSxp
-    body::UnknownSxp
-    env::UnknownSxp
+immutable ClosSxp <: Sxp  # type tag 3
+    head::SxpHead
+    formals::ListSxpPtr
+    body::UnknownSxpPtr
+    env::UnknownSxpPtr
 end
-typealias ClosSxp Ptr{ClosSxpRec}
+typealias ClosSxpPtr Ptr{ClosSxp}
 
 @doc "R environment"->
-immutable EnvSxpRec <: SxpRec  # type tag 4
-    head::SxpRecHead
-    frame::UnknownSxp
-    enclos::UnknownSxp
-    hashtab::UnknownSxp
+immutable EnvSxp <: Sxp  # type tag 4
+    head::SxpHead
+    frame::UnknownSxpPtr
+    enclos::UnknownSxpPtr
+    hashtab::UnknownSxpPtr
 end
-typealias EnvSxp Ptr{EnvSxpRec}
+typealias EnvSxpPtr Ptr{EnvSxp}
 
 @doc "R promise"->
-immutable PromSxpRec <: SxpRec  # type tag 5
-    head::SxpRecHead
-    value::UnknownSxp
-    expr::UnknownSxp
-    env::UnknownSxp
+immutable PromSxp <: Sxp  # type tag 5
+    head::SxpHead
+    value::UnknownSxpPtr
+    expr::UnknownSxpPtr
+    env::UnknownSxpPtr
 end
-typealias PromSxp Ptr{PromSxpRec}
+typealias PromSxpPtr Ptr{PromSxp}
 
 @doc "R function call"->
-immutable LangSxpRec <: SxpRec  # type tag 6
-    head::SxpRecHead
-    car::UnknownSxp
-    cdr::UnknownSxp
-    tag::UnknownSxp
+immutable LangSxp <: Sxp  # type tag 6
+    head::SxpHead
+    car::UnknownSxpPtr
+    cdr::UnknownSxpPtr
+    tag::UnknownSxpPtr
 end
-typealias LangSxp Ptr{LangSxpRec}
+typealias LangSxpPtr Ptr{LangSxp}
 
 @doc "R special function"->
-immutable SpecialSxpRec <: SxpRec  # type tag 7
-    head::SxpRecHead
+immutable SpecialSxp <: Sxp  # type tag 7
+    head::SxpHead
 end
-typealias SpecialSxp Ptr{SpecialSxpRec}
+typealias SpecialSxpPtr Ptr{SpecialSxp}
 
 @doc "R built-in function"->
-immutable BuiltinSxpRec <: SxpRec  # type tag 8
-    head::SxpRecHead
+immutable BuiltinSxp <: Sxp  # type tag 8
+    head::SxpHead
 end
-typealias BuiltinSxp Ptr{BuiltinSxpRec}
+typealias BuiltinSxpPtr Ptr{BuiltinSxp}
 
 @doc "R character string"->
-immutable CharSxpRec <: SxpRec     # type tag 9
-    head::SxpRecHead
+immutable CharSxp <: Sxp     # type tag 9
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias CharSxp Ptr{CharSxpRec}
+typealias CharSxpPtr Ptr{CharSxp}
 
 @doc "R symbol"->
-immutable SymSxpRec <: SxpRec   # type tag 1
-    head::SxpRecHead
-    name::CharSxp
-    value::UnknownSxp
-    internal::UnknownSxp
+immutable SymSxp <: Sxp   # type tag 1
+    head::SxpHead
+    name::CharSxpPtr
+    value::UnknownSxpPtr
+    internal::UnknownSxpPtr
 end
-typealias SymSxp Ptr{SymSxpRec}
+typealias SymSxpPtr Ptr{SymSxp}
 
 @doc "R logical vector"->
-immutable LglSxpRec <: SxpRec     # type tag 10
-    head::SxpRecHead
+immutable LglSxp <: Sxp     # type tag 10
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias LglSxp Ptr{LglSxpRec}
+typealias LglSxpPtr Ptr{LglSxp}
 
 @doc "R integer vector"->
-immutable IntSxpRec <: SxpRec     # type tag 13
-    head::SxpRecHead
+immutable IntSxp <: Sxp     # type tag 13
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias IntSxp Ptr{IntSxpRec}
+typealias IntSxpPtr Ptr{IntSxp}
 
 @doc "R real vector"->
-immutable RealSxpRec <: SxpRec    # type tag 14
-    head::SxpRecHead
+immutable RealSxp <: Sxp    # type tag 14
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias RealSxp Ptr{RealSxpRec}
+typealias RealSxpPtr Ptr{RealSxp}
 
 @doc "R complex vector"->
-immutable CplxSxpRec <: SxpRec    # type tag 15
-    head::SxpRecHead
+immutable CplxSxp <: Sxp    # type tag 15
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias CplxSxp Ptr{CplxSxpRec}
+typealias CplxSxpPtr Ptr{CplxSxp}
 
 @doc "R vector of character strings"->
-immutable StrSxpRec <: SxpRec     # type tag 16
-    head::SxpRecHead
+immutable StrSxp <: Sxp     # type tag 16
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias StrSxp Ptr{StrSxpRec}
+typealias StrSxpPtr Ptr{StrSxp}
 
 @doc "R dot-dot-dot object"->
-immutable DotSxpRec <: SxpRec     # type tag 17
-    head::SxpRecHead
+immutable DotSxp <: Sxp     # type tag 17
+    head::SxpHead
 end
-typealias DotSxp Ptr{DotSxpRec}
+typealias DotSxpPtr Ptr{DotSxp}
 
 @doc "R \"any\" object"->
-immutable AnySxpRec <: SxpRec     # type tag 18
-    head::SxpRecHead
+immutable AnySxp <: Sxp     # type tag 18
+    head::SxpHead
 end
-typealias AnySxp Ptr{AnySxpRec}
+typealias AnySxpPtr Ptr{AnySxp}
 
 @doc "R list (i.e. Array{Any,1})"->
-immutable VecSxpRec <: SxpRec     # type tag 19
-    head::SxpRecHead
+immutable VecSxp <: Sxp     # type tag 19
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias VecSxp Ptr{VecSxpRec}
+typealias VecSxpPtr Ptr{VecSxp}
 
 @doc "R expression vector"->
-immutable ExprSxpRec <: SxpRec    # type tag 20
-    head::SxpRecHead
+immutable ExprSxp <: Sxp    # type tag 20
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias ExprSxp Ptr{ExprSxpRec}
+typealias ExprSxpPtr Ptr{ExprSxp}
 
 @doc "R byte code"->
-immutable BcodeSxpRec <: SxpRec   # type tag 21
-    head::SxpRecHead
+immutable BcodeSxp <: Sxp   # type tag 21
+    head::SxpHead
 end
-typealias BcodeSxp Ptr{BcodeSxpRec}
+typealias BcodeSxpPtr Ptr{BcodeSxp}
 
 @doc "R external pointer"->
-immutable ExtPtrSxpRec <: SxpRec  # type tag 22
-    head::SxpRecHead
+immutable ExtPtrSxp <: Sxp  # type tag 22
+    head::SxpHead
     ptr::Ptr{Void}
     prot::Ptr{Void}
-    tag::UnknownSxp
+    tag::UnknownSxpPtr
 end
-typealias ExtPtrSxp Ptr{ExtPtrSxpRec}
+typealias ExtPtrSxpPtr Ptr{ExtPtrSxp}
 
 @doc "R weak reference"->
-immutable WeakRefSxpRec <: SxpRec  # type tag 23
-    head::SxpRecHead
+immutable WeakRefSxp <: Sxp  # type tag 23
+    head::SxpHead
 end
-typealias WeakRefSxp Ptr{WeakRefSxpRec}
+typealias WeakRefSxpPtr Ptr{WeakRefSxp}
 
 @doc "R byte vector"->
-immutable RawSxpRec <: SxpRec      # type tag 24
-    head::SxpRecHead
+immutable RawSxp <: Sxp      # type tag 24
+    head::SxpHead
     length::Cint
     truelength::Cint
 end
-typealias RawSxp Ptr{RawSxpRec}
+typealias RawSxpPtr Ptr{RawSxp}
 
 @doc "R S4 object"->
-immutable S4SxpRec <: SxpRec      # type tag 25
-    head::SxpRecHead
+immutable S4Sxp <: Sxp      # type tag 25
+    head::SxpHead
 end
-typealias S4Sxp Ptr{S4SxpRec}
+typealias S4SxpPtr Ptr{S4Sxp}
 
 
 
 @doc "Vector types in R"->
-typealias VectorSxpRec Union(CharSxpRec,LglSxpRec,IntSxpRec,RealSxpRec,CplxSxpRec,StrSxpRec,VecSxpRec,ExprSxpRec,RawSxpRec)
-typealias VectorSxp{S<:VectorSxpRec} Ptr{S}
+typealias VectorSxp Union(CharSxp,LglSxp,IntSxp,RealSxp,CplxSxp,StrSxp,VecSxp,ExprSxp,RawSxp)
+typealias VectorSxpPtr{S<:VectorSxp} Ptr{S}
 
-typealias VectorAtomicSxpRec Union(LglSxpRec,IntSxpRec,RealSxpRec,CplxSxpRec,RawSxpRec,CharSxpRec)
-typealias VectorAtomicSxp{S<:VectorAtomicSxpRec} Ptr{S}
+typealias VectorAtomicSxp Union(LglSxp,IntSxp,RealSxp,CplxSxp,RawSxp,CharSxp)
+typealias VectorAtomicSxpPtr{S<:VectorAtomicSxp} Ptr{S}
 
-typealias VectorNumericSxpRec Union(LglSxpRec,IntSxpRec,RealSxpRec,CplxSxpRec)
-typealias VectorNumericSxp{S<:VectorNumericSxpRec} Ptr{S}
+typealias VectorNumericSxp Union(LglSxp,IntSxp,RealSxp,CplxSxp)
+typealias VectorNumericSxpPtr{S<:VectorNumericSxp} Ptr{S}
 
-typealias VectorListSxpRec Union(VecSxpRec,StrSxpRec,ExprSxpRec)
-typealias VectorListSxp{S<:VectorListSxpRec} Ptr{S}
+typealias VectorListSxp Union(VecSxp,StrSxp,ExprSxp)
+typealias VectorListSxpPtr{S<:VectorListSxp} Ptr{S}
 
-typealias PairListSxpRec Union(NilSxpRec,ListSxpRec,LangSxpRec)
-typealias PairListSxp{S<:PairListSxpRec} Ptr{S}
+typealias PairListSxp Union(NilSxp,ListSxp,LangSxp)
+typealias PairListSxpPtr{S<:PairListSxp} Ptr{S}
 
-typealias PrimitiveSxpRec Union(BuiltinSxpRec,SpecialSxpRec)
-typealias PrimitiveSxp{S<:PrimitiveSxpRec} Ptr{S}
+typealias PrimitiveSxp Union(BuiltinSxp,SpecialSxp)
+typealias PrimitiveSxpPtr{S<:PrimitiveSxp} Ptr{S}
 
-typealias FunctionSxpRec Union(ClosSxpRec,BuiltinSxpRec,SpecialSxpRec)
-typealias FunctionSxp{S<:FunctionSxpRec} Ptr{S}
+typealias FunctionSxp Union(ClosSxp,BuiltinSxp,SpecialSxp)
+typealias FunctionSxpPtr{S<:FunctionSxp} Ptr{S}
 
 @doc """
 Element types of R vectors.
 """->
-eltype(::Type{LglSxpRec}) = Cint
-eltype(::Type{IntSxpRec}) = Cint
-eltype(::Type{RealSxpRec}) = Float64
-eltype(::Type{CplxSxpRec}) = Complex128
-eltype(::Type{CharSxpRec}) = UInt8
-eltype(::Type{RawSxpRec}) = UInt8
+eltype(::Type{LglSxp}) = Cint
+eltype(::Type{IntSxp}) = Cint
+eltype(::Type{RealSxp}) = Float64
+eltype(::Type{CplxSxp}) = Complex128
+eltype(::Type{CharSxp}) = UInt8
+eltype(::Type{RawSxp}) = UInt8
 
-eltype(::Type{StrSxpRec}) = Ptr{CharSxpRec}
-eltype(::Type{VecSxpRec}) = UnknownSxp
-eltype(::Type{ExprSxpRec}) = UnknownSxp
+eltype(::Type{StrSxp}) = Ptr{CharSxp}
+eltype(::Type{VecSxp}) = UnknownSxpPtr
+eltype(::Type{ExprSxp}) = UnknownSxpPtr
 
 
 
@@ -244,7 +244,7 @@ eltype(::Type{ExprSxpRec}) = UnknownSxp
 @doc """
 The general user-facing type for R objects. It is protected from garbage collection until being finalized by Julia
 """->
-type RObject{S<:SxpRec}
+type RObject{S<:Sxp}
     p::Ptr{S}
     function RObject(p::Ptr{S})
         preserve(p)
@@ -253,7 +253,7 @@ type RObject{S<:SxpRec}
         r
     end
 end
-RObject{S<:SxpRec}(p::Ptr{S}) = RObject{S}(p)
+RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
 RObject(x) = RObject(sexp(x))
 
@@ -266,13 +266,13 @@ Prevent garbage collection of an R object. Object can be released via `release`.
 This is slower than `protect`, as it requires searching an internal list, but
 more flexible.
 """->
-preserve{S<:SxpRec}(p::Ptr{S}) = ccall((:R_PreserveObject,libR), Void, (Ptr{S},), p)
+preserve{S<:Sxp}(p::Ptr{S}) = ccall((:R_PreserveObject,libR), Void, (Ptr{S},), p)
 
 @doc """
 Release object that has been gc protected by `preserve`.
 """->
-release{S<:SxpRec}(p::Ptr{S}) = ccall((:R_ReleaseObject,libR),Void,(Ptr{S},),p)
-release{S<:SxpRec}(r::RObject{S}) = release(r.p)
+release{S<:Sxp}(p::Ptr{S}) = ccall((:R_ReleaseObject,libR),Void,(Ptr{S},),p)
+release{S<:Sxp}(r::RObject{S}) = release(r.p)
 
 @doc """
 
@@ -282,7 +282,7 @@ released via `unprotect`. Returns the same pointer, allowing inline use.
 This is faster than `preserve`, but more restrictive. Really only useful
 inside functions.
 """->
-protect{S<:SxpRec}(p::Ptr{S}) = ccall((:Rf_protect,libR), Ptr{S}, (Ptr{S},), p)
+protect{S<:Sxp}(p::Ptr{S}) = ccall((:Rf_protect,libR), Ptr{S}, (Ptr{S},), p)
 
 @doc """
 Release last `n` objects gc-protected by `protect`.
@@ -290,21 +290,21 @@ Release last `n` objects gc-protected by `protect`.
 unprotect(n::Integer) = ccall((:Rf_unprotect,libR), Void, (Cint,), n)
 
 @doc """
-The SEXPTYPE number of a `SxpRec`
+The SEXPTYPE number of a `Sxp`
 
 Determined from the trailing 5 bits of the first 32-bit word, is
-a 0-based index into the `info` field of a `SxpRecHead`.
+a 0-based index into the `info` field of a `SxpHead`.
 """->
-sexpnum(h::SxpRecHead) = h.info & 0x1f
-sexpnum(p::Sxp) = sexpnum(unsafe_load(p))
+sexpnum(h::SxpHead) = h.info & 0x1f
+sexpnum(p::SxpPtr) = sexpnum(unsafe_load(p))
 
-@doc "vector of R SxpRec types"->
-const typs = [NilSxpRec,SymSxpRec,ListSxpRec,ClosSxpRec,EnvSxpRec,
-              PromSxpRec,LangSxpRec,SpecialSxpRec,BuiltinSxpRec,CharSxpRec,
-              LglSxpRec,Void,Void,IntSxpRec,RealSxpRec,
-              CplxSxpRec,StrSxpRec,DotSxpRec,AnySxpRec,VecSxpRec,
-              ExprSxpRec,BcodeSxpRec,ExtPtrSxpRec,WeakRefSxpRec,RawSxpRec,
-              S4SxpRec]
+@doc "vector of R Sxp types"->
+const typs = [NilSxp,SymSxp,ListSxp,ClosSxp,EnvSxp,
+              PromSxp,LangSxp,SpecialSxp,BuiltinSxp,CharSxp,
+              LglSxp,Void,Void,IntSxp,RealSxp,
+              CplxSxp,StrSxp,DotSxp,AnySxp,VecSxp,
+              ExprSxp,BcodeSxp,ExtPtrSxp,WeakRefSxp,RawSxp,
+              S4Sxp]
 
 for (i,T) in enumerate(typs)
     if T != Void
@@ -314,14 +314,14 @@ end
 
 
 @doc """
-Convert a `UnknownSxp` to an approptiate `Sxp`.
+Convert a `UnknownSxpPtr` to an approptiate `SxpPtr`.
 """->
-function sexp(p::UnknownSxp)
+function sexp(p::UnknownSxpPtr)
     typ = sexpnum(p)
     0 ≤ typ ≤ 10 || 13 ≤ typ ≤ 25 || error("Unknown SEXPTYPE $typ")
     styp = typs[typ+1]
     convert(Ptr{styp},p)
 end
-sexp(s::Sxp) = s
+sexp(s::SxpPtr) = s
 sexp(r::RObject) = r.p
 

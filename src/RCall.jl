@@ -9,7 +9,7 @@ import Base: eltype, show, convert,
     length, size, getindex, setindex!, start, next, done
 
 export RObject,
-   SxpRec, StrSxpRec, LglSxpRec, IntSxpRec, RealSxpRec, CplxSxpRec,
+   Sxp, StrSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
    getAttrib, setAttrib!, getNames, setNames!,
    rGlobalEnv,
    rcopy, rparse, rprint, reval, rcall, rlang,
@@ -61,9 +61,9 @@ function __init__()
     global const rNaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint))
     global const rNaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble))
 
-    global const rNaString = unsafe_load(cglobal((:R_NaString,libR),CharSxp))
-    global const rBlankString = unsafe_load(cglobal((:R_BlankString,libR),CharSxp))
-    global const rBlankScalarString = unsafe_load(cglobal((:R_BlankScalarString,libR),Ptr{StrSxpRec}))
+    global const rNaString = unsafe_load(cglobal((:R_NaString,libR),CharSxpPtr))
+    global const rBlankString = unsafe_load(cglobal((:R_BlankString,libR),CharSxpPtr))
+    global const rBlankScalarString = unsafe_load(cglobal((:R_BlankScalarString,libR),Ptr{StrSxp}))
 
     for s in [:BaseSymbol,         # base
               :BraceSymbol,        # {
@@ -98,22 +98,22 @@ function __init__()
               :dot_packageName,    # .packageName
               :dot_target]         # .targe
 
-        @eval global const $(symbol(string('r',s))) = unsafe_load(cglobal(($(string(:R_,s)),libR),Ptr{SymSxpRec}))
+        @eval global const $(symbol(string('r',s))) = unsafe_load(cglobal(($(string(:R_,s)),libR),Ptr{SymSxp}))
     end
 
-    global const rEmptyEnv = unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{EnvSxpRec}))
-    global const rGlobalEnv = unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{EnvSxpRec}))
+    global const rEmptyEnv = unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{EnvSxp}))
+    global const rGlobalEnv = unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{EnvSxp}))
 
-    global const rNilValue = unsafe_load(cglobal((:R_NilValue,libR),Ptr{NilSxpRec}))
-    global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),UnknownSxp))
-    global const rMissingArg =  unsafe_load(cglobal((:R_MissingArg,libR),Ptr{SymSxpRec}))
+    global const rNilValue = unsafe_load(cglobal((:R_NilValue,libR),Ptr{NilSxp}))
+    global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),UnknownSxpPtr))
+    global const rMissingArg =  unsafe_load(cglobal((:R_MissingArg,libR),Ptr{SymSxp}))
 
 
 
     # set up function callbacks
-    global const pJuliaCallback = cfunction(callJuliaExtPtr,UnknownSxp,(ListSxp,))
+    global const pJuliaCallback = cfunction(callJuliaExtPtr,UnknownSxpPtr,(ListSxpPtr,))
     global const rJuliaCallback = RObject(makeNativeSymbol(pJuliaCallback))
-    global const pJuliaDecref = cfunction(decrefExtPtr,Void,(ExtPtrSxp,))
+    global const pJuliaDecref = cfunction(decrefExtPtr,Void,(ExtPtrSxpPtr,))
 
 
     # printing

@@ -1,16 +1,16 @@
 @doc """
 Evaluate an R symbol or language object (i.e. a function call) in an R
-try/catch block, returning a SxpRec pointer.
+try/catch block, returning a Sxp pointer.
 """->
-function reval_p{S<:SxpRec}(expr::Ptr{S}, env::Ptr{EnvSxpRec})
+function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     err = Array(Cint,1)
-    val = ccall((:R_tryEval,libR),UnknownSxp,(Ptr{S},Ptr{EnvSxpRec},Ptr{Cint}),expr,env,err)
+    val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
     # TODO: figure out warnings: Rf_PrintWarnings not exported on all platforms.
     err[1]==0 || error("RCall.jl ",rcopy(rcall(:geterrmessage))[1])
     sexp(val)
 end
 
-function reval_p(expr::Ptr{ExprSxpRec}, env::Ptr{EnvSxpRec})
+function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val           # the value of the last expression is returned
     for e in expr
         val = reval_p(e,env)
@@ -18,7 +18,7 @@ function reval_p(expr::Ptr{ExprSxpRec}, env::Ptr{EnvSxpRec})
     val
 end
 
-reval_p{S<:SxpRec}(s::Ptr{S}) = reval_p(s,rGlobalEnv)
+reval_p{S<:Sxp}(s::Ptr{S}) = reval_p(s,rGlobalEnv)
 
 @doc """
 Evaluate an R symbol or language object (i.e. a function call) in an R
@@ -38,11 +38,11 @@ rcopy{T}(::Type{T}, str::String) = rcopy(T, reval_p(rparse_p(str)))
 rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
-@doc "Parse a string as an R expression, returning a SxpRec pointer."->
-function rparse_p(st::Ptr{StrSxpRec})
+@doc "Parse a string as an R expression, returning a Sxp pointer."->
+function rparse_p(st::Ptr{StrSxp})
     ParseStatus = Array(Cint,1)
-    val = ccall((:R_ParseVector,libR),UnknownSxp,
-                (Ptr{StrSxpRec},Cint,Ptr{Cint},UnknownSxp),
+    val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
+                (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
                 st,-1,ParseStatus,rNilValue)
     ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
     sexp(val)
@@ -53,8 +53,8 @@ rparse_p(st::String) = rparse_p(sexp(st))
 rparse(st::String) = RObject(rparse_p(st))
 
 
-@doc "Print the value of an SxpRec using R's printing mechanism"->
-function rprint{S<:SxpRec}(io::IO, s::Ptr{S})
+@doc "Print the value of an Sxp using R's printing mechanism"->
+function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     write(io,takebuf_string(printBuffer))
     nothing

@@ -1,19 +1,19 @@
 lsv = reval("ls()")
 @test length(lsv) == 0
-@test isa(lsv, RObject{StrSxpRec})
+@test isa(lsv, RObject{StrSxp})
 
 lsd = reval("ls(\"package:datasets\")")
-@test isa(lsv, RObject{StrSxpRec})
+@test isa(lsv, RObject{StrSxp})
 @test length(lsd) > 50
 @test rcopy(lsd[2]) == "airmiles"
 
 psexp = RObject("p")
-@test isa(psexp,RObject{StrSxpRec})
+@test isa(psexp,RObject{StrSxp})
 @test length(psexp) == 1
 @test rcopy(psexp[1]) == "p"
 
 pqsexp = RObject(["p","q"])
-@test isa(pqsexp,RObject{StrSxpRec})
+@test isa(pqsexp,RObject{StrSxp})
 @test length(pqsexp) == 2
 @test rcopy(pqsexp[1]) == "p"
 
@@ -40,11 +40,11 @@ function testfn(x,y;a=3,b=4)
 end
 
 r = rcall(testfn, 1, 2)
-@test isa(r,RObject{IntSxpRec})
+@test isa(r,RObject{IntSxp})
 @test rcopy(r) == [1,2,3,4]
 
 r = rcall(testfn, 1, 2,b=6)
-@test isa(r,RObject{IntSxpRec})
+@test isa(r,RObject{IntSxp})
 @test rcopy(r) == [1,2,3,6]
 
 r = rcall(:optimize,sin,[-2,0])
