@@ -5,11 +5,8 @@ try/catch block, returning a SxpRec pointer.
 function reval_p{S<:SxpRec}(expr::Ptr{S}, env::Ptr{EnvSxpRec})
     err = Array(Cint,1)
     val = ccall((:R_tryEval,libR),UnknownSxp,(Ptr{S},Ptr{EnvSxpRec},Ptr{Cint}),expr,env,err)
-	ccall((:Rf_PrintWarnings,libR),Void,())
-    err[1]==0 || error("RCall.jl ",takebuf_string(errorBuffer))
-	if !eof(errorBuffer)
-        warn("RCall.jl ",takebuf_string(errorBuffer))
-    end
+    # TODO: figure out warnings: Rf_PrintWarnings not exported on all platforms.
+    err[1]==0 || error("RCall.jl ",rcopy(rcall(:geterrmessage))[1])
     sexp(val)
 end
 
