@@ -1,3 +1,4 @@
+# conversion methods for Base Julia types
 
 # Fallbacks
 @doc """
@@ -37,6 +38,7 @@ sexp(::Type{Complex128},x) = convert(Complex128,x)
 sexp(::Type{Nothing}) = rNilValue
 rcopy(::Ptr{NilSxp}) = nothing
 
+
 # SymSxp
 @doc "Create a `SymSxp` from a `Symbol`"->
 sexp(::Type{SymSxp}, s::String) = ccall((:Rf_install,libR),Ptr{SymSxp},(Ptr{UInt8},),bytestring(s))
@@ -49,13 +51,6 @@ rcopy(::Type{Symbol},ss::SymSxp) = symbol(rcopy(String,ss))
 rcopy(::Type{String},ss::SymSxp) = rcopy(String,ss.name)
 rcopy{T<:Union(Symbol,String)}(::Type{T},s::Ptr{SymSxp}) =
     rcopy(T,unsafe_load(s))
-#Base.symbol(s::Ptr{SymSxp}) = rcopy(Symbol,s)
-
-
-@doc """
-`rcopy` copies the contents of an R object into a corresponding canonical Julia type.
-""" ->
-rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
 
 
 
@@ -74,27 +69,7 @@ sexp(::Type{CharSxp},sym::Symbol) = sexp(CharSxp,string(sym))
 
 rcopy{T<:String}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
 rcopy(::Type{Symbol},s::CharSxpPtr) = symbol(rcopy(String,s))
-rcopy(s::CharSxpPtr) = rcopy(String,s)
 
-
-
-@doc """
-Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).
- * 0x00_0002_00 (bit 1): set of bytes (no known encoding)
- * 0x00_0004_00 (bit 2): Latin-1
- * 0x00_0008_00 (bit 3): UTF-8
- * 0x00_4000_00 (bit 6): ASCII
-"""->
-function encoding(s::CharSxp)
-    if s.head.info & 0x00_0040_00 != 0
-        return ASCIIString
-    elseif s.info & 0x00_0008_00 != 0
-        return UTF8String
-    else
-        error("Unknown string type")
-    end
-end
-encoding(s::CharSxpPtr) = encoding(unsafe_load(s))
 
 @doc "Create a `StrSxp` from a `String`"->
 sexp(::Type{StrSxp}, s::CharSxpPtr) =
@@ -102,7 +77,6 @@ sexp(::Type{StrSxp}, s::CharSxpPtr) =
 
 sexp(::Type{StrSxp},st::String) = sexp(StrSxp,sexp(CharSxp,st))
 sexp(st::String) = sexp(StrSxp,st)
-
 
 
 # general vectors
@@ -117,23 +91,20 @@ end
 sexp(a::AbstractArray) = sexp(VecSxp,a)
 
 function rcopy{T,S<:VectorSxp}(::Type{Array{T}}, s::Ptr{S})
-    v = T[rcopy(e) for e in s]
-    reshape(v,size(s))
-end
-function rcopy{S<:VectorSxp}(s::Ptr{S})
-    v = [rcopy(e) for e in s]
+    v = T[rcopy(T,e) for e in s]
     reshape(v,size(s))
 end
 
 
 # StrSxp
 sexp{S<:String}(a::AbstractArray{S}) = sexp(StrSxp,a)
-rcopy{T<:String}(::Type{T},s::Ptr{StrSxp}) = convert(T,s[1])
+
+rcopy(::Type{Array},s::StrSxpPtr) = rcopy(Array{isascii(s) ? ASCIIString : UTF8String}, s)
+rcopy{T<:String}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
 
 
 # LglSxp, IntSxp, RealSxp, CplxSxp
-for (J,Jc,rsnm,S) in ((:Bool, :Cint, "Logical", :LglSxp),
-                      (:Integer, :Cint, "Integer", :IntSxp),
+for (J,Jc,rsnm,S) in ((:Integer, :Cint, "Integer", :IntSxp),
                       (:Real, :Float64, "Real", :RealSxp),
                       (:Complex, :Complex128, "Complex", :CplxSxp))
     @eval begin
@@ -148,13 +119,20 @@ for (J,Jc,rsnm,S) in ((:Bool, :Cint, "Logical", :LglSxp),
         sexp{T<:$J}(a::AbstractArray{T}) = sexp($S,a)
 
         rcopy{T<:$J}(::Type{T},s::Ptr{$S}) = convert(T,s[1])
+        function rcopy{T<:$J}(::Type{Vector{T}},s::Ptr{$S})
+            a = Array(T,length(s))
+            copy!(a,unsafe_vec(s))
+            a
+        end
         function rcopy{T<:$J}(::Type{Array{T}},s::Ptr{$S})
             a = Array(T,size(s)...)
             copy!(a,unsafe_vec(s))
             a
         end
+        rcopy(::Type{Array},s::Ptr{$S}) = rcopy(Array{$Jc},s)
     end
 end
+
 
 # Handle LglSxp seperately
 sexp(::Type{LglSxp},v::Union(Bool,Cint)) =
@@ -167,9 +145,31 @@ end
 sexp(v::Bool) = sexp(LglSxp,v)
 sexp(a::AbstractArray{Bool}) = sexp(LglSxp,a)
 
+
 rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(T,s[1])
 rcopy(::Type{Bool},s::Ptr{LglSxp}) = convert(T,s[1]!=0)
 
+function rcopy(::Type{Vector{Cint}},s::Ptr{LglSxp})
+    a = Array(Cint,length(s))
+    copy!(a,unsafe_vec(s))
+    a
+end
+function rcopy(::Type{Vector{Bool}},s::Ptr{LglSxp})
+    a = Array(Bool,length(s))
+    v = unsafe_vec(s)
+    for i = 1:length(a)
+        a[i] = v[i] != 0
+    end
+    a
+end
+function rcopy(::Type{BitVector},s::Ptr{LglSxp})
+    a = BitArray(length(s))
+    v = unsafe_vec(s)
+    for i = 1:length(a)
+        a[i] = v[i] != 0
+    end
+    a
+end
 function rcopy(::Type{Array{Cint}},s::Ptr{LglSxp})
     a = Array(Cint,size(s)...)
     copy!(a,unsafe_vec(s))
@@ -183,6 +183,7 @@ function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
     end
     a
 end
+rcopy(::Type{Array},s::Ptr{LglSxp}) = rcopy(Array{Bool},s)
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a = BitArray(size(s)...)
     v = unsafe_vec(s)
@@ -191,7 +192,6 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     end
     a
 end
-rcopy(s::Ptr{LglSxp}) = rcopy(BitArray,s)
 
 
 # Associative types
@@ -236,3 +236,10 @@ function rcopy{A<:Associative,S<:PairListSxp}(::Type{A}, s::Ptr{S})
     a
 end
 
+# Functions
+function rcopy{S<:FunctionSxp}(::Type{Function}, s::Ptr{S})
+    (args...) -> rcopy(rcall_p(s,args...))
+end
+function rcopy{S<:FunctionSxp}(::Type{Function}, r::RObject{S})
+    (args...) -> rcopy(rcall_p(r,args...))
+end

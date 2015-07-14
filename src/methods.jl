@@ -200,13 +200,26 @@ getNames{S<:VectorSxp}(s::Ptr{S}) = getAttrib(s,rNamesSymbol)
 getNames(r::RObject) = RObject(getNames(sexp(r)))
 
 
-
-
 @doc """
 Set the names of an R vector.
 """->
 setNames!{S<:VectorSxp}(s::Ptr{S},n::Ptr{StrSxp}) = setAttrib!(s,rNamesSymbol,n)
 setNames!(r::RObject,n) = RObject(setNames!(sexp(r)),sexp(StrSxp,n))
+
+@doc """
+Returns the class of an R object.
+"""->
+getClass{S<:Sxp}(s::Ptr{S}) = getAttrib(s,rClassSymbol)
+getClass(r::RObject) = RObject(getClass(sexp(r)))
+
+
+@doc """
+Set the class of an R object.
+"""->
+setClass!{S<:Sxp}(s::Ptr{S},c::Ptr{StrSxp}) = setAttrib!(s,rClassSymbol,c)
+setClass!(r::RObject,c) = RObject(setClass!(sexp(r)),sexp(StrSxp,c))
+
+
 
 allocList(n::Int) = ccall((:Rf_allocList,libR),Ptr{ListSxp},(Cint,),n)
 allocArray{S<:Sxp}(::Type{S}, n::Integer) =
@@ -261,13 +274,43 @@ Check if there are any NA values in the vector.
 """->
 function anyNA{S<:VectorSxp}(s::Ptr{S})
     for i in s
-        if isNA(s)
+        if isNA(i)
             return true
         end
     end
     return false
 end
+anyNA{S<:VectorSxp}(r::RObject{S}) = anyNA(r.p)
 
+
+# StrSxp
+@doc """
+Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).
+ * 0x00_0002_00 (bit 1): set of bytes (no known encoding)
+ * 0x00_0004_00 (bit 2): Latin-1
+ * 0x00_0008_00 (bit 3): UTF-8
+ * 0x00_0040_00 (bit 6): ASCII
+
+We only support ASCII and UTF-8.
+"""->
+function isascii(s::CharSxp)
+    if s.head.info & 0x00_0040_00 != 0
+        return true
+    elseif s.head.info & 0x00_0008_00 != 0
+        return false
+    else
+        error("Unsupported string type.")
+    end
+end
+isascii(s::CharSxpPtr) = isascii(unsafe_load(s))
+
+function isascii(s::StrSxpPtr)
+    ind = true
+    for c in s        
+        ind &= isNA(c) || isascii(c)
+    end
+    return ind
+end
 
 
 # EnvSxp

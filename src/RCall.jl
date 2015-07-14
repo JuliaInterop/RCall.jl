@@ -5,7 +5,7 @@ if VERSION < v"v0.4-"
     using Docile                    # for the @doc macro
 end
 
-import Base: eltype, show, convert,
+import Base: eltype, show, convert, isascii,
     length, size, getindex, setindex!, start, next, done
 
 export RObject,
@@ -26,8 +26,9 @@ end
 
 include("types.jl")
 include("methods.jl")
-include("conversions.jl")
-include("dframes.jl")
+include("convert-base.jl")
+include("convert-data.jl")
+include("convert-default.jl")
 include("iface.jl")
 include("functions.jl")
 include("library.jl")

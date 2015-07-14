@@ -17,7 +17,7 @@ function rwrap(pkg::ASCIIString,s::Symbol)
     consts = [Expr(:const,
                     Expr(:(=),
                     symbol(x),
-                    rlang(symbol("::"),symbol(pkg),symbol(x)))
+                    rcall(symbol("::"),symbol(pkg),symbol(x)))
                 ) for x in members]
     id = Expr(:(=), :__package__, pkg)
     exports = [symbol(x) for x in members]

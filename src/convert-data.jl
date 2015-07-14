@@ -1,12 +1,15 @@
-## Methods related to the SEXP (pointer to Sxp type) in R
+# conversion methods for DataArrays and DataFrames
 
-
-rcopy{S<:VectorSxp}(::Type{DataArray}, s::Ptr{S}) = DataArray(rcopy(s), isNA(s))
-rcopy(::Type{DataArray}, s::Ptr{LglSxp}) = DataArray(rcopy(Array{Bool},s), isNA(s))
+function rcopy{T,S<:VectorSxp}(::Type{DataArray{T}}, s::Ptr{S})
+    DataArray(rcopy(Array{T},s), isNA(s))
+end
+function rcopy{S<:VectorSxp}(::Type{DataArray}, s::Ptr{S})
+    DataArray(rcopy(Array,s), isNA(s))
+end
 
 function rcopy(::Type{DataArray}, s::Ptr{IntSxp})
     isFactor(s) && error("$s is a R factor")
-    DataArray(rcopy(s), isNA(s))
+    DataArray(rcopy(Array,s), isNA(s))
 end
 function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
     isFactor(s) || error("$s is not a R factor")
@@ -57,3 +60,30 @@ function sexp(d::DataFrame)
     unprotect(1)
     rd
 end
+
+
+# R formula objects
+function sexp(f::Formula)
+    s = protect(rlang_p(:~,rlang_formula(f.lhs),rlang_formula(f.rhs)))
+    setAttrib!(s,rClassSymbol,sexp("formula"))
+    setAttrib!(s,".Environment",rGlobalEnv)
+    unprotect(1)
+    s
+end
+
+function rlang_formula(e::Expr)
+    e.head == :call || error("invalid formula object")
+    op = e.args[1]
+    if op == :&
+        op = :(:)
+    end
+    if length(e.args) > 3 && op in (:+,:*,:(:))
+        rlang_p(op,
+                rlang_formula(Expr(e.head,e.args[1:end-1]...)),
+                rlang_formula(e.args[end]))
+    else
+        rlang_p(op,map(rlang_formula,e.args[2:end])...)
+    end
+end
+rlang_formula(e::Symbol) = e
+        

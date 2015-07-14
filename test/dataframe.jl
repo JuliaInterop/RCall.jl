@@ -11,13 +11,13 @@ attenu = rcopy(DataFrame,:attenu)
 dist = attenu[:dist]
 @test isa(dist,DataArray{Float64})
 
-@test rcopy(DataArray,"c(NA,TRUE)").na == @data([NA,true]).na
-@test rcopy(DataArray,"c(NA,1)").na == @data([NA,1.0]).na
-@test rcopy(DataArray,"c(NA,1+0i)").na == @data([NA,1.0+0.0*im]).na
-@test rcopy(DataArray,"c(NA,1L)").na == @data([NA,one(Int32)]).na
-@test rcopy(DataArray,"c(NA,'NA')").na == @data([NA,"NA"]).na
-@test_throws ErrorException rcopy(DataArray,"as.factor(c('a','a','c'))")
-@test rcopy(PooledDataArray,"as.factor(c('a','a','c'))").pool == ["a","c"]
+@test rcopy(DataArray,reval("c(NA,TRUE)")).na == @data([NA,true]).na
+@test rcopy(DataArray,reval("c(NA,1)")).na == @data([NA,1.0]).na
+@test rcopy(DataArray,reval("c(NA,1+0i)")).na == @data([NA,1.0+0.0*im]).na
+@test rcopy(DataArray,reval("c(NA,1L)")).na == @data([NA,one(Int32)]).na
+@test rcopy(DataArray,reval("c(NA,'NA')")).na == @data([NA,"NA"]).na
+@test_throws ErrorException rcopy(DataArray,reval("as.factor(c('a','a','c'))"))
+@test rcopy(PooledDataArray,reval("as.factor(c('a','a','c'))")).pool == ["a","c"]
 
 @test rcopy(DataArray,RObject(@data([NA,true]))).na == @data([NA,true]).na
 @test rcopy(DataArray,RObject(@data([NA,1]))).na == @data([NA,1]).na
