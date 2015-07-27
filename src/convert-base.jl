@@ -146,8 +146,8 @@ sexp(v::Bool) = sexp(LglSxp,v)
 sexp(a::AbstractArray{Bool}) = sexp(LglSxp,a)
 
 
-rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(T,s[1])
-rcopy(::Type{Bool},s::Ptr{LglSxp}) = convert(T,s[1]!=0)
+rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(Cint,s[1])
+rcopy(::Type{Bool},s::Ptr{LglSxp}) = s[1]!=0
 
 function rcopy(::Type{Vector{Cint}},s::Ptr{LglSxp})
     a = Array(Cint,length(s))
@@ -243,3 +243,5 @@ end
 function rcopy{S<:FunctionSxp}(::Type{Function}, r::RObject{S})
     (args...) -> rcopy(rcall_p(r,args...))
 end
+
+

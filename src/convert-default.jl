@@ -65,3 +65,7 @@ function rcopy(s::VecSxpPtr)
 end
 
 rcopy(s::FunctionSxpPtr) = rcopy(Function,s)
+
+# TODO
+rcopy(l::LangSxpPtr) = l
+rcopy(r::RObject{LangSxp}) = r

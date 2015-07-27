@@ -2,6 +2,7 @@ using Base.Test
 using RCall
 
 tests = ["basic",
+         "conversion",
          "dataframe"]
 
 println("Running tests:")

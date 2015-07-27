@@ -242,7 +242,23 @@ eltype(::Type{ExprSxp}) = UnknownSxpPtr
 
 
 @doc """
-The general user-facing type for R objects. It is protected from garbage collection until being finalized by Julia
+An `RObject` is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the `RObject` itself is finalized by Julia. The parameter is the type of the S-expression.
+
+When called with a Julia object as an argument, a corresponding R object is constructed.
+
+```julia
+julia> RObject(1)
+RObject{IntSxp}
+[1] 1
+
+julia> RObject(1:3)
+RObject{IntSxp}
+[1] 1 2 3
+
+julia> RObject(1.0:3.0)
+RObject{RealSxp}
+[1] 1 2 3
+```
 """->
 type RObject{S<:Sxp}
     p::Ptr{S}
@@ -252,6 +268,8 @@ type RObject{S<:Sxp}
         finalizer(r, release)
         r
     end
+    # SymSxps are not garbage collected, so preserve not necessary.
+    RObject(p::Ptr{SymSxp}) = new(p)
 end
 RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
@@ -275,7 +293,6 @@ release{S<:Sxp}(p::Ptr{S}) = ccall((:R_ReleaseObject,libR),Void,(Ptr{S},),p)
 release{S<:Sxp}(r::RObject{S}) = release(r.p)
 
 @doc """
-
 Stack-based protection of garbage collection of R objects. Objects are
 released via `unprotect`. Returns the same pointer, allowing inline use.
 
@@ -292,7 +309,7 @@ unprotect(n::Integer) = ccall((:Rf_unprotect,libR), Void, (Cint,), n)
 @doc """
 The SEXPTYPE number of a `Sxp`
 
-Determined from the trailing 5 bits of the first 32-bit word, is
+Determined from the trailing 5 bits of the first 32-bit word. Is
 a 0-based index into the `info` field of a `SxpHead`.
 """->
 sexpnum(h::SxpHead) = h.info & 0x1f

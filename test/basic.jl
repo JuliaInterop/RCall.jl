@@ -7,16 +7,6 @@ lsd = reval("ls(\"package:datasets\")")
 @test length(lsd) > 50
 @test rcopy(lsd[2]) == "airmiles"
 
-psexp = RObject("p")
-@test isa(psexp,RObject{StrSxp})
-@test length(psexp) == 1
-@test rcopy(psexp[1]) == "p"
-
-pqsexp = RObject(["p","q"])
-@test isa(pqsexp,RObject{StrSxp})
-@test length(pqsexp) == 2
-@test rcopy(pqsexp[1]) == "p"
-
 langsexp = rlang(:solve, RObject([1 2; 0 4]))
 @test length(langsexp) == 2
 @test rcopy(reval(langsexp)) == [1 -0.5; 0 0.25]
