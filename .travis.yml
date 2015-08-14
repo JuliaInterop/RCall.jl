@@ -16,9 +16,8 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install git r-base r-base-dev r-recommended -y; fi
 
   # osx
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew tap homebrew/science; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install R; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then wget https://cran.rstudio.com/bin/macosx/ -r --level=1 --accept-regex "R-[0-9.]*.pkg" -nd; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then sudo installer -pkg R-*.pkg -target /; fi
   
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
