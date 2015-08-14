@@ -142,6 +142,9 @@ function __init__()
         unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
     end
 
+    # print warnings as they arise
+    # we can't use Rf_PrintWarnings as not exported on all platforms.
+    rcall_p(:options,warn=1)
 
     # IJulia hooks
     if isdefined(Main, :IJulia) && Main.IJulia.inited

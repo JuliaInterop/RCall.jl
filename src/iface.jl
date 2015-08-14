@@ -5,8 +5,12 @@ try/catch block, returning a Sxp pointer.
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     err = Array(Cint,1)
     val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
-    # TODO: figure out warnings: Rf_PrintWarnings not exported on all platforms.
-    err[1]==0 || error("RCall.jl ",rcopy(rcall(:geterrmessage))[1])
+    if nb_available(errorBuffer) != 0
+        warn("RCall.jl ",readall(RCall.errorBuffer))
+    end
+    if err[1] !=0
+        error("RCall.jl ",rcopy(String,rcall_p(:geterrmessage)))
+    end
     sexp(val)
 end
 
@@ -40,11 +44,16 @@ rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 @doc "Parse a string as an R expression, returning a Sxp pointer."->
 function rparse_p(st::Ptr{StrSxp})
-    ParseStatus = Array(Cint,1)
+    status = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
-                st,-1,ParseStatus,rNilValue)
-    ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
+                st,-1,status,rNilValue)
+    s = status[1]
+    if s != 1
+        s == 2 && error("RCall.jl incomplete R expression")
+        s == 3 && error("RCall.jl invalid R expression")
+        s == 4 && throw(EOFError())
+    end
     sexp(val)
 end
 rparse_p(st::String) = rparse_p(sexp(st))
