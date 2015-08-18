@@ -26,13 +26,58 @@ rl = RObject(false)
 @test rcopy(rl) === false
 @test rl[1] === convert(Cint,0)
 
-# int
-ri = RObject(2)
-@test isa(ri,RObject{IntSxp})
-@test length(ri) == 1
-@test rcopy(ri) === convert(Cint,2)
-@test ri[1] === convert(Cint,2)
+# integer
+x = 7
+r = RObject(x)
+@test isa(r,RObject{IntSxp})
+@test length(r) == 1
+@test size(r) == (1,)
+@test rcopy(r) === convert(Cint,x)
+@test r[1] === convert(Cint,x)
 
+v = -7:3
+r = RObject(v)
+@test isa(r,RObject{IntSxp})
+@test length(r) == length(v)
+@test size(r) == size(v)
+@test isa(rcopy(r), Vector{Cint})
+@test rcopy(r) == collect(v)
+@test r[1] === convert(Cint,v[1])
+@test r[3] === convert(Cint,v[3])
+
+m = Int[-5 2 9; 7 -8 3]
+r = RObject(m)
+@test isa(r,RObject{IntSxp})
+@test length(r) == length(m)
+@test size(r) == size(m)
+@test isa(rcopy(r), Matrix{Cint})
+@test rcopy(r) == m
+@test r[1] === convert(Cint,m[1])
+@test r[3] === convert(Cint,m[3])
+@test r[2,2] === convert(Cint,m[2,2])
+
+a = rand(-20:20,2,4,5)
+r = RObject(a)
+@test isa(r,RObject{IntSxp})
+@test length(r) == length(a)
+@test size(r) == size(a)
+@test isa(rcopy(r), Array{Cint,3})
+@test rcopy(r) == a
+@test r[1] === convert(Cint,a[1])
+@test r[3] === convert(Cint,a[3])
+@test r[2,3,2] === convert(Cint,a[2,3,2])
+
+a = rand(-20:20,2,4,2,3)
+r = RObject(a)
+@test isa(r,RObject{IntSxp})
+@test length(r) == length(a)
+@test size(r) == size(a)
+@test isa(rcopy(r), Array{Cint,4})
+@test rcopy(r) == a
+@test r[1] === convert(Cint,a[1])
+@test r[3] === convert(Cint,a[3])
+@test r[2,3,1,2] === convert(Cint,a[2,3,1,2])
+            
 # real
 rr = RObject(2.0)
 @test isa(rr,RObject{RealSxp})
@@ -46,6 +91,12 @@ rc = RObject(2.0-1.0*im)
 @test length(rc) == 1
 @test rcopy(rc) === 2.0-1.0*im
 @test rc[1] === 2.0-1.0*im
+
+
+rc = RObject(Complex128[2.0-1.0*im,2.0+4.0*im])
+@test isa(rc,RObject{CplxSxp})
+@test length(rc) == 2
+
 
 
 

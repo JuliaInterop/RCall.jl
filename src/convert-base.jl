@@ -104,12 +104,16 @@ rcopy{T<:String}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
 
 
 # LglSxp, IntSxp, RealSxp, CplxSxp
-for (J,Jc,rsnm,S) in ((:Integer, :Cint, "Integer", :IntSxp),
-                      (:Real, :Float64, "Real", :RealSxp),
-                      (:Complex, :Complex128, "Complex", :CplxSxp))
+for (J,S) in ((:Integer,:IntSxp),
+                 (:Real, :RealSxp),
+                 (:Complex, :CplxSxp))
     @eval begin
-        sexp(::Type{$S},v::$J) =
-            ccall(($(string("Rf_Scalar",rsnm)),libR),Ptr{$S},($Jc,),v)
+        # Could use Rf_Scalar... methods, but see weird error on Appveyor Windows for Complex.
+        function sexp(::Type{$S},v::$J)
+            ra = allocArray($S,1)
+            unsafe_store!(dataptr(ra),convert(eltype($S),v))
+            ra
+        end
         function sexp{T<:$J}(::Type{$S}, a::AbstractArray{T})
             ra = allocArray($S, size(a)...)
             copy!(unsafe_vec(ra),a)
@@ -129,7 +133,7 @@ for (J,Jc,rsnm,S) in ((:Integer, :Cint, "Integer", :IntSxp),
             copy!(a,unsafe_vec(s))
             a
         end
-        rcopy(::Type{Array},s::Ptr{$S}) = rcopy(Array{$Jc},s)
+        rcopy(::Type{Array},s::Ptr{$S}) = rcopy(Array{eltype($S)},s)
     end
 end
 

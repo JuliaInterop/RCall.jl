@@ -42,7 +42,12 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
 end
 
 @doc """
-Represent the contents of an VectorSxp type as a `Vector`.
+Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
+"""->
+dataptr{S<:VectorSxp}(s::Ptr{S}) = convert(Ptr{eltype(S)}, s+voffset)
+
+@doc """
+Represent the contents of a VectorSxp type as a `Vector`.
 
 This does __not__ copy the contents.  If the argument is not named (in R) or
 otherwise protected from R's garbage collection (e.g. by keeping the
@@ -56,8 +61,15 @@ as `-2147483648`, the minimum 32-bit integer value.  Internally a `LglSxp` is
 represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 `-2147483648` is `NA` and all other values represent `true`.
 """->
-unsafe_vec{S<:VectorSxp}(s::Ptr{S}) = pointer_to_array(convert(Ptr{eltype(S)}, s+voffset), length(s))
+unsafe_vec{S<:VectorSxp}(s::Ptr{S}) = pointer_to_array(dataptr(s), length(s))
 unsafe_vec{S<:VectorSxp}(r::RObject{S}) = unsafe_vec(r.p)
+
+@doc """
+The same as `unsafe_vec`, except returns an appropriately sized array.
+"""->
+unsafe_array{S<:VectorSxp}(s::Ptr{S}) =  pointer_to_array(dataptr(s), size(s))
+unsafe_array{S<:VectorSxp}(r::RObject{S}) = unsafe_array(r.p)
+
 
 
 @doc """
@@ -65,9 +77,13 @@ Indexing into `VectorSxp` types uses Julia indexing into the `vec` result,
 except for `StrSxp` and the `VectorListSxp` types, which must apply `sexp`
 to the `Ptr{Void}` obtained by indexing into the `vec` result.
 """->
-getindex{S<:VectorSxp}(s::Ptr{S}, I::Union(Real,AbstractVector)) = getindex(unsafe_vec(s),I)
-getindex(s::Ptr{VecSxp}, I::Union(Real,AbstractVector)) = sexp(getindex(unsafe_vec(s),I))
-getindex(s::Ptr{ExprSxp}, I::Union(Real,AbstractVector)) = sexp(getindex(unsafe_vec(s),I))
+getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real) = getindex(unsafe_vec(s),I)
+getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::AbstractVector) = getindex(unsafe_vec(s),I)
+getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real...) = getindex(unsafe_array(s),I...)
+
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real) = sexp(getindex(unsafe_vec(s),I))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = sexp(getindex(unsafe_vec(s),I))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real...) = sexp(getindex(unsafe_array(s),I...))
 
 @doc """
 String indexing finds the first element with the matching name
@@ -85,6 +101,13 @@ function getindex{S<:VectorSxp}(s::Ptr{S}, label::String)
 end
 getindex{S<:VectorSxp}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
 
+getindex{S<:VectorAtomicSxp}(r::RObject{S}, I...) = getindex(sexp(r), I...)
+getindex{S<:VectorAtomicSxp}(r::RObject{S}, I::AbstractArray) = getindex(sexp(r), I)
+
+getindex{S<:VectorListSxp}(r::RObject{S}, I...) = RObject(getindex(sexp(r), I...))
+getindex{S<:VectorListSxp}(r::RObject{S}, I::AbstractArray) = map(RObject,getindex(sexp(r),I))
+
+
 function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, key)
     setindex!(unsafe_vec(s), value, key)
 end
@@ -98,6 +121,7 @@ end
 setindex!(s::Ptr{StrSxp}, value::String, key::Integer) =
     setindex!(s,sexp(CharSxp,value),key)
 
+
 function setindex!{S<:Union(VecSxp,ExprSxp),T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_VECTOR_ELT,libR), Ptr{T},
@@ -107,12 +131,6 @@ end
 setindex!{S<:Union(VecSxp,ExprSxp)}(s::Ptr{S}, value, key::Integer) =
     setindex!(s,sexp(value),key)
 
-
-getindex{S<:VectorAtomicSxp}(r::RObject{S}, I) = getindex(r.p, I)
-getindex{S<:VectorAtomicSxp}(r::RObject{S}, I::AbstractArray) = getindex(r.p, I)
-
-getindex(r::RObject, I) = RObject(getindex(r.p,I))
-getindex(r::RObject, I::AbstractArray) = map(RObject,getindex(r.p,I))
 
 setindex!(r::RObject, value::RObject, key) = setindex!(r.p,value.p,key)
 
@@ -152,6 +170,8 @@ function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
     car(l)
 end
 
+getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I))
+
 @doc "assign value v to the i-th element of LangSxp l"->
 function setindex!{S<:PairListSxp,T<:Sxp}(l::Ptr{S},v::Ptr{T},I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
@@ -190,7 +210,7 @@ function size{S<:Sxp}(s::Ptr{S})
     isArray(s) || return (length(s),)
     tuple(convert(Array{Int},unsafe_vec(getAttrib(s,rDimSymbol)))...)
 end
-size(r::RObject) = r
+size(r::RObject) = size(sexp(r))
 
 
 @doc """
@@ -229,7 +249,7 @@ allocArray{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer) =
     ccall((:Rf_allocMatrix,libR),Ptr{S},(Cint,Cint,Cint),sexpnum(S),n1,n2)
 
 allocArray{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer, n3::Integer) =
-    ccall((:Rf_alloc3DArray,libR),Ptr{S},(Cint,Cint,Cint,Cint),sexpnum(S),n1,n2,3)
+    ccall((:Rf_alloc3DArray,libR),Ptr{S},(Cint,Cint,Cint,Cint),sexpnum(S),n1,n2,n3)
 
 function allocArray{S<:Sxp}(::Type{S}, dims::Integer...)
     sdims = sexp(IntSxp,[dims...])
