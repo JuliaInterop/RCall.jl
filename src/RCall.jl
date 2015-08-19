@@ -1,5 +1,5 @@
 module RCall
-using Compat,DataArrays,DataFrames
+using Compat,DataFrames,DataArrays
 
 if VERSION < v"v0.4-"
     using Docile                    # for the @doc macro
@@ -39,10 +39,11 @@ include("IJulia.jl")
 include("io.jl")
 
 
-type Rinstance                    # attach a finalizer to clean up
+type Rinstance
     i::Cint
     function Rinstance(i::Integer)
         v = new(convert(Cint,i))
+        # attach a finalizer to clean up
         finalizer(v,i->ccall((:Rf_endEmbeddedR,libR),Void,(Cint,),0))
         v
     end
@@ -51,12 +52,12 @@ end
 
 function __init__()
     argv = ["REmbeddedJulia","--silent","--no-save"]
-    i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Uint8}}),length(argv),argv)
-    i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
+    i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{UInt8}}),length(argv),argv)
+    i > 0 || error("initEmbeddedR failed. Try restarting and running Pkg.build(\"RCall\").")
     global const Rproc = Rinstance(i)
 
 
-    ip = ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Int32,),0)
+    ip = ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Cint,),0)
     global const voffset = ccall((:INTEGER,libR),Ptr{Void},(Ptr{Void},),ip) - ip
 
 
@@ -111,36 +112,37 @@ function __init__()
     global const rMissingArg =  unsafe_load(cglobal((:R_MissingArg,libR),Ptr{SymSxp}))
 
 
-
     # set up function callbacks
     global const pJuliaCallback = cfunction(callJuliaExtPtr,UnknownSxpPtr,(ListSxpPtr,))
     global const rJuliaCallback = RObject(makeNativeSymbol(pJuliaCallback))
     global const pJuliaDecref = cfunction(decrefExtPtr,Void,(ExtPtrSxpPtr,))
 
-
     # printing
     pWriteConsoleEx = cfunction(writeConsoleEx,Void,(Ptr{UInt8},Cint,Cint))
 
-    if OS_NAME == :Windows
-		pCallBack = cfunction(eventCallBack,Void,())
-		pYesNoCancel = cfunction(askYesNoCancel,Cint,(Ptr{Cchar},))
-        rs = RStart()
-        ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
-        rs.rhome = ccall((:get_R_HOME,libR),Ptr{Cchar},())
-        rs.home = ccall((:getRUser,libR),Ptr{Cchar},())
-        rs.ReadConsole = cglobal((:R_ReadConsole,libR),Void)
-        rs.CallBack = pCallBack
-        rs.ShowMessage = cglobal((:R_ShowMessage,libR),Void)
-        rs.YesNoCancel = pYesNoCancel
-        rs.Busy = cglobal((:R_Busy,libR),Void)
-        rs.WriteConsoleEx = pWriteConsoleEx
-        ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
-    else
-        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), pWriteConsoleEx)
-        unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
-        unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
-        unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
-    end
+    @windows? (
+        begin               
+            pCallBack = cfunction(eventCallBack,Void,())
+            pYesNoCancel = cfunction(askYesNoCancel,Cint,(Ptr{Cchar},))
+            rs = RStart()
+            ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
+            rs.rhome = ccall((:get_R_HOME,libR),Ptr{Cchar},())
+            rs.home = ccall((:getRUser,libR),Ptr{Cchar},())
+            rs.ReadConsole = cglobal((:R_ReadConsole,libR), Void)
+            rs.CallBack = pCallBack
+            rs.ShowMessage = cglobal((:R_ShowMessage,libR),Void)
+            rs.YesNoCancel = pYesNoCancel
+            rs.Busy = cglobal((:R_Busy,libR),Void)
+            rs.WriteConsoleEx = pWriteConsoleEx
+            ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
+        end
+      : begin
+            unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), pWriteConsoleEx)
+            unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
+            unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
+            unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
+         end
+    )
 
     # print warnings as they arise
     # we can't use Rf_PrintWarnings as not exported on all platforms.
@@ -155,7 +157,5 @@ function __init__()
         global InlineDisplay = Main.IPythonDisplay.InlineDisplay
     end
 end
-
-
 
 end # module

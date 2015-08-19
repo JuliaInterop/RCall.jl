@@ -21,7 +21,7 @@ function askYesNoCancel(prompt::Ptr{Cchar})
     return r
 end
 
-# if OS_NAME == :Windows
+@windows_only begin
     type RStart # mirror structRstart in R_ext/RStartup.h
         R_Quiet::Cint
         R_Slave::Cint
@@ -56,4 +56,4 @@ end
                       C_NULL,C_NULL,C_NULL,C_NULL,
                       C_NULL,C_NULL,2,C_NULL)
 
-# end
+end
