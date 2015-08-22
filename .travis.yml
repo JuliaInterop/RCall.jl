@@ -1,16 +1,29 @@
 language: julia
 os:
   - linux
+  - osx
 julia:
   - release
   - nightly
 notifications:
   email: false
+
 before_install:
-  - sudo apt-get update -qq -y
-  - sudo apt-get install git r-base r-base-dev r-recommended -y
+  # linux
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then echo "deb http://cran.rstudio.com/bin/linux/ubuntu precise/" | sudo tee -a /etc/apt/sources.list; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq -y; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install git r-base r-base-dev r-recommended -y; fi
+
+  # osx
+  # faster than using homebrew/science tap
+  # but no permalink to release download
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget https://cran.rstudio.com/bin/macosx/ -r --level=1 --accept-regex "R-[0-9.]*.pkg" -nd; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo installer -pkg R-*.pkg -target /; fi
+  
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("RCall"); Pkg.test("RCall"; coverage=true)'
+  
 after_success:
-  # - if [ $JULIAVERSION = "julianightlies" ]; julia -e 'cd(Pkg.dir("RCall")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'; fi
+  - if [ "$JULIAVERSION" == "julianightlies" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then julia -e 'cd(Pkg.dir("RCall")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'; fi

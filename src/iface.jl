@@ -1,49 +1,81 @@
-@doc "evaluate an R symbol or language object (i.e. a function call) in an R try/catch block"->
-function reval(expr::SEXPREC, env::EnvSxp)
+@doc """
+Evaluate an R symbol or language object (i.e. a function call) in an R
+try/catch block, returning a Sxp pointer.
+"""->
+function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     err = Array(Cint,1)
-    val = ccall((:R_tryEval,libR),Ptr{Void},(Ptr{Void},Ptr{Void},Ptr{Cint}),expr,env,err)
-    @compat(Bool(err[1])) && error("Error occurred in R_tryEval")
+    val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
+    if nb_available(errorBuffer) != 0
+        warn("RCall.jl ",readall(RCall.errorBuffer))
+    end
+    if err[1] !=0
+        error("RCall.jl ",rcopy(String,rcall_p(:geterrmessage)))
+    end
     sexp(val)
 end
-@doc "expression objects (the result of rparse) have a special reval method"->
-function reval(expr::ExprSxp, env::EnvSxp) # evaluate result of R_ParseVector
+
+function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val           # the value of the last expression is returned
     for e in expr
-        val = reval(e,env)
+        val = reval_p(e,env)
     end
-    preserve(val)
-end
-reval(s::SEXPREC) = reval(s,globalEnv)
-reval(sym::Symbol) = reval(sexp(sym))
-reval(str::ByteString) = reval(rparse(str))
-
-@doc "Parse a string as an R expression"->
-function rparse(st::ByteString)
-    ParseStatus = Array(Cint,1)
-    val = ccall((:R_ParseVector,libR),Ptr{Void},
-                (Ptr{Void},Cint,Ptr{Cint},Ptr{Void}),
-                sexp(st),length(st),ParseStatus,nilValue)
-    ParseStatus[1] == 1 || error("R_ParseVector set ParseStatus to $(ParseStatus[1])")
-    preserve(sexp(val))
+    val
 end
 
-@doc "print the value of an SEXP using R's printing mechanism"->
-rprint(s::SEXPREC) = ccall((:Rf_PrintValue,libR),Void,(Ptr{Void},),s)
-rprint(str::ByteString) = rprint(reval(str))
-rprint(sym::Symbol) = rprint(reval(sym))
+reval_p{S<:Sxp}(s::Ptr{S}) = reval_p(s,rGlobalEnv)
 
-function rprint(io::IO, s)
-    oldout = STDOUT
-    (rd,wr) = redirect_stdout()
-    start_reading(rd)
-    rprint(s)
-    flush_cstdio()
-    redirect_stdout(oldout)
-    close(wr)
-    print(io, rstrip(readall(rd)))
-    close(rd)
+@doc """
+Evaluate an R symbol or language object (i.e. a function call) in an R
+try/catch block, returning an RObject.
+"""->
+reval(s, env=rGlobalEnv) = RObject(reval_p(sexp(s),sexp(env)))
+reval(str::String, env=rGlobalEnv) = reval(rparse_p(str))
+reval(sym::Symbol, env=rGlobalEnv) = reval(sexp(sym))
+
+
+@doc """
+Evaluate and convert the result of a string as an R expression.
+"""->
+rcopy(str::String) = rcopy(reval_p(rparse_p(str)))
+rcopy(sym::Symbol) = rcopy(reval_p(sexp(sym)))
+rcopy{T}(::Type{T}, str::String) = rcopy(T, reval_p(rparse_p(str)))
+rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
+
+
+@doc "Parse a string as an R expression, returning a Sxp pointer."->
+function rparse_p(st::Ptr{StrSxp})
+    status = Array(Cint,1)
+    val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
+                (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
+                st,-1,status,rNilValue)
+    s = status[1]
+    if s != 1
+        s == 2 && error("RCall.jl incomplete R expression")
+        s == 3 && error("RCall.jl invalid R expression")
+        s == 4 && throw(EOFError())
+    end
+    sexp(val)
+end
+rparse_p(st::String) = rparse_p(sexp(st))
+
+@doc "Parse a string as an R expression, returning an RObject."->
+rparse(st::String) = RObject(rparse_p(st))
+
+
+@doc "Print the value of an Sxp using R's printing mechanism"->
+function rprint{S<:Sxp}(io::IO, s::Ptr{S})
+    ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
+    write(io,takebuf_string(printBuffer))
     nothing
 end
+rprint(io::IO,r::RObject) = rprint(io,r.p)
 
-rcopy(str::ByteString) = rcopy(reval(str))
-rcopy(sym::Symbol) = rcopy(reval(sym))
+rprint(s) = rprint(STDOUT,s)
+
+
+
+@doc """
+Parse, evaluate and print the result of a string as an R expression.
+"""->
+rprint(io::IO,str::ByteString) = rprint(io,reval(str))
+rprint(io::IO,sym::Symbol) = rprint(io,reval(sym))
