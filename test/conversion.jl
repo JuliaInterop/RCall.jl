@@ -1,30 +1,46 @@
 # strings
-rp = RObject("p")
-@test isa(rp,RObject{StrSxp})
-@test length(rp) == 1
-@test rcopy(rp) == "p"
-@test isa(rcopy(rp),ASCIIString)
-@test rcopy(rp[1]) == "p"
-@test isa(rp[1],RObject{CharSxp})
+x = "ppzz!#"
+r = RObject(x)
+@test isa(r,RObject{StrSxp})
+@test length(r) == 1
+@test rcopy(r) == x
+@test isascii(r)
+@test isa(rcopy(r),ASCIIString)
+@test rcopy(r[1]) == x
+@test isa(r[1],RObject{CharSxp})
 
-rp = RObject("α")
-@test isa(rp,RObject{StrSxp})
-@test length(rp) == 1
-@test rcopy(rp) == "α"
-@test isa(rcopy(rp),UTF8String)
+x = "aaα₁"
+r = RObject(x)
+@test isa(r,RObject{StrSxp})
+@test length(r) == 1
+@test rcopy(r) == x
+@test isa(rcopy(r),UTF8String)
 
-rp = RObject(["p","α"])
-@test isa(rp,RObject{StrSxp})
-@test length(rp) == 2
-@test rcopy(rp) == ["p","α"]
-@test rcopy(rp[1]) == "p"
+v = ["ap","xα⟩","pp"]
+r = RObject(v)
+@test isa(r,RObject{StrSxp})
+@test length(r) == length(v)
+@test rcopy(r) == v
+@test rcopy(r[1]) == v[1]
+
+
+
 
 # logical
-rl = RObject(false)
-@test isa(rl,RObject{LglSxp})
-@test length(rl) == 1
-@test rcopy(rl) === false
-@test rl[1] === convert(Cint,0)
+r = RObject(false)
+@test isa(r,RObject{LglSxp})
+@test length(r) == 1
+@test rcopy(r) === false
+@test r[1] === convert(Cint,0)
+
+v = randbool(10)
+r = RObject(v)
+@test isa(r,RObject{LglSxp})
+@test length(r) == length(v)
+@test size(r) == size(v)
+@test rcopy(r) == v
+@test r[1] === convert(Cint,v[1])
+
 
 # integer
 x = 7
@@ -44,6 +60,11 @@ r = RObject(v)
 @test rcopy(r) == collect(v)
 @test r[1] === convert(Cint,v[1])
 @test r[3] === convert(Cint,v[3])
+r[2] = -100
+@test r[2] === convert(Cint,-100)
+@test r[1] === convert(Cint,v[1])
+@test r[3] === convert(Cint,v[3])
+
 
 m = Int[-5 2 9; 7 -8 3]
 r = RObject(m)
@@ -55,6 +76,11 @@ r = RObject(m)
 @test r[1] === convert(Cint,m[1])
 @test r[3] === convert(Cint,m[3])
 @test r[2,2] === convert(Cint,m[2,2])
+r[2] = -100
+@test r[2] === convert(Cint,-100)
+r[1,3] = -101
+@test r[1,3] === convert(Cint,-101)
+
 
 a = rand(-20:20,2,4,5)
 r = RObject(a)
@@ -77,25 +103,111 @@ r = RObject(a)
 @test r[1] === convert(Cint,a[1])
 @test r[3] === convert(Cint,a[3])
 @test r[2,3,1,2] === convert(Cint,a[2,3,1,2])
-            
+
+
 # real
-rr = RObject(2.0)
-@test isa(rr,RObject{RealSxp})
-@test length(rr) == 1
-@test rcopy(rr) === 2.0
-@test rr[1] === 2.0
+x = 7.0
+r = RObject(x)
+@test isa(r,RObject{RealSxp})
+@test length(r) == 1
+@test size(r) == (1,)
+@test rcopy(r) === convert(Float64,x)
+@test r[1] === convert(Float64,x)
+
+v = -7.0:3.0
+r = RObject(v)
+@test isa(r,RObject{RealSxp})
+@test length(r) == length(v)
+@test size(r) == size(v)
+@test isa(rcopy(r), Vector{Float64})
+@test rcopy(r) == collect(v)
+@test r[1] === convert(Float64,v[1])
+@test r[3] === convert(Float64,v[3])
+
+m = Float64[-5 2 9; 7 -8 3]
+r = RObject(m)
+@test isa(r,RObject{RealSxp})
+@test length(r) == length(m)
+@test size(r) == size(m)
+@test isa(rcopy(r), Matrix{Float64})
+@test rcopy(r) == m
+@test r[1] === convert(Float64,m[1])
+@test r[3] === convert(Float64,m[3])
+@test r[2,2] === convert(Float64,m[2,2])
+
+a = rand(2,4,5)
+r = RObject(a)
+@test isa(r,RObject{RealSxp})
+@test length(r) == length(a)
+@test size(r) == size(a)
+@test isa(rcopy(r), Array{Float64,3})
+@test rcopy(r) == a
+@test r[1] === convert(Float64,a[1])
+@test r[3] === convert(Float64,a[3])
+@test r[2,3,2] === convert(Float64,a[2,3,2])
+
+a = rand(2,4,2,3)
+r = RObject(a)
+@test isa(r,RObject{RealSxp})
+@test length(r) == length(a)
+@test size(r) == size(a)
+@test isa(rcopy(r), Array{Float64,4})
+@test rcopy(r) == a
+@test r[1] === convert(Float64,a[1])
+@test r[3] === convert(Float64,a[3])
+@test r[2,3,1,2] === convert(Float64,a[2,3,1,2])
 
 # complex
-rc = RObject(2.0-1.0*im)
-@test isa(rc,RObject{CplxSxp})
-@test length(rc) == 1
-@test rcopy(rc) === 2.0-1.0*im
-@test rc[1] === 2.0-1.0*im
+x = 7.0-2.0*im
+r = RObject(x)
+@test isa(r,RObject{CplxSxp})
+@test length(r) == 1
+@test size(r) == (1,)
+@test rcopy(r) === convert(Complex128,x)
+@test r[1] === convert(Complex128,x)
 
+v = randn(7)+im*randn(7)
+r = RObject(v)
+@test isa(r,RObject{CplxSxp})
+@test length(r) == length(v)
+@test size(r) == size(v)
+@test isa(rcopy(r), Vector{Complex128})
+@test rcopy(r) == collect(v)
+@test r[1] === convert(Complex128,v[1])
+@test r[3] === convert(Complex128,v[3])
 
-rc = RObject(Complex128[2.0-1.0*im,2.0+4.0*im])
-@test isa(rc,RObject{CplxSxp})
-@test length(rc) == 2
+m = Float64[-5 2 9; 7 -8 3] + im*Float64[-5 2 9; 7 -8 3]
+r = RObject(m)
+@test isa(r,RObject{CplxSxp})
+@test length(r) == length(m)
+@test size(r) == size(m)
+@test isa(rcopy(r), Matrix{Complex128})
+@test rcopy(r) == m
+@test r[1] === convert(Complex128,m[1])
+@test r[3] === convert(Complex128,m[3])
+@test r[2,2] === convert(Complex128,m[2,2])
+
+a = rand(2,4,5)+im*randn(2,4,5)
+r = RObject(a)
+@test isa(r,RObject{CplxSxp})
+@test length(r) == length(a)
+@test size(r) == size(a)
+@test isa(rcopy(r), Array{Complex128,3})
+@test rcopy(r) == a
+@test r[1] === convert(Complex128,a[1])
+@test r[3] === convert(Complex128,a[3])
+@test r[2,3,2] === convert(Complex128,a[2,3,2])
+
+a = rand(2,4,2,3)+im*randn(2,4,2,3)
+r = RObject(a)
+@test isa(r,RObject{CplxSxp})
+@test length(r) == length(a)
+@test size(r) == size(a)
+@test isa(rcopy(r), Array{Complex128,4})
+@test rcopy(r) == a
+@test r[1] === convert(Complex128,a[1])
+@test r[3] === convert(Complex128,a[3])
+@test r[2,3,1,2] === convert(Complex128,a[2,3,1,2])
 
 
 

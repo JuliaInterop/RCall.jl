@@ -9,7 +9,7 @@ values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more
 symbols. See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
 """->
-function named{S<:Sxp}(s::Ptr{S})
+function bound{S<:Sxp}(s::Ptr{S})
     u = unsafe_load(convert(UnknownSxpPtr,s))
     (u.info >>> 6) & 0x03
 end
@@ -89,7 +89,6 @@ getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real...) = sexp(getindex(unsafe_array(s
 String indexing finds the first element with the matching name
 """->
 function getindex{S<:VectorSxp}(s::Ptr{S}, label::String)
-    protect(s)
     ls = unsafe_vec(getNames(s))
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
@@ -97,7 +96,6 @@ function getindex{S<:VectorSxp}(s::Ptr{S}, label::String)
         end
     end
     throw(BoundsError())
-    unprotect(1)
 end
 getindex{S<:VectorSxp}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
 
@@ -108,18 +106,22 @@ getindex{S<:VectorListSxp}(r::RObject{S}, I...) = RObject(getindex(sexp(r), I...
 getindex{S<:VectorListSxp}(r::RObject{S}, I::AbstractArray) = map(RObject,getindex(sexp(r),I))
 
 
-function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, key)
-    setindex!(unsafe_vec(s), value, key)
+function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I...)
+    setindex!(unsafe_array(s), value, I...)
+end
+function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I)
+    setindex!(unsafe_vec(s), value, I)
 end
 function setindex!(s::Ptr{StrSxp}, value::CharSxpPtr, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_STRING_ELT,libR), Void,
           (Ptr{StrSxp},Cptrdiff_t, CharSxpPtr),
           s, key-1, value)
-    return value
+    value
 end
-setindex!(s::Ptr{StrSxp}, value::String, key::Integer) =
+function setindex!(s::Ptr{StrSxp}, value::String, key::Integer)
     setindex!(s,sexp(CharSxp,value),key)
+end
 
 
 function setindex!{S<:Union(VecSxp,ExprSxp),T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
@@ -128,11 +130,11 @@ function setindex!{S<:Union(VecSxp,ExprSxp),T<:Sxp}(s::Ptr{S}, value::Ptr{T}, ke
           (Ptr{S},Cptrdiff_t, Ptr{T}),
           s, key-1, value)
 end
-setindex!{S<:Union(VecSxp,ExprSxp)}(s::Ptr{S}, value, key::Integer) =
+function setindex!{S<:Union(VecSxp,ExprSxp)}(s::Ptr{S}, value, key::Integer)
     setindex!(s,sexp(value),key)
+end
 
-
-setindex!(r::RObject, value::RObject, key) = setindex!(r.p,value.p,key)
+setindex!(r::RObject, value, keys...) = setindex!(sexp(r), value, keys...)
 
 
 
@@ -149,8 +151,18 @@ cdr{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CDR,libR),UnknownSxpPtr,(Ptr{S},),
 car{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CAR,libR),UnknownSxpPtr,(Ptr{S},),s))
 tag{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:TAG,libR),UnknownSxpPtr,(Ptr{S},),s))
 
-setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T}) = (ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c); return nothing)
-settag!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T}) = ccall((:SET_TAG,libR),Void,(Ptr{S},Ptr{T}),s,c)
+function setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
+    ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
+    nothing
+end
+function settag!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
+    ccall((:SET_TAG,libR),Void,(Ptr{S},Ptr{T}),s,c)
+    nothing
+end
+function setcdr!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
+    ccall((:SETCDR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
+    nothing
+end
 
 
 start{S<:PairListSxp}(s::Ptr{S}) = s
@@ -179,6 +191,9 @@ function setindex!{S<:PairListSxp,T<:Sxp}(l::Ptr{S},v::Ptr{T},I::Integer)
         l = cdr(l)
     end
     setcar!(l,v)
+end
+function setindex!{S<:PairListSxp}(s::Ptr{S}, value, key::Integer)
+    setindex!(s,sexp(value),key)
 end
 
 
@@ -219,12 +234,11 @@ Returns the names of an R vector.
 getNames{S<:VectorSxp}(s::Ptr{S}) = getAttrib(s,rNamesSymbol)
 getNames(r::RObject) = RObject(getNames(sexp(r)))
 
-
 @doc """
 Set the names of an R vector.
 """->
-setNames!{S<:VectorSxp}(s::Ptr{S},n::Ptr{StrSxp}) = setAttrib!(s,rNamesSymbol,n)
-setNames!(r::RObject,n) = RObject(setNames!(sexp(r)),sexp(StrSxp,n))
+setNames!{S<:VectorSxp}(s::Ptr{S}, n::Ptr{StrSxp}) = setAttrib!(s,rNamesSymbol,n)
+setNames!(r::RObject,n) = RObject(setNames!(sexp(r),sexp(StrSxp,n)))
 
 @doc """
 Returns the class of an R object.
@@ -323,6 +337,7 @@ function isascii(s::CharSxp)
     end
 end
 isascii(s::CharSxpPtr) = isascii(unsafe_load(s))
+isascii(r::RObject{CharSxp}) = isascii(sexp(r))
 
 function isascii(s::StrSxpPtr)
     ind = true
@@ -331,7 +346,7 @@ function isascii(s::StrSxpPtr)
     end
     return ind
 end
-
+isascii(r::RObject{StrSxp}) = isascii(sexp(r))
 
 # EnvSxp
 

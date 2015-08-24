@@ -88,6 +88,11 @@ function registerFinalizer(s::ExtPtrSxpPtr)
           s,pJuliaDecref,0)
 end
 
+sexp(::Type{ExtPtrSxp}, s::Ptr{ExtPtrSxp}) = s
+sexp(::Type{ExtPtrSxp}, r::RObject{ExtPtrSxp}) = sexp(r)
+sexp(::Type{ClosSxp}, s::Ptr{ClosSxp}) = s
+sexp(::Type{ClosSxp}, r::RObject{ClosSxp}) = sexp(r)
+
 @doc """
 Wrap a Julia object an a R `ExtPtrSxpPtr`.
 
@@ -111,20 +116,37 @@ Constructs the following R code
 
 """->
 function sexp(::Type{ClosSxp}, f)
-    # TODO: is there a way to construct a ClosSxp directly?
-    args = protect(allocList(1))
-    setcar!(args, rMissingArg)
-    settag!(args, rDotsSymbol)
-
     body = protect(rlang_p(symbol(".External"),
                            rJuliaCallback,
                            sexp(ExtPtrSxp,f),
                            rDotsSymbol))
 
-    lang = rlang_p(:function, args, body)
+    lang = rlang_p(:function, sexp_arglist_dots(), body)
     clos = reval_p(lang)
-    unprotect(2)
+    unprotect(1)
     clos
+end
+
+@doc """
+Create an argument list for an R function call, with a varargs "dots" at the end.
+"""->
+function sexp_arglist_dots(args...;kwargs...)
+    rarglist = protect(allocList(length(args)+length(kwargs)+1))
+    rr = rarglist
+    for var in args
+        settag!(rr, sexp(var))
+        setcar!(rr, rMissingArg)
+        rr = cdr(rr)
+    end
+    for (var,val) in kwargs
+        settag!(rr, sexp(var))
+        setcar!(rr, sexp(val))
+        rr = cdr(rr)
+    end
+    settag!(rr, rDotsSymbol)
+    setcar!(rr, rMissingArg)
+    unprotect(1)
+    rarglist
 end
 
 sexp(f::Function) = sexp(ClosSxp, f)

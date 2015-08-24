@@ -4,8 +4,8 @@ symbolic expression record (`Sxp`).
 """->
 abstract Sxp # SEXPREC
 typealias SxpPtr{S<:Sxp} Ptr{S} # SEXP
-
 typealias SxpPtrInfo UInt32 # sxpinfo_struct
+
 
 @doc "R Sxp header: a pointer to this is used for unknown types."->
 immutable SxpHead <: Sxp # SEXPREC_HEADER
@@ -16,14 +16,22 @@ immutable SxpHead <: Sxp # SEXPREC_HEADER
 end
 typealias UnknownSxpPtr Ptr{SxpHead}
 
+abstract VectorSxp <: Sxp
+abstract VectorAtomicSxp <: VectorSxp
+abstract VectorNumericSxp <: VectorAtomicSxp
+abstract VectorListSxp <: VectorSxp
+abstract PairListSxp <: Sxp
+abstract FunctionSxp <: Sxp
+
+
 @doc "R NULL value"->
-immutable NilSxp <: Sxp   # type tag 0
+immutable NilSxp <: PairListSxp   # type tag 0
     head::SxpHead
 end
 typealias NilSxpPtr Ptr{NilSxp}
 
 @doc "R pairs (cons) list cell"->
-immutable ListSxp <: Sxp  # type tag 2
+immutable ListSxp <: PairListSxp  # type tag 2
     head::SxpHead
     car::UnknownSxpPtr
     cdr::UnknownSxpPtr
@@ -32,7 +40,7 @@ end
 typealias ListSxpPtr Ptr{ListSxp}
 
 @doc "R function closure"->
-immutable ClosSxp <: Sxp  # type tag 3
+immutable ClosSxp <: FunctionSxp  # type tag 3
     head::SxpHead
     formals::ListSxpPtr
     body::UnknownSxpPtr
@@ -59,7 +67,7 @@ end
 typealias PromSxpPtr Ptr{PromSxp}
 
 @doc "R function call"->
-immutable LangSxp <: Sxp  # type tag 6
+immutable LangSxp <: PairListSxp  # type tag 6
     head::SxpHead
     car::UnknownSxpPtr
     cdr::UnknownSxpPtr
@@ -68,19 +76,19 @@ end
 typealias LangSxpPtr Ptr{LangSxp}
 
 @doc "R special function"->
-immutable SpecialSxp <: Sxp  # type tag 7
+immutable SpecialSxp <: FunctionSxp  # type tag 7
     head::SxpHead
 end
 typealias SpecialSxpPtr Ptr{SpecialSxp}
 
 @doc "R built-in function"->
-immutable BuiltinSxp <: Sxp  # type tag 8
+immutable BuiltinSxp <: FunctionSxp  # type tag 8
     head::SxpHead
 end
 typealias BuiltinSxpPtr Ptr{BuiltinSxp}
 
 @doc "R character string"->
-immutable CharSxp <: Sxp     # type tag 9
+immutable CharSxp <: VectorAtomicSxp     # type tag 9
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -97,7 +105,7 @@ end
 typealias SymSxpPtr Ptr{SymSxp}
 
 @doc "R logical vector"->
-immutable LglSxp <: Sxp     # type tag 10
+immutable LglSxp <: VectorNumericSxp     # type tag 10
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -105,7 +113,7 @@ end
 typealias LglSxpPtr Ptr{LglSxp}
 
 @doc "R integer vector"->
-immutable IntSxp <: Sxp     # type tag 13
+immutable IntSxp <: VectorNumericSxp     # type tag 13
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -113,7 +121,7 @@ end
 typealias IntSxpPtr Ptr{IntSxp}
 
 @doc "R real vector"->
-immutable RealSxp <: Sxp    # type tag 14
+immutable RealSxp <: VectorNumericSxp    # type tag 14
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -121,7 +129,7 @@ end
 typealias RealSxpPtr Ptr{RealSxp}
 
 @doc "R complex vector"->
-immutable CplxSxp <: Sxp    # type tag 15
+immutable CplxSxp <: VectorNumericSxp    # type tag 15
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -129,7 +137,7 @@ end
 typealias CplxSxpPtr Ptr{CplxSxp}
 
 @doc "R vector of character strings"->
-immutable StrSxp <: Sxp     # type tag 16
+immutable StrSxp <: VectorListSxp     # type tag 16
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -149,7 +157,7 @@ end
 typealias AnySxpPtr Ptr{AnySxp}
 
 @doc "R list (i.e. Array{Any,1})"->
-immutable VecSxp <: Sxp     # type tag 19
+immutable VecSxp <: VectorListSxp     # type tag 19
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -157,7 +165,7 @@ end
 typealias VecSxpPtr Ptr{VecSxp}
 
 @doc "R expression vector"->
-immutable ExprSxp <: Sxp    # type tag 20
+immutable ExprSxp <: VectorListSxp    # type tag 20
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -186,7 +194,7 @@ end
 typealias WeakRefSxpPtr Ptr{WeakRefSxp}
 
 @doc "R byte vector"->
-immutable RawSxp <: Sxp      # type tag 24
+immutable RawSxp <: VectorAtomicSxp      # type tag 24
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -200,28 +208,13 @@ end
 typealias S4SxpPtr Ptr{S4Sxp}
 
 
-
-@doc "Vector types in R"->
-typealias VectorSxp Union(CharSxp,LglSxp,IntSxp,RealSxp,CplxSxp,StrSxp,VecSxp,ExprSxp,RawSxp)
 typealias VectorSxpPtr{S<:VectorSxp} Ptr{S}
-
-typealias VectorAtomicSxp Union(LglSxp,IntSxp,RealSxp,CplxSxp,RawSxp,CharSxp)
 typealias VectorAtomicSxpPtr{S<:VectorAtomicSxp} Ptr{S}
-
-typealias VectorNumericSxp Union(LglSxp,IntSxp,RealSxp,CplxSxp)
 typealias VectorNumericSxpPtr{S<:VectorNumericSxp} Ptr{S}
-
-typealias VectorListSxp Union(VecSxp,StrSxp,ExprSxp)
 typealias VectorListSxpPtr{S<:VectorListSxp} Ptr{S}
-
-typealias PairListSxp Union(NilSxp,ListSxp,LangSxp)
 typealias PairListSxpPtr{S<:PairListSxp} Ptr{S}
-
-typealias PrimitiveSxp Union(BuiltinSxp,SpecialSxp)
-typealias PrimitiveSxpPtr{S<:PrimitiveSxp} Ptr{S}
-
-typealias FunctionSxp Union(ClosSxp,BuiltinSxp,SpecialSxp)
 typealias FunctionSxpPtr{S<:FunctionSxp} Ptr{S}
+
 
 @doc """
 Element types of R vectors.
@@ -341,4 +334,7 @@ function sexp(p::UnknownSxpPtr)
 end
 sexp(s::SxpPtr) = s
 sexp(r::RObject) = r.p
+
+sexp{S<:Sxp}(::Type{S},s::Ptr{S}) = s
+sexp{S<:Sxp}(::Type{S},r::RObject{S}) = r.p
 

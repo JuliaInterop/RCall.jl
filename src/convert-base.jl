@@ -25,8 +25,6 @@ rcopy{T}(::Type{T},r::RObject) = rcopy(T,r.p)
 
 `sexp(x)` performs a default conversion.
 """ ->
-sexp(::Type{SxpHead},x) = sexp(x)
-
 # used in vector indexing
 sexp(::Type{Cint},x) = convert(Cint,x)
 sexp(::Type{Float64},x) = convert(Float64,x)
@@ -76,7 +74,10 @@ sexp(::Type{StrSxp}, s::CharSxpPtr) =
     ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
 
 sexp(::Type{StrSxp},st::String) = sexp(StrSxp,sexp(CharSxp,st))
+
 sexp(st::String) = sexp(StrSxp,st)
+
+
 
 
 # general vectors
