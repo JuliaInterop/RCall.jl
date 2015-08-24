@@ -10,18 +10,13 @@ Coverage: [![Coveralls Status](https://coveralls.io/repos/JuliaStats/RCall.jl/ba
 
 ## Embedded R within Julia.
 
-### Installation
-To add the package, first ensure that both `R` and `Rscript` are on your search path, then start
-`julia` and enter
+### Requirements and Installation
+
+This package requires that a recent version of R be installed. Then running
 ```julia
 Pkg.add("RCall")
 ```
-
-Adding or re-building the package should write a file whose name is the value of
-```julia
-Pkg.dir("RCall","deps","deps.jl")
-```
-This file sets several environment values and defines a string `libR`.  You may want to check these values.
+from within Julia should be sufficient. For further details, see the [Installing RCall.jl](doc/Installation.md).
 
 ### Attaching the package
 Attaching the package in a Julia session with
@@ -29,8 +24,6 @@ Attaching the package in a Julia session with
 using RCall
 ```
 should start an embedded R.
-
-Please file an issue at the [github repository](https://github.com/JuliaStats/RCall.jl) for the package if this fails.
 
 ## Documentation
 
