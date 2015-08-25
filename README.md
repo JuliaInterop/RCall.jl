@@ -16,7 +16,7 @@ This package requires that a recent version of R be installed. Then running
 ```julia
 Pkg.add("RCall")
 ```
-from within Julia should be sufficient. For further details, see the [Installing RCall.jl](doc/Installation.md).
+from within Julia should be sufficient. For further details, see [Installing RCall.jl](doc/Installation.md).
 
 ### Attaching the package
 Attaching the package in a Julia session with

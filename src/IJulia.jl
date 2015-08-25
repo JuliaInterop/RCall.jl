@@ -1,12 +1,8 @@
 # IJulia hooks for displaying plots with RCall
 
-export rplot_set
+# TODO: create a special graphics device. This would allow us to not accidently close devices opened by users, and display plots immediately as they appear.
 
-const rplot_devno = Int32[1]
-const rplot_file_base = joinpath(tempdir(),"IJulia_RCall")
-const rplot_file_arg = rplot_file_base*"%03d"
-
-const rplot_opts = Any[MIME"image/png"(),(480,400),()]
+ijulia_mime = nothing
 
 @doc """
 Set options for R plotting with IJulia.
@@ -15,40 +11,32 @@ The first argument should be a MIME object: currently supported are
 * `MIME("image/png")` [default]
 * `MIME("image/svg+xml")`
 
-The remaining arguments are passed to the appropriate R graphics
+The remaining arguments (keyword only) are passed to the appropriate R graphics
 device: see the relevant R help for details.
 """->
-function rplot_set(m::MIME,args...;kwargs...)
-    rplot_opts[1] = m
-    rplot_opts[2] = args
-    rplot_opts[3] = kwargs
+function ijulia_setdevice(m::MIME;kwargs...)
+    global ijulia_mime
+    reval("options(device = function(filename='$(ijulia_file_fmt)',...) $(rdevicename(m))(filename,...))")
+    ijulia_mime = m
     nothing
 end
-rplot_set(m::MIME"image/png") = rplot_set(m,480,400)
-rplot_set(m::MIME"image/svg+xml") = rplot_set(m,6,5)
+ijulia_setdevice(m::MIME"image/png") = ijulia_setdevice(m,width=6*72,height=5*72)
+ijulia_setdevice(m::MIME"image/svg+xml") = ijulia_setdevice(m,width=6,height=5)
 
-rplot_device(m::MIME"image/png") = :png
-rplot_device(m::MIME"image/svg+xml") = :svg
+rdevicename(m::MIME"image/png") = :png
+rdevicename(m::MIME"image/svg+xml") = :svg
 
-@doc """
-Called before cell evaluation.
-Opens new graphics device.
-"""->
-function new_rplot()
-    rcall(rplot_device(rplot_opts[1]),rplot_file_arg,rplot_opts[2]...;rplot_opts[3]...)
-    rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
-end
 
-function displayfile(m::MIME"image/png", f)
+function ijulia_displayfile(m::MIME"image/png", f)
     open(f) do f
         d = readbytes(f)
-        display(InlineDisplay(),m,d)
+        display(Main.IPythonDisplay.InlineDisplay(),m,d)
     end
 end
-function displayfile(m::MIME"image/svg+xml", f)
+function ijulia_displayfile(m::MIME"image/svg+xml", f)
     open(f) do f
         d = readall(f)
-        display(InlineDisplay(),m,d)
+        display(Main.IPythonDisplay.InlineDisplay(),m,d)
     end
 end
 
@@ -56,41 +44,33 @@ end
 Called after cell evaluation.
 Closes graphics device and displays files in notebook.
 """->
-function disp_rplot()
-    d = rplot_devno[1]
-    if d != 1
-        rcall(symbol("dev.off"),d)
-        rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
-        i = 1
-        while true
-            rplot_file = @sprintf "%s%03d" rplot_file_base i
-            if isfile(rplot_file)
-                displayfile(rplot_opts[1],rplot_file)
-                rm(rplot_file)
-            else
-                break
-            end
-            i += 1
+function ijulia_displayplots()
+    if rcopy(Int,"dev.cur()") != 1
+        rcopy(Int,"dev.off()")
+        for fn in sort(readdir(ijulia_file_dir))
+            ffn = joinpath(ijulia_file_dir,fn)
+            ijulia_displayfile(ijulia_mime,ffn)
+            rm(ffn)
         end
     end
 end
 
-# cleanup png device on error
-function clean_rplot()
-    d = rplot_devno[1]
-    if d != 1
-        rcall(symbol("dev.off"),d)
-        rplot_devno[1] = rcopy(rcall(symbol("dev.cur")))[1]
+# cleanup after error
+function ijulia_cleanup()
+    if rcopy(Int,"dev.cur()") != 1
+        rcopy(Int,"dev.off()")
     end
-    i = 1
-    while true
-        rplot_file = @sprintf "%s%03d" rplot_file_base i
-        if isfile(rplot_file)
-            rm(rplot_file)
-        else
-            break
-        end
-        i += 1
+    for fn in readdir(ijulia_file_dir)
+        ffn = joinpath(ijulia_file_dir,fn)
+        rm(ffn)
     end
 end
 
+function ijulia_init()
+    global const ijulia_file_dir = tempname()
+    mkpath(ijulia_file_dir)
+    global const ijulia_file_fmt = joinpath(ijulia_file_dir,"rij_%03d")
+    Main.IJulia.push_postexecute_hook(ijulia_displayplots)
+    Main.IJulia.push_posterror_hook(ijulia_cleanup)
+    ijulia_setdevice(MIME"image/png"())
+end

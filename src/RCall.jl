@@ -149,13 +149,7 @@ function __init__()
     rcall_p(:options,warn=1)
 
     # IJulia hooks
-    if isdefined(Main, :IJulia) && Main.IJulia.inited
-        Main.IJulia.push_preexecute_hook(new_rplot)
-        Main.IJulia.push_postexecute_hook(disp_rplot)
-        Main.IJulia.push_posterror_hook(clean_rplot)
-
-        global InlineDisplay = Main.IPythonDisplay.InlineDisplay
-    end
+    isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_init()
 end
 
 end # module
