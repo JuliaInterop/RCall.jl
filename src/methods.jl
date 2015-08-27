@@ -356,6 +356,8 @@ function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
     v == rUnboundValue && error("$s is not defined in the environment")
     sexp(v)
 end
+getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(s))
+getindex(e::RObject{EnvSxp},s) = RObject(getindex(sexp(e),s))
 
 
 @doc "assign value v to symbol s in the environment e"->
@@ -364,11 +366,12 @@ function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{SymSxp})
     # frame.  If it is defined call Rf_setVar, otherwise call Rf_defineVar.
     # As it stands this segfaults if the symbol is bound in, say, the base
     # environment.
-    ccall((:Rf_setVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
+    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
 end
-function setindex!(e::Ptr{EnvSxp},v,s::Symbol)
+function setindex!(e::Ptr{EnvSxp},v,s)
     sv = protect(sexp(v))
     ss = protect(sexp(s))
     setindex!(e,sv,ss)
     unprotect(2)
 end
+setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)

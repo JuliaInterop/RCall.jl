@@ -12,10 +12,10 @@ export RObject,
    Sxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
    ClosSxp,
    getAttrib, setAttrib!, getNames, setNames!,
-   rGlobalEnv,
+   globalEnv,
    rcopy, rparse, rprint, reval, rcall, rlang,
    isNA, anyNA, isFactor, isOrdered,
-   @rimport, @rusing
+   @rimport, @rusing, @rput, @rget
 
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
@@ -111,6 +111,8 @@ function __init__()
     global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),UnknownSxpPtr))
     global const rMissingArg =  unsafe_load(cglobal((:R_MissingArg,libR),Ptr{SymSxp}))
 
+
+    global const globalEnv = RObject(rGlobalEnv)
 
     # set up function callbacks
     global const pJuliaCallback = cfunction(callJuliaExtPtr,UnknownSxpPtr,(ListSxpPtr,))

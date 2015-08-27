@@ -79,3 +79,38 @@ Parse, evaluate and print the result of a string as an R expression.
 """->
 rprint(io::IO,str::ByteString) = rprint(io,reval(str))
 rprint(io::IO,sym::Symbol) = rprint(io,reval(sym))
+
+
+macro rput(args...)
+    blk = Expr(:block)
+    for a in args
+        if isa(a,Symbol)
+            v = a
+            push!(blk.args,:(rGlobalEnv[$(QuoteNode(v))] = $(esc(v))))
+        elseif isa(a,Expr) && a.head == :(::) 
+            v = a.args[1]
+            S = a.args[2]
+            push!(blk.args,:(rGlobalEnv[$(QuoteNode(v))] = sexp($S,$(esc(v)))))
+        else
+            error("Incorrect usage of @rput")
+        end
+    end
+    blk
+end
+
+macro rget(args...)
+    blk = Expr(:block)
+    for a in args
+        if isa(a,Symbol)
+            v = a
+            push!(blk.args,:($(esc(v)) = rcopy(rGlobalEnv[$(QuoteNode(v))])))
+        elseif isa(a,Expr) && a.head == :(::) 
+            v = a.args[1]
+            T = a.args[2]
+            push!(blk.args,:($(esc(v)) = rcopy($(esc(T)),rGlobalEnv[$(QuoteNode(v))])))
+        else
+            error("Incorrect usage of @rget")
+        end
+    end
+    blk
+end

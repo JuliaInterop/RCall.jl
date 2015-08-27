@@ -15,9 +15,22 @@ langsexp[1] = RObject(:det)
 langsexp[2] = RObject([1 2; 0 0])
 @test rcopy(reval(langsexp))[1] == 0
 
-rGlobalEnv[:x] = RObject([1,2,3])
-rGlobalEnv[:y] = RObject([4,5,6])
+globalEnv[:x] = RObject([1,2,3])
+@test rcopy(globalEnv[:x]) == [1,2,3]
+globalEnv[:y] = RObject([4,5,6])
 @test rcopy(rcall(symbol("+"),:x,:y)) == [5,7,9]
+
+x = 1:10
+@rput x
+@rget x
+@test typeof(x,Vector{Int})
+@test all(x .== 1:10)
+
+y = "foo"
+@rput x y::StrSxp
+@rget x y::Array{UTF8String}
+@test isa(y,Vector{UTF8String})
+@test y[1] == "foo"
 
 @rimport MASS as mass
 @test round(rcopy(rcall(mass.ginv, RObject([1 2; 0 4]))),5) == [1 -0.5; 0 0.25]
