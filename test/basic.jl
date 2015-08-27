@@ -23,7 +23,7 @@ globalEnv[:y] = RObject([4,5,6])
 x = 1:10
 @rput x
 @rget x
-@test typeof(x,Vector{Int})
+@test isa(x,Vector{Int32})
 @test all(x .== 1:10)
 
 y = "foo"
