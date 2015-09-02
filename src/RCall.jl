@@ -51,11 +51,13 @@ end
 
 
 function __init__()
-    argv = ["REmbeddedJulia","--silent","--no-save"]
-    i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{UInt8}}),length(argv),argv)
-    i > 0 || error("initEmbeddedR failed. Try restarting and running Pkg.build(\"RCall\").")
-    global const Rproc = Rinstance(i)
-
+    Rinited = unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
+    if !Rinited
+        argv = ["REmbeddedJulia","--silent","--no-save"]
+        i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{UInt8}}),length(argv),argv)
+        i > 0 || error("initEmbeddedR failed. Try restarting and running Pkg.build(\"RCall\").")
+        global const Rproc = Rinstance(i)
+    end
 
     ip = ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Cint,),0)
     global const voffset = ccall((:INTEGER,libR),Ptr{Void},(Ptr{Void},),ip) - ip
@@ -120,31 +122,33 @@ function __init__()
     global const pJuliaDecref = cfunction(decrefExtPtr,Void,(ExtPtrSxpPtr,))
 
     # printing
-    pWriteConsoleEx = cfunction(writeConsoleEx,Void,(Ptr{UInt8},Cint,Cint))
+    if !Rinited
+        pWriteConsoleEx = cfunction(writeConsoleEx,Void,(Ptr{UInt8},Cint,Cint))
 
-    @windows? (
-        begin               
-            pCallBack = cfunction(eventCallBack,Void,())
-            pYesNoCancel = cfunction(askYesNoCancel,Cint,(Ptr{Cchar},))
-            rs = RStart()
-            ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
-            rs.rhome = ccall((:get_R_HOME,libR),Ptr{Cchar},())
-            rs.home = ccall((:getRUser,libR),Ptr{Cchar},())
-            rs.ReadConsole = cglobal((:R_ReadConsole,libR), Void)
-            rs.CallBack = pCallBack
-            rs.ShowMessage = cglobal((:R_ShowMessage,libR),Void)
-            rs.YesNoCancel = pYesNoCancel
-            rs.Busy = cglobal((:R_Busy,libR),Void)
-            rs.WriteConsoleEx = pWriteConsoleEx
-            ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
-        end
-      : begin
-            unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), pWriteConsoleEx)
-            unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
-            unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
-            unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
-         end
-    )
+        @windows? (
+            begin
+                pCallBack = cfunction(eventCallBack,Void,())
+                pYesNoCancel = cfunction(askYesNoCancel,Cint,(Ptr{Cchar},))
+                rs = RStart()
+                ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
+                rs.rhome = ccall((:get_R_HOME,libR),Ptr{Cchar},())
+                rs.home = ccall((:getRUser,libR),Ptr{Cchar},())
+                rs.ReadConsole = cglobal((:R_ReadConsole,libR), Void)
+                rs.CallBack = pCallBack
+                rs.ShowMessage = cglobal((:R_ShowMessage,libR),Void)
+                rs.YesNoCancel = pYesNoCancel
+                rs.Busy = cglobal((:R_Busy,libR),Void)
+                rs.WriteConsoleEx = pWriteConsoleEx
+                ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
+            end
+           : begin
+                unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), pWriteConsoleEx)
+                unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
+                unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
+                unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
+             end
+        )
+    end
 
     # print warnings as they arise
     # we can't use Rf_PrintWarnings as not exported on all platforms.
