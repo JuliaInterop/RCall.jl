@@ -67,8 +67,7 @@ function ijulia_cleanup()
 end
 
 function ijulia_init()
-    global const ijulia_file_dir = tempname()
-    mkpath(ijulia_file_dir)
+    global const ijulia_file_dir = mktempdir()
     global const ijulia_file_fmt = joinpath(ijulia_file_dir,"rij_%03d")
     Main.IJulia.push_postexecute_hook(ijulia_displayplots)
     Main.IJulia.push_posterror_hook(ijulia_cleanup)
