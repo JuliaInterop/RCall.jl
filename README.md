@@ -1,12 +1,13 @@
 # RCall.jl
 
-Linux & OSX: [![Travis Build Status](https://travis-ci.org/JuliaStats/RCall.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/RCall.jl)
+#### Most recent release
+[![RCall](http://pkg.julialang.org/badges/RCall_0.3.svg)](http://pkg.julialang.org/?pkg=RCall&ver=0.3)
+[![RCall](http://pkg.julialang.org/badges/RCall_0.4.svg)](http://pkg.julialang.org/?pkg=RCall&ver=0.4)
 
-Windows: [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/y3kxma63apcig150/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/rcall-jl)
-
-Pkg: [![PkgEval status](http://pkg.julialang.org/badges/RCall_release.svg)](http://pkg.julialang.org/?pkg=RCall&ver=release) [![pkg.julialang.org status](http://pkg.julialang.org/badges/RCall_0.4.svg)](http://pkg.julialang.org/?pkg=RCall&ver=nightly)
-
-Coverage: [![Coveralls Status](https://coveralls.io/repos/JuliaStats/RCall.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaStats/RCall.jl?branch=master)
+#### Development version
+* Linux & OSX: [![Travis Build Status](https://travis-ci.org/JuliaStats/RCall.jl.svg?branch=master)](https://travis-ci.org/JuliaStats/RCall.jl)
+* Windows: [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/y3kxma63apcig150/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/rcall-jl)
+* Coverage: [![Coveralls Status](https://coveralls.io/repos/JuliaStats/RCall.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaStats/RCall.jl?branch=master)
 
 ## Embedded R within Julia.
 
