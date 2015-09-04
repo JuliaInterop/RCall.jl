@@ -5,11 +5,10 @@ try/catch block, returning a Sxp pointer.
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     err = Array(Cint,1)
     val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
-    if nb_available(errorBuffer) != 0
-        warn("RCall.jl ",readall(RCall.errorBuffer))
-    end
     if err[1] !=0
-        error("RCall.jl ",rcopy(String,rcall_p(:geterrmessage)))
+        error("RCall.jl ", readall(RCall.errorBuffer))
+    elseif nb_available(errorBuffer) != 0
+        warn("RCall.jl ", readall(RCall.errorBuffer))
     end
     sexp(val)
 end
@@ -80,7 +79,9 @@ Parse, evaluate and print the result of a string as an R expression.
 rprint(io::IO,str::ByteString) = rprint(io,reval(str))
 rprint(io::IO,sym::Symbol) = rprint(io,reval(sym))
 
-
+@doc """
+Copies variables from Julia to R using the same name.
+"""->
 macro rput(args...)
     blk = Expr(:block)
     for a in args
@@ -98,6 +99,9 @@ macro rput(args...)
     blk
 end
 
+@doc """
+Copies variables from R to Julia using the same name.
+"""->
 macro rget(args...)
     blk = Expr(:block)
     for a in args
