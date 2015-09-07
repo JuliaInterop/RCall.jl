@@ -35,8 +35,14 @@ function ijulia_displayfile(m::MIME"image/png", f)
     end
 end
 function ijulia_displayfile(m::MIME"image/svg+xml", f)
+    # R svg images use named defs, which cause problem when used inline, see
+    # https://github.com/jupyter/notebook/issues/333
+    # we get around this by renaming the elements.
     open(f) do f
+        r = randstring()
         d = readall(f)
+        d = replace(d,"id=\"glyph","id=\"glyph"*r)
+        d = replace(d,"href=\"#glyph","href=\"#glyph"*r)
         display(Main.IPythonDisplay.InlineDisplay(),m,d)
     end
 end
