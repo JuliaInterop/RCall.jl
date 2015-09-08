@@ -374,7 +374,7 @@ function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
     v == sexp(Const.UnboundValue) && error("$s is not defined in the environment")
     sexp(v)
 end
-getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(s))
+getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(SymSxp,s))
 getindex(e::RObject{EnvSxp},s) = RObject(getindex(sexp(e),s))
 
 
@@ -388,7 +388,7 @@ function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{SymSxp})
 end
 function setindex!(e::Ptr{EnvSxp},v,s)
     sv = protect(sexp(v))
-    ss = protect(sexp(s))
+    ss = protect(sexp(SymSxp,s))
     setindex!(e,sv,ss)
     unprotect(2)
 end

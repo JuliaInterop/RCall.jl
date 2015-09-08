@@ -12,7 +12,7 @@ export RObject,
    globalEnv,
    rcopy, rparse, rprint, reval, rcall, rlang,
    isNA, anyNA, isFactor, isOrdered,
-   @rimport, @rusing, @rput, @rget, @var_str
+   @rimport, @rusing, @rput, @rget, @var_str, @R_str
 
 
 include("setup.jl")
@@ -29,6 +29,7 @@ include("eventloop.jl")
 include("callback.jl")
 include("IJulia.jl")
 include("io.jl")
+include("rstr.jl")
 
 
 const globalEnv = Const.GlobalEnv
