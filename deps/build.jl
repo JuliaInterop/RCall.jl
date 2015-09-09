@@ -16,11 +16,13 @@ if OS_NAME == :Windows
         Rlib = joinpath(Rlibpath,Rlibname)
         Libdl.dlopen_e(Rlib) == C_NULL && error("Unable to locate $Rlibname\nTry adding location to PATH and re-run Pkg.build(\"RCall\")")
 
-        # We have to circumvent Win32/POSIX ENV bug, see
+        # use _wputenv to circumvent Win32/POSIX ENV bug, see
         # https://github.com/JuliaLang/julia/issues/11215
+        # define HOME to stop R defining it
         deps_code = quote
             const libR = $Rlib
             ccall(:_wputenv,Cint,(Ptr{UInt16},),utf16("PATH="*ENV["PATH"]*";"*$Rlibpath))
+            ccall(:_wputenv,Cint,(Ptr{UInt16},),utf16("HOME="*homedir())) 
         end
     end
 else
