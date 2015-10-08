@@ -10,6 +10,7 @@ notifications:
 
 before_install:
   # linux
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then /lib/libc.so.6; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then echo "deb http://cran.rstudio.com/bin/linux/ubuntu precise/" | sudo tee -a /etc/apt/sources.list; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq -y; fi
