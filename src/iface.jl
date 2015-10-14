@@ -28,16 +28,16 @@ Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """->
 reval(s, env=rGlobalEnv) = RObject(reval_p(sexp(s),sexp(env)))
-reval(str::String, env=rGlobalEnv) = reval(rparse_p(str))
+reval(str::AbstractString, env=rGlobalEnv) = reval(rparse_p(str))
 reval(sym::Symbol, env=rGlobalEnv) = reval(sexp(sym))
 
 
 @doc """
 Evaluate and convert the result of a string as an R expression.
 """->
-rcopy(str::String) = rcopy(reval_p(rparse_p(str)))
+rcopy(str::AbstractString) = rcopy(reval_p(rparse_p(str)))
 rcopy(sym::Symbol) = rcopy(reval_p(sexp(sym)))
-rcopy{T}(::Type{T}, str::String) = rcopy(T, reval_p(rparse_p(str)))
+rcopy{T}(::Type{T}, str::AbstractString) = rcopy(T, reval_p(rparse_p(str)))
 rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
@@ -55,10 +55,10 @@ function rparse_p(st::Ptr{StrSxp})
     end
     sexp(val)
 end
-rparse_p(st::String) = rparse_p(sexp(st))
+rparse_p(st::AbstractString) = rparse_p(sexp(st))
 
 @doc "Parse a string as an R expression, returning an RObject."->
-rparse(st::String) = RObject(rparse_p(st))
+rparse(st::AbstractString) = RObject(rparse_p(st))
 
 
 @doc "Print the value of an Sxp using R's printing mechanism"->

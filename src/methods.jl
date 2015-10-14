@@ -88,7 +88,7 @@ getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real...) = sexp(getindex(unsafe_array(s
 @doc """
 String indexing finds the first element with the matching name
 """->
-function getindex{S<:VectorSxp}(s::Ptr{S}, label::String)
+function getindex{S<:VectorSxp}(s::Ptr{S}, label::AbstractString)
     ls = unsafe_vec(getNames(s))
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
@@ -119,18 +119,18 @@ function setindex!(s::Ptr{StrSxp}, value::CharSxpPtr, key::Integer)
           s, key-1, value)
     value
 end
-function setindex!(s::Ptr{StrSxp}, value::String, key::Integer)
+function setindex!(s::Ptr{StrSxp}, value::AbstractString, key::Integer)
     setindex!(s,sexp(CharSxp,value),key)
 end
 
 
-function setindex!{S<:Union(VecSxp,ExprSxp),T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
+@compat function setindex!{S<:Union{VecSxp,ExprSxp},T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_VECTOR_ELT,libR), Ptr{T},
           (Ptr{S},Cptrdiff_t, Ptr{T}),
           s, key-1, value)
 end
-function setindex!{S<:Union(VecSxp,ExprSxp)}(s::Ptr{S}, value, key::Integer)
+@compat function setindex!{S<:Union{VecSxp,ExprSxp}}(s::Ptr{S}, value, key::Integer)
     setindex!(s,sexp(value),key)
 end
 
@@ -202,7 +202,7 @@ function getAttrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
     sexp(ccall((:Rf_getAttrib,libR),UnknownSxpPtr,(Ptr{S},Ptr{SymSxp}),s,sym))
 end
 getAttrib{S<:Sxp}(s::Ptr{S}, sym::Symbol) = getAttrib(s,sexp(SymSxp,sym))
-getAttrib{S<:Sxp}(s::Ptr{S}, sym::String) = getAttrib(s,sexp(SymSxp,sym))
+getAttrib{S<:Sxp}(s::Ptr{S}, sym::AbstractString) = getAttrib(s,sexp(SymSxp,sym))
 
 getAttrib(r::RObject, sym) = RObject(getAttrib(r.p,sym))
 
@@ -211,7 +211,7 @@ function setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T})
     return nothing
 end
 setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Symbol,t::Ptr{T}) = setAttrib!(s,sexp(SymSxp,sym),t)
-setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::String,t::Ptr{T}) = setAttrib!(s,sexp(SymSxp,sym),t)
+setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::AbstractString,t::Ptr{T}) = setAttrib!(s,sexp(SymSxp,sym),t)
 setAttrib!{S<:Sxp}(s::Ptr{S},sym,t) = setAttrib!(s,sym,sexp(t))
 
 setAttrib!(r::RObject, sym, t) = setAttrib!(r.p, sym, t)

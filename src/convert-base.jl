@@ -33,21 +33,21 @@ sexp(::Type{Complex128},x) = convert(Complex128,x)
 
 
 # NilSxp
-sexp(::Type{Nothing}) = rNilValue
+sexp(::Type{Void}) = rNilValue
 rcopy(::Ptr{NilSxp}) = nothing
 
 
 # SymSxp
 @doc "Create a `SymSxp` from a `Symbol`"->
-sexp(::Type{SymSxp}, s::String) = ccall((:Rf_install,libR),Ptr{SymSxp},(Ptr{UInt8},),bytestring(s))
+sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install,libR),Ptr{SymSxp},(Ptr{UInt8},),bytestring(s))
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
 
 @doc "Generic function for constructing Sxps from Julia objects."->
 sexp(s::Symbol) = sexp(SymSxp,s)
 
-rcopy(::Type{Symbol},ss::SymSxp) = symbol(rcopy(String,ss))
-rcopy(::Type{String},ss::SymSxp) = rcopy(String,ss.name)
-rcopy{T<:Union(Symbol,String)}(::Type{T},s::Ptr{SymSxp}) =
+rcopy(::Type{Symbol},ss::SymSxp) = symbol(rcopy(AbstractString,ss))
+rcopy(::Type{AbstractString},ss::SymSxp) = rcopy(AbstractString,ss.name)
+@compat rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
     rcopy(T,unsafe_load(s))
 
 
@@ -61,21 +61,21 @@ sexp(::Type{CharSxp},st::ASCIIString) =
 sexp(::Type{CharSxp},st::UTF8String) =
     ccall((:Rf_mkCharLenCE,libR),CharSxpPtr,(Ptr{UInt8},Cint,Cint),st,sizeof(st),1)
 
-sexp(::Type{CharSxp},st::String) = sexp(CharSxp,bytestring(st))
+sexp(::Type{CharSxp},st::AbstractString) = sexp(CharSxp,bytestring(st))
 sexp(::Type{CharSxp},sym::Symbol) = sexp(CharSxp,string(sym))
 
 
-rcopy{T<:String}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
-rcopy(::Type{Symbol},s::CharSxpPtr) = symbol(rcopy(String,s))
+rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
+rcopy(::Type{Symbol},s::CharSxpPtr) = symbol(rcopy(AbstractString,s))
 
 
 @doc "Create a `StrSxp` from a `String`"->
 sexp(::Type{StrSxp}, s::CharSxpPtr) =
     ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
 
-sexp(::Type{StrSxp},st::String) = sexp(StrSxp,sexp(CharSxp,st))
+sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
 
-sexp(st::String) = sexp(StrSxp,st)
+sexp(st::AbstractString) = sexp(StrSxp,st)
 
 
 
@@ -98,10 +98,10 @@ end
 
 
 # StrSxp
-sexp{S<:String}(a::AbstractArray{S}) = sexp(StrSxp,a)
+sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
 
 rcopy(::Type{Array},s::StrSxpPtr) = rcopy(Array{isascii(s) ? ASCIIString : UTF8String}, s)
-rcopy{T<:String}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
+rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
 
 
 # LglSxp, IntSxp, RealSxp, CplxSxp
@@ -140,9 +140,9 @@ end
 
 
 # Handle LglSxp seperately
-sexp(::Type{LglSxp},v::Union(Bool,Cint)) =
+@compat sexp(::Type{LglSxp},v::Union{Bool,Cint}) =
     ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
-function sexp{T<:Union(Bool,Cint)}(::Type{LglSxp}, a::AbstractArray{T})
+@compat function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
     ra = allocArray(LglSxp, size(a)...)
     copy!(unsafe_vec(ra),a)
     ra
@@ -217,7 +217,7 @@ function sexp{S<:VectorSxp}(::Type{S},d::Associative)
     unprotect(2)
     vs
 end
-sexp{K,V<:String}(d::Associative{K,V}) = sexp(StrSxp,d)
+sexp{K,V<:AbstractString}(d::Associative{K,V}) = sexp(StrSxp,d)
 sexp(d::Associative) = sexp(VecSxp,d)
 
 
