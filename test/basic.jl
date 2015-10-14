@@ -37,6 +37,10 @@ y = "foo"
 
 @test sprint(io -> rprint(io,RObject([1,2,3]))) == "[1] 1 2 3\n"
 
+@test_approx_eq rcopy(rcall(:besselI, 1.0, 2.0)) besseli(2.0,1.0)
+@test_approx_eq rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) besselix(2.0,1.0)
+
+
 # callbacks
 function testfn(x,y;a=3,b=4)
     [x;y;a;b]

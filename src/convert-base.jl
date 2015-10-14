@@ -69,7 +69,7 @@ rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe
 rcopy(::Type{Symbol},s::CharSxpPtr) = symbol(rcopy(AbstractString,s))
 
 
-@doc "Create a `StrSxp` from a `String`"->
+@doc "Create a `StrSxp` from an `AbstractString`"->
 sexp(::Type{StrSxp}, s::CharSxpPtr) =
     ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
 

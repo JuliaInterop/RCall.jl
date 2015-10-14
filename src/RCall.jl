@@ -15,7 +15,7 @@ export RObject,
    globalEnv,
    rcopy, rparse, rprint, reval, rcall, rlang,
    isNA, anyNA, isFactor, isOrdered,
-   @rimport, @rusing, @rput, @rget
+   @rimport, @rusing, @rput, @rget, @var_str
 
 
 if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))

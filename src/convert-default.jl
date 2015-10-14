@@ -4,13 +4,13 @@
 `rcopy` copies the contents of an R object into a corresponding canonical Julia type.
 """ ->
 rcopy(s::SymSxpPtr) = rcopy(Symbol,s)
-rcopy(s::CharSxpPtr) = rcopy(String,s)
+rcopy(s::CharSxpPtr) = rcopy(AbstractString,s)
 
 function rcopy(s::StrSxpPtr)
     if anyNA(s)
         rcopy(DataArray,s)
     elseif length(s) == 1
-        rcopy(String,s)
+        rcopy(AbstractString,s)
     else
         rcopy(Array,s)
     end

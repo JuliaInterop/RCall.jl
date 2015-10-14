@@ -33,7 +33,7 @@ r = RObject(false)
 @test rcopy(r) === false
 @test r[1] === convert(Cint,0)
 
-v = randbool(10)
+v = bitrand(10)
 r = RObject(v)
 @test isa(r,RObject{LglSxp})
 @test length(r) == length(v)
