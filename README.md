@@ -13,7 +13,7 @@
 
 ### Requirements and Installation
 
-This package requires that a recent version of R be installed. Then running
+This package requires that a recent version of R (3.2.0 or greater) be installed. Then running
 ```julia
 Pkg.add("RCall")
 ```

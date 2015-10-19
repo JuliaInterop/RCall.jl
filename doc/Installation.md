@@ -2,7 +2,7 @@
 
 ## Supported methods
 
-RCall.jl requires that a recent version of R be installed. Currently supported are:
+RCall.jl requires that a recent version of R, at least 3.2.0, be installed. Currently supported are:
  * Windows: The Windows binary from [CRAN](https://cran.r-project.org/bin/windows/base/).
  * Mac OS X: The [CRAN .pkg](https://cran.r-project.org/bin/macosx/) or the [homebrew/science](https://github.com/Homebrew/homebrew-science) tap.
  * Linux: most distributions allow installation of R from their package manager, however these are often older versions which may not work with RCall.jl. We recommend that you use the updated repositories from [CRAN](https://cran.r-project.org/bin/linux/).
