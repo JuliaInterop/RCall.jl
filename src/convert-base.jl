@@ -33,7 +33,11 @@ sexp(::Type{Complex128},x) = convert(Complex128,x)
 
 
 # NilSxp
-sexp(::Void) = rNilValue
+if VERSION < v"v0.4-"
+    sexp(::Type{Void}) = rNilValue
+else
+    sexp(::Void) = rNilValue
+end
 rcopy(::Ptr{NilSxp}) = nothing
 
 
