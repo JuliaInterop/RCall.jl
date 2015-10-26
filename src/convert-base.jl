@@ -34,7 +34,7 @@ sexp(::Type{Complex128},x) = convert(Complex128,x)
 
 # NilSxp
 if VERSION < v"v0.4-"
-    sexp(::Type{Void}) = rNilValue
+    sexp(::Nothing) = rNilValue
 else
     sexp(::Void) = rNilValue
 end
