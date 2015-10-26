@@ -53,6 +53,8 @@ end
 function __init__()
     Rinited = unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
     if !Rinited
+        # disable signal handlers
+        unsafe_store!(cglobal((:R_SignalHandlers,RCall.libR),Cint),0)
         argv = ["REmbeddedJulia","--silent","--no-save"]
         i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{UInt8}}),length(argv),argv)
         i > 0 || error("initEmbeddedR failed. Try restarting and running Pkg.build(\"RCall\").")
