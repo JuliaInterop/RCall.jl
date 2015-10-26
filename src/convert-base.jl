@@ -33,7 +33,7 @@ sexp(::Type{Complex128},x) = convert(Complex128,x)
 
 
 # NilSxp
-sexp(::Type{Void}) = rNilValue
+sexp(::Void) = rNilValue
 rcopy(::Ptr{NilSxp}) = nothing
 
 
@@ -248,5 +248,3 @@ end
 function rcopy{S<:FunctionSxp}(::Type{Function}, r::RObject{S})
     (args...) -> rcopy(rcall_p(r,args...))
 end
-
-

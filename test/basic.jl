@@ -59,6 +59,8 @@ r = rcall(:optimize,sin,[-2,0])
 r = rcall(:optimize,sin,[0,2],maximum=true)
 @test_approx_eq_eps r[:maximum][1] pi/2 eps()^0.25
 
+nullfn() = nothing
+@test isa(rcall(nullfn), RObject{NilSxp})
 
 # graphics
 f = tempname()
