@@ -9,7 +9,7 @@ import Base: eltype, show, convert, isascii,
     length, size, getindex, setindex!, start, next, done
 
 export RObject,
-   Sxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
+   Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
    ClosSxp,
    getAttrib, setAttrib!, getNames, setNames!,
    globalEnv,
