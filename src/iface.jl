@@ -70,11 +70,11 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     # print function as it doesn't use R_tryEval
     # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     # below mirrors Rf_PrintValue
+    env = protect(ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
+            (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),rNilValue,rNilValue,rGlobalEnv))
+    xsym = protect(sexp(:x))
+    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),xsym,s,env)
     if isObject(s) || isFunction(s)
-        env = protect(ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
-                (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),rNilValue,rNilValue,rGlobalEnv))
-        xsym = protect(sexp(:x))
-        ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),xsym,s,env)
         if isS4(s)
             methodsNamespace = protect(ccall((:R_FindNamespace,libR),Ptr{EnvSxp},
                 (Ptr{StrSxp},), sexp("methods")))
@@ -88,12 +88,16 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
             reval(rlang_p(printFn, xsym),env)
             unprotect(1)
         end
-        unprotect(2)
     else
-        ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, rGlobalEnv)
+        # Rf_PrintValueRec not found on unix!?
+        # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, rGlobalEnv)
+        printFn = protect(ccall((:Rf_findVar,libR),UnknownSxpPtr,
+            (Ptr{SymSxp},Ptr{EnvSxp}), sexp(symbol("print.default")), rBaseNamespace))
+        reval(rlang_p(printFn, xsym),env)
+        unprotect(1)
     end
     write(io,takebuf_string(printBuffer))
-    unprotect(1)
+    unprotect(3)
     nothing
 end
 rprint(io::IO,r::RObject) = rprint(io,r.p)
