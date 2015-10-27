@@ -68,3 +68,24 @@ rcall(:png,f)
 rcall(:plot,1:10)
 rcall(symbol("dev.off"))
 @test isfile(f)
+
+# S4 rprint
+const pipe = PipeBuffer()
+rprint(pipe, reval("""
+   setClass("Foo", representation(x = "numeric"))
+   foo <- new("Foo", x = 20)
+"""))
+@test nb_available(pipe)>0
+readall(pipe)
+@test nb_available(pipe)==0
+
+# S3 rprint
+rprint(pipe, reval("""
+   print.Bar <- function(x) print("hello")
+   bar <- 1
+   class(bar) <- "Bar"
+   bar
+"""))
+@test nb_available(pipe)>0
+readall(pipe)
+@test nb_available(pipe)==0

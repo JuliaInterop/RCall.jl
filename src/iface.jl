@@ -15,9 +15,11 @@ end
 
 function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val           # the value of the last expression is returned
+    protect(expr)
     for e in expr
         val = reval_p(e,env)
     end
+    unprotect(1)
     val
 end
 
@@ -63,8 +65,35 @@ rparse(st::AbstractString) = RObject(rparse_p(st))
 
 @doc "Print the value of an Sxp using R's printing mechanism"->
 function rprint{S<:Sxp}(io::IO, s::Ptr{S})
-    ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
+    protect(s)
+    # Rf_PrintValue can cause segfault if S3 objects has custom
+    # print function as it doesn't use R_tryEval
+    # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
+    # below mirrors Rf_PrintValue
+    if isObject(s) || isFunction(s)
+        env = protect(ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
+                (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),rNilValue,rNilValue,rGlobalEnv))
+        xsym = protect(sexp(:x))
+        ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),xsym,s,env)
+        if isS4(s)
+            methodsNamespace = protect(ccall((:R_FindNamespace,libR),Ptr{EnvSxp},
+                (Ptr{StrSxp},), sexp("methods")))
+            showFn = protect(ccall((:Rf_findVarInFrame3,libR),UnknownSxpPtr,
+                (Ptr{EnvSxp}, Ptr{SymSxp}, Int32), methodsNamespace, sexp(:show), 1))
+            reval(rlang_p(showFn, xsym),env)
+            unprotect(2)
+        else
+            printFn = protect(ccall((:Rf_findVar,libR),UnknownSxpPtr,
+                (Ptr{SymSxp},Ptr{EnvSxp}), sexp(:print), rBaseNamespace))
+            reval(rlang_p(printFn, xsym),env)
+            unprotect(1)
+        end
+        unprotect(2)
+    else
+        ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, rGlobalEnv)
+    end
     write(io,takebuf_string(printBuffer))
+    unprotect(1)
     nothing
 end
 rprint(io::IO,r::RObject) = rprint(io,r.p)
@@ -88,7 +117,7 @@ macro rput(args...)
         if isa(a,Symbol)
             v = a
             push!(blk.args,:(rGlobalEnv[$(QuoteNode(v))] = $(esc(v))))
-        elseif isa(a,Expr) && a.head == :(::) 
+        elseif isa(a,Expr) && a.head == :(::)
             v = a.args[1]
             S = a.args[2]
             push!(blk.args,:(rGlobalEnv[$(QuoteNode(v))] = sexp($S,$(esc(v)))))
@@ -108,7 +137,7 @@ macro rget(args...)
         if isa(a,Symbol)
             v = a
             push!(blk.args,:($(esc(v)) = rcopy(rGlobalEnv[$(QuoteNode(v))])))
-        elseif isa(a,Expr) && a.head == :(::) 
+        elseif isa(a,Expr) && a.head == :(::)
             v = a.args[1]
             T = a.args[2]
             push!(blk.args,:($(esc(v)) = rcopy($(esc(T)),rGlobalEnv[$(QuoteNode(v))])))
