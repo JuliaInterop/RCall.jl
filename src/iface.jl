@@ -96,6 +96,7 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
         reval(rlang_p(printFn, xsym),env)
         unprotect(1)
     end
+    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),xsym,rNilValue,env)
     write(io,takebuf_string(printBuffer))
     unprotect(3)
     nothing
