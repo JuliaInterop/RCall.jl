@@ -70,35 +70,24 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     # print function as it doesn't use R_tryEval
     # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     # below mirrors Rf_PrintValue
-    env = protect(ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
-            (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),rNilValue,rNilValue,rGlobalEnv))
-    xsym = protect(sexp(:x))
-    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),xsym,s,env)
+    env = protect(newEnvironment(rGlobalEnv))
+    env[:x] = s
     if isObject(s) || isFunction(s)
         if isS4(s)
-            methodsNamespace = protect(ccall((:R_FindNamespace,libR),Ptr{EnvSxp},
-                (Ptr{StrSxp},), sexp("methods")))
-            showFn = protect(ccall((:Rf_findVarInFrame3,libR),UnknownSxpPtr,
-                (Ptr{EnvSxp}, Ptr{SymSxp}, Int32), methodsNamespace, sexp(:show), 1))
-            reval(rlang_p(showFn, xsym),env)
-            unprotect(2)
-        else
-            printFn = protect(ccall((:Rf_findVar,libR),UnknownSxpPtr,
-                (Ptr{SymSxp},Ptr{EnvSxp}), sexp(:print), rBaseNamespace))
-            reval(rlang_p(printFn, xsym),env)
+            methodsNamespace = protect(findNamespace("methods"))
+            reval(rlang_p(methodsNamespace[:show], :x),env)
             unprotect(1)
+        else
+            reval(rlang_p(rBaseNamespace[:print], :x),env)
         end
     else
         # Rf_PrintValueRec not found on unix!?
         # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, rGlobalEnv)
-        printFn = protect(ccall((:Rf_findVar,libR),UnknownSxpPtr,
-            (Ptr{SymSxp},Ptr{EnvSxp}), sexp(symbol("print.default")), rBaseNamespace))
-        reval(rlang_p(printFn, xsym),env)
-        unprotect(1)
+        reval(rlang_p(rBaseNamespace[symbol("print.default")], :x),env)
     end
-    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),xsym,rNilValue,env)
+    env[:x] = rNilValue
     write(io,takebuf_string(printBuffer))
-    unprotect(3)
+    unprotect(2)
     nothing
 end
 rprint(io::IO,r::RObject) = rprint(io,r.p)
