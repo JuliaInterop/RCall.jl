@@ -15,23 +15,38 @@ end
 
 global timeout = nothing
 
-function rgui_start()
+function rgui_start(silent=false)
     global timeout
     if timeout == nothing
         timeout = Base.Timer(x -> process_events(), 0.05, 0.05)
+        return true
     else
-        error("eventloop is running.")
+        silent || error("eventloop is already running.")
+        return false
     end
-    nothing
 end
 
-function rgui_stop()
+function rgui_stop(silent=false)
     global timeout
     if timeout != nothing
         close(timeout)
         timeout = nothing
+        return true
     else
-        error("eventloop is not running.")
+        silent || error("eventloop is not running.")
+        return false
     end
-    nothing
+end
+
+function setHook(hookname, value)
+    l = rparse("""setHook(hookname, function(...) rstart(TRUE))""")
+    l[1][2] = hookname
+    l[1][3][3][1] = value
+    reval(l)
+end
+
+function rgui_init()
+    setHook("plot.new", rgui_start)
+    setHook("grid.newpage", rgui_start)
+    setHook(rlang(:packageEvent, "rgl", "onLoad"), rgui_start)
 end

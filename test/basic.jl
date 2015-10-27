@@ -63,11 +63,15 @@ nullfn() = nothing
 @test isa(rcall(nullfn), RObject{NilSxp})
 
 # graphics
+RCall.rgui_init()
 f = tempname()
 rcall(:png,f)
 rcall(:plot,1:10)
 rcall(symbol("dev.off"))
 @test isfile(f)
+@test !RCall.rgui_start(true)
+@test_throws ErrorException RCall.rgui_start()
+@test RCall.rgui_stop()
 
 # S4 rprint
 @test contains(sprint(io ->
