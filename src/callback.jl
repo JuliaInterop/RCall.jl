@@ -74,7 +74,7 @@ const jtypExtPtrs = Dict{ExtPtrSxpPtr, Any}()
 Called by the R finalizer.
 """->
 function decrefExtPtr(p::ExtPtrSxpPtr)
-    delete(jtypExtPtrs, p)
+    delete!(jtypExtPtrs, p)
     return nothing
 end
 
