@@ -110,6 +110,8 @@ function __init__()
 
     global const rEmptyEnv = unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{EnvSxp}))
     global const rGlobalEnv = unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{EnvSxp}))
+    global const rBaseEnv = unsafe_load(cglobal((:R_BaseEnv,libR),Ptr{EnvSxp}))
+    global const rBaseNamespace = unsafe_load(cglobal((:R_BaseNamespace,libR),Ptr{EnvSxp}))
 
     global const rNilValue = unsafe_load(cglobal((:R_NilValue,libR),Ptr{NilSxp}))
     global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),UnknownSxpPtr))

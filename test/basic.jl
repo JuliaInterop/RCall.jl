@@ -68,3 +68,19 @@ rcall(:png,f)
 rcall(:plot,1:10)
 rcall(symbol("dev.off"))
 @test isfile(f)
+
+# S4 rprint
+@test contains(sprint(io ->
+rprint(io, reval("""
+   setClass("Foo", representation(x = "numeric"))
+   foo <- new("Foo", x = 20)
+"""))), "An object of class")
+
+# S3 rprint
+@test contains(sprint(io ->
+rprint(io, reval("""
+   print.Bar <- function(x) print("hello")
+   bar <- 1
+   class(bar) <- "Bar"
+   bar
+"""))), "hello")

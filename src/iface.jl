@@ -15,9 +15,11 @@ end
 
 function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val           # the value of the last expression is returned
+    protect(expr)
     for e in expr
         val = reval_p(e,env)
     end
+    unprotect(1)
     val
 end
 
@@ -63,8 +65,29 @@ rparse(st::AbstractString) = RObject(rparse_p(st))
 
 @doc "Print the value of an Sxp using R's printing mechanism"->
 function rprint{S<:Sxp}(io::IO, s::Ptr{S})
-    ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
+    protect(s)
+    # Rf_PrintValue can cause segfault if S3 objects has custom
+    # print function as it doesn't use R_tryEval
+    # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
+    # below mirrors Rf_PrintValue
+    env = protect(newEnvironment(rGlobalEnv))
+    env[:x] = s
+    if isObject(s) || isFunction(s)
+        if isS4(s)
+            methodsNamespace = protect(findNamespace("methods"))
+            reval(rlang_p(methodsNamespace[:show], :x),env)
+            unprotect(1)
+        else
+            reval(rlang_p(rBaseNamespace[:print], :x),env)
+        end
+    else
+        # Rf_PrintValueRec not found on unix!?
+        # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, rGlobalEnv)
+        reval(rlang_p(rBaseNamespace[symbol("print.default")], :x),env)
+    end
+    env[:x] = rNilValue
     write(io,takebuf_string(printBuffer))
+    unprotect(2)
     nothing
 end
 rprint(io::IO,r::RObject) = rprint(io,r.p)
@@ -88,7 +111,7 @@ macro rput(args...)
         if isa(a,Symbol)
             v = a
             push!(blk.args,:(rGlobalEnv[$(QuoteNode(v))] = $(esc(v))))
-        elseif isa(a,Expr) && a.head == :(::) 
+        elseif isa(a,Expr) && a.head == :(::)
             v = a.args[1]
             S = a.args[2]
             push!(blk.args,:(rGlobalEnv[$(QuoteNode(v))] = sexp($S,$(esc(v)))))
@@ -108,7 +131,7 @@ macro rget(args...)
         if isa(a,Symbol)
             v = a
             push!(blk.args,:($(esc(v)) = rcopy(rGlobalEnv[$(QuoteNode(v))])))
-        elseif isa(a,Expr) && a.head == :(::) 
+        elseif isa(a,Expr) && a.head == :(::)
             v = a.args[1]
             T = a.args[2]
             push!(blk.args,:($(esc(v)) = rcopy($(esc(T)),rGlobalEnv[$(QuoteNode(v))])))

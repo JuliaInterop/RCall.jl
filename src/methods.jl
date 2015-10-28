@@ -341,7 +341,7 @@ isascii(r::RObject{CharSxp}) = isascii(sexp(r))
 
 function isascii(s::StrSxpPtr)
     ind = true
-    for c in s        
+    for c in s
         ind &= isNA(c) || isascii(c)
     end
     return ind
@@ -375,3 +375,14 @@ function setindex!(e::Ptr{EnvSxp},v,s)
     unprotect(2)
 end
 setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)
+
+@doc "create a new environment which extends env" ->
+function newEnvironment(env::Ptr{EnvSxp})
+    ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
+            (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),rNilValue,rNilValue,env)
+end
+
+@doc "find namespace by name of the namespace" ->
+function findNamespace(str::ByteString)
+    ccall((:R_FindNamespace,libR),Ptr{EnvSxp}, (Ptr{StrSxp},), sexp(str))
+end
