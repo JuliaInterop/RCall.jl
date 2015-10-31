@@ -158,6 +158,9 @@ function __init__()
     # we can't use Rf_PrintWarnings as not exported on all platforms.
     rcall_p(:options,warn=1)
 
+    # R gui eventloop
+    !Rinited && isinteractive() && rgui_init()
+
     # IJulia hooks
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_init()
 end
