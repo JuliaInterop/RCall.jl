@@ -30,6 +30,7 @@ include("callback.jl")
 include("IJulia.jl")
 include("io.jl")
 include("rstr.jl")
+include("operators.jl")
 
 """
 R global Environment.
