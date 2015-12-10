@@ -25,10 +25,3 @@ Attaching the package in a Julia session with
 using RCall
 ```
 should start an embedded R.
-
-## Documentation
-
-- [Introduction](doc/RCall.md)
-- [RCall](https://rawgit.com/JuliaStats/RCall.jl/master/doc/RCall.html)
-- [Mapping API](https://rawgit.com/JuliaStats/RCall.jl/master/doc/MappingAPI.html)
-- [Graphics](https://rawgit.com/JuliaStats/RCall.jl/master/doc/graphics.html)

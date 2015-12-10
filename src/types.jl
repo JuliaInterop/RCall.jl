@@ -239,7 +239,7 @@ An `RObject` is a Julia wrapper for an R object (known as an "S-expression" or "
 
 When called with a Julia object as an argument, a corresponding R object is constructed.
 
-```julia
+```julia_skip
 julia> RObject(1)
 RObject{IntSxp}
 [1] 1
@@ -252,6 +252,7 @@ julia> RObject(1.0:3.0)
 RObject{RealSxp}
 [1] 1 2 3
 ```
+
 """
 type RObject{S<:Sxp}
     p::Ptr{S}

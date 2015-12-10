@@ -1,0 +1,13 @@
+site_name:           RCall.jl
+repo_url:            https://github.com/JuliaStats/RCall.jl
+site_description:    Embedded R within Julia
+site_author:         JuliaStats
+theme:               readthedocs
+markdown_extensions: [tables, fenced_code]
+pages:
+- Introduction: index.md
+- Manual:
+  - Installation: installation.md
+- API:
+  - RCall: api/RCall.md
+  - Index: api/index.md
