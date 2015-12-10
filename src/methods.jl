@@ -3,24 +3,24 @@ function show(io::IO,r::RObject)
     rprint(io,r.p)
 end
 
-@doc """
+"""
 The R NAMED property, represented by 2 bits in the info field. This can take
 values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more
 symbols. See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
-"""->
+"""
 function bound{S<:Sxp}(s::Ptr{S})
     u = unsafe_load(convert(UnknownSxpPtr,s))
     (u.info >>> 6) & 0x03
 end
 
 
-@doc """
+"""
 Sxp methods for `length` return the R length.
 
 `Rf_xlength` handles Sxps that are not vector-like and R's
 "long vectors", which have a negative value for the `length` member.
-"""->
+"""
 length{S<:Sxp}(s::Ptr{S}) =
     @compat Int(ccall((:Rf_xlength,libR),Cptrdiff_t,(Ptr{S},),s))
 length(r::RObject) = length(r.p)
@@ -41,12 +41,12 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
     end
 end
 
-@doc """
+"""
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
-"""->
+"""
 dataptr{S<:VectorSxp}(s::Ptr{S}) = convert(Ptr{eltype(S)}, s+voffset)
 
-@doc """
+"""
 Represent the contents of a VectorSxp type as a `Vector`.
 
 This does __not__ copy the contents.  If the argument is not named (in R) or
@@ -60,23 +60,23 @@ up as `NaN` and `NaN + NaNim`, respectively.  Missing data in IntSxp show up
 as `-2147483648`, the minimum 32-bit integer value.  Internally a `LglSxp` is
 represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 `-2147483648` is `NA` and all other values represent `true`.
-"""->
+"""
 unsafe_vec{S<:VectorSxp}(s::Ptr{S}) = pointer_to_array(dataptr(s), length(s))
 unsafe_vec{S<:VectorSxp}(r::RObject{S}) = unsafe_vec(r.p)
 
-@doc """
+"""
 The same as `unsafe_vec`, except returns an appropriately sized array.
-"""->
+"""
 unsafe_array{S<:VectorSxp}(s::Ptr{S}) =  pointer_to_array(dataptr(s), size(s))
 unsafe_array{S<:VectorSxp}(r::RObject{S}) = unsafe_array(r.p)
 
 
 
-@doc """
+"""
 Indexing into `VectorSxp` types uses Julia indexing into the `vec` result,
 except for `StrSxp` and the `VectorListSxp` types, which must apply `sexp`
 to the `Ptr{Void}` obtained by indexing into the `vec` result.
-"""->
+"""
 getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real) = getindex(unsafe_vec(s),I)
 getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::AbstractVector) = getindex(unsafe_vec(s),I)
 getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real...) = getindex(unsafe_array(s),I...)
@@ -85,9 +85,9 @@ getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real) = sexp(getindex(unsafe_vec(s),I))
 getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = sexp(getindex(unsafe_vec(s),I))
 getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real...) = sexp(getindex(unsafe_array(s),I...))
 
-@doc """
+"""
 String indexing finds the first element with the matching name
-"""->
+"""
 function getindex{S<:VectorSxp}(s::Ptr{S}, label::AbstractString)
     ls = unsafe_vec(getNames(s))
     for (i,l) in enumerate(ls)
@@ -173,7 +173,7 @@ function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
 end
 done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == rNilValue
 
-@doc "extract the i-th element of LangSxp l"->
+"extract the i-th element of LangSxp l"
 function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
@@ -184,7 +184,7 @@ end
 
 getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I))
 
-@doc "assign value v to the i-th element of LangSxp l"->
+"assign value v to the i-th element of LangSxp l"
 function setindex!{S<:PairListSxp,T<:Sxp}(l::Ptr{S},v::Ptr{T},I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
@@ -228,28 +228,28 @@ end
 size(r::RObject) = size(sexp(r))
 
 
-@doc """
+"""
 Returns the names of an R vector.
-"""->
+"""
 getNames{S<:VectorSxp}(s::Ptr{S}) = getAttrib(s,rNamesSymbol)
 getNames(r::RObject) = RObject(getNames(sexp(r)))
 
-@doc """
+"""
 Set the names of an R vector.
-"""->
+"""
 setNames!{S<:VectorSxp}(s::Ptr{S}, n::Ptr{StrSxp}) = setAttrib!(s,rNamesSymbol,n)
 setNames!(r::RObject,n) = RObject(setNames!(sexp(r),sexp(StrSxp,n)))
 
-@doc """
+"""
 Returns the class of an R object.
-"""->
+"""
 getClass{S<:Sxp}(s::Ptr{S}) = getAttrib(s,rClassSymbol)
 getClass(r::RObject) = RObject(getClass(sexp(r)))
 
 
-@doc """
+"""
 Set the class of an R object.
-"""->
+"""
 setClass!{S<:Sxp}(s::Ptr{S},c::Ptr{StrSxp}) = setAttrib!(s,rClassSymbol,c)
 setClass!(r::RObject,c) = RObject(setClass!(sexp(r)),sexp(StrSxp,c))
 
@@ -271,9 +271,9 @@ function allocArray{S<:Sxp}(::Type{S}, dims::Integer...)
 end
 
 
-@doc """
+"""
 NA element for each type
-"""->
+"""
 NAel(::Type{LglSxp}) = rNaInt
 NAel(::Type{IntSxp}) = rNaInt
 NAel(::Type{RealSxp}) = rNaReal
@@ -282,9 +282,9 @@ NAel(::Type{StrSxp}) = rNaString
 NAel(::Type{VecSxp}) = sexp(LglSxp,rNaInt) # used for setting
 
 
-@doc """
+"""
 Check if values correspond to R's sentinel NA values.
-"""->
+"""
 isNA(x::Complex128) = real(x) === rNaReal && imag(x) === rNaReal
 isNA(x::Float64) = x === rNaReal
 isNA(x::Int32) = x == rNaInt
@@ -303,9 +303,9 @@ end
 isNA(r::RObject) = isNA(r.p)
 
 
-@doc """
+"""
 Check if there are any NA values in the vector.
-"""->
+"""
 function anyNA{S<:VectorSxp}(s::Ptr{S})
     for i in s
         if isNA(i)
@@ -318,7 +318,7 @@ anyNA{S<:VectorSxp}(r::RObject{S}) = anyNA(r.p)
 
 
 # StrSxp
-@doc """
+"""
 Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).
  * 0x00_0002_00 (bit 1): set of bytes (no known encoding)
  * 0x00_0004_00 (bit 2): Latin-1
@@ -326,7 +326,7 @@ Determines the encoding of the CharSxp. This is determined by the 'gp' part of t
  * 0x00_0040_00 (bit 6): ASCII
 
 We only support ASCII and UTF-8.
-"""->
+"""
 function isascii(s::CharSxp)
     if s.head.info & 0x00_0040_00 != 0
         return true
@@ -350,7 +350,7 @@ isascii(r::RObject{StrSxp}) = isascii(sexp(r))
 
 # EnvSxp
 
-@doc "extract the value of symbol s in the environment e"->
+"extract the value of symbol s in the environment e"
 function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
     v = ccall((:Rf_findVarInFrame,libR),UnknownSxpPtr,(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
     v == rUnboundValue && error("$s is not defined in the environment")
@@ -360,7 +360,7 @@ getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(s))
 getindex(e::RObject{EnvSxp},s) = RObject(getindex(sexp(e),s))
 
 
-@doc "assign value v to symbol s in the environment e"->
+"assign value v to symbol s in the environment e"
 function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{SymSxp})
     # This should be done more carefully.  First check for the symbol in the
     # frame.  If it is defined call Rf_setVar, otherwise call Rf_defineVar.
@@ -376,13 +376,13 @@ function setindex!(e::Ptr{EnvSxp},v,s)
 end
 setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)
 
-@doc "create a new environment which extends env" ->
+"create a new environment which extends env"
 function newEnvironment(env::Ptr{EnvSxp})
     ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
             (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),rNilValue,rNilValue,env)
 end
 
-@doc "find namespace by name of the namespace" ->
+"find namespace by name of the namespace"
 function findNamespace(str::ByteString)
     ccall((:R_FindNamespace,libR),Ptr{EnvSxp}, (Ptr{StrSxp},), sexp(str))
 end

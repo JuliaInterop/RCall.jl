@@ -1,8 +1,8 @@
 # logic for default rcopy
 
-@doc """
+"""
 `rcopy` copies the contents of an R object into a corresponding canonical Julia type.
-""" ->
+"""
 rcopy(s::SymSxpPtr) = rcopy(Symbol,s)
 rcopy(s::CharSxpPtr) = rcopy(AbstractString,s)
 

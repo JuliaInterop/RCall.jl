@@ -1,11 +1,11 @@
 # conversion methods for Base Julia types
 
 # Fallbacks
-@doc """
+"""
 `rcopy(T,p)` converts a pointer `p` to a Sxp object to a native Julia object of type T.
 
 `rcopy(p)` performs a default conversion.
-""" ->
+"""
 rcopy{S<:Sxp}(::Type{Any},x::Ptr{S}) = rcopy(x)
 
 # used in vector indexing
@@ -20,11 +20,11 @@ rcopy(r::RObject) = rcopy(r.p)
 rcopy{T}(::Type{T},r::RObject) = rcopy(T,r.p)
 
 
-@doc """
+"""
 `sexp(S,x)` converts a Julia object `x` to a pointer to a Sxp object of type `S`.
 
 `sexp(x)` performs a default conversion.
-""" ->
+"""
 # used in vector indexing
 sexp(::Type{Cint},x) = convert(Cint,x)
 sexp(::Type{Float64},x) = convert(Float64,x)
@@ -42,11 +42,11 @@ rcopy(::Ptr{NilSxp}) = nothing
 
 
 # SymSxp
-@doc "Create a `SymSxp` from a `Symbol`"->
+"Create a `SymSxp` from a `Symbol`"
 sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install,libR),Ptr{SymSxp},(Ptr{UInt8},),bytestring(s))
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
 
-@doc "Generic function for constructing Sxps from Julia objects."->
+"Generic function for constructing Sxps from Julia objects."
 sexp(s::Symbol) = sexp(SymSxp,s)
 
 rcopy(::Type{Symbol},ss::SymSxp) = symbol(rcopy(AbstractString,ss))
@@ -57,9 +57,9 @@ rcopy(::Type{AbstractString},ss::SymSxp) = rcopy(AbstractString,ss.name)
 
 
 # CharSxp
-@doc """
+"""
 Create a `CharSxp` from a String.
-"""->
+"""
 sexp(::Type{CharSxp},st::ASCIIString) =
     ccall((:Rf_mkCharLen,libR),CharSxpPtr,(Ptr{UInt8},Cint),st,sizeof(st))
 sexp(::Type{CharSxp},st::UTF8String) =
@@ -73,7 +73,7 @@ rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe
 rcopy(::Type{Symbol},s::CharSxpPtr) = symbol(rcopy(AbstractString,s))
 
 
-@doc "Create a `StrSxp` from an `AbstractString`"->
+"Create a `StrSxp` from an `AbstractString`"
 sexp(::Type{StrSxp}, s::CharSxpPtr) =
     ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
 
