@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Index - RCall.jl</title>
+  
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Index";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script>
+  <script src="../js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> RCall.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="..">Introduction</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Manual</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../installation/">Installation</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>API</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="RCall/">RCall</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Index</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#api-index">API-INDEX</a></li>
+                
+                    <li><a class="toctree-l4" href="#module-rcall">MODULE: RCall</a></li>
+                
+                    <li><a class="toctree-l4" href="#methods-exported">Methods [Exported]</a></li>
+                
+                    <li><a class="toctree-l4" href="#types-exported">Types [Exported]</a></li>
+                
+                    <li><a class="toctree-l4" href="#macros-exported">Macros [Exported]</a></li>
+                
+                    <li><a class="toctree-l4" href="#methods-internal">Methods [Internal]</a></li>
+                
+                    <li><a class="toctree-l4" href="#types-internal">Types [Internal]</a></li>
+                
+                    <li><a class="toctree-l4" href="#globals-internal">Globals [Internal]</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">RCall.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API &raquo;</li>
+        
+      
+    
+    <li>Index</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/JuliaStats/RCall.jl" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="api-index">API-INDEX</h1>
+<h2 id="module-rcall">MODULE: RCall</h2>
+<hr />
+<h2 id="methods-exported">Methods [Exported]</h2>
+<p><a href="RCall/#method__anyna.1">anyNA{S&lt;:RCall.VectorSxp}(s::Ptr{S&lt;:RCall.VectorSxp})</a>  Check if there are any NA values in the vector.</p>
+<p><a href="RCall/#method__getnames.1">getNames{S&lt;:RCall.VectorSxp}(s::Ptr{S&lt;:RCall.VectorSxp})</a>  Returns the names of an R vector.</p>
+<p><a href="RCall/#method__isna.1">isNA(x::Complex{Float64})</a>  Check if values correspond to R's sentinel NA values.</p>
+<p><a href="RCall/#method__rcall.1">rcall(f,  args...)</a>  Evaluate a function in the global environment. The first argument corresponds</p>
+<p><a href="RCall/#method__rcopy.1">rcopy(s::Ptr{RCall.SymSxp})</a>  <code>rcopy</code> copies the contents of an R object into a corresponding canonical Julia type.</p>
+<p><a href="RCall/#method__rcopy.2">rcopy(str::AbstractString)</a>  Evaluate and convert the result of a string as an R expression.</p>
+<p><a href="RCall/#method__rcopy.3">rcopy{S&lt;:RCall.Sxp}(::Type{Any},  x::Ptr{S&lt;:RCall.Sxp})</a>  <code>rcopy(T,p)</code> converts a pointer <code>p</code> to a Sxp object to a native Julia object of type T.</p>
+<p><a href="RCall/#method__reval.1">reval(s)</a>  Evaluate an R symbol or language object (i.e. a function call) in an R</p>
+<p><a href="RCall/#method__reval.2">reval(s,  env)</a>  Evaluate an R symbol or language object (i.e. a function call) in an R</p>
+<p><a href="RCall/#method__rparse.1">rparse(st::AbstractString)</a>  Parse a string as an R expression, returning an RObject.</p>
+<p><a href="RCall/#method__rprint.1">rprint(io::IO,  str::ByteString)</a>  Parse, evaluate and print the result of a string as an R expression.</p>
+<p><a href="RCall/#method__rprint.2">rprint{S&lt;:RCall.Sxp}(io::IO,  s::Ptr{S&lt;:RCall.Sxp})</a>  Print the value of an Sxp using R's printing mechanism</p>
+<p><a href="RCall/#method__setnames.1">setNames!{S&lt;:RCall.VectorSxp}(s::Ptr{S&lt;:RCall.VectorSxp},  n::Ptr{RCall.StrSxp})</a>  Set the names of an R vector.</p>
+<hr />
+<h2 id="types-exported">Types [Exported]</h2>
+<p><a href="RCall/#type__charsxp.1">RCall.CharSxp</a>  R character string</p>
+<p><a href="RCall/#type__clossxp.1">RCall.ClosSxp</a>  R function closure</p>
+<p><a href="RCall/#type__cplxsxp.1">RCall.CplxSxp</a>  R complex vector</p>
+<p><a href="RCall/#type__intsxp.1">RCall.IntSxp</a>  R integer vector</p>
+<p><a href="RCall/#type__lglsxp.1">RCall.LglSxp</a>  R logical vector</p>
+<p><a href="RCall/#type__nilsxp.1">RCall.NilSxp</a>  R NULL value</p>
+<p><a href="RCall/#type__robject.1">RCall.RObject{S&lt;:RCall.Sxp}</a>  An <code>RObject</code> is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the <code>RObject</code> itself is finalized by Julia. The parameter is the type of the S-expression.</p>
+<p><a href="RCall/#type__realsxp.1">RCall.RealSxp</a>  R real vector</p>
+<p><a href="RCall/#type__strsxp.1">RCall.StrSxp</a>  R vector of character strings</p>
+<p><a href="RCall/#type__sxp.1">RCall.Sxp</a>  R symbolic expression (<code>SxpPtr</code>): these are represented by a pointer to a</p>
+<hr />
+<h2 id="macros-exported">Macros [Exported]</h2>
+<p><a href="RCall/#macro___rget.1">@rget(args...)</a>  Copies variables from R to Julia using the same name.</p>
+<p><a href="RCall/#macro___rput.1">@rput(args...)</a>  Copies variables from Julia to R using the same name.</p>
+<p><a href="RCall/#macro___var_str.1">@var_str(str)</a>  Returns a variable named "str". Useful for passing keyword arguments containing dots.</p>
+<hr />
+<h2 id="methods-internal">Methods [Internal]</h2>
+<p><a href="RCall/#method__nael.1">NAel(::Type{RCall.LglSxp})</a>  NA element for each type</p>
+<p><a href="RCall/#method__bound.1">bound{S&lt;:RCall.Sxp}(s::Ptr{S&lt;:RCall.Sxp})</a>  The R NAMED property, represented by 2 bits in the info field. This can take</p>
+<p><a href="RCall/#method__calljuliaextptr.1">callJuliaExtPtr(p::Ptr{RCall.ListSxp})</a>  The function called by R .External for Julia callbacks.</p>
+<p><a href="RCall/#method__dataptr.1">dataptr{S&lt;:RCall.VectorSxp}(s::Ptr{S&lt;:RCall.VectorSxp})</a>  Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.</p>
+<p><a href="RCall/#method__decrefextptr.1">decrefExtPtr(p::Ptr{RCall.ExtPtrSxp})</a>  Called by the R finalizer.</p>
+<p><a href="RCall/#method__eltype.1">eltype(::Type{RCall.LglSxp})</a>  Element types of R vectors.</p>
+<p><a href="RCall/#method__findnamespace.1">findNamespace(str::ByteString)</a>  find namespace by name of the namespace</p>
+<p><a href="RCall/#method__getclass.1">getClass{S&lt;:RCall.Sxp}(s::Ptr{S&lt;:RCall.Sxp})</a>  Returns the class of an R object.</p>
+<p><a href="RCall/#method__getindex.1">getindex(e::Ptr{RCall.EnvSxp},  s::Ptr{RCall.SymSxp})</a>  extract the value of symbol s in the environment e</p>
+<p><a href="RCall/#method__getindex.2">getindex{S&lt;:RCall.PairListSxp}(l::Ptr{S&lt;:RCall.PairListSxp},  I::Integer)</a>  extract the i-th element of LangSxp l</p>
+<p><a href="RCall/#method__getindex.3">getindex{S&lt;:RCall.VectorAtomicSxp}(s::Ptr{S&lt;:RCall.VectorAtomicSxp},  I::Real)</a>  Indexing into <code>VectorSxp</code> types uses Julia indexing into the <code>vec</code> result,</p>
+<p><a href="RCall/#method__getindex.4">getindex{S&lt;:RCall.VectorSxp}(s::Ptr{S&lt;:RCall.VectorSxp},  label::AbstractString)</a>  String indexing finds the first element with the matching name</p>
+<p><a href="RCall/#method__ijulia_displayplots.1">ijulia_displayplots()</a>  Called after cell evaluation.</p>
+<p><a href="RCall/#method__ijulia_setdevice.1">ijulia_setdevice(m::MIME{mime})</a>  Set options for R plotting with IJulia.</p>
+<p><a href="RCall/#method__isascii.1">isascii(s::RCall.CharSxp)</a>  Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).</p>
+<p><a href="RCall/#method__length.1">length{S&lt;:RCall.Sxp}(s::Ptr{S&lt;:RCall.Sxp})</a>  Sxp methods for <code>length</code> return the R length.</p>
+<p><a href="RCall/#method__makeexternalptr.1">makeExternalPtr(ptr::Ptr{Void})</a>  Create an ExtPtrSxpPtr object</p>
+<p><a href="RCall/#method__makeexternalptr.2">makeExternalPtr(ptr::Ptr{Void},  tag)</a>  Create an ExtPtrSxpPtr object</p>
+<p><a href="RCall/#method__makeexternalptr.3">makeExternalPtr(ptr::Ptr{Void},  tag,  prot)</a>  Create an ExtPtrSxpPtr object</p>
+<p><a href="RCall/#method__makenativesymbol.1">makeNativeSymbol(fptr::Ptr{Void})</a>  Register a function pointer as an R NativeSymbol.</p>
+<p><a href="RCall/#method__newenvironment.1">newEnvironment(env::Ptr{RCall.EnvSxp})</a>  create a new environment which extends env</p>
+<p><a href="RCall/#method__preserve.1">preserve{S&lt;:RCall.Sxp}(p::Ptr{S&lt;:RCall.Sxp})</a>  Prevent garbage collection of an R object. Object can be released via <code>release</code>.</p>
+<p><a href="RCall/#method__protect.1">protect{S&lt;:RCall.Sxp}(p::Ptr{S&lt;:RCall.Sxp})</a>  Stack-based protection of garbage collection of R objects. Objects are</p>
+<p><a href="RCall/#method__registerfinalizer.1">registerFinalizer(s::Ptr{RCall.ExtPtrSxp})</a>  Register finalizer to be called by the R GC.</p>
+<p><a href="RCall/#method__release.1">release{S&lt;:RCall.Sxp}(p::Ptr{S&lt;:RCall.Sxp})</a>  Release object that has been gc protected by <code>preserve</code>.</p>
+<p><a href="RCall/#method__reval_p.1">reval_p{S&lt;:RCall.Sxp}(expr::Ptr{S&lt;:RCall.Sxp},  env::Ptr{RCall.EnvSxp})</a>  Evaluate an R symbol or language object (i.e. a function call) in an R</p>
+<p><a href="RCall/#method__rlang_p.1">rlang_p(f,  args...)</a>  Create a function call from a list of arguments</p>
+<p><a href="RCall/#method__rparse_p.1">rparse_p(st::Ptr{RCall.StrSxp})</a>  Parse a string as an R expression, returning a Sxp pointer.</p>
+<p><a href="RCall/#method__setclass.1">setClass!{S&lt;:RCall.Sxp}(s::Ptr{S&lt;:RCall.Sxp},  c::Ptr{RCall.StrSxp})</a>  Set the class of an R object.</p>
+<p><a href="RCall/#method__setindex.1">setindex!{S&lt;:RCall.PairListSxp, T&lt;:RCall.Sxp}(l::Ptr{S&lt;:RCall.PairListSxp},  v::Ptr{T&lt;:RCall.Sxp},  I::Integer)</a>  assign value v to the i-th element of LangSxp l</p>
+<p><a href="RCall/#method__setindex.2">setindex!{S&lt;:RCall.Sxp}(e::Ptr{RCall.EnvSxp},  v::Ptr{S&lt;:RCall.Sxp},  s::Ptr{RCall.SymSxp})</a>  assign value v to symbol s in the environment e</p>
+<p><a href="RCall/#method__sexp.1">sexp(::Type{Int32},  x)</a>  <code>sexp(S,x)</code> converts a Julia object <code>x</code> to a pointer to a Sxp object of type <code>S</code>.</p>
+<p><a href="RCall/#method__sexp.2">sexp(::Type{RCall.CharSxp},  st::ASCIIString)</a>  Create a <code>CharSxp</code> from a String.</p>
+<p><a href="RCall/#method__sexp.3">sexp(::Type{RCall.ClosSxp},  f)</a>  Wrap a callable Julia object <code>f</code> an a R <code>ClosSxpPtr</code>.</p>
+<p><a href="RCall/#method__sexp.4">sexp(::Type{RCall.ExtPtrSxp},  j)</a>  Wrap a Julia object an a R <code>ExtPtrSxpPtr</code>.</p>
+<p><a href="RCall/#method__sexp.5">sexp(::Type{RCall.StrSxp},  s::Ptr{RCall.CharSxp})</a>  Create a <code>StrSxp</code> from an <code>AbstractString</code></p>
+<p><a href="RCall/#method__sexp.6">sexp(::Type{RCall.SymSxp},  s::AbstractString)</a>  Create a <code>SymSxp</code> from a <code>Symbol</code></p>
+<p><a href="RCall/#method__sexp.7">sexp(p::Ptr{RCall.SxpHead})</a>  Convert a <code>UnknownSxpPtr</code> to an approptiate <code>SxpPtr</code>.</p>
+<p><a href="RCall/#method__sexp.8">sexp(s::Symbol)</a>  Generic function for constructing Sxps from Julia objects.</p>
+<p><a href="RCall/#method__sexp_arglist_dots.1">sexp_arglist_dots(args...)</a>  Create an argument list for an R function call, with a varargs "dots" at the end.</p>
+<p><a href="RCall/#method__sexpnum.1">sexpnum(h::RCall.SxpHead)</a>  The SEXPTYPE number of a <code>Sxp</code></p>
+<p><a href="RCall/#method__unprotect.1">unprotect(n::Integer)</a>  Release last <code>n</code> objects gc-protected by <code>protect</code>.</p>
+<p><a href="RCall/#method__unsafe_array.1">unsafe_array{S&lt;:RCall.VectorSxp}(s::Ptr{S&lt;:RCall.VectorSxp})</a>  The same as <code>unsafe_vec</code>, except returns an appropriately sized array.</p>
+<p><a href="RCall/#method__unsafe_vec.1">unsafe_vec{S&lt;:RCall.VectorSxp}(s::Ptr{S&lt;:RCall.VectorSxp})</a>  Represent the contents of a VectorSxp type as a <code>Vector</code>.</p>
+<hr />
+<h2 id="types-internal">Types [Internal]</h2>
+<p><a href="RCall/#type__anysxp.1">RCall.AnySxp</a>  R "any" object</p>
+<p><a href="RCall/#type__bcodesxp.1">RCall.BcodeSxp</a>  R byte code</p>
+<p><a href="RCall/#type__builtinsxp.1">RCall.BuiltinSxp</a>  R built-in function</p>
+<p><a href="RCall/#type__dotsxp.1">RCall.DotSxp</a>  R dot-dot-dot object</p>
+<p><a href="RCall/#type__envsxp.1">RCall.EnvSxp</a>  R environment</p>
+<p><a href="RCall/#type__exprsxp.1">RCall.ExprSxp</a>  R expression vector</p>
+<p><a href="RCall/#type__extptrsxp.1">RCall.ExtPtrSxp</a>  R external pointer</p>
+<p><a href="RCall/#type__langsxp.1">RCall.LangSxp</a>  R function call</p>
+<p><a href="RCall/#type__listsxp.1">RCall.ListSxp</a>  R pairs (cons) list cell</p>
+<p><a href="RCall/#type__promsxp.1">RCall.PromSxp</a>  R promise</p>
+<p><a href="RCall/#type__rawsxp.1">RCall.RawSxp</a>  R byte vector</p>
+<p><a href="RCall/#type__s4sxp.1">RCall.S4Sxp</a>  R S4 object</p>
+<p><a href="RCall/#type__specialsxp.1">RCall.SpecialSxp</a>  R special function</p>
+<p><a href="RCall/#type__sxphead.1">RCall.SxpHead</a>  R Sxp header: a pointer to this is used for unknown types.</p>
+<p><a href="RCall/#type__symsxp.1">RCall.SymSxp</a>  R symbol</p>
+<p><a href="RCall/#type__vecsxp.1">RCall.VecSxp</a>  R list (i.e. Array{Any,1})</p>
+<p><a href="RCall/#type__weakrefsxp.1">RCall.WeakRefSxp</a>  R weak reference</p>
+<hr />
+<h2 id="globals-internal">Globals [Internal]</h2>
+<p><a href="RCall/#global__jtypextptrs.1">jtypExtPtrs</a>  Julia types (typically functions) which are wrapped in <code>ExtPtrSxpPtr</code> are</p>
+<p><a href="RCall/#global__typs.1">typs</a>  vector of R Sxp types</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="RCall/" class="btn btn-neutral" title="RCall"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="RCall/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+
+</body>
+</html>
