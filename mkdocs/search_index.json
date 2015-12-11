@@ -2,13 +2,13 @@
     "docs": [
         {
             "location": "/",
-            "text": "RCall\n\n\nR\n has been round for a couple of decades.  In the\nlast few years, a new language for technical computing,\n\nJulia\n, has arrived and provides remarkable performance\nvia Just-In-Time (JIT) compilation of functions than in R, but there are still\na lot of well-developed packages in R that could use in Julia.  The\n\nRCall\n package is a way of\nestablishing communication between to two.\n\n\nIt is a pure Julia package.  In other words, there is\nno code in C or C++ or another such language necessary to implement\ncalling R from Julia. It is possible to exploit the advantages of both\nlanguages.",
+            "text": "RCall.jl\n\n\nR\n has been round for a couple of decades.  In the\nlast few years, a new language for technical computing,\n\nJulia\n, has arrived and provides remarkable performance\nvia Just-In-Time (JIT) compilation of functions than in R, but there are still\na lot of well-developed packages in R that could use in Julia.  The\n\nRCall\n package is a way of\nestablishing communication between to two.\n\n\nIt is a pure Julia package.  In other words, there is\nno code in C or C++ or another such language necessary to implement\ncalling R from Julia. It is possible to exploit the advantages of both\nlanguages.",
             "title": "Introduction"
         },
         {
-            "location": "/#rcall",
+            "location": "/#rcalljl",
             "text": "R  has been round for a couple of decades.  In the\nlast few years, a new language for technical computing, Julia , has arrived and provides remarkable performance\nvia Just-In-Time (JIT) compilation of functions than in R, but there are still\na lot of well-developed packages in R that could use in Julia.  The RCall  package is a way of\nestablishing communication between to two.  It is a pure Julia package.  In other words, there is\nno code in C or C++ or another such language necessary to implement\ncalling R from Julia. It is possible to exploit the advantages of both\nlanguages.",
-            "title": "RCall"
+            "title": "RCall.jl"
         },
         {
             "location": "/installation/",
