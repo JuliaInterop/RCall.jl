@@ -11,7 +11,7 @@ Check if there are any NA values in the vector.
 
 
 *source:*
-[RCall/src/methods.jl:309](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L309)
+[RCall/src/methods.jl:309](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L309)
 
 ---
 
@@ -21,7 +21,7 @@ Returns the names of an R vector.
 
 
 *source:*
-[RCall/src/methods.jl:234](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L234)
+[RCall/src/methods.jl:234](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L234)
 
 ---
 
@@ -31,7 +31,7 @@ Check if values correspond to R's sentinel NA values.
 
 
 *source:*
-[RCall/src/methods.jl:288](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L288)
+[RCall/src/methods.jl:288](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L288)
 
 ---
 
@@ -42,7 +42,7 @@ to the function to be called. It can be either a FunctionSxp type, a SymSxp or
 a Symbol.
 
 *source:*
-[RCall/src/functions.jl:25](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/functions.jl#L25)
+[RCall/src/functions.jl:25](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/functions.jl#L25)
 
 ---
 
@@ -52,7 +52,7 @@ a Symbol.
 
 
 *source:*
-[RCall/src/convert-default.jl:6](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/convert-default.jl#L6)
+[RCall/src/convert-default.jl:6](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/convert-default.jl#L6)
 
 ---
 
@@ -62,7 +62,7 @@ Evaluate and convert the result of a string as an R expression.
 
 
 *source:*
-[RCall/src/iface.jl:40](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L40)
+[RCall/src/iface.jl:40](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L40)
 
 ---
 
@@ -74,7 +74,7 @@ Evaluate and convert the result of a string as an R expression.
 
 
 *source:*
-[RCall/src/convert-base.jl:9](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/convert-base.jl#L9)
+[RCall/src/convert-base.jl:9](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/convert-base.jl#L9)
 
 ---
 
@@ -85,7 +85,7 @@ try/catch block, returning an RObject.
 
 
 *source:*
-[RCall/src/iface.jl:32](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L32)
+[RCall/src/iface.jl:32](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L32)
 
 ---
 
@@ -96,7 +96,7 @@ try/catch block, returning an RObject.
 
 
 *source:*
-[RCall/src/iface.jl:32](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L32)
+[RCall/src/iface.jl:32](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L32)
 
 ---
 
@@ -105,7 +105,7 @@ try/catch block, returning an RObject.
 Parse a string as an R expression, returning an RObject.
 
 *source:*
-[RCall/src/iface.jl:63](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L63)
+[RCall/src/iface.jl:63](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L63)
 
 ---
 
@@ -115,7 +115,7 @@ Parse, evaluate and print the result of a string as an R expression.
 
 
 *source:*
-[RCall/src/iface.jl:102](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L102)
+[RCall/src/iface.jl:102](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L102)
 
 ---
 
@@ -124,7 +124,7 @@ Parse, evaluate and print the result of a string as an R expression.
 Print the value of an Sxp using R's printing mechanism
 
 *source:*
-[RCall/src/iface.jl:67](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L67)
+[RCall/src/iface.jl:67](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L67)
 
 ---
 
@@ -134,7 +134,7 @@ Set the names of an R vector.
 
 
 *source:*
-[RCall/src/methods.jl:240](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L240)
+[RCall/src/methods.jl:240](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L240)
 
 ## Types [Exported]
 
@@ -145,7 +145,7 @@ Set the names of an R vector.
 R character string
 
 *source:*
-[RCall/src/types.jl:91](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L91)
+[RCall/src/types.jl:91](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L91)
 
 ---
 
@@ -154,7 +154,7 @@ R character string
 R function closure
 
 *source:*
-[RCall/src/types.jl:43](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L43)
+[RCall/src/types.jl:43](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L43)
 
 ---
 
@@ -163,7 +163,7 @@ R function closure
 R complex vector
 
 *source:*
-[RCall/src/types.jl:132](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L132)
+[RCall/src/types.jl:132](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L132)
 
 ---
 
@@ -172,7 +172,7 @@ R complex vector
 R integer vector
 
 *source:*
-[RCall/src/types.jl:116](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L116)
+[RCall/src/types.jl:116](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L116)
 
 ---
 
@@ -181,7 +181,7 @@ R integer vector
 R logical vector
 
 *source:*
-[RCall/src/types.jl:108](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L108)
+[RCall/src/types.jl:108](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L108)
 
 ---
 
@@ -190,7 +190,7 @@ R logical vector
 R NULL value
 
 *source:*
-[RCall/src/types.jl:28](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L28)
+[RCall/src/types.jl:28](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L28)
 
 ---
 
@@ -217,7 +217,7 @@ RObject{RealSxp}
 
 
 *source:*
-[RCall/src/types.jl:257](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L257)
+[RCall/src/types.jl:257](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L257)
 
 ---
 
@@ -226,7 +226,7 @@ RObject{RealSxp}
 R real vector
 
 *source:*
-[RCall/src/types.jl:124](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L124)
+[RCall/src/types.jl:124](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L124)
 
 ---
 
@@ -235,7 +235,7 @@ R real vector
 R vector of character strings
 
 *source:*
-[RCall/src/types.jl:140](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L140)
+[RCall/src/types.jl:140](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L140)
 
 ---
 
@@ -246,7 +246,7 @@ symbolic expression record (`Sxp`).
 
 
 *source:*
-[RCall/src/types.jl:5](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L5)
+[RCall/src/types.jl:5](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L5)
 
 ## Macros [Exported]
 
@@ -258,7 +258,7 @@ Copies variables from R to Julia using the same name.
 
 
 *source:*
-[RCall/src/iface.jl:128](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L128)
+[RCall/src/iface.jl:128](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L128)
 
 ---
 
@@ -268,7 +268,7 @@ Copies variables from Julia to R using the same name.
 
 
 *source:*
-[RCall/src/iface.jl:108](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L108)
+[RCall/src/iface.jl:108](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L108)
 
 ---
 
@@ -278,7 +278,7 @@ Returns a variable named "str". Useful for passing keyword arguments containing 
 
 
 *source:*
-[RCall/src/functions.jl:35](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/functions.jl#L35)
+[RCall/src/functions.jl:35](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/functions.jl#L35)
 
 
 ## Methods [Internal]
@@ -291,7 +291,7 @@ NA element for each type
 
 
 *source:*
-[RCall/src/methods.jl:277](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L277)
+[RCall/src/methods.jl:277](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L277)
 
 ---
 
@@ -304,7 +304,7 @@ http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-co
 
 
 *source:*
-[RCall/src/methods.jl:12](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L12)
+[RCall/src/methods.jl:12](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L12)
 
 ---
 
@@ -319,7 +319,7 @@ It receives a `ListSxpPtr` containing
 
 
 *source:*
-[RCall/src/callback.jl:32](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L32)
+[RCall/src/callback.jl:32](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L32)
 
 ---
 
@@ -329,7 +329,7 @@ Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
 
 
 *source:*
-[RCall/src/methods.jl:47](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L47)
+[RCall/src/methods.jl:47](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L47)
 
 ---
 
@@ -339,7 +339,7 @@ Called by the R finalizer.
 
 
 *source:*
-[RCall/src/callback.jl:76](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L76)
+[RCall/src/callback.jl:76](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L76)
 
 ---
 
@@ -349,7 +349,7 @@ Element types of R vectors.
 
 
 *source:*
-[RCall/src/types.jl:222](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L222)
+[RCall/src/types.jl:222](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L222)
 
 ---
 
@@ -358,7 +358,7 @@ Element types of R vectors.
 find namespace by name of the namespace
 
 *source:*
-[RCall/src/methods.jl:386](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L386)
+[RCall/src/methods.jl:386](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L386)
 
 ---
 
@@ -368,7 +368,7 @@ Returns the class of an R object.
 
 
 *source:*
-[RCall/src/methods.jl:246](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L246)
+[RCall/src/methods.jl:246](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L246)
 
 ---
 
@@ -377,7 +377,7 @@ Returns the class of an R object.
 extract the value of symbol s in the environment e
 
 *source:*
-[RCall/src/methods.jl:354](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L354)
+[RCall/src/methods.jl:354](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L354)
 
 ---
 
@@ -386,7 +386,7 @@ extract the value of symbol s in the environment e
 extract the i-th element of LangSxp l
 
 *source:*
-[RCall/src/methods.jl:177](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L177)
+[RCall/src/methods.jl:177](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L177)
 
 ---
 
@@ -398,7 +398,7 @@ to the `Ptr{Void}` obtained by indexing into the `vec` result.
 
 
 *source:*
-[RCall/src/methods.jl:80](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L80)
+[RCall/src/methods.jl:80](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L80)
 
 ---
 
@@ -408,7 +408,7 @@ String indexing finds the first element with the matching name
 
 
 *source:*
-[RCall/src/methods.jl:91](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L91)
+[RCall/src/methods.jl:91](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L91)
 
 ---
 
@@ -419,7 +419,7 @@ Closes graphics device and displays files in notebook.
 
 
 *source:*
-[RCall/src/IJulia.jl:53](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/IJulia.jl#L53)
+[RCall/src/IJulia.jl:53](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/IJulia.jl#L53)
 
 ---
 
@@ -436,7 +436,7 @@ device: see the relevant R help for details.
 
 
 *source:*
-[RCall/src/IJulia.jl:17](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/IJulia.jl#L17)
+[RCall/src/IJulia.jl:17](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/IJulia.jl#L17)
 
 ---
 
@@ -452,7 +452,7 @@ We only support ASCII and UTF-8.
 
 
 *source:*
-[RCall/src/methods.jl:330](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L330)
+[RCall/src/methods.jl:330](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L330)
 
 ---
 
@@ -465,7 +465,7 @@ Sxp methods for `length` return the R length.
 
 
 *source:*
-[RCall/src/methods.jl:24](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L24)
+[RCall/src/methods.jl:24](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L24)
 
 ---
 
@@ -474,7 +474,7 @@ Sxp methods for `length` return the R length.
 Create an ExtPtrSxpPtr object
 
 *source:*
-[RCall/src/callback.jl:18](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L18)
+[RCall/src/callback.jl:18](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L18)
 
 ---
 
@@ -483,7 +483,7 @@ Create an ExtPtrSxpPtr object
 Create an ExtPtrSxpPtr object
 
 *source:*
-[RCall/src/callback.jl:18](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L18)
+[RCall/src/callback.jl:18](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L18)
 
 ---
 
@@ -492,7 +492,7 @@ Create an ExtPtrSxpPtr object
 Create an ExtPtrSxpPtr object
 
 *source:*
-[RCall/src/callback.jl:18](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L18)
+[RCall/src/callback.jl:18](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L18)
 
 ---
 
@@ -505,7 +505,7 @@ use R_registerRoutines, but this is _much_ easier for just 1 function.
 
 
 *source:*
-[RCall/src/callback.jl:7](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L7)
+[RCall/src/callback.jl:7](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L7)
 
 ---
 
@@ -514,7 +514,7 @@ use R_registerRoutines, but this is _much_ easier for just 1 function.
 create a new environment which extends env
 
 *source:*
-[RCall/src/methods.jl:380](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L380)
+[RCall/src/methods.jl:380](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L380)
 
 ---
 
@@ -527,7 +527,7 @@ more flexible.
 
 
 *source:*
-[RCall/src/types.jl:281](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L281)
+[RCall/src/types.jl:281](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L281)
 
 ---
 
@@ -541,7 +541,7 @@ inside functions.
 
 
 *source:*
-[RCall/src/types.jl:296](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L296)
+[RCall/src/types.jl:296](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L296)
 
 ---
 
@@ -551,7 +551,7 @@ Register finalizer to be called by the R GC.
 
 
 *source:*
-[RCall/src/callback.jl:85](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L85)
+[RCall/src/callback.jl:85](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L85)
 
 ---
 
@@ -561,7 +561,7 @@ Release object that has been gc protected by `preserve`.
 
 
 *source:*
-[RCall/src/types.jl:286](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L286)
+[RCall/src/types.jl:286](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L286)
 
 ---
 
@@ -572,7 +572,7 @@ try/catch block, returning a Sxp pointer.
 
 
 *source:*
-[RCall/src/iface.jl:5](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L5)
+[RCall/src/iface.jl:5](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L5)
 
 ---
 
@@ -581,7 +581,7 @@ try/catch block, returning a Sxp pointer.
 Create a function call from a list of arguments
 
 *source:*
-[RCall/src/functions.jl:2](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/functions.jl#L2)
+[RCall/src/functions.jl:2](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/functions.jl#L2)
 
 ---
 
@@ -590,7 +590,7 @@ Create a function call from a list of arguments
 Parse a string as an R expression, returning a Sxp pointer.
 
 *source:*
-[RCall/src/iface.jl:47](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/iface.jl#L47)
+[RCall/src/iface.jl:47](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/iface.jl#L47)
 
 ---
 
@@ -600,7 +600,7 @@ Set the class of an R object.
 
 
 *source:*
-[RCall/src/methods.jl:253](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L253)
+[RCall/src/methods.jl:253](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L253)
 
 ---
 
@@ -609,7 +609,7 @@ Set the class of an R object.
 assign value v to the i-th element of LangSxp l
 
 *source:*
-[RCall/src/methods.jl:188](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L188)
+[RCall/src/methods.jl:188](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L188)
 
 ---
 
@@ -618,7 +618,7 @@ assign value v to the i-th element of LangSxp l
 assign value v to symbol s in the environment e
 
 *source:*
-[RCall/src/methods.jl:364](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L364)
+[RCall/src/methods.jl:364](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L364)
 
 ---
 
@@ -630,7 +630,7 @@ assign value v to symbol s in the environment e
 
 
 *source:*
-[RCall/src/convert-base.jl:29](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/convert-base.jl#L29)
+[RCall/src/convert-base.jl:29](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/convert-base.jl#L29)
 
 ---
 
@@ -640,7 +640,7 @@ Create a `CharSxp` from a String.
 
 
 *source:*
-[RCall/src/convert-base.jl:63](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/convert-base.jl#L63)
+[RCall/src/convert-base.jl:63](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/convert-base.jl#L63)
 
 ---
 
@@ -655,7 +655,7 @@ Constructs the following R code
 
 
 *source:*
-[RCall/src/callback.jl:118](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L118)
+[RCall/src/callback.jl:118](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L118)
 
 ---
 
@@ -668,7 +668,7 @@ removed by the Julia GC.
 
 
 *source:*
-[RCall/src/callback.jl:102](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L102)
+[RCall/src/callback.jl:102](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L102)
 
 ---
 
@@ -677,7 +677,7 @@ removed by the Julia GC.
 Create a `StrSxp` from an `AbstractString`
 
 *source:*
-[RCall/src/convert-base.jl:77](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/convert-base.jl#L77)
+[RCall/src/convert-base.jl:77](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/convert-base.jl#L77)
 
 ---
 
@@ -686,7 +686,7 @@ Create a `StrSxp` from an `AbstractString`
 Create a `SymSxp` from a `Symbol`
 
 *source:*
-[RCall/src/convert-base.jl:46](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/convert-base.jl#L46)
+[RCall/src/convert-base.jl:46](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/convert-base.jl#L46)
 
 ---
 
@@ -696,7 +696,7 @@ Convert a `UnknownSxpPtr` to an approptiate `SxpPtr`.
 
 
 *source:*
-[RCall/src/types.jl:330](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L330)
+[RCall/src/types.jl:330](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L330)
 
 ---
 
@@ -705,7 +705,7 @@ Convert a `UnknownSxpPtr` to an approptiate `SxpPtr`.
 Generic function for constructing Sxps from Julia objects.
 
 *source:*
-[RCall/src/convert-base.jl:50](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/convert-base.jl#L50)
+[RCall/src/convert-base.jl:50](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/convert-base.jl#L50)
 
 ---
 
@@ -715,7 +715,7 @@ Create an argument list for an R function call, with a varargs "dots" at the end
 
 
 *source:*
-[RCall/src/callback.jl:133](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L133)
+[RCall/src/callback.jl:133](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L133)
 
 ---
 
@@ -728,7 +728,7 @@ a 0-based index into the `info` field of a `SxpHead`.
 
 
 *source:*
-[RCall/src/types.jl:309](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L309)
+[RCall/src/types.jl:309](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L309)
 
 ---
 
@@ -738,7 +738,7 @@ Release last `n` objects gc-protected by `protect`.
 
 
 *source:*
-[RCall/src/types.jl:301](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L301)
+[RCall/src/types.jl:301](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L301)
 
 ---
 
@@ -748,7 +748,7 @@ The same as `unsafe_vec`, except returns an appropriately sized array.
 
 
 *source:*
-[RCall/src/methods.jl:70](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L70)
+[RCall/src/methods.jl:70](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L70)
 
 ---
 
@@ -770,7 +770,7 @@ represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 
 
 *source:*
-[RCall/src/methods.jl:64](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/methods.jl#L64)
+[RCall/src/methods.jl:64](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/methods.jl#L64)
 
 ## Types [Internal]
 
@@ -781,7 +781,7 @@ represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 R "any" object
 
 *source:*
-[RCall/src/types.jl:154](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L154)
+[RCall/src/types.jl:154](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L154)
 
 ---
 
@@ -790,7 +790,7 @@ R "any" object
 R byte code
 
 *source:*
-[RCall/src/types.jl:176](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L176)
+[RCall/src/types.jl:176](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L176)
 
 ---
 
@@ -799,7 +799,7 @@ R byte code
 R built-in function
 
 *source:*
-[RCall/src/types.jl:85](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L85)
+[RCall/src/types.jl:85](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L85)
 
 ---
 
@@ -808,7 +808,7 @@ R built-in function
 R dot-dot-dot object
 
 *source:*
-[RCall/src/types.jl:148](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L148)
+[RCall/src/types.jl:148](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L148)
 
 ---
 
@@ -817,7 +817,7 @@ R dot-dot-dot object
 R environment
 
 *source:*
-[RCall/src/types.jl:52](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L52)
+[RCall/src/types.jl:52](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L52)
 
 ---
 
@@ -826,7 +826,7 @@ R environment
 R expression vector
 
 *source:*
-[RCall/src/types.jl:168](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L168)
+[RCall/src/types.jl:168](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L168)
 
 ---
 
@@ -835,7 +835,7 @@ R expression vector
 R external pointer
 
 *source:*
-[RCall/src/types.jl:182](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L182)
+[RCall/src/types.jl:182](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L182)
 
 ---
 
@@ -844,7 +844,7 @@ R external pointer
 R function call
 
 *source:*
-[RCall/src/types.jl:70](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L70)
+[RCall/src/types.jl:70](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L70)
 
 ---
 
@@ -853,7 +853,7 @@ R function call
 R pairs (cons) list cell
 
 *source:*
-[RCall/src/types.jl:34](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L34)
+[RCall/src/types.jl:34](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L34)
 
 ---
 
@@ -862,7 +862,7 @@ R pairs (cons) list cell
 R promise
 
 *source:*
-[RCall/src/types.jl:61](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L61)
+[RCall/src/types.jl:61](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L61)
 
 ---
 
@@ -871,7 +871,7 @@ R promise
 R byte vector
 
 *source:*
-[RCall/src/types.jl:197](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L197)
+[RCall/src/types.jl:197](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L197)
 
 ---
 
@@ -880,7 +880,7 @@ R byte vector
 R S4 object
 
 *source:*
-[RCall/src/types.jl:205](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L205)
+[RCall/src/types.jl:205](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L205)
 
 ---
 
@@ -889,7 +889,7 @@ R S4 object
 R special function
 
 *source:*
-[RCall/src/types.jl:79](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L79)
+[RCall/src/types.jl:79](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L79)
 
 ---
 
@@ -898,7 +898,7 @@ R special function
 R Sxp header: a pointer to this is used for unknown types.
 
 *source:*
-[RCall/src/types.jl:11](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L11)
+[RCall/src/types.jl:11](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L11)
 
 ---
 
@@ -907,7 +907,7 @@ R Sxp header: a pointer to this is used for unknown types.
 R symbol
 
 *source:*
-[RCall/src/types.jl:99](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L99)
+[RCall/src/types.jl:99](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L99)
 
 ---
 
@@ -916,7 +916,7 @@ R symbol
 R list (i.e. Array{Any,1})
 
 *source:*
-[RCall/src/types.jl:160](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L160)
+[RCall/src/types.jl:160](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L160)
 
 ---
 
@@ -925,7 +925,7 @@ R list (i.e. Array{Any,1})
 R weak reference
 
 *source:*
-[RCall/src/types.jl:191](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L191)
+[RCall/src/types.jl:191](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L191)
 
 ## Globals [Internal]
 
@@ -938,7 +938,7 @@ stored here to prevent garbage collection by Julia.
 
 
 *source:*
-[RCall/src/callback.jl:71](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/callback.jl#L71)
+[RCall/src/callback.jl:71](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/callback.jl#L71)
 
 ---
 
@@ -947,5 +947,5 @@ stored here to prevent garbage collection by Julia.
 vector of R Sxp types
 
 *source:*
-[RCall/src/types.jl:313](https://github.com/JuliaStats/RCall.jl/tree/7bbf9e154ac1ead274767ec81d72682aded1414a/src/types.jl#L313)
+[RCall/src/types.jl:313](https://github.com/JuliaStats/RCall.jl/tree/82c47be42bfc3f9c210d2023beaa79fc0746dd2e/src/types.jl#L313)
 

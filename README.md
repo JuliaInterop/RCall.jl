@@ -10,9 +10,9 @@
 * Coverage: [![Coveralls Status](https://coveralls.io/repos/JuliaStats/RCall.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/JuliaStats/RCall.jl?branch=master)
 
 #### Lastest Documentataion
-[![Documentation Status](https://readthedocs.org/projects/rcalljl/badge/?version=latest)](http://rcalljl.readthedocs.org/en/latest/?badge=latest)
- 
 
+[Latest Documentation](http://juliastats.github.io/RCall.jl/).
+ 
 ## Embedded R within Julia.
 
 ### Requirements and Installation
