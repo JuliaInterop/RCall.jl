@@ -1,4 +1,4 @@
-# `RCall`
+# RCall.jl
 
 [R](http://www.r-project.org) has been round for a couple of decades.  In the
 last few years, a new language for technical computing,
