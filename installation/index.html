@@ -177,12 +177,14 @@
 <pre><code class="julia">Pkg.build(&quot;RCall&quot;)
 </code></pre>
 
-<p>If that fails, you may need to also set the following environmental variables:
- * <code>R_HOME</code>
- * <code>R_DOC_DIR</code>
- * <code>R_INCLUDE_DIR</code>
- * <code>R_SHARE_DIR</code>
- * <code>LD_LIBRARY_PATH</code></p>
+<p>If that fails, you may need to also set the following environmental variables:</p>
+<ul>
+<li><code>R_HOME</code></li>
+<li><code>R_DOC_DIR</code></li>
+<li><code>R_INCLUDE_DIR</code></li>
+<li><code>R_SHARE_DIR</code></li>
+<li><code>LD_LIBRARY_PATH</code></li>
+</ul>
 <h3 id="windows_1">Windows</h3>
 <p>The <code>PATH</code> environmental variable should contain the location of your R binary, and the <code>HOME</code> variable should contain the current user's home directory. These need to be set before Julia is started.</p>
               
