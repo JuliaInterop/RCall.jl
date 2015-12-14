@@ -1,7 +1,15 @@
-using Compat, BinDeps
+using Compat
+
+if isdefined(Main, :RCall)
+    # The environmental variables can cause conflicts if RCall has already been loaded.
+    error("RCall already loaded. Please restart Julia and re-run Pkg.build(\"RCall\")")
+end
+
 
 if OS_NAME == :Windows
-    Rlibname = "R."*BinDeps.shlib_ext
+    ### Windows
+    
+    Rlibname = "R."*Libdl.dlext
     # First try to open R dll directly: this will work if it is in the PATH
     if Libdl.dlopen_e(Rlibname) != C_NULL
         deps_code = quote
@@ -14,7 +22,10 @@ if OS_NAME == :Windows
 
         Rlibpath = joinpath(Rinstallpath,"bin",WORD_SIZE==64?"x64":"i386")
         Rlib = joinpath(Rlibpath,Rlibname)
-        Libdl.dlopen_e(Rlib) == C_NULL && error("Unable to locate $Rlibname\nTry adding location to PATH and re-run Pkg.build(\"RCall\")")
+        Rlibh = Libdl.dlopen_e(Rlib)
+        if Rlibh == C_NULL
+            error("Unable to locate $Rlibname\nSee http://juliastats.github.io/RCall.jl/installation/")
+        end
 
         # use _wputenv to circumvent Win32/POSIX ENV bug, see
         # https://github.com/JuliaLang/julia/issues/11215
@@ -25,8 +36,11 @@ if OS_NAME == :Windows
             ccall(:_wputenv,Cint,(Ptr{UInt16},),utf16("HOME="*homedir())) 
         end
     end
+    
 else
-    Rlibname = "libR."*BinDeps.shlib_ext
+    ### OS X and Linux
+    
+    Rlibname = "libR."*Libdl.dlext
     
     if haskey(ENV,"R_HOME")
         Rscript = joinpath(ENV["R_HOME"],"bin","Rscript")
@@ -43,7 +57,10 @@ else
     end
 
     Rlib = joinpath(Renv["R_HOME"],"lib",Rlibname)
-    Libdl.dlopen_e(Rlib) == C_NULL && error("Unable to locate $Rlibname\nTry setting R_HOME, and re-run Pkg.build(\"RCall\").")
+    Rlibh = Libdl.dlopen_e(Rlib)
+    if Rlibh == C_NULL
+        error("Unable to locate $Rlibname\nSee http://juliastats.github.io/RCall.jl/installation/")
+    end
 
     deps_code = quote
         const libR = $Rlib
@@ -53,10 +70,22 @@ else
     end
 end
 
-
-
 ## Write the deps.jl file
 open("./deps.jl","w") do io
     println(io,"# This is an auto-generated file; do not edit\n")
     println(io, deps_code)
+end
+
+julia_exe = joinpath(JULIA_HOME, Base.julia_exename())
+
+## try loading R, and capture version information
+rversionhead = readall(`$julia_exe versioninfo.jl`)
+R_VERSION = VersionNumber(split(rversionhead,' ')[3])
+
+if R_VERSION < v"3.2.0"
+    error("R installation is out of date. RCall.jl requires at least version 3.2.0.\nSee http://juliastats.github.io/RCall.jl/installation/")
+end
+
+open("./deps.jl","a") do io
+    println(io, :(const R_VERSION = $R_VERSION))
 end

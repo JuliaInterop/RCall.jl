@@ -18,7 +18,7 @@ The current [Windows binary from CRAN](https://cran.r-project.org/bin/windows/ba
 The [CRAN .pkg](https://cran.r-project.org/bin/macosx/) or the [homebrew/science](https://github.com/Homebrew/homebrew-science) tap.
 
 ### Linux
-Most linux distributions allow installation of R from their package manager, however these are often out of date, and may not work with RCall.jl. We recommend that you use the updated repositories from [CRAN](https://cran.r-project.org/bin/linux/).
+Most Linux distributions allow installation of R from their package manager, however these are often out of date, and may not work with RCall.jl. We recommend that you use the updated repositories from [CRAN](https://cran.r-project.org/bin/linux/).
 
 
 ## Updating R
@@ -35,23 +35,23 @@ This should be done from within a new Julia session (i.e. before RCall has been 
 If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).
 
 ### Linux and OS X
-The following environmental variables should be set:
+Firstly, try setting the `R_HOME` environmental variable to the location of your R installation. This can be set in your `~/.juliarc.jl` file via the `ENV` global variable, e.g.
+```julia
+ENV["R_HOME"] = ...
+```
+Then from within a new Julia session, try running
+```julia
+Pkg.build("RCall")
+```
+
+If that fails, you may need to also set the following environmental variables:
  * `R_HOME`
  * `R_DOC_DIR`
  * `R_INCLUDE_DIR`
  * `R_SHARE_DIR`
  * `LD_LIBRARY_PATH`
 
-These can be set in your `~/.juliarc.jl` file via the `ENV` global variable, e.g.
-```julia
-ENV["R_HOME"] = ...
-```
-
-Then from withing Julia, try running
-```julia
-Pkg.build("RCall")
-```
 
 ### Windows
-The `PATH` environmental variable should contain your R binary, and the `HOME` variable should contain the current user's home directory. These need to be set before Julia is started.
+The `PATH` environmental variable should contain the location of your R binary, and the `HOME` variable should contain the current user's home directory. These need to be set before Julia is started.
 
