@@ -21,7 +21,7 @@ This package requires that a recent version of R (3.2.0 or greater) be installed
 ```julia
 Pkg.add("RCall")
 ```
-from within Julia should be sufficient. For further details, see [Installing RCall.jl](docs/installation.md).
+from within Julia should be sufficient. For further details, see [Installing RCall.jl](http://juliastats.github.io/RCall.jl/installation/).
 
 ### Attaching the package
 Attaching the package in a Julia session with

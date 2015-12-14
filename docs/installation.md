@@ -45,6 +45,7 @@ Pkg.build("RCall")
 ```
 
 If that fails, you may need to also set the following environmental variables:
+
  * `R_HOME`
  * `R_DOC_DIR`
  * `R_INCLUDE_DIR`
