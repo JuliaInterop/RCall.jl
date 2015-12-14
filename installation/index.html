@@ -69,7 +69,9 @@
             
                 <li class="toctree-l3"><a href="#installing-rcalljl">Installing RCall.jl</a></li>
                 
-                    <li><a class="toctree-l4" href="#supported-methods">Supported methods</a></li>
+                    <li><a class="toctree-l4" href="#standard-installations">Standard installations</a></li>
+                
+                    <li><a class="toctree-l4" href="#updating-r">Updating R</a></li>
                 
                     <li><a class="toctree-l4" href="#other-methods">Other methods</a></li>
                 
@@ -145,38 +147,44 @@
             <div class="section">
               
                 <h1 id="installing-rcalljl">Installing RCall.jl</h1>
-<h2 id="supported-methods">Supported methods</h2>
-<p>RCall.jl requires that a recent version of R, at least 3.2.0, be installed. Currently supported are:
- * Windows: The Windows binary from <a href="https://cran.r-project.org/bin/windows/base/">CRAN</a>.
- * Mac OS X: The <a href="https://cran.r-project.org/bin/macosx/">CRAN .pkg</a> or the <a href="https://github.com/Homebrew/homebrew-science">homebrew/science</a> tap.
- * Linux: most distributions allow installation of R from their package manager, however these are often older versions which may not work with RCall.jl. We recommend that you use the updated repositories from <a href="https://cran.r-project.org/bin/linux/">CRAN</a>.</p>
-<p>If R has been installed by any of these methods, it should be possible to install RCall.jl from within Julia using</p>
+<p>RCall.jl requires that a recent version of R, at least 3.2.0, be installed. </p>
+<h2 id="standard-installations">Standard installations</h2>
+<p>If R has been installed using one of the standard approaches below, then RCall.jl can simply be installed with</p>
 <pre><code class="julia">Pkg.add(&quot;RCall&quot;)
 </code></pre>
 
 <p>Should you experience problems with any of these methods, please <a href="https://github.com/JuliaStats/RCall.jl/issues/new">open an issue</a>.</p>
-<h3 id="updating">Updating</h3>
+<h3 id="windows">Windows</h3>
+<p>The current <a href="https://cran.r-project.org/bin/windows/base/">Windows binary from CRAN</a>.</p>
+<h3 id="os-x">OS X</h3>
+<p>The <a href="https://cran.r-project.org/bin/macosx/">CRAN .pkg</a> or the <a href="https://github.com/Homebrew/homebrew-science">homebrew/science</a> tap.</p>
+<h3 id="linux">Linux</h3>
+<p>Most Linux distributions allow installation of R from their package manager, however these are often out of date, and may not work with RCall.jl. We recommend that you use the updated repositories from <a href="https://cran.r-project.org/bin/linux/">CRAN</a>.</p>
+<h2 id="updating-r">Updating R</h2>
 <p>If you have updated the R installation, you may need to rebuild RCall via</p>
 <pre><code class="julia">Pkg.build(&quot;RCall&quot;)
 </code></pre>
 
 <p>This should be done from within a new Julia session (i.e. before RCall has been loaded).</p>
 <h2 id="other-methods">Other methods</h2>
-<p>If you're using some sort of other installation, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).</p>
+<p>If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).</p>
 <h3 id="linux-and-os-x">Linux and OS X</h3>
-<p>The following environmental variables should be set:
+<p>Firstly, try setting the <code>R_HOME</code> environmental variable to the location of your R installation. This can be set in your <code>~/.juliarc.jl</code> file via the <code>ENV</code> global variable, e.g.</p>
+<pre><code class="julia">ENV[&quot;R_HOME&quot;] = ...
+</code></pre>
+
+<p>Then from within a new Julia session, try running</p>
+<pre><code class="julia">Pkg.build(&quot;RCall&quot;)
+</code></pre>
+
+<p>If that fails, you may need to also set the following environmental variables:
  * <code>R_HOME</code>
  * <code>R_DOC_DIR</code>
  * <code>R_INCLUDE_DIR</code>
  * <code>R_SHARE_DIR</code>
  * <code>LD_LIBRARY_PATH</code></p>
-<p>These can be set in your <code>~/.juliarc.jl</code> file via the <code>ENV</code> global variable, e.g.</p>
-<pre><code class="julia">ENV[&quot;R_HOME&quot;] = ...
-</code></pre>
-
-<p>Then from withing Julia, try running</p>
-<pre><code class="julia">Pkg.build(&quot;RCall&quot;)
-</code></pre>
+<h3 id="windows_1">Windows</h3>
+<p>The <code>PATH</code> environmental variable should contain the location of your R binary, and the <code>HOME</code> variable should contain the current user's home directory. These need to be set before Julia is started.</p>
               
             </div>
           </div>
