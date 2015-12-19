@@ -35,7 +35,7 @@ This should be done from within a new Julia session (i.e. before RCall has been 
 If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).
 
 ### Linux and OS X
-Firstly, try setting the `R_HOME` environmental variable to the location of your R installation. This can be set in your `~/.juliarc.jl` file via the `ENV` global variable, e.g.
+Firstly, try setting the `R_HOME` environmental variable to the location of your R installation. You can find the correct value for it by calling `Rscript -e "cat(Sys.getenv('R_HOME'))"` from the command line. This can be set in your `~/.juliarc.jl` file via the `ENV` global variable, e.g.
 ```julia
 ENV["R_HOME"] = ...
 ```
