@@ -169,7 +169,7 @@
 <h2 id="other-methods">Other methods</h2>
 <p>If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).</p>
 <h3 id="linux-and-os-x">Linux and OS X</h3>
-<p>Firstly, try setting the <code>R_HOME</code> environmental variable to the location of your R installation. This can be set in your <code>~/.juliarc.jl</code> file via the <code>ENV</code> global variable, e.g.</p>
+<p>Firstly, try setting the <code>R_HOME</code> environmental variable to the location of your R installation, which can be found by running <code>Sys.getenv('R_HOME')</code> from within R. This can be set in your <code>~/.juliarc.jl</code> file via the <code>ENV</code> global variable, e.g.</p>
 <pre><code class="julia">ENV[&quot;R_HOME&quot;] = ...
 </code></pre>
 
