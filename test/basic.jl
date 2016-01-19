@@ -5,7 +5,7 @@ lsv = reval("ls()")
 lsd = reval("ls(\"package:datasets\")")
 @test isa(lsv, RObject{StrSxp})
 @test length(lsd) > 50
-@test rcopy(lsd[2]) == "airmiles"
+@test "airmiles" in rcopy(lsd)
 
 langsexp = rlang(:solve, RObject([1 2; 0 4]))
 @test length(langsexp) == 2
