@@ -4,12 +4,15 @@ try/catch block, returning a Sxp pointer.
 """
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     err = Array(Cint,1)
+    protect(expr)
+    protect(env)
     val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
     if err[1] !=0
         error("RCall.jl ", readall(RCall.errorBuffer))
     elseif nb_available(errorBuffer) != 0
         warn("RCall.jl ", readall(RCall.errorBuffer))
     end
+    unprotect(2)
     sexp(val)
 end
 
@@ -45,6 +48,7 @@ rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 "Parse a string as an R expression, returning a Sxp pointer."
 function rparse_p(st::Ptr{StrSxp})
+    protect(st)
     status = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
@@ -55,6 +59,7 @@ function rparse_p(st::Ptr{StrSxp})
         s == 3 && error("RCall.jl invalid R expression")
         s == 4 && throw(EOFError())
     end
+    unprotect(1)
     sexp(val)
 end
 rparse_p(st::AbstractString) = rparse_p(sexp(st))
