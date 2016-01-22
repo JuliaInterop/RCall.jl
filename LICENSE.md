@@ -1,7 +1,7 @@
 The RCall.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2015:
->  * Douglas Bates
+>  * Douglas Bates, Randy Lai, Simon Byrne and contributors
 >
 > Permission is hereby granted, free of charge, to any person obtaining
 > a copy of this software and associated documentation files (the
