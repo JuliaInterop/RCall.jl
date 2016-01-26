@@ -209,8 +209,8 @@ end
 # used to this effect.
 function sexp{S<:VectorSxp}(::Type{S},d::Associative)
     n = length(d)
-    ks = protect(allocVector(StrSxp,n))
-    vs = protect(allocVector(VecSxp,n))
+    vs = protect(allocArray(VecSxp,n))
+    ks = protect(allocArray(StrSxp,n))
 
     for (i,(k,v)) in enumerate(d)
         ks[i] = string(k)
