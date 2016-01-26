@@ -209,8 +209,8 @@ r = RObject(a)
 @test r[3] === convert(Complex128,a[3])
 @test r[2,3,1,2] === convert(Complex128,a[2,3,1,2])
 
-
-
-
-
-
+# dict
+d = Dict(:a=>[1, 2, 4], :b=> ["e", "d", "f"])
+r = RObject(d)
+@test r[:a][3] == 4
+@test rcopy(r[:b][2]) == "d"
