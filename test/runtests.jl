@@ -1,4 +1,4 @@
-using Base.Test
+using Base.Test, Compat
 hd = homedir()
 pd = Pkg.dir()
 
@@ -29,8 +29,8 @@ a = RObject(rand(10))
 @test typeof(RCall.sexp(Complex128, 1)) == Complex128
 @test typeof(rcopy(Vector{Float64}, a.p)) == Vector{Float64}
 b = RObject(true)
-@test rcopy(Cint(1)) == 1
-@test rcopy(Cint, Cint(1)) == 1
+@test rcopy(@compat(Int32(1))) == 1
+@test rcopy(Cint, @compat(Int32(1))) == 1
 @test rcopy(Cint, b.p) == 1
 @test rcopy(Vector{Cint}, b.p) == [1]
 @test rcopy(Array{Cint}, b.p) == [1]
@@ -46,6 +46,6 @@ f1 = RObject(funk)
 @test RCall.rlang_formula(:a) == :a
 
 #Dictionaries
-d = RObject(Dict(1=>2)) 
-@test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
-@test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
+d = RObject(@compat(Dict(1=>2)))
+@test @compat Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
+@test @compat Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
