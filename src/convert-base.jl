@@ -71,7 +71,7 @@ sexp(::Type{CharSxp},sym::Symbol) = sexp(CharSxp,string(sym))
 
 rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
 rcopy(::Type{Symbol},s::CharSxpPtr) = symbol(rcopy(AbstractString,s))
-rcopy(::Type{Int64}, s::CharSxpPtr) = parse(Int, rcopy(s))
+rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
 
 "Create a `StrSxp` from an `AbstractString`"
 sexp(::Type{StrSxp}, s::CharSxpPtr) =
