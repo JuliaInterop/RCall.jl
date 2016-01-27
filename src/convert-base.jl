@@ -227,7 +227,8 @@ sexp(d::Associative) = sexp(VecSxp,d)
 
 function rcopy{A<:Associative,S<:VectorSxp}(::Type{A}, s::Ptr{S})
     a = A()
-    K,V = eltype(a).parameters
+    K = keytype(a)
+    V = valtype(a)
     for (k,v) in zip(getNames(s),s)
         a[rcopy(K,k)] = rcopy(V,v)
     end
@@ -237,7 +238,8 @@ end
 function rcopy{A<:Associative,S<:PairListSxp}(::Type{A}, s::Ptr{S})
     protect(s)
     a = A()
-    K,V = eltype(a).parameters
+    K = keytype(a)
+    V = valtype(a)
     for (k,v) in s
         a[rcopy(K,k)] = rcopy(V,v)
     end
