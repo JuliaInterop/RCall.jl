@@ -117,7 +117,7 @@ function __init__()
     global const rUnboundValue = unsafe_load(cglobal((:R_UnboundValue,libR),UnknownSxpPtr))
     global const rMissingArg =  unsafe_load(cglobal((:R_MissingArg,libR),Ptr{SymSxp}))
 
-
+    "Returns R's global environment as an RObject"
     global const globalEnv = RObject(rGlobalEnv)
 
     # set up function callbacks

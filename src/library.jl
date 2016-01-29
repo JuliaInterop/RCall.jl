@@ -25,6 +25,7 @@ function rwrap(pkg::ASCIIString,s::Symbol)
     m
 end
 
+"Import R Packages into Julia with or without alias. You can also use classic Python syntax to do this: `import *module-name* as *shorthand*`"
 macro rimport(x, args...)
     if length(args)==2 && args[1] == :as
         m = args[2]
@@ -50,6 +51,7 @@ macro rimport(x, args...)
     end
 end
 
+"Import R packages into Julia without alias."
 macro rusing(x)
     sym = Expr(:quote, x)
     quote
