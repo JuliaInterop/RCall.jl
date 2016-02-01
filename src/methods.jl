@@ -40,8 +40,12 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
         $sym(r::RObject) = $sym(r.p)
     end
 end
-@doc "Check whether an R variable is a factor variable" isFactor
-@doc "Check whether an R variable is an ordered factor variable" isOrdered
+
+"Check whether an R variable is a factor variable" 
+isFactor
+
+"Check whether an R variable is an ordered factor variable" 
+isOrdered
 
 """
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
