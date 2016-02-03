@@ -41,6 +41,12 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
     end
 end
 
+"Check whether an R variable is a factor variable" 
+isFactor
+
+"Check whether an R variable is an ordered factor variable" 
+isOrdered
+
 """
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
 """
@@ -197,7 +203,7 @@ function setindex!{S<:PairListSxp}(s::Ptr{S}, value, key::Integer)
 end
 
 
-
+"Return a particular attribute of an RObject"
 function getAttrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
     sexp(ccall((:Rf_getAttrib,libR),UnknownSxpPtr,(Ptr{S},Ptr{SymSxp}),s,sym))
 end
@@ -206,6 +212,7 @@ getAttrib{S<:Sxp}(s::Ptr{S}, sym::AbstractString) = getAttrib(s,sexp(SymSxp,sym)
 
 getAttrib(r::RObject, sym) = RObject(getAttrib(r.p,sym))
 
+"Set a particular attribute of an RObject"
 function setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T})
     ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
