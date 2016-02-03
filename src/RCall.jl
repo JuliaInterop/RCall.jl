@@ -50,8 +50,21 @@ type Rinstance
 end
 
 
-function __init__()
-    Rinited = unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
+function __init__()    
+    Rinited =unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
+    #For RStudio Server or other R embedded Applications, if them emedded julia into them
+    #unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) is null,
+    #but unsafe_load(cglobal((:R_NilValue),Ptr{Void})) is not null
+    if !Rinited
+        Rinited1=false
+        try
+         Rinited1 =unsafe_load(cglobal((:R_NilValue),Ptr{Void})) != C_NULL
+        catch
+        end
+        #if both value are false,then R not inited ,otherwise R is inited.
+        Rinited= Rinited || Rinited1
+    end
+
     if !Rinited
         # disable signal handlers
         unsafe_store!(cglobal((:R_SignalHandlers,RCall.libR),Cint),0)
