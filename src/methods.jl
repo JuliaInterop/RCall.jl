@@ -22,7 +22,7 @@ Sxp methods for `length` return the R length.
 "long vectors", which have a negative value for the `length` member.
 """
 length{S<:Sxp}(s::Ptr{S}) =
-    @compat Int(ccall((:Rf_xlength,libR),Cptrdiff_t,(Ptr{S},),s))
+    Int(ccall((:Rf_xlength,libR),Cptrdiff_t,(Ptr{S},),s))
 length(r::RObject) = length(r.p)
 
 ## Predicates applied to an Sxp
@@ -47,10 +47,13 @@ isFactor
 "Check whether an R variable is an ordered factor variable" 
 isOrdered
 
+
+const voffset = Ref{UInt}()
+
 """
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
 """
-dataptr{S<:VectorSxp}(s::Ptr{S}) = convert(Ptr{eltype(S)}, s+voffset)
+dataptr{S<:VectorSxp}(s::Ptr{S}) = convert(Ptr{eltype(S)}, s+voffset[])
 
 """
 Represent the contents of a VectorSxp type as a `Vector`.
@@ -130,13 +133,13 @@ function setindex!(s::Ptr{StrSxp}, value::AbstractString, key::Integer)
 end
 
 
-@compat function setindex!{S<:Union{VecSxp,ExprSxp},T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
+function setindex!{S<:Union{VecSxp,ExprSxp},T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_VECTOR_ELT,libR), Ptr{T},
           (Ptr{S},Cptrdiff_t, Ptr{T}),
           s, key-1, value)
 end
-@compat function setindex!{S<:Union{VecSxp,ExprSxp}}(s::Ptr{S}, value, key::Integer)
+function setindex!{S<:Union{VecSxp,ExprSxp}}(s::Ptr{S}, value, key::Integer)
     setindex!(s,sexp(value),key)
 end
 
@@ -161,14 +164,20 @@ function setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
     ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
+setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::RObject{T}) = setcar!(s,sexp(c))
+
 function settag!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
     ccall((:SET_TAG,libR),Void,(Ptr{S},Ptr{T}),s,c)
     nothing
 end
+settag!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::RObject{T}) = settag!(s,sexp(c))
+
 function setcdr!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
     ccall((:SETCDR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
+setcdr!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::RObject{T}) = setcdr!(s,sexp(c))
+
 
 
 start{S<:PairListSxp}(s::Ptr{S}) = s
@@ -177,7 +186,7 @@ function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
     c = car(state)
     (t,c), cdr(state)
 end
-done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == rNilValue
+done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == sexp(Const.NilValue)
 
 "extract the i-th element of LangSxp l"
 function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
@@ -207,6 +216,7 @@ end
 function getAttrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
     sexp(ccall((:Rf_getAttrib,libR),UnknownSxpPtr,(Ptr{S},Ptr{SymSxp}),s,sym))
 end
+getAttrib{S<:Sxp}(s::Ptr{S}, sym::RObject{SymSxp}) = getAttrib(s,sexp(sym))
 getAttrib{S<:Sxp}(s::Ptr{S}, sym::Symbol) = getAttrib(s,sexp(SymSxp,sym))
 getAttrib{S<:Sxp}(s::Ptr{S}, sym::AbstractString) = getAttrib(s,sexp(SymSxp,sym))
 
@@ -217,6 +227,7 @@ function setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T})
     ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
 end
+setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::RObject{SymSxp},t::Ptr{T}) = setAttrib!(s,sexp(sym),t)
 setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Symbol,t::Ptr{T}) = setAttrib!(s,sexp(SymSxp,sym),t)
 setAttrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::AbstractString,t::Ptr{T}) = setAttrib!(s,sexp(SymSxp,sym),t)
 setAttrib!{S<:Sxp}(s::Ptr{S},sym,t) = setAttrib!(s,sym,sexp(t))
@@ -230,7 +241,7 @@ attributes{S<:Sxp}(s::Ptr{S}) = attributes(unsafe_load(s))
 
 function size{S<:Sxp}(s::Ptr{S})
     isArray(s) || return (length(s),)
-    tuple(convert(Array{Int},unsafe_vec(getAttrib(s,rDimSymbol)))...)
+    tuple(convert(Array{Int},unsafe_vec(getAttrib(s,Const.DimSymbol)))...)
 end
 size(r::RObject) = size(sexp(r))
 
@@ -238,26 +249,26 @@ size(r::RObject) = size(sexp(r))
 """
 Returns the names of an R vector.
 """
-getNames{S<:VectorSxp}(s::Ptr{S}) = getAttrib(s,rNamesSymbol)
+getNames{S<:VectorSxp}(s::Ptr{S}) = getAttrib(s,Const.NamesSymbol)
 getNames(r::RObject) = RObject(getNames(sexp(r)))
 
 """
 Set the names of an R vector.
 """
-setNames!{S<:VectorSxp}(s::Ptr{S}, n::Ptr{StrSxp}) = setAttrib!(s,rNamesSymbol,n)
+setNames!{S<:VectorSxp}(s::Ptr{S}, n::Ptr{StrSxp}) = setAttrib!(s,Const.NamesSymbol,n)
 setNames!(r::RObject,n) = RObject(setNames!(sexp(r),sexp(StrSxp,n)))
 
 """
 Returns the class of an R object.
 """
-getClass{S<:Sxp}(s::Ptr{S}) = getAttrib(s,rClassSymbol)
+getClass{S<:Sxp}(s::Ptr{S}) = getAttrib(s,Const.ClassSymbol)
 getClass(r::RObject) = RObject(getClass(sexp(r)))
 
 
 """
 Set the class of an R object.
 """
-setClass!{S<:Sxp}(s::Ptr{S},c::Ptr{StrSxp}) = setAttrib!(s,rClassSymbol,c)
+setClass!{S<:Sxp}(s::Ptr{S},c::Ptr{StrSxp}) = setAttrib!(s,Const.ClassSymbol,c)
 setClass!(r::RObject,c) = RObject(setClass!(sexp(r)),sexp(StrSxp,c))
 
 
@@ -281,22 +292,22 @@ end
 """
 NA element for each type
 """
-NAel(::Type{LglSxp}) = rNaInt
-NAel(::Type{IntSxp}) = rNaInt
-NAel(::Type{RealSxp}) = rNaReal
-NAel(::Type{CplxSxp}) = complex(rNaReal,rNaReal)
-NAel(::Type{StrSxp}) = rNaString
-NAel(::Type{VecSxp}) = sexp(LglSxp,rNaInt) # used for setting
+NAel(::Type{LglSxp}) = Const.NaInt
+NAel(::Type{IntSxp}) = Const.NaInt
+NAel(::Type{RealSxp}) = Const.NaReal
+NAel(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
+NAel(::Type{StrSxp}) = sexp(Const.NaString)
+NAel(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
 
 
 """
 Check if values correspond to R's sentinel NA values.
 """
-isNA(x::Complex128) = real(x) === rNaReal && imag(x) === rNaReal
-isNA(x::Float64) = x === rNaReal
-isNA(x::Int32) = x == rNaInt
+isNA(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
+isNA(x::Float64) = x === Const.NaReal
+isNA(x::Int32) = x == Const.NaInt
 isNA(a::AbstractArray) = reshape(bitpack([isNA(aa) for aa in a]),size(a))
-isNA(s::CharSxpPtr) = s === rNaString
+isNA(s::CharSxpPtr) = s === sexp(Const.NaString)
 
 # this doesn't allow us to check VecSxp s
 function isNA{S<:VectorSxp}(s::Ptr{S})
@@ -360,7 +371,7 @@ isascii(r::RObject{StrSxp}) = isascii(sexp(r))
 "extract the value of symbol s in the environment e"
 function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
     v = ccall((:Rf_findVarInFrame,libR),UnknownSxpPtr,(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
-    v == rUnboundValue && error("$s is not defined in the environment")
+    v == sexp(Const.UnboundValue) && error("$s is not defined in the environment")
     sexp(v)
 end
 getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(s))
@@ -386,8 +397,9 @@ setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)
 "create a new environment which extends env"
 function newEnvironment(env::Ptr{EnvSxp})
     ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
-            (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),rNilValue,rNilValue,env)
+            (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),sexp(Const.NilValue),sexp(Const.Const.NilValue),env)
 end
+newEnvironment(env::RObject{EnvSxp}) = newEnvironment(sexp(env))
 
 "find namespace by name of the namespace"
 function findNamespace(str::ByteString)

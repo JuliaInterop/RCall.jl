@@ -26,9 +26,7 @@ a Symbol."""
 rcall(f,args...;kwargs...) = reval(rlang_p(f,args...;kwargs...))
 rcall_p(f,args...;kwargs...) = reval_p(rlang_p(f,args...;kwargs...))
 
-if VERSION >= v"v0.4-"
-    @compat Base.call{S<:Union{SymSxp,LangSxp,FunctionSxp}}(f::RObject{S},args...;kwargs...) = rcall(f,args...;kwargs...)
-end
+Base.call{S<:Union{SymSxp,LangSxp,FunctionSxp}}(f::RObject{S},args...;kwargs...) = rcall(f,args...;kwargs...)
 
 """
 Returns a variable named "str". Useful for passing keyword arguments containing dots.
