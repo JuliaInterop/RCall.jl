@@ -33,11 +33,7 @@ sexp(::Type{Complex128},x) = convert(Complex128,x)
 
 
 # NilSxp
-if VERSION < v"v0.4-"
-    sexp(::Nothing) = rNilValue
-else
-    sexp(::Void) = rNilValue
-end
+sexp(::Void) = sexp(Const.NilValue)
 rcopy(::Ptr{NilSxp}) = nothing
 
 
@@ -51,7 +47,7 @@ sexp(s::Symbol) = sexp(SymSxp,s)
 
 rcopy(::Type{Symbol},ss::SymSxp) = symbol(rcopy(AbstractString,ss))
 rcopy(::Type{AbstractString},ss::SymSxp) = rcopy(AbstractString,ss.name)
-@compat rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
+rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
     rcopy(T,unsafe_load(s))
 
 
@@ -144,9 +140,9 @@ end
 
 
 # Handle LglSxp seperately
-@compat sexp(::Type{LglSxp},v::Union{Bool,Cint}) =
+sexp(::Type{LglSxp},v::Union{Bool,Cint}) =
     ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
-@compat function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
+function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
     ra = allocArray(LglSxp, size(a)...)
     copy!(unsafe_vec(ra),a)
     ra

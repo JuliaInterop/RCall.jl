@@ -8,17 +8,18 @@ function makeNativeSymbol(fptr::Ptr{Void})
     # Rdynpriv.h
     rexfn = ccall((:R_MakeExternalPtrFn,libR), ExtPtrSxpPtr,
                      (Ptr{Void}, Ptr{Void}, Ptr{Void}),
-                     fptr, sexp(symbol("native symbol")), rNilValue)
-    setAttrib!(rexfn, rClassSymbol, sexp("NativeSymbol"))
+                     fptr, sexp(symbol("native symbol")), sexp(Const.NilValue))
+    setAttrib!(rexfn, Const.ClassSymbol, sexp("NativeSymbol"))
+    protect(rexfn)
     rexfn
 end
 
 
 "Create an ExtPtrSxpPtr object"
-makeExternalPtr(ptr::Ptr{Void}, tag=rNilValue, prot=rNilValue) =
+makeExternalPtr(ptr::Ptr{Void}, tag=Const.NilValue, prot=Const.NilValue) =
     ccall((:R_MakeExternalPtr,libR), ExtPtrSxpPtr,
           (Ptr{Void}, UnknownSxpPtr, UnknownSxpPtr),
-          ptr, tag, prot)
+          ptr, sexp(tag), sexp(prot))
 
 
 """
@@ -45,7 +46,7 @@ function callJuliaExtPtr(p::ListSxpPtr)
         for (k,a) in l
             # TODO: provide a mechanism for users to specify their own
             # conversion routines
-            if k == rNilValue
+            if k == sexp(Const.NilValue)
                 push!(args,rcopy(a))
             else
                 push!(kwargs,(rcopy(Symbol,k),rcopy(a)))
@@ -59,7 +60,7 @@ function callJuliaExtPtr(p::ListSxpPtr)
         return p = convert(UnknownSxpPtr,sexp(y))::UnknownSxpPtr
     catch e
         ccall((:Rf_error,libR),Ptr{Void},(Ptr{Cchar},),string(e))
-        return convert(UnknownSxpPtr,rNilValue)::UnknownSxpPtr
+        return convert(UnknownSxpPtr,sexp(Const.NilValue))::UnknownSxpPtr
     end
 end
 
@@ -78,6 +79,7 @@ function decrefExtPtr(p::ExtPtrSxpPtr)
     return nothing
 end
 
+const juliaDecref = Ref{Ptr{Void}}()
 
 """
 Register finalizer to be called by the R GC.
@@ -85,8 +87,9 @@ Register finalizer to be called by the R GC.
 function registerFinalizer(s::ExtPtrSxpPtr)
     ccall((:R_RegisterCFinalizerEx,libR),Void,
           (Ptr{ExtPtrSxp}, Ptr{Void}, Cint),
-          s,pJuliaDecref,0)
+          s,juliaDecref[],0)
 end
+
 
 sexp(::Type{ExtPtrSxp}, s::Ptr{ExtPtrSxp}) = s
 sexp(::Type{ExtPtrSxp}, r::RObject{ExtPtrSxp}) = sexp(r)
@@ -107,19 +110,21 @@ function sexp(::Type{ExtPtrSxp}, j)
     s
 end
 
+const juliaCallback = RObject{ExtPtrSxp}()
+
 """
 Wrap a callable Julia object `f` an a R `ClosSxpPtr`.
 
 Constructs the following R code
 
-    function(...) .External(rJuliaCallback, fExPtr, ...)
+    function(...) .External(juliaCallback, fExPtr, ...)
 
 """
 function sexp(::Type{ClosSxp}, f)
     body = protect(rlang_p(symbol(".External"),
-                           rJuliaCallback,
+                           juliaCallback,
                            sexp(ExtPtrSxp,f),
-                           rDotsSymbol))
+                           Const.DotsSymbol))
 
     lang = rlang_p(:function, sexp_arglist_dots(), body)
     clos = reval_p(lang)
@@ -135,7 +140,7 @@ function sexp_arglist_dots(args...;kwargs...)
     rr = rarglist
     for var in args
         settag!(rr, sexp(var))
-        setcar!(rr, rMissingArg)
+        setcar!(rr, Const.MissingArg)
         rr = cdr(rr)
     end
     for (var,val) in kwargs
@@ -143,8 +148,8 @@ function sexp_arglist_dots(args...;kwargs...)
         setcar!(rr, sexp(val))
         rr = cdr(rr)
     end
-    settag!(rr, rDotsSymbol)
-    setcar!(rr, rMissingArg)
+    settag!(rr, Const.DotsSymbol)
+    setcar!(rr, Const.MissingArg)
     unprotect(1)
     rarglist
 end

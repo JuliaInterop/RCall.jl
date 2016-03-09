@@ -22,6 +22,11 @@ function askYesNoCancel(prompt::Ptr{Cchar})
 end
 
 @windows_only begin
+    """
+        RStart
+
+    This type mirrors `structRstart` in `R_ext/RStartup.h`. It is used to change the IO behaviour on Windows.
+    """        
     type RStart # mirror structRstart in R_ext/RStartup.h
         R_Quiet::Cint
         R_Slave::Cint
@@ -57,3 +62,5 @@ end
                       C_NULL,C_NULL,2,C_NULL)
 
 end
+
+

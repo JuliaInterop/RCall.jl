@@ -6,7 +6,7 @@ for w in ("while", "if", "for", "try", "return", "break",
           "bitstype", "immutable", "ccall", "do", "module",
           "baremodule", "using", "import", "export", "importall",
           "false", "true")
-    push!(reserved, w) # construct Set this way for compat with Julia 0.2/0.3
+    push!(reserved, w)
 end
 
 function rwrap(pkg::ASCIIString,s::Symbol)

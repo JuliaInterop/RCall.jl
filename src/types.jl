@@ -256,6 +256,10 @@ RObject{RealSxp}
 """
 type RObject{S<:Sxp}
     p::Ptr{S}
+    # used for pre-defined constants
+    function RObject()
+        new(C_NULL)
+    end
     function RObject(p::Ptr{S})
         preserve(p)
         r = new(p)
