@@ -20,10 +20,13 @@ before_install:
   # but no permalink to release download
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget https://cran.rstudio.com/bin/macosx/ -r --level=1 --accept-regex "R-[0-9.]*.pkg" -nd; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo installer -pkg R-*.pkg -target /; fi
-  
+
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("RCall"); Pkg.test("RCall"; coverage=true)'
-  
+
 after_success:
+  # Lapidary has not yet released, need to install from source
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then julia -e 'Pkg.clone("https://github.com/MichaelHatherly/Lapidary.jl")'); fi
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then julia -e 'cd(Pkg.dir("RCall")); include(joinpath("docs", "make.jl"))'; fi
   - julia -e 'cd(Pkg.dir("RCall")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
