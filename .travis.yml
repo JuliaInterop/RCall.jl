@@ -27,8 +27,8 @@ script:
 
 after_success:
   # only deploy on linux nightly build of master
+  # Lapidary has not yet released, need to install from source
   - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_JULIA_VERSION" == "nightly" ]; then
-      # Lapidary has not yet released, need to install from source
       julia -e 'Pkg.clone("https://github.com/MichaelHatherly/Lapidary.jl")'
       julia -e 'cd(Pkg.dir("RCall")); include(joinpath("docs", "make.jl"))'
     fi
