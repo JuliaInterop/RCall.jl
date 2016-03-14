@@ -31,7 +31,12 @@ include("IJulia.jl")
 include("io.jl")
 include("rstr.jl")
 
+"""
+R global Environment.
 
+    globalEnv[:x] = 1
+    globalEnv[:x]
+"""
 const globalEnv = Const.GlobalEnv
 
 
