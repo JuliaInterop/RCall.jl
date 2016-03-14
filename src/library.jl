@@ -21,6 +21,7 @@ function rwrap(pkg::ASCIIString,s::Symbol)
                 ) for x in members]
     id = Expr(:(=), :__package__, pkg)
     exports = [symbol(x) for x in members]
+    s in exports && error("$pkg has a function with the same name as $(pkg), use `@rimport $pkg as ...` instead.")
     eval(m, Expr(:toplevel, consts..., Expr(:export, exports...), id))
     m
 end
@@ -51,11 +52,11 @@ macro rimport(x, args...)
     end
 end
 
-"Import R packages into Julia without alias."
+"Import R packages and export all exported functions to the global environment."
 macro rusing(x)
-    sym = Expr(:quote, x)
+    sym = symbol("##RCall#$(x)")
     quote
-        @rimport $(esc(x))
-        eval(current_module(), Expr(:using, :., $sym))
+        @rimport $(esc(x)) $(esc(:as)) $(esc(sym))
+        using $(esc(sym))
     end
 end
