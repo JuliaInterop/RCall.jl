@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="JuliaStats">
+  
+  <title>Public - RCall.jl</title>
+  
+
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+  <link href="../../assets/Lapidary.css" rel="stylesheet">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Public";
+    var mkdocs_page_input_path = "lib/public.md";
+    var mkdocs_page_url = "/lib/public/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+  <script src="../../js/theme.js"></script> 
+  <script src="../../assets/mathjaxhelper.js"></script>
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> RCall.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../..">Introduction</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Manual</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../installation/">Installation</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Library</span></li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Public</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#public-documentation">Public Documentation</a></li>
+                
+                    <li><a class="toctree-l4" href="#types">Types</a></li>
+                
+                    <li><a class="toctree-l4" href="#methods">Methods</a></li>
+                
+                    <li><a class="toctree-l4" href="#macros">Macros</a></li>
+                
+                    <li><a class="toctree-l4" href="#variables">Variables</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">RCall.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Library &raquo;</li>
+        
+      
+    
+    <li>Public</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/JuliaStats/RCall.jl" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='public-documentation'></a></p>
+<h1 id="public-documentation">Public Documentation</h1>
+<p><a id='types'></a></p>
+<h2 id="types">Types</h2>
+<p><a id='RCall.RObject' href='#RCall.RObject'>#</a><strong>RCall.RObject</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>An <code>RObject</code> is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the <code>RObject</code> itself is finalized by Julia. The parameter is the type of the S-expression.</p>
+<p>When called with a Julia object as an argument, a corresponding R object is constructed.</p>
+<pre><code class="julia_skip">julia&gt; RObject(1)
+RObject{IntSxp}
+[1] 1
+
+julia&gt; RObject(1:3)
+RObject{IntSxp}
+[1] 1 2 3
+
+julia&gt; RObject(1.0:3.0)
+RObject{RealSxp}
+[1] 1 2 3
+</code></pre>
+
+<p><a id='RCall.Sxp' href='#RCall.Sxp'>#</a><strong>RCall.Sxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R symbolic expression (<code>SxpPtr</code>): these are represented by a pointer to a symbolic expression record (<code>Sxp</code>).</p>
+<p><a id='RCall.NilSxp' href='#RCall.NilSxp'>#</a><strong>RCall.NilSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R NULL value</p>
+<p><a id='RCall.StrSxp' href='#RCall.StrSxp'>#</a><strong>RCall.StrSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R vector of character strings</p>
+<p><a id='RCall.CharSxp' href='#RCall.CharSxp'>#</a><strong>RCall.CharSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R character string</p>
+<p><a id='RCall.LglSxp' href='#RCall.LglSxp'>#</a><strong>RCall.LglSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R logical vector</p>
+<p><a id='RCall.IntSxp' href='#RCall.IntSxp'>#</a><strong>RCall.IntSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R integer vector</p>
+<p><a id='RCall.RealSxp' href='#RCall.RealSxp'>#</a><strong>RCall.RealSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R real vector</p>
+<p><a id='RCall.CplxSxp' href='#RCall.CplxSxp'>#</a><strong>RCall.CplxSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R complex vector</p>
+<p><a id='RCall.ClosSxp' href='#RCall.ClosSxp'>#</a><strong>RCall.ClosSxp</strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R function closure</p>
+<p><a id='methods'></a></p>
+<h2 id="methods">Methods</h2>
+<p><a id='RCall.getAttrib' href='#RCall.getAttrib'>#</a><strong>RCall.getAttrib</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Return a particular attribute of an RObject</p>
+<p><a id='RCall.setAttrib!' href='#RCall.setAttrib!'>#</a><strong>RCall.setAttrib!</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Set a particular attribute of an RObject</p>
+<p><a id='RCall.getNames' href='#RCall.getNames'>#</a><strong>RCall.getNames</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Returns the names of an R vector.</p>
+<p><a id='RCall.setNames!' href='#RCall.setNames!'>#</a><strong>RCall.setNames!</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Set the names of an R vector.</p>
+<p><a id='RCall.rcopy' href='#RCall.rcopy'>#</a><strong>RCall.rcopy</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p><code>rcopy(T,p)</code> converts a pointer <code>p</code> to a Sxp object to a native Julia object of type T.</p>
+<p><code>rcopy(p)</code> performs a default conversion.</p>
+<p><code>rcopy</code> copies the contents of an R object into a corresponding canonical Julia type.</p>
+<p>Evaluate and convert the result of a string as an R expression.</p>
+<p><a id='RCall.rparse' href='#RCall.rparse'>#</a><strong>RCall.rparse</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Parse a string as an R expression, returning an RObject.</p>
+<p><a id='RCall.rprint' href='#RCall.rprint'>#</a><strong>RCall.rprint</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Print the value of an Sxp using R's printing mechanism</p>
+<p>Parse, evaluate and print the result of a string as an R expression.</p>
+<p><a id='RCall.reval' href='#RCall.reval'>#</a><strong>RCall.reval</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning an RObject.</p>
+<p><a id='RCall.rcall' href='#RCall.rcall'>#</a><strong>RCall.rcall</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a FunctionSxp type, a SymSxp or a Symbol.</p>
+<p><a id='RCall.rlang' href='#RCall.rlang'>#</a><strong>RCall.rlang</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaulated</p>
+<p><a id='RCall.isNA' href='#RCall.isNA'>#</a><strong>RCall.isNA</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check if values correspond to R's sentinel NA values.</p>
+<p><a id='RCall.anyNA' href='#RCall.anyNA'>#</a><strong>RCall.anyNA</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check if there are any NA values in the vector.</p>
+<p><a id='RCall.isFactor' href='#RCall.isFactor'>#</a><strong>RCall.isFactor</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check whether an R variable is a factor variable</p>
+<p><a id='RCall.isOrdered' href='#RCall.isOrdered'>#</a><strong>RCall.isOrdered</strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check whether an R variable is an ordered factor variable</p>
+<p><a id='macros'></a></p>
+<h2 id="macros">Macros</h2>
+<p><a id='RCall.@rimport' href='#RCall.@rimport'>#</a><strong>RCall.@rimport</strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Import R Packages into Julia with or without alias. You can also use classic Python syntax to do this: <code>@rimport *module-name* as *shorthand*</code></p>
+<p><a id='RCall.@rusing' href='#RCall.@rusing'>#</a><strong>RCall.@rusing</strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Import R packages and export all exported functions to the global environment.</p>
+<p><a id='RCall.@rput' href='#RCall.@rput'>#</a><strong>RCall.@rput</strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Copies variables from Julia to R using the same name.</p>
+<p><a id='RCall.@rget' href='#RCall.@rget'>#</a><strong>RCall.@rget</strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Copies variables from R to Julia using the same name.</p>
+<p><a id='RCall.@var_str' href='#RCall.@var_str'>#</a><strong>RCall.@var_str</strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Returns a variable named "str". Useful for passing keyword arguments containing dots.</p>
+<p><a id='RCall.@R_str' href='#RCall.@R_str'>#</a><strong>RCall.@R_str</strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Allows inline R scripts, e.g</p>
+<pre><code>foo = R&quot;glm(Sepal.Length ~ Sepal.Width, data=$iris)&quot;
+</code></pre>
+
+<p>Does not yet support assigning to Julia variables, so can only return results.</p>
+<p><a id='variables'></a></p>
+<h2 id="variables">Variables</h2>
+<p><a id='RCall.globalEnv' href='#RCall.globalEnv'>#</a><strong>RCall.globalEnv</strong> &mdash; <em>Constant</em>.</p>
+<hr />
+<p>R global Environment.</p>
+<pre><code>globalEnv[:x] = 1
+globalEnv[:x]
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../../installation/" class="btn btn-neutral" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/JuliaStats/RCall.jl" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../../installation/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+
+</body>
+</html>
