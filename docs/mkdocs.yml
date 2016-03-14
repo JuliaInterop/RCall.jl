@@ -4,10 +4,10 @@ site_description:    Embedded R within Julia
 site_author:         JuliaStats
 theme:               readthedocs
 markdown_extensions: [tables, fenced_code]
+docs_dir: 'build'
 pages:
 - Introduction: index.md
 - Manual:
   - Installation: installation.md
-- API:
-  - RCall: api/RCall.md
-  - Index: api/index.md
+- Library:
+  - Public: lib/public.md
