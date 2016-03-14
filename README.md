@@ -11,7 +11,7 @@
 
 #### Lastest Documentataion
 
-[Latest Documentation](http://juliastats.github.io/RCall.jl/).
+[Latest Documentation](http://juliastats.github.io/RCall.jl/latest).
  
 ## Embedded R within Julia.
 
@@ -21,7 +21,7 @@ This package requires that a recent version of R (3.2.0 or greater) be installed
 ```julia
 Pkg.add("RCall")
 ```
-from within Julia should be sufficient. For further details, see [Installing RCall.jl](http://juliastats.github.io/RCall.jl/installation/).
+from within Julia should be sufficient. For further details, see [Installing RCall.jl](http://juliastats.github.io/RCall.jl/latest/installation/).
 
 ### Attaching the package
 Attaching the package in a Julia session with
