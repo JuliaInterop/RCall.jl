@@ -26,9 +26,9 @@ script:
   - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("RCall"); Pkg.test("RCall"; coverage=true)'
 
 after_success:
-  # only deploy on linux nightly build of master
+  # only deploy on linux nightly builds of master branch or tags
   # Lapidary has not yet released, need to install from source
-  - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_JULIA_VERSION" == "nightly" ]; then
+  - if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == false ] && [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_JULIA_VERSION" == "nightly" ]; then
       julia -e 'Pkg.clone("https://github.com/MichaelHatherly/Lapidary.jl")';
       julia -e 'cd(Pkg.dir("RCall")); include(joinpath("docs", "make.jl"))';
     fi
