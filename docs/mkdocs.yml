@@ -3,7 +3,19 @@ repo_url:            https://github.com/JuliaStats/RCall.jl
 site_description:    Embedded R within Julia
 site_author:         JuliaStats
 theme:               readthedocs
-markdown_extensions: [tables, fenced_code]
+extra_css:
+  - assets/Lapidary.css
+extra_javascript:
+  - https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML
+  - assets/mathjaxhelper.js
+
+markdown_extensions:
+  - admonition
+  - tables
+  - fenced_code
+  - toc:
+      permalink: True
+
 docs_dir: 'build'
 pages:
 - Introduction: index.md
