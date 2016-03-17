@@ -33,6 +33,7 @@
   <script src="../../js/modernizr-2.8.3.min.js"></script>
   <script type="text/javascript" src="../../js/highlight.pack.js"></script>
   <script src="../../js/theme.js"></script> 
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
   <script src="../../assets/mathjaxhelper.js"></script>
 
   
@@ -149,9 +150,9 @@
             <div class="section">
               
                 <p><a id='public-documentation'></a></p>
-<h1 id="public-documentation">Public Documentation</h1>
+<h1 id="public-documentation">Public Documentation<a class="headerlink" href="#public-documentation" title="Permanent link">&para;</a></h1>
 <p><a id='types'></a></p>
-<h2 id="types">Types</h2>
+<h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
 <p><a id='RCall.RObject' href='#RCall.RObject'>#</a><strong>RCall.RObject</strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>An <code>RObject</code> is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the <code>RObject</code> itself is finalized by Julia. The parameter is the type of the S-expression.</p>
@@ -197,7 +198,7 @@ RObject{RealSxp}
 <hr />
 <p>R function closure</p>
 <p><a id='methods'></a></p>
-<h2 id="methods">Methods</h2>
+<h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
 <p><a id='RCall.getAttrib' href='#RCall.getAttrib'>#</a><strong>RCall.getAttrib</strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Return a particular attribute of an RObject</p>
@@ -245,13 +246,13 @@ RObject{RealSxp}
 <hr />
 <p>Check whether an R variable is an ordered factor variable</p>
 <p><a id='macros'></a></p>
-<h2 id="macros">Macros</h2>
+<h2 id="macros">Macros<a class="headerlink" href="#macros" title="Permanent link">&para;</a></h2>
 <p><a id='RCall.@rimport' href='#RCall.@rimport'>#</a><strong>RCall.@rimport</strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Import R Packages into Julia with or without alias. You can also use classic Python syntax to do this: <code>@rimport *module-name* as *shorthand*</code></p>
-<p><a id='RCall.@rusing' href='#RCall.@rusing'>#</a><strong>RCall.@rusing</strong> &mdash; <em>Macro</em>.</p>
+<p><a id='RCall.@rlibrary' href='#RCall.@rlibrary'>#</a><strong>RCall.@rlibrary</strong> &mdash; <em>Macro</em>.</p>
 <hr />
-<p>Import R packages and export all exported functions to the global environment.</p>
+<p>Import R packages and import all exported functions/objects to the current module.</p>
 <p><a id='RCall.@rput' href='#RCall.@rput'>#</a><strong>RCall.@rput</strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Copies variables from Julia to R using the same name.</p>
@@ -269,7 +270,7 @@ RObject{RealSxp}
 
 <p>Does not yet support assigning to Julia variables, so can only return results.</p>
 <p><a id='variables'></a></p>
-<h2 id="variables">Variables</h2>
+<h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h2>
 <p><a id='RCall.globalEnv' href='#RCall.globalEnv'>#</a><strong>RCall.globalEnv</strong> &mdash; <em>Constant</em>.</p>
 <hr />
 <p>R global Environment.</p>
