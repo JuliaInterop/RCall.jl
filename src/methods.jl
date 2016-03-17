@@ -1,8 +1,3 @@
-function show(io::IO,r::RObject)
-    println(io,typeof(r))
-    rprint(io,r.p)
-end
-
 """
 The R NAMED property, represented by 2 bits in the info field. This can take
 values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more

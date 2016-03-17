@@ -74,14 +74,6 @@ end
 
 function ijulia_init()
     global const ijulia_file_dir = mktempdir()
-    # ggplot2's plot is displayed after `print` function is invoked,
-    # the `show` function have to be overwritten to clean up all the plots.
-    global show
-    function show(io::IO,r::RObject)
-        println(io,typeof(r))
-        rprint(io,r.p)
-        ijulia_displayplots()
-    end
     ijulia_file_fmt = joinpath(ijulia_file_dir,"rij_%03d")
     rcall(:options,rcalljl_filename=ijulia_file_fmt)
 

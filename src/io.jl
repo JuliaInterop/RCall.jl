@@ -1,3 +1,11 @@
+function show(io::IO,r::RObject)
+    println(io,typeof(r))
+    rprint(io,r.p)
+    # ggplot2's plot is displayed after `print` function is invoked,
+    # so we have to clear any displayed plots.
+    isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
+end
+
 global const printBuffer = PipeBuffer()
 global const errorBuffer = PipeBuffer()
 
@@ -26,7 +34,7 @@ end
         RStart
 
     This type mirrors `structRstart` in `R_ext/RStartup.h`. It is used to change the IO behaviour on Windows.
-    """        
+    """
     type RStart # mirror structRstart in R_ext/RStartup.h
         R_Quiet::Cint
         R_Slave::Cint
@@ -62,5 +70,3 @@ end
                       C_NULL,C_NULL,2,C_NULL)
 
 end
-
-
