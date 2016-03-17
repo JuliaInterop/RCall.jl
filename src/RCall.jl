@@ -12,7 +12,7 @@ export RObject,
    globalEnv,
    rcopy, rparse, rprint, reval, rcall, rlang,
    isNA, anyNA, isFactor, isOrdered,
-   @rimport, @rusing, @rput, @rget, @var_str, @R_str
+   @rimport, @rusing, @rlibrary, @rput, @rget, @var_str, @R_str
 
 
 include("setup.jl")

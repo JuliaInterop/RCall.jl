@@ -38,7 +38,7 @@
 
     {docs}
     @rimport
-    @rusing
+    @rlibrary
     @rput
     @rget
     @var_str

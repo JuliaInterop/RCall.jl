@@ -22,7 +22,7 @@ function rwrap(pkg::ASCIIString,s::Symbol)
     id = Expr(:(=), :__package__, pkg)
     exports = [symbol(x) for x in members]
     s in exports && error("$pkg has a function with the same name as $(pkg), use `@rimport $pkg as ...` instead.")
-    eval(m, Expr(:toplevel, consts..., Expr(:export, exports...), id))
+    eval(m, Expr(:toplevel, consts..., Expr(:export, exports...), id, Expr(:(=), :__exports__, exports)))
     m
 end
 
@@ -52,11 +52,22 @@ macro rimport(x, args...)
     end
 end
 
-"Import R packages and export all exported functions to the global environment."
-macro rusing(x)
+"""
+Import R packages and import all exported functions/objects to the current module.
+"""
+macro rlibrary(x)
     sym = symbol("##RCall#$(x)")
     quote
         @rimport $(esc(x)) $(esc(:as)) $(esc(sym))
-        using $(esc(sym))
+        for m in $(esc(sym)).__exports__
+            eval(current_module(), Expr(:(=), m, Expr(:., $(QuoteNode(sym)), QuoteNode(m))))
+        end
+    end
+end
+
+macro rusing(x)
+    pkg = Expr(:quote, x)
+    quote
+        error("`@rusing $($pkg)` is deprecated, please use the syntax `@rlibrary $($pkg)`.")
     end
 end

@@ -32,9 +32,6 @@ y = "foo"
 @test isa(y,Vector{UTF8String})
 @test y[1] == "foo"
 
-@rimport MASS as mass
-@test round(rcopy(rcall(mass.ginv, RObject([1 2; 0 4]))),5) == [1 -0.5; 0 0.25]
-
 @test sprint(io -> rprint(io,RObject([1,2,3]))) == "[1] 1 2 3\n"
 
 @test_approx_eq rcopy(rcall(:besselI, 1.0, 2.0)) besseli(2.0,1.0)

@@ -49,3 +49,11 @@ f1 = RObject(funk)
 d = RObject(Dict(1=>2))
 @test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
 @test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
+
+# library
+# Since @rimport and @rlibrary create module objects which may be conflict with other objects,
+# it is safer to place them at the end of the test.
+@rimport MASS as mass
+@test_approx_eq rcopy(rcall(mass.ginv, RObject([1 2; 0 4]))) [1 -0.5; 0 0.25]
+@rlibrary MASS
+@test_approx_eq rcopy(rcall(ginv, RObject([1 2; 0 4]))) [1 -0.5; 0 0.25]
