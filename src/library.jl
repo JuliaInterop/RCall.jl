@@ -26,7 +26,7 @@ function rwrap(pkg::ASCIIString,s::Symbol)
     m
 end
 
-"Import R Packages into Julia with or without alias. You can also use classic Python syntax to do this: `@rimport *module-name* as *shorthand*`"
+"Import a R Package as a Julia module. You can also use classic Python syntax to make an alias: `@rimport *module-name* as *shorthand*`"
 macro rimport(x, args...)
     if length(args)==2 && args[1] == :as
         m = args[2]
@@ -53,14 +53,22 @@ macro rimport(x, args...)
 end
 
 """
-Import R packages and import all exported functions/objects to the current module.
+Load all exported functions/objects of a R package to the current module.
 """
 macro rlibrary(x)
-    sym = symbol("##RCall#$(x)")
+    pkg = Expr(:quote, x)
     quote
-        @rimport $(esc(x)) $(esc(:as)) $(esc(sym))
-        for m in $(esc(sym)).__exports__
-            eval(current_module(), Expr(:(=), m, Expr(:., $(QuoteNode(sym)), QuoteNode(m))))
+        reval("library($($pkg))")
+        members = rcopy("ls('package:$($pkg)')")
+        filter!(x -> !(x in reserved), members)
+        for m in members
+            sym = symbol(m)
+            eval(current_module(), Expr(
+                    :(=),
+                    sym,
+                    Expr(:call, :rcall, QuoteNode(symbol("::")), QuoteNode($pkg), QuoteNode(sym))
+                )
+            )
         end
     end
 end
