@@ -85,3 +85,12 @@ rprint(io, reval("""
    class(bar) <- "Bar"
    bar
 """))), "hello")
+
+# operators
+a = reval("a=c(1,2,3)")
+b = reval("b=c(4,5,6)")
+@test rcopy(rcall(symbol("all.equal"), a+b, reval("a+b")))
+@test rcopy(rcall(symbol("all.equal"), a-b, reval("a-b")))
+@test rcopy(rcall(symbol("all.equal"), a*b, reval("a*b")))
+@test rcopy(rcall(symbol("all.equal"), a/b, reval("a/b")))
+@test rcopy(rcall(symbol("all.equal"), a^b, reval("a^b")))
