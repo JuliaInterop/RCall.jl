@@ -7,22 +7,25 @@ function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     protect(expr)
     protect(env)
     val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
+    unprotect(2)
     if err[1] !=0
         error("RCall.jl ", readall(RCall.errorBuffer))
     elseif nb_available(errorBuffer) != 0
         warn("RCall.jl ", readall(RCall.errorBuffer))
     end
-    unprotect(2)
     sexp(val)
 end
 
 function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val           # the value of the last expression is returned
     protect(expr)
-    for e in expr
-        val = reval_p(e,env)
+    try
+        for e in expr
+            val = reval_p(e,env)
+        end
+    finally
+        unprotect(1)
     end
-    unprotect(1)
     val
 end
 
@@ -54,13 +57,13 @@ function rparse_p(st::Ptr{StrSxp})
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
                 st,-1,status,sexp(Const.NilValue))
+    unprotect(1)
     s = status[1]
     if s != 1
         s == 2 && error("RCall.jl incomplete R expression")
         s == 3 && error("RCall.jl invalid R expression")
         s == 4 && throw(EOFError())
     end
-    unprotect(1)
     sexp(val)
 end
 rparse_p(st::AbstractString) = rparse_p(sexp(st))
