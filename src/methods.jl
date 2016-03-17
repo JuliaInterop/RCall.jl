@@ -41,10 +41,10 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
     end
 end
 
-"Check whether an R variable is a factor variable" 
+"Check whether an R variable is a factor variable"
 isFactor
 
-"Check whether an R variable is an ordered factor variable" 
+"Check whether an R variable is an ordered factor variable"
 isOrdered
 
 
@@ -401,7 +401,10 @@ function newEnvironment(env::Ptr{EnvSxp})
 end
 newEnvironment(env::RObject{EnvSxp}) = newEnvironment(sexp(env))
 
-"find namespace by name of the namespace"
+"find namespace by name of the namespace, it is not error tolerant."
 function findNamespace(str::ByteString)
     ccall((:R_FindNamespace,libR),Ptr{EnvSxp}, (Ptr{StrSxp},), sexp(str))
 end
+
+"get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound."
+getNamespace(str::ByteString) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespace"], str))
