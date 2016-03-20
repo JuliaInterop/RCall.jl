@@ -30,12 +30,15 @@ end
 ## DataArray to sexp conversion.
 function sexp(v::DataArray)
     rv = protect(sexp(v.data))
-    for (i,isna) = enumerate(v.na)
-        if isna
-            rv[i] = NAel(eltype(rv))
+    try
+        for (i,isna) = enumerate(v.na)
+            if isna
+                rv[i] = NAel(eltype(rv))
+            end
         end
+    finally
+        unprotect(1)
     end
-    unprotect(1)
     rv
 end
 
@@ -51,13 +54,16 @@ end
 function sexp(d::DataFrame)
     nr,nc = size(d)
     rd = protect(allocArray(VecSxp, nc))
-    for i in 1:nc
-        rd[i] = sexp(d[d.colindex.names[i]])
+    try
+        for i in 1:nc
+            rd[i] = sexp(d[d.colindex.names[i]])
+        end
+        setAttrib!(rd,Const.NamesSymbol, sexp([string(n) for n in d.colindex.names]))
+        setAttrib!(rd,Const.ClassSymbol, sexp("data.frame"))
+        setAttrib!(rd,Const.RowNamesSymbol, sexp(1:nr))
+    finally
+        unprotect(1)
     end
-    setAttrib!(rd,Const.NamesSymbol, sexp([string(n) for n in d.colindex.names]))
-    setAttrib!(rd,Const.ClassSymbol, sexp("data.frame"))
-    setAttrib!(rd,Const.RowNamesSymbol, sexp(1:nr))
-    unprotect(1)
     rd
 end
 
@@ -65,9 +71,12 @@ end
 # R formula objects
 function sexp(f::Formula)
     s = protect(rlang_p(:~,rlang_formula(f.lhs),rlang_formula(f.rhs)))
-    setAttrib!(s,Const.ClassSymbol,sexp("formula"))
-    setAttrib!(s,".Environment",Const.GlobalEnv)
-    unprotect(1)
+    try
+        setAttrib!(s,Const.ClassSymbol,sexp("formula"))
+        setAttrib!(s,".Environment",Const.GlobalEnv)
+    finally
+        unprotect(1)
+    end
     s
 end
 
@@ -86,4 +95,3 @@ function rlang_formula(e::Expr)
     end
 end
 rlang_formula(e::Symbol) = e
-        

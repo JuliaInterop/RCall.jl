@@ -382,10 +382,16 @@ function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{SymSxp})
     ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
 end
 function setindex!(e::Ptr{EnvSxp},v,s)
-    sv = protect(sexp(v))
-    ss = protect(sexp(SymSxp,s))
-    setindex!(e,sv,ss)
-    unprotect(2)
+    nprotect = 0
+    try
+        sv = protect(sexp(v))
+        nprotect += 1
+        ss = protect(sexp(SymSxp,s))
+        nprotect += 1
+        setindex!(e,sv,ss)
+    finally
+        unprotect(nprotect)
+    end
 end
 setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)
 

@@ -83,10 +83,13 @@ sexp(st::AbstractString) = sexp(StrSxp,st)
 # general vectors
 function sexp{S<:VectorListSxp}(::Type{S}, a::AbstractArray)
     ra = protect(allocArray(S, size(a)...))
-    for i in 1:length(a)
-        ra[i] = a[i]
+    try
+        for i in 1:length(a)
+            ra[i] = a[i]
+        end
+    finally
+        unprotect(1)
     end
-    unprotect(1)
     ra
 end
 sexp(a::AbstractArray) = sexp(VecSxp,a)
@@ -207,14 +210,16 @@ function sexp{S<:VectorSxp}(::Type{S},d::Associative)
     n = length(d)
     vs = protect(allocArray(VecSxp,n))
     ks = protect(allocArray(StrSxp,n))
+    try
+        for (i,(k,v)) in enumerate(d)
+            ks[i] = string(k)
+            vs[i] = v
+        end
 
-    for (i,(k,v)) in enumerate(d)
-        ks[i] = string(k)
-        vs[i] = v
+        setNames!(vs,ks)
+    finally
+        unprotect(2)
     end
-
-    setNames!(vs,ks)
-    unprotect(2)
     vs
 end
 sexp{K,V<:AbstractString}(d::Associative{K,V}) = sexp(StrSxp,d)
@@ -233,13 +238,16 @@ end
 
 function rcopy{A<:Associative,S<:PairListSxp}(::Type{A}, s::Ptr{S})
     protect(s)
-    a = A()
-    K = keytype(a)
-    V = valtype(a)
-    for (k,v) in s
-        a[rcopy(K,k)] = rcopy(V,v)
+    try
+        a = A()
+        K = keytype(a)
+        V = valtype(a)
+        for (k,v) in s
+            a[rcopy(K,k)] = rcopy(V,v)
+        end
+    finally
+        unprotect(1)
     end
-    unprotect(1)
     a
 end
 

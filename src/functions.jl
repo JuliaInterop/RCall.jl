@@ -2,17 +2,20 @@
 function rlang_p(f, args...; kwargs...)
     argn = length(args)+length(kwargs)
     s = l = protect(allocArray(LangSxp,argn+1))
-    setcar!(s,sexp(f))
-    for argv in args
-        s = cdr(s)
-        setcar!(s,sexp(argv))
+    try
+        setcar!(s,sexp(f))
+        for argv in args
+            s = cdr(s)
+            setcar!(s,sexp(argv))
+        end
+        for (key,argv) in kwargs
+            s = cdr(s)
+            settag!(s,sexp(key))
+            setcar!(s,sexp(argv))
+        end
+    finally
+        unprotect(1)
     end
-    for (key,argv) in kwargs
-        s = cdr(s)
-        settag!(s,sexp(key))
-        setcar!(s,sexp(argv))
-    end
-    unprotect(1)
     l
 end
 

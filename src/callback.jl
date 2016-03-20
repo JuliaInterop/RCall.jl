@@ -125,10 +125,13 @@ function sexp(::Type{ClosSxp}, f)
                            juliaCallback,
                            sexp(ExtPtrSxp,f),
                            Const.DotsSymbol))
-
-    lang = rlang_p(:function, sexp_arglist_dots(), body)
-    clos = reval_p(lang)
-    unprotect(1)
+    local clos
+    try
+        lang = rlang_p(:function, sexp_arglist_dots(), body)
+        clos = reval_p(lang)
+    finally
+        unprotect(1)
+    end
     clos
 end
 
@@ -137,20 +140,23 @@ Create an argument list for an R function call, with a varargs "dots" at the end
 """
 function sexp_arglist_dots(args...;kwargs...)
     rarglist = protect(allocList(length(args)+length(kwargs)+1))
-    rr = rarglist
-    for var in args
-        settag!(rr, sexp(var))
+    try
+        rr = rarglist
+        for var in args
+            settag!(rr, sexp(var))
+            setcar!(rr, Const.MissingArg)
+            rr = cdr(rr)
+        end
+        for (var,val) in kwargs
+            settag!(rr, sexp(var))
+            setcar!(rr, sexp(val))
+            rr = cdr(rr)
+        end
+        settag!(rr, Const.DotsSymbol)
         setcar!(rr, Const.MissingArg)
-        rr = cdr(rr)
+    finally
+        unprotect(1)
     end
-    for (var,val) in kwargs
-        settag!(rr, sexp(var))
-        setcar!(rr, sexp(val))
-        rr = cdr(rr)
-    end
-    settag!(rr, Const.DotsSymbol)
-    setcar!(rr, Const.MissingArg)
-    unprotect(1)
     rarglist
 end
 

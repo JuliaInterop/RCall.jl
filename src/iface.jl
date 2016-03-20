@@ -80,23 +80,26 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     # below mirrors Rf_PrintValue
     env = protect(newEnvironment(Const.GlobalEnv))
-    env[:x] = s
-    if isObject(s) || isFunction(s)
-        if isS4(s)
-            methodsNamespace = protect(findNamespace("methods"))
-            reval(rlang_p(methodsNamespace[:show], :x),env)
-            unprotect(1)
+    try
+        env[:x] = s
+        if isObject(s) || isFunction(s)
+            if isS4(s)
+                methodsNamespace = protect(findNamespace("methods"))
+                reval(rlang_p(methodsNamespace[:show], :x),env)
+                unprotect(1)
+            else
+                reval(rlang_p(Const.BaseNamespace[:print], :x),env)
+            end
         else
-            reval(rlang_p(Const.BaseNamespace[:print], :x),env)
+            # Rf_PrintValueRec not found on unix!?
+            # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
+            reval(rlang_p(Const.BaseNamespace[symbol("print.default")], :x),env)
         end
-    else
-        # Rf_PrintValueRec not found on unix!?
-        # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-        reval(rlang_p(Const.BaseNamespace[symbol("print.default")], :x),env)
+        env[:x] = Const.NilValue
+        write(io,takebuf_string(printBuffer))
+    finally
+        unprotect(2)
     end
-    env[:x] = Const.NilValue
-    write(io,takebuf_string(printBuffer))
-    unprotect(2)
     nothing
 end
 rprint(io::IO,r::RObject) = rprint(io,r.p)
