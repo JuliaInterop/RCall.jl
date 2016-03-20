@@ -149,11 +149,12 @@
           <div role="main">
             <div class="section">
               
-                <p><a id='public-documentation'></a></p>
+                <p><a id='Public-Documentation-1'></a></p>
 <h1 id="public-documentation">Public Documentation<a class="headerlink" href="#public-documentation" title="Permanent link">&para;</a></h1>
-<p><a id='types'></a></p>
+<p><a id='Types-1'></a></p>
 <h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
-<p><a id='RCall.RObject' href='#RCall.RObject'>#</a><strong>RCall.RObject</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.RObject' href='#RCall.RObject'>#</a>
+<strong><code>RCall.RObject</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>An <code>RObject</code> is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the <code>RObject</code> itself is finalized by Julia. The parameter is the type of the S-expression.</p>
 <p>When called with a Julia object as an argument, a corresponding R object is constructed.</p>
@@ -170,108 +171,138 @@ RObject{RealSxp}
 [1] 1 2 3
 </code></pre>
 
-<p><a id='RCall.Sxp' href='#RCall.Sxp'>#</a><strong>RCall.Sxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.Sxp' href='#RCall.Sxp'>#</a>
+<strong><code>RCall.Sxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R symbolic expression (<code>SxpPtr</code>): these are represented by a pointer to a symbolic expression record (<code>Sxp</code>).</p>
-<p><a id='RCall.NilSxp' href='#RCall.NilSxp'>#</a><strong>RCall.NilSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.NilSxp' href='#RCall.NilSxp'>#</a>
+<strong><code>RCall.NilSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R NULL value</p>
-<p><a id='RCall.StrSxp' href='#RCall.StrSxp'>#</a><strong>RCall.StrSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.StrSxp' href='#RCall.StrSxp'>#</a>
+<strong><code>RCall.StrSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R vector of character strings</p>
-<p><a id='RCall.CharSxp' href='#RCall.CharSxp'>#</a><strong>RCall.CharSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.CharSxp' href='#RCall.CharSxp'>#</a>
+<strong><code>RCall.CharSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R character string</p>
-<p><a id='RCall.LglSxp' href='#RCall.LglSxp'>#</a><strong>RCall.LglSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.LglSxp' href='#RCall.LglSxp'>#</a>
+<strong><code>RCall.LglSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R logical vector</p>
-<p><a id='RCall.IntSxp' href='#RCall.IntSxp'>#</a><strong>RCall.IntSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.IntSxp' href='#RCall.IntSxp'>#</a>
+<strong><code>RCall.IntSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R integer vector</p>
-<p><a id='RCall.RealSxp' href='#RCall.RealSxp'>#</a><strong>RCall.RealSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.RealSxp' href='#RCall.RealSxp'>#</a>
+<strong><code>RCall.RealSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R real vector</p>
-<p><a id='RCall.CplxSxp' href='#RCall.CplxSxp'>#</a><strong>RCall.CplxSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.CplxSxp' href='#RCall.CplxSxp'>#</a>
+<strong><code>RCall.CplxSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R complex vector</p>
-<p><a id='RCall.ClosSxp' href='#RCall.ClosSxp'>#</a><strong>RCall.ClosSxp</strong> &mdash; <em>Type</em>.</p>
+<p><a id='RCall.ClosSxp' href='#RCall.ClosSxp'>#</a>
+<strong><code>RCall.ClosSxp</code></strong> &mdash; <em>Type</em>.</p>
 <hr />
 <p>R function closure</p>
-<p><a id='methods'></a></p>
+<p><a id='Methods-1'></a></p>
 <h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
-<p><a id='RCall.getAttrib' href='#RCall.getAttrib'>#</a><strong>RCall.getAttrib</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.getAttrib' href='#RCall.getAttrib'>#</a>
+<strong><code>RCall.getAttrib</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Return a particular attribute of an RObject</p>
-<p><a id='RCall.setAttrib!' href='#RCall.setAttrib!'>#</a><strong>RCall.setAttrib!</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setAttrib!' href='#RCall.setAttrib!'>#</a>
+<strong><code>RCall.setAttrib!</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Set a particular attribute of an RObject</p>
-<p><a id='RCall.getNames' href='#RCall.getNames'>#</a><strong>RCall.getNames</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.getNames' href='#RCall.getNames'>#</a>
+<strong><code>RCall.getNames</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Returns the names of an R vector.</p>
-<p><a id='RCall.setNames!' href='#RCall.setNames!'>#</a><strong>RCall.setNames!</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setNames!' href='#RCall.setNames!'>#</a>
+<strong><code>RCall.setNames!</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Set the names of an R vector.</p>
-<p><a id='RCall.rcopy' href='#RCall.rcopy'>#</a><strong>RCall.rcopy</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rcopy' href='#RCall.rcopy'>#</a>
+<strong><code>RCall.rcopy</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p><code>rcopy(T,p)</code> converts a pointer <code>p</code> to a Sxp object to a native Julia object of type T.</p>
 <p><code>rcopy(p)</code> performs a default conversion.</p>
 <p><code>rcopy</code> copies the contents of an R object into a corresponding canonical Julia type.</p>
 <p>Evaluate and convert the result of a string as an R expression.</p>
-<p><a id='RCall.rparse' href='#RCall.rparse'>#</a><strong>RCall.rparse</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rparse' href='#RCall.rparse'>#</a>
+<strong><code>RCall.rparse</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Parse a string as an R expression, returning an RObject.</p>
-<p><a id='RCall.rprint' href='#RCall.rprint'>#</a><strong>RCall.rprint</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rprint' href='#RCall.rprint'>#</a>
+<strong><code>RCall.rprint</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Print the value of an Sxp using R's printing mechanism</p>
 <p>Parse, evaluate and print the result of a string as an R expression.</p>
-<p><a id='RCall.reval' href='#RCall.reval'>#</a><strong>RCall.reval</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.reval' href='#RCall.reval'>#</a>
+<strong><code>RCall.reval</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning an RObject.</p>
-<p><a id='RCall.rcall' href='#RCall.rcall'>#</a><strong>RCall.rcall</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rcall' href='#RCall.rcall'>#</a>
+<strong><code>RCall.rcall</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a FunctionSxp type, a SymSxp or a Symbol.</p>
-<p><a id='RCall.rlang' href='#RCall.rlang'>#</a><strong>RCall.rlang</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rlang' href='#RCall.rlang'>#</a>
+<strong><code>RCall.rlang</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaulated</p>
-<p><a id='RCall.isNA' href='#RCall.isNA'>#</a><strong>RCall.isNA</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.isNA' href='#RCall.isNA'>#</a>
+<strong><code>RCall.isNA</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Check if values correspond to R's sentinel NA values.</p>
-<p><a id='RCall.anyNA' href='#RCall.anyNA'>#</a><strong>RCall.anyNA</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.anyNA' href='#RCall.anyNA'>#</a>
+<strong><code>RCall.anyNA</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Check if there are any NA values in the vector.</p>
-<p><a id='RCall.isFactor' href='#RCall.isFactor'>#</a><strong>RCall.isFactor</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.isFactor' href='#RCall.isFactor'>#</a>
+<strong><code>RCall.isFactor</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Check whether an R variable is a factor variable</p>
-<p><a id='RCall.isOrdered' href='#RCall.isOrdered'>#</a><strong>RCall.isOrdered</strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.isOrdered' href='#RCall.isOrdered'>#</a>
+<strong><code>RCall.isOrdered</code></strong> &mdash; <em>Function</em>.</p>
 <hr />
 <p>Check whether an R variable is an ordered factor variable</p>
-<p><a id='macros'></a></p>
+<p><a id='Macros-1'></a></p>
 <h2 id="macros">Macros<a class="headerlink" href="#macros" title="Permanent link">&para;</a></h2>
-<p><a id='RCall.@rimport' href='#RCall.@rimport'>#</a><strong>RCall.@rimport</strong> &mdash; <em>Macro</em>.</p>
+<p><a id='RCall.@rimport' href='#RCall.@rimport'>#</a>
+<strong><code>RCall.@rimport</code></strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Import a R Package as a Julia module. You can also use classic Python syntax to make an alias: <code>@rimport *module-name* as *shorthand*</code></p>
-<p><a id='RCall.@rlibrary' href='#RCall.@rlibrary'>#</a><strong>RCall.@rlibrary</strong> &mdash; <em>Macro</em>.</p>
+<p><a id='RCall.@rlibrary' href='#RCall.@rlibrary'>#</a>
+<strong><code>RCall.@rlibrary</code></strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Load all exported functions/objects of a R package to the current module.</p>
-<p><a id='RCall.@rput' href='#RCall.@rput'>#</a><strong>RCall.@rput</strong> &mdash; <em>Macro</em>.</p>
+<p><a id='RCall.@rput' href='#RCall.@rput'>#</a>
+<strong><code>RCall.@rput</code></strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Copies variables from Julia to R using the same name.</p>
-<p><a id='RCall.@rget' href='#RCall.@rget'>#</a><strong>RCall.@rget</strong> &mdash; <em>Macro</em>.</p>
+<p><a id='RCall.@rget' href='#RCall.@rget'>#</a>
+<strong><code>RCall.@rget</code></strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Copies variables from R to Julia using the same name.</p>
-<p><a id='RCall.@var_str' href='#RCall.@var_str'>#</a><strong>RCall.@var_str</strong> &mdash; <em>Macro</em>.</p>
+<p><a id='RCall.@var_str' href='#RCall.@var_str'>#</a>
+<strong><code>RCall.@var_str</code></strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Returns a variable named "str". Useful for passing keyword arguments containing dots.</p>
-<p><a id='RCall.@R_str' href='#RCall.@R_str'>#</a><strong>RCall.@R_str</strong> &mdash; <em>Macro</em>.</p>
+<p><a id='RCall.@R_str' href='#RCall.@R_str'>#</a>
+<strong><code>RCall.@R_str</code></strong> &mdash; <em>Macro</em>.</p>
 <hr />
 <p>Allows inline R scripts, e.g</p>
 <pre><code>foo = R&quot;glm(Sepal.Length ~ Sepal.Width, data=$iris)&quot;
 </code></pre>
 
 <p>Does not yet support assigning to Julia variables, so can only return results.</p>
-<p><a id='variables'></a></p>
+<p><a id='Variables-1'></a></p>
 <h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h2>
-<p><a id='RCall.globalEnv' href='#RCall.globalEnv'>#</a><strong>RCall.globalEnv</strong> &mdash; <em>Constant</em>.</p>
+<p><a id='RCall.globalEnv' href='#RCall.globalEnv'>#</a>
+<strong><code>RCall.globalEnv</code></strong> &mdash; <em>Constant</em>.</p>
 <hr />
 <p>R global Environment.</p>
 <pre><code>globalEnv[:x] = 1

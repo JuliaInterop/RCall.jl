@@ -147,26 +147,26 @@
           <div role="main">
             <div class="section">
               
-                <p><a id='installing-rcalljl'></a></p>
+                <p><a id='Installing-RCall.jl-1'></a></p>
 <h1 id="installing-rcalljl">Installing RCall.jl<a class="headerlink" href="#installing-rcalljl" title="Permanent link">&para;</a></h1>
 <p>RCall.jl requires that a recent version of R, at least 3.2.0, be installed. </p>
-<p><a id='standard-installations'></a></p>
+<p><a id='Standard-installations-1'></a></p>
 <h2 id="standard-installations">Standard installations<a class="headerlink" href="#standard-installations" title="Permanent link">&para;</a></h2>
 <p>If R has been installed using one of the standard approaches below, then RCall.jl can simply be installed with</p>
 <pre><code class="julia">Pkg.add(&quot;RCall&quot;)
 </code></pre>
 
 <p>Should you experience problems with any of these methods, please <a href="https://github.com/JuliaStats/RCall.jl/issues/new">open an issue</a>.</p>
-<p><a id='windows'></a></p>
+<p><a id='Windows-1'></a></p>
 <h3 id="windows">Windows<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h3>
 <p>The current <a href="https://cran.r-project.org/bin/windows/base/">Windows binary from CRAN</a>.</p>
-<p><a id='os-x'></a></p>
+<p><a id='OS-X-1'></a></p>
 <h3 id="os-x">OS X<a class="headerlink" href="#os-x" title="Permanent link">&para;</a></h3>
 <p>The <a href="https://cran.r-project.org/bin/macosx/">CRAN .pkg</a> or the <a href="https://github.com/Homebrew/homebrew-science">homebrew/science</a> tap.</p>
-<p><a id='linux'></a></p>
+<p><a id='Linux-1'></a></p>
 <h3 id="linux">Linux<a class="headerlink" href="#linux" title="Permanent link">&para;</a></h3>
 <p>Most Linux distributions allow installation of R from their package manager, however these are often out of date, and may not work with RCall.jl. We recommend that you use the updated repositories from <a href="https://cran.r-project.org/bin/linux/">CRAN</a>.</p>
-<p><a id='ubuntu'></a></p>
+<p><a id='Ubuntu-1'></a></p>
 <h4 id="ubuntu">Ubuntu<a class="headerlink" href="#ubuntu" title="Permanent link">&para;</a></h4>
 <p>The following will update R on recent versions of Ubuntu:</p>
 <pre><code>sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
@@ -175,20 +175,20 @@ sudo apt-get update -y
 sudo apt-get install -y r-base r-base-dev
 </code></pre>
 
-<p><a id='updating-r'></a></p>
+<p><a id='Updating-R-1'></a></p>
 <h2 id="updating-r">Updating R<a class="headerlink" href="#updating-r" title="Permanent link">&para;</a></h2>
 <p>If you have updated the R installation, you may need to rebuild the RCall cache via</p>
 <pre><code class="julia">Base.compilecache(&quot;RCall&quot;)
 </code></pre>
 
-<p><a id='other-methods'></a></p>
+<p><a id='Other-methods-1'></a></p>
 <h2 id="other-methods">Other methods<a class="headerlink" href="#other-methods" title="Permanent link">&para;</a></h2>
 <p>If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).</p>
 <p>Firstly, try setting the <code>R_HOME</code> environmental variable to the location of your R installation, which can be found by running <code>R.home()</code> from within R. This can be set in your <code>~/.juliarc.jl</code> file via the <code>ENV</code> global variable, e.g.</p>
 <pre><code class="julia">ENV[&quot;R_HOME&quot;] = ...
 </code></pre>
 
-<p><a id='windows-path'></a></p>
+<p><a id='Windows-PATH-1'></a></p>
 <h3 id="windows-path">Windows PATH<a class="headerlink" href="#windows-path" title="Permanent link">&para;</a></h3>
 <p>The <code>PATH</code> environmental variable should contain the location of your R binary, and the <code>HOME</code> variable should contain the current user's home directory. These need to be set before Julia is started.</p>
               
