@@ -10,7 +10,7 @@ function makeNativeSymbol(fptr::Ptr{Void})
                      (Ptr{Void}, Ptr{Void}, Ptr{Void}),
                      fptr, sexp(symbol("native symbol")), sexp(Const.NilValue))
     setAttrib!(rexfn, Const.ClassSymbol, sexp("NativeSymbol"))
-    protect(rexfn)
+    preserve(rexfn)
     rexfn
 end
 
