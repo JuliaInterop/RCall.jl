@@ -26,7 +26,7 @@ install:
 
 # Download and install R binary
   - ps: |
-      (new-object net.webclient).DownloadString("http://cran.rstudio.com/bin/windows/base/") -match 'href="(R-[0-9.]*-win.exe)"';
+      (new-object net.webclient).DownloadString("http://cran.rstudio.com/bin/windows/base/") -match 'href="(R-[0-9.]*[a-zA-Z]*-win.exe)"';
       (new-object net.webclient).DownloadFile($("http://cran.rstudio.com/bin/windows/base/"+$matches[1]),"C:\projects\R-binary.exe")
   - C:\projects\R-binary.exe /VERYSILENT /DIR=C:\projects\R
 
