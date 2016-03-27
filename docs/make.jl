@@ -1,4 +1,4 @@
-using Lapidary, RCall
+using Documenter, RCall
 
 makedocs(modules = [RCall], clean = true)
 

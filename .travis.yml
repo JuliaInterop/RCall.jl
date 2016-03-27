@@ -27,9 +27,9 @@ script:
 
 after_success:
   # only deploy on linux nightly builds of master branch or tags
-  # Lapidary has not yet released, need to install from source
+  # Documenter has not yet released, need to install from source
   - if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == false ] && [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_JULIA_VERSION" == "nightly" ]; then
-      julia -e 'Pkg.clone("https://github.com/MichaelHatherly/Lapidary.jl")';
+      julia -e 'Pkg.clone("https://github.com/MichaelHatherly/Documenter.jl")';
       julia -e 'cd(Pkg.dir("RCall")); include(joinpath("docs", "make.jl"))';
     fi
   - julia -e 'cd(Pkg.dir("RCall")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
