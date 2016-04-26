@@ -1,11 +1,11 @@
 @windows_only begin
+    import WinReg
+    
     function locate_Rhome()
-        ## look up windows registry for installation path
-        # TODO: use the C interface for this.
         if haskey(ENV,"R_HOME")
             Rhome = ENV["R_HOME"]
         else
-            Rhome = split(split(readall(`REG QUERY HKLM\\Software\\R-Core\\R /v InstallPath`),"\r\n")[3],"    ")[4]
+            Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
         end
         
         if isdir(Rhome)
