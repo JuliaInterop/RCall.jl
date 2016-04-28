@@ -1,6 +1,6 @@
 
 # Only works for ASCII, as UTF-8 character numbers are incorrect, see https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
-rscript(script::UTF8String) = error("Unicode scripts not supported")
+rscript(script::AbstractString) = error("Unicode R scripts not supported by R_str, due to\n    https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524")
 
 """
 Parses an inline R script, substituting invalid "\$" signs for Julia symbols
