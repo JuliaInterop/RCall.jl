@@ -10,29 +10,27 @@
     
 
     
-        
     <url>
      <loc>None/installation/</loc>
      <lastmod>2016-04-28</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
+    
+
+    
     <url>
      <loc>None/gettingstarted/</loc>
      <lastmod>2016-04-28</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
     
 
     
-        
     <url>
-     <loc>None/lib/public/</loc>
+     <loc>None/public/</loc>
      <lastmod>2016-04-28</lastmod>
      <changefreq>daily</changefreq>
     </url>
-        
     
 
 </urlset>
