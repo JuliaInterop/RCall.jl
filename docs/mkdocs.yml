@@ -19,8 +19,6 @@ markdown_extensions:
 docs_dir: 'build'
 pages:
 - Introduction: index.md
-- Manual:
-  - Installation: installation.md
-  - Getting started: gettingstarted.md
-- Library:
-  - Public: lib/public.md
+- Installation: installation.md
+- Getting started: gettingstarted.md
+- Public API: public.md
