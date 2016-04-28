@@ -1,13 +1,15 @@
 function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0
-        if Sys.OS_NAME == :Darwin
+        if Sys.OS_NAME ∈ (:Darwin, :Windows)
             ccall((:R_ProcessEvents, libR), Void, ())
         end
-        what = ccall((:R_checkActivity,libR),Ptr{Void},(Cint,Cint),0,1)
-        if what != C_NULL
-            R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Void}))
-            ccall((:R_runHandlers,libR),Void,(Ptr{Void},Ptr{Void}),R_InputHandlers,what)
+        if Sys.OS_NAME != :Windows
+            what = ccall((:R_checkActivity,libR),Ptr{Void},(Cint,Cint),0,1)
+            if what != C_NULL
+                R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Void}))
+                ccall((:R_runHandlers,libR),Void,(Ptr{Void},Ptr{Void}),R_InputHandlers,what)
+            end
         end
     end
     nothing
