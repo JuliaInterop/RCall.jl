@@ -21,5 +21,6 @@ pages:
 - Introduction: index.md
 - Manual:
   - Installation: installation.md
+  - Getting started: gettingstarted.md
 - Library:
   - Public: lib/public.md
