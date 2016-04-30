@@ -59,14 +59,11 @@ function rscript(script::ASCIIString)
             c,i = next(script,i)
             c == '\$' || error("RCall.jl: incorrect R parsing")
 
-
-
             expr,i = parse(script,i,greedy=false)
 
             push!(exprs,expr)
 
-            k += 1
-            sym = "##RCall##$k"
+            sym = "##RCall$(gensym())"
             push!(rsyms,sym)
 
 
@@ -97,7 +94,10 @@ macro R_str(script)
     quote
         $blk_ld
         ret = reval($script, Const.GlobalEnv)
-        $blk_rm
+        function callback_rm(::RObject)
+            $blk_rm
+        end
+        finalizer(ret, callback_rm)
         ret
     end
 end
