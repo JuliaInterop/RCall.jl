@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="JuliaStats">
+  
+  <title>Public API - RCall.jl</title>
+  
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+  <link href="../assets/Documenter.css" rel="stylesheet">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Public API";
+    var mkdocs_page_input_path = "public.md";
+    var mkdocs_page_url = "/public/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script>
+  <script src="../js/theme.js"></script> 
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+  <script src="../assets/mathjaxhelper.js"></script>
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> RCall.jl</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="..">Introduction</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../installation/">Installation</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../gettingstarted/">Getting started</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Public API</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#public-api">Public API</a></li>
+                
+                    <li><a class="toctree-l4" href="#types">Types</a></li>
+                
+                    <li><a class="toctree-l4" href="#methods">Methods</a></li>
+                
+                    <li><a class="toctree-l4" href="#macros">Macros</a></li>
+                
+                    <li><a class="toctree-l4" href="#constants">Constants</a></li>
+                
+            
+            </ul>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">RCall.jl</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Public API</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/JuliaStats/RCall.jl" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><a id='Public-API-1'></a></p>
+<h1 id="public-api">Public API<a class="headerlink" href="#public-api" title="Permanent link">&para;</a></h1>
+<p><a id='Types-1'></a></p>
+<h2 id="types">Types<a class="headerlink" href="#types" title="Permanent link">&para;</a></h2>
+<p><a id='RCall.AnySxp' href='#RCall.AnySxp'>#</a>
+<strong><code>RCall.AnySxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R "any" object</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L153' class='documenter-source'>source</a><br>
+<a id='RCall.BcodeSxp' href='#RCall.BcodeSxp'>#</a>
+<strong><code>RCall.BcodeSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R byte code</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L175' class='documenter-source'>source</a><br>
+<a id='RCall.BuiltinSxp' href='#RCall.BuiltinSxp'>#</a>
+<strong><code>RCall.BuiltinSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R built-in function</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L84' class='documenter-source'>source</a><br>
+<a id='RCall.CharSxp' href='#RCall.CharSxp'>#</a>
+<strong><code>RCall.CharSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R character string</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L90' class='documenter-source'>source</a><br>
+<a id='RCall.ClosSxp' href='#RCall.ClosSxp'>#</a>
+<strong><code>RCall.ClosSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R function closure</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L42' class='documenter-source'>source</a><br>
+<a id='RCall.CplxSxp' href='#RCall.CplxSxp'>#</a>
+<strong><code>RCall.CplxSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R complex vector</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L131' class='documenter-source'>source</a><br>
+<a id='RCall.DotSxp' href='#RCall.DotSxp'>#</a>
+<strong><code>RCall.DotSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R dot-dot-dot object</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L147' class='documenter-source'>source</a><br>
+<a id='RCall.EnvSxp' href='#RCall.EnvSxp'>#</a>
+<strong><code>RCall.EnvSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R environment</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L51' class='documenter-source'>source</a><br>
+<a id='RCall.ExprSxp' href='#RCall.ExprSxp'>#</a>
+<strong><code>RCall.ExprSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R expression vector</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L167' class='documenter-source'>source</a><br>
+<a id='RCall.ExtPtrSxp' href='#RCall.ExtPtrSxp'>#</a>
+<strong><code>RCall.ExtPtrSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R external pointer</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L181' class='documenter-source'>source</a><br>
+<a id='RCall.IntSxp' href='#RCall.IntSxp'>#</a>
+<strong><code>RCall.IntSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R integer vector</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L115' class='documenter-source'>source</a><br>
+<a id='RCall.LangSxp' href='#RCall.LangSxp'>#</a>
+<strong><code>RCall.LangSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R function call</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L69' class='documenter-source'>source</a><br>
+<a id='RCall.LglSxp' href='#RCall.LglSxp'>#</a>
+<strong><code>RCall.LglSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R logical vector</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L107' class='documenter-source'>source</a><br>
+<a id='RCall.ListSxp' href='#RCall.ListSxp'>#</a>
+<strong><code>RCall.ListSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R pairs (cons) list cell</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L33' class='documenter-source'>source</a><br>
+<a id='RCall.NilSxp' href='#RCall.NilSxp'>#</a>
+<strong><code>RCall.NilSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R NULL value</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L27' class='documenter-source'>source</a><br>
+<a id='RCall.PromSxp' href='#RCall.PromSxp'>#</a>
+<strong><code>RCall.PromSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R promise</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L60' class='documenter-source'>source</a><br>
+<a id='RCall.RObject' href='#RCall.RObject'>#</a>
+<strong><code>RCall.RObject</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>An <code>RObject</code> is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the <code>RObject</code> itself is finalized by Julia. The parameter is the type of the S-expression.</p>
+<p>When called with a Julia object as an argument, a corresponding R object is constructed.</p>
+<pre><code class="julia_skip">julia&gt; RObject(1)
+RObject{IntSxp}
+[1] 1
+
+julia&gt; RObject(1:3)
+RObject{IntSxp}
+[1] 1 2 3
+
+julia&gt; RObject(1.0:3.0)
+RObject{RealSxp}
+[1] 1 2 3
+</code></pre>
+
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L237' class='documenter-source'>source</a><br>
+<a id='RCall.RawSxp' href='#RCall.RawSxp'>#</a>
+<strong><code>RCall.RawSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R byte vector</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L196' class='documenter-source'>source</a><br>
+<a id='RCall.RealSxp' href='#RCall.RealSxp'>#</a>
+<strong><code>RCall.RealSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R real vector</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L123' class='documenter-source'>source</a><br>
+<a id='RCall.S4Sxp' href='#RCall.S4Sxp'>#</a>
+<strong><code>RCall.S4Sxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R S4 object</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L204' class='documenter-source'>source</a><br>
+<a id='RCall.SpecialSxp' href='#RCall.SpecialSxp'>#</a>
+<strong><code>RCall.SpecialSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R special function</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L78' class='documenter-source'>source</a><br>
+<a id='RCall.StrSxp' href='#RCall.StrSxp'>#</a>
+<strong><code>RCall.StrSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R vector of character strings</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L139' class='documenter-source'>source</a><br>
+<a id='RCall.Sxp' href='#RCall.Sxp'>#</a>
+<strong><code>RCall.Sxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R symbolic expression (<code>SxpPtr</code>): these are represented by a pointer to a symbolic expression record (<code>Sxp</code>).</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L1' class='documenter-source'>source</a><br>
+<a id='RCall.SxpHead' href='#RCall.SxpHead'>#</a>
+<strong><code>RCall.SxpHead</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R Sxp header: a pointer to this is used for unknown types.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L10' class='documenter-source'>source</a><br>
+<a id='RCall.SymSxp' href='#RCall.SymSxp'>#</a>
+<strong><code>RCall.SymSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R symbol</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L98' class='documenter-source'>source</a><br>
+<a id='RCall.VecSxp' href='#RCall.VecSxp'>#</a>
+<strong><code>RCall.VecSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R list (i.e. Array{Any,1})</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L159' class='documenter-source'>source</a><br>
+<a id='RCall.WeakRefSxp' href='#RCall.WeakRefSxp'>#</a>
+<strong><code>RCall.WeakRefSxp</code></strong> &mdash; <em>Type</em>.</p>
+<hr />
+<p>R weak reference</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L190' class='documenter-source'>source</a><br></p>
+<p><a id='Methods-1'></a></p>
+<h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
+<p><a id='Base.eltype' href='#Base.eltype'>#</a>
+<strong><code>Base.eltype</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Element types of R vectors.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L219' class='documenter-source'>source</a><br>
+<a id='Base.getindex' href='#Base.getindex'>#</a>
+<strong><code>Base.getindex</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Indexing into <code>VectorSxp</code> types uses Julia indexing into the <code>vec</code> result, except for <code>StrSxp</code> and the <code>VectorListSxp</code> types, which must apply <code>sexp</code> to the <code>Ptr{Void}</code> obtained by indexing into the <code>vec</code> result.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L79' class='documenter-source'>source</a><br></p>
+<p>String indexing finds the first element with the matching name</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L92' class='documenter-source'>source</a><br></p>
+<p>extract the i-th element of LangSxp l</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L186' class='documenter-source'>source</a><br></p>
+<p>extract the value of symbol s in the environment e</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L366' class='documenter-source'>source</a><br>
+<a id='Base.isascii' href='#Base.isascii'>#</a>
+<strong><code>Base.isascii</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).  * 0x00_0002_00 (bit 1): set of bytes (no known encoding)  * 0x00_0004_00 (bit 2): Latin-1  * 0x00_0008_00 (bit 3): UTF-8  * 0x00_0040_00 (bit 6): ASCII</p>
+<p>We only support ASCII and UTF-8.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L334' class='documenter-source'>source</a><br>
+<a id='Base.length' href='#Base.length'>#</a>
+<strong><code>Base.length</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Sxp methods for <code>length</code> return the R length.</p>
+<p><code>Rf_xlength</code> handles Sxps that are not vector-like and R's "long vectors", which have a negative value for the <code>length</code> member.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L13' class='documenter-source'>source</a><br>
+<a id='Base.setindex!' href='#Base.setindex!'>#</a>
+<strong><code>Base.setindex!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>assign value v to the i-th element of LangSxp l</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L197' class='documenter-source'>source</a><br></p>
+<p>assign value v to symbol s in the environment e</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L376' class='documenter-source'>source</a><br>
+<a id='RCall.NAel' href='#RCall.NAel'>#</a>
+<strong><code>RCall.NAel</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>NA element for each type</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L287' class='documenter-source'>source</a><br>
+<a id='RCall.anyNA' href='#RCall.anyNA'>#</a>
+<strong><code>RCall.anyNA</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check if there are any NA values in the vector.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L319' class='documenter-source'>source</a><br>
+<a id='RCall.bound' href='#RCall.bound'>#</a>
+<strong><code>RCall.bound</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>The R NAMED property, represented by 2 bits in the info field. This can take values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more symbols. See http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L1' class='documenter-source'>source</a><br>
+<a id='RCall.callJuliaExtPtr' href='#RCall.callJuliaExtPtr'>#</a>
+<strong><code>RCall.callJuliaExtPtr</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>The function called by R .External for Julia callbacks.</p>
+<p>It receives a <code>ListSxpPtr</code> containing  - a pointer to the function itself (<code>ExtPtrSxpPtr</code>)  - a pointer to the Julia function (<code>ExtPtrSxpPtr</code>)  - any arguments (as <code>SxpPtr</code>)</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L25' class='documenter-source'>source</a><br>
+<a id='RCall.dataptr' href='#RCall.dataptr'>#</a>
+<strong><code>RCall.dataptr</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L48' class='documenter-source'>source</a><br>
+<a id='RCall.decrefExtPtr' href='#RCall.decrefExtPtr'>#</a>
+<strong><code>RCall.decrefExtPtr</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Called by the R finalizer.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L74' class='documenter-source'>source</a><br>
+<a id='RCall.endEmbeddedR' href='#RCall.endEmbeddedR'>#</a>
+<strong><code>RCall.endEmbeddedR</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<pre><code>endEmbeddedR()
+</code></pre>
+
+<p>Close embedded R session.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/setup.jl#L143' class='documenter-source'>source</a><br>
+<a id='RCall.findNamespace' href='#RCall.findNamespace'>#</a>
+<strong><code>RCall.findNamespace</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>find namespace by name of the namespace, it is not error tolerant.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L405' class='documenter-source'>source</a><br>
+<a id='RCall.getAttrib' href='#RCall.getAttrib'>#</a>
+<strong><code>RCall.getAttrib</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Return a particular attribute of an RObject</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L210' class='documenter-source'>source</a><br>
+<a id='RCall.getClass' href='#RCall.getClass'>#</a>
+<strong><code>RCall.getClass</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Returns the class of an R object.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L256' class='documenter-source'>source</a><br>
+<a id='RCall.getNames' href='#RCall.getNames'>#</a>
+<strong><code>RCall.getNames</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Returns the names of an R vector.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L244' class='documenter-source'>source</a><br>
+<a id='RCall.getNamespace' href='#RCall.getNamespace'>#</a>
+<strong><code>RCall.getNamespace</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L410' class='documenter-source'>source</a><br>
+<a id='RCall.ijulia_displayplots' href='#RCall.ijulia_displayplots'>#</a>
+<strong><code>RCall.ijulia_displayplots</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Called after cell evaluation. Closes graphics device and displays files in notebook.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/IJulia.jl#L49' class='documenter-source'>source</a><br>
+<a id='RCall.ijulia_setdevice' href='#RCall.ijulia_setdevice'>#</a>
+<strong><code>RCall.ijulia_setdevice</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Set options for R plotting with IJulia.</p>
+<p>The first argument should be a MIME object: currently supported are * <code>MIME("image/png")</code> [default] * <code>MIME("image/svg+xml")</code></p>
+<p>The remaining arguments (keyword only) are passed to the appropriate R graphics device: see the relevant R help for details.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/IJulia.jl#L7' class='documenter-source'>source</a><br>
+<a id='RCall.initEmbeddedR' href='#RCall.initEmbeddedR'>#</a>
+<strong><code>RCall.initEmbeddedR</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<pre><code>initEmbeddedR()
+</code></pre>
+
+<p>This initializes an embedded R session. It should only be called when R is not already running (e.g. if Julia is running inside an R session)</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/setup.jl#L44' class='documenter-source'>source</a><br>
+<a id='RCall.isFactor' href='#RCall.isFactor'>#</a>
+<strong><code>RCall.isFactor</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check whether an R variable is a factor variable</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L39' class='documenter-source'>source</a><br>
+<a id='RCall.isNA' href='#RCall.isNA'>#</a>
+<strong><code>RCall.isNA</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check if values correspond to R's sentinel NA values.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L298' class='documenter-source'>source</a><br>
+<a id='RCall.isOrdered' href='#RCall.isOrdered'>#</a>
+<strong><code>RCall.isOrdered</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Check whether an R variable is an ordered factor variable</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L42' class='documenter-source'>source</a><br>
+<a id='RCall.makeExternalPtr' href='#RCall.makeExternalPtr'>#</a>
+<strong><code>RCall.makeExternalPtr</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Create an ExtPtrSxpPtr object</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L18' class='documenter-source'>source</a><br>
+<a id='RCall.makeNativeSymbol' href='#RCall.makeNativeSymbol'>#</a>
+<strong><code>RCall.makeNativeSymbol</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Register a function pointer as an R NativeSymbol.</p>
+<p>This is completely undocumented, so may break: we technically are supposed to use R_registerRoutines, but this is <em>much</em> easier for just 1 function.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L1' class='documenter-source'>source</a><br>
+<a id='RCall.newEnvironment' href='#RCall.newEnvironment'>#</a>
+<strong><code>RCall.newEnvironment</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>create a new environment which extends env</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L398' class='documenter-source'>source</a><br>
+<a id='RCall.preserve' href='#RCall.preserve'>#</a>
+<strong><code>RCall.preserve</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Prevent garbage collection of an R object. Object can be released via <code>release</code>.</p>
+<p>This is slower than <code>protect</code>, as it requires searching an internal list, but more flexible.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L279' class='documenter-source'>source</a><br>
+<a id='RCall.protect' href='#RCall.protect'>#</a>
+<strong><code>RCall.protect</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Stack-based protection of garbage collection of R objects. Objects are released via <code>unprotect</code>. Returns the same pointer, allowing inline use.</p>
+<p>This is faster than <code>preserve</code>, but more restrictive. Really only useful inside functions.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L293' class='documenter-source'>source</a><br>
+<a id='RCall.rcall' href='#RCall.rcall'>#</a>
+<strong><code>RCall.rcall</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a FunctionSxp type, a SymSxp or a Symbol.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/functions.jl#L25' class='documenter-source'>source</a><br>
+<a id='RCall.rcopy' href='#RCall.rcopy'>#</a>
+<strong><code>RCall.rcopy</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p><code>rcopy(T,p)</code> converts a pointer <code>p</code> to a Sxp object to a native Julia object of type T.</p>
+<p><code>rcopy(p)</code> performs a default conversion.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/convert-base.jl#L4' class='documenter-source'>source</a><br></p>
+<p><code>rcopy</code> copies the contents of an R object into a corresponding canonical Julia type.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/convert-default.jl#L3' class='documenter-source'>source</a><br></p>
+<p>Evaluate and convert the result of a string as an R expression.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L44' class='documenter-source'>source</a><br>
+<a id='RCall.registerFinalizer' href='#RCall.registerFinalizer'>#</a>
+<strong><code>RCall.registerFinalizer</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Register finalizer to be called by the R GC.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L84' class='documenter-source'>source</a><br>
+<a id='RCall.release' href='#RCall.release'>#</a>
+<strong><code>RCall.release</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Release object that has been gc protected by <code>preserve</code>.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L287' class='documenter-source'>source</a><br>
+<a id='RCall.reval' href='#RCall.reval'>#</a>
+<strong><code>RCall.reval</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning an RObject.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L35' class='documenter-source'>source</a><br>
+<a id='RCall.reval_p' href='#RCall.reval_p'>#</a>
+<strong><code>RCall.reval_p</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning a Sxp pointer.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L1' class='documenter-source'>source</a><br>
+<a id='RCall.rlang' href='#RCall.rlang'>#</a>
+<strong><code>RCall.rlang</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaulated</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/functions.jl#L22' class='documenter-source'>source</a><br>
+<a id='RCall.rlang_p' href='#RCall.rlang_p'>#</a>
+<strong><code>RCall.rlang_p</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Create a function call from a list of arguments</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/functions.jl#L1' class='documenter-source'>source</a><br>
+<a id='RCall.rparse' href='#RCall.rparse'>#</a>
+<strong><code>RCall.rparse</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Parse a string as an R expression, returning an RObject.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L71' class='documenter-source'>source</a><br>
+<a id='RCall.rparse_p' href='#RCall.rparse_p'>#</a>
+<strong><code>RCall.rparse_p</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Parse a string as an R expression, returning a Sxp pointer.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L53' class='documenter-source'>source</a><br>
+<a id='RCall.rprint' href='#RCall.rprint'>#</a>
+<strong><code>RCall.rprint</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Print the value of an Sxp using R's printing mechanism</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L75' class='documenter-source'>source</a><br></p>
+<p>Parse, evaluate and print the result of a string as an R expression.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L111' class='documenter-source'>source</a><br>
+<a id='RCall.rscript' href='#RCall.rscript'>#</a>
+<strong><code>RCall.rscript</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Parses an inline R script, substituting invalid ":($(Expr(:incomplete, "incomplete: invalid string syntax")))</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/rstr.jl#L5' class='documenter-source'>source</a><br>
+<a id='RCall.setAttrib!' href='#RCall.setAttrib!'>#</a>
+<strong><code>RCall.setAttrib!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Set a particular attribute of an RObject</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L220' class='documenter-source'>source</a><br>
+<a id='RCall.setClass!' href='#RCall.setClass!'>#</a>
+<strong><code>RCall.setClass!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Set the class of an R object.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L263' class='documenter-source'>source</a><br>
+<a id='RCall.setNames!' href='#RCall.setNames!'>#</a>
+<strong><code>RCall.setNames!</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Set the names of an R vector.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L250' class='documenter-source'>source</a><br>
+<a id='RCall.sexp' href='#RCall.sexp'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Convert a <code>UnknownSxpPtr</code> to an approptiate <code>SxpPtr</code>.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L331' class='documenter-source'>source</a><br></p>
+<p><code>sexp(S,x)</code> converts a Julia object <code>x</code> to a pointer to a Sxp object of type <code>S</code>.</p>
+<p><code>sexp(x)</code> performs a default conversion.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/convert-base.jl#L23' class='documenter-source'>source</a><br></p>
+<p>Create a <code>SymSxp</code> from a <code>Symbol</code></p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/convert-base.jl#L41' class='documenter-source'>source</a><br></p>
+<p>Generic function for constructing Sxps from Julia objects.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/convert-base.jl#L45' class='documenter-source'>source</a><br></p>
+<p>Create a <code>CharSxp</code> from a String.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/convert-base.jl#L56' class='documenter-source'>source</a><br></p>
+<p>Create a <code>StrSxp</code> from an <code>AbstractString</code></p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/convert-base.jl#L72' class='documenter-source'>source</a><br></p>
+<p>Wrap a Julia object an a R <code>ExtPtrSxpPtr</code>.</p>
+<p>We store the pointer and the object in a const Dict to prevent it being removed by the Julia GC.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L99' class='documenter-source'>source</a><br></p>
+<p>Wrap a callable Julia object <code>f</code> an a R <code>ClosSxpPtr</code>.</p>
+<p>Constructs the following R code</p>
+<pre><code>function(...) .External(juliaCallback, fExPtr, ...)
+</code></pre>
+
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L115' class='documenter-source'>source</a><br>
+<a id='RCall.sexp_arglist_dots' href='#RCall.sexp_arglist_dots'>#</a>
+<strong><code>RCall.sexp_arglist_dots</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Create an argument list for an R function call, with a varargs "dots" at the end.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L138' class='documenter-source'>source</a><br>
+<a id='RCall.sexpnum' href='#RCall.sexpnum'>#</a>
+<strong><code>RCall.sexpnum</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>The SEXPTYPE number of a <code>Sxp</code></p>
+<p>Determined from the trailing 5 bits of the first 32-bit word. Is a 0-based index into the <code>info</code> field of a <code>SxpHead</code>.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L307' class='documenter-source'>source</a><br>
+<a id='RCall.unprotect' href='#RCall.unprotect'>#</a>
+<strong><code>RCall.unprotect</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Release last <code>n</code> objects gc-protected by <code>protect</code>.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L302' class='documenter-source'>source</a><br>
+<a id='RCall.unsafe_array' href='#RCall.unsafe_array'>#</a>
+<strong><code>RCall.unsafe_array</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>The same as <code>unsafe_vec</code>, except returns an appropriately sized array.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L71' class='documenter-source'>source</a><br>
+<a id='RCall.unsafe_vec' href='#RCall.unsafe_vec'>#</a>
+<strong><code>RCall.unsafe_vec</code></strong> &mdash; <em>Function</em>.</p>
+<hr />
+<p>Represent the contents of a VectorSxp type as a <code>Vector</code>.</p>
+<p>This does <strong>not</strong> copy the contents.  If the argument is not named (in R) or otherwise protected from R's garbage collection (e.g. by keeping the containing RObject in scope) the contents of this vector can be modified or could cause a memory error when accessed.</p>
+<p>The contents are as stored in R.  Missing values (NA's) are represented in R by sentinels.  Missing data values in RealSxp and CplxSxp show up as <code>NaN</code> and <code>NaN + NaNim</code>, respectively.  Missing data in IntSxp show up as <code>-2147483648</code>, the minimum 32-bit integer value.  Internally a <code>LglSxp</code> is represented as <code>Vector{Int32}</code>.  The convention is that <code>0</code> is <code>false</code>, <code>-2147483648</code> is <code>NA</code> and all other values represent <code>true</code>.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/methods.jl#L53' class='documenter-source'>source</a><br></p>
+<p><a id='Macros-1'></a></p>
+<h2 id="macros">Macros<a class="headerlink" href="#macros" title="Permanent link">&para;</a></h2>
+<p><a id='RCall.@R_str' href='#RCall.@R_str'>#</a>
+<strong><code>RCall.@R_str</code></strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Allows inline R scripts, e.g</p>
+<pre><code>foo = R&quot;glm(Sepal.Length ~ Sepal.Width, data=$iris)&quot;
+</code></pre>
+
+<p>Does not yet support assigning to Julia variables, so can only return results.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/rstr.jl#L78' class='documenter-source'>source</a><br>
+<a id='RCall.@rget' href='#RCall.@rget'>#</a>
+<strong><code>RCall.@rget</code></strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Copies variables from R to Julia using the same name.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L137' class='documenter-source'>source</a><br>
+<a id='RCall.@rimport' href='#RCall.@rimport'>#</a>
+<strong><code>RCall.@rimport</code></strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Import a R Package as a Julia module. You can also use classic Python syntax to make an alias: <code>@rimport *module-name* as *shorthand*</code></p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/library.jl#L29' class='documenter-source'>source</a><br>
+<a id='RCall.@rlibrary' href='#RCall.@rlibrary'>#</a>
+<strong><code>RCall.@rlibrary</code></strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Load all exported functions/objects of a R package to the current module.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/library.jl#L55' class='documenter-source'>source</a><br>
+<a id='RCall.@rput' href='#RCall.@rput'>#</a>
+<strong><code>RCall.@rput</code></strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Copies variables from Julia to R using the same name.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/iface.jl#L117' class='documenter-source'>source</a><br>
+<a id='RCall.@var_str' href='#RCall.@var_str'>#</a>
+<strong><code>RCall.@var_str</code></strong> &mdash; <em>Macro</em>.</p>
+<hr />
+<p>Returns a variable named "str". Useful for passing keyword arguments containing dots.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/functions.jl#L34' class='documenter-source'>source</a><br></p>
+<p><a id='Constants-1'></a></p>
+<h2 id="constants">Constants<a class="headerlink" href="#constants" title="Permanent link">&para;</a></h2>
+<p><a id='RCall.globalEnv' href='#RCall.globalEnv'>#</a>
+<strong><code>RCall.globalEnv</code></strong> &mdash; <em>Constant</em>.</p>
+<hr />
+<p>R global Environment.</p>
+<pre><code>globalEnv[:x] = 1
+globalEnv[:x]
+</code></pre>
+
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/RCall.jl#L35' class='documenter-source'>source</a><br>
+<a id='RCall.jtypExtPtrs' href='#RCall.jtypExtPtrs'>#</a>
+<strong><code>RCall.jtypExtPtrs</code></strong> &mdash; <em>Constant</em>.</p>
+<hr />
+<p>Julia types (typically functions) which are wrapped in <code>ExtPtrSxpPtr</code> are stored here to prevent garbage collection by Julia.</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/callback.jl#L68' class='documenter-source'>source</a><br>
+<a id='RCall.typs' href='#RCall.typs'>#</a>
+<strong><code>RCall.typs</code></strong> &mdash; <em>Constant</em>.</p>
+<hr />
+<p>vector of R Sxp types</p>
+<p><a href='https://github.com/JuliaStats/RCall.jl/tree/d92e90798a411dfd45ac1fd8c1dce9ae96716df5/src/types.jl#L316' class='documenter-source'>source</a><br></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../gettingstarted/" class="btn btn-neutral" title="Getting started"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/JuliaStats/RCall.jl" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../gettingstarted/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+
+</body>
+</html>
