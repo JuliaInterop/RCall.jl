@@ -82,17 +82,31 @@ function rscript(script::ASCIIString)
 end
 
 """
-Allows inline R scripts, e.g
+    R"..."
 
-    foo = R"glm(Sepal.Length ~ Sepal.Width, data=\$iris)"
+An inline R expression, the result of which is evaluated and returned as an `RObject`.
 
-Notes:
- - All Julia expressions are evaluated before the R expression.
- - Does not yet support assigning to Julia variables, so can only return results.
- - Is evaluated in it's own R environment. You can assign to the global environment by using the double-assignment operator `<<-`.
+It supports substitution of Julia variables and expressions via prefix with `\$` whenever
+not valid R syntax (i.e. when not immediately following another completed R expression):
+
+    R"glm(Sepal.Length ~ Sepal.Width, data=\$iris)"
+
+It is also possible to pass Julia expressions:
+
+    R"plot($(x -> exp(x)*sin(x)))"
+
+All such Julia expressions are evaluated once, before the R expression is evaluated.
+
+The expression does not support assigning to Julia variables, so the only way retrieve
+values from R via the return value.
+
+The R expression is evaluated each time in a new environment, so standard R variable
+assignments (`=` or `<-`) will not persist between expressions, or even multiple calls of
+the same expression. In order to persist variables, you should use the the
+double-assignment operator (`<<-`), which assigns the variable to the global environment.
+
 """
-macro R_str(script)
-    script, symdict = rscript(script)    
+macro R_str(script) script, symdict = rscript(script)
 
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
