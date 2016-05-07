@@ -8,10 +8,10 @@ Parses an inline R script, substituting invalid "\$" signs for Julia symbols
 function rscript(script::ASCIIString)
     sf = protect(rcall_p(:srcfile,"xx"))
     status = Array(Cint,1)
-    k = 0
+    k = 1
     rsyms = ASCIIString[]
     exprs = Any[]
-    jsymdict = Dict{Symbol,ASCIIString}()
+    symdict = OrderedDict{ASCIIString,Any}()
     local ret, parsedata
 
     try
@@ -56,26 +56,29 @@ function rscript(script::ASCIIString)
             # assuming no unicode, see
             # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
             i_stop = prevind(script,i)
+            
             c,i = next(script,i)
             c == '\$' || error("RCall.jl: incorrect R parsing")
 
-
-
             expr,i = parse(script,i,greedy=false)
 
-            push!(exprs,expr)
-
-            k += 1
-            sym = "##RCall##$k"
-            push!(rsyms,sym)
-
+            if isa(expr,Symbol)
+                sym = "\$$expr"
+            else
+                sym = "\$($expr)"
+                # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
+                if haskey(symdict, sym)
+                    sym *= "##$k"
+                end
+            end
+            symdict[sym] = expr
 
             script = string(script[1:i_stop],'`',sym,'`',script[i:end])
         end
     finally
         unprotect(1)
     end
-    return script, rsyms, exprs
+    return script, symdict
 end
 
 """
@@ -83,21 +86,24 @@ Allows inline R scripts, e.g
 
     foo = R"glm(Sepal.Length ~ Sepal.Width, data=\$iris)"
 
-Does not yet support assigning to Julia variables, so can only return results.
+Notes:
+ - All Julia expressions are evaluated before the R expression.
+ - Does not yet support assigning to Julia variables, so can only return results.
+ - Is evaluated in it's own R environment. You can assign to the global environment by using the double-assignment operator `<<-`.
 """
 macro R_str(script)
-    script, rsyms, exprs = rscript(script)
+    script, symdict = rscript(script)    
 
     blk_ld = Expr(:block)
-    blk_rm = Expr(:block)
-    for (rsym, expr) in zip(rsyms,exprs)
-        push!(blk_ld.args,:(Const.GlobalEnv[$rsym] = $(esc(expr))))
-        push!(blk_rm.args,:(rcall(:rm,$rsym)))
+    for (rsym, expr) in symdict
+        push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
     end
     quote
+        env = newEnvironment()
+        protect(env)
         $blk_ld
-        ret = reval($script, Const.GlobalEnv)
-        $blk_rm
+        ret = reval($script, env)
+        unprotect(1)
         ret
     end
 end

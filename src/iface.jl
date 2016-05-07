@@ -37,8 +37,8 @@ Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """
 reval(s, env=Const.GlobalEnv) = RObject(reval_p(sexp(s),sexp(env)))
-reval(str::AbstractString, env=Const.GlobalEnv) = reval(rparse_p(str))
-reval(sym::Symbol, env=Const.GlobalEnv) = reval(sexp(sym))
+reval(str::AbstractString, env=Const.GlobalEnv) = reval(rparse_p(str),env)
+reval(sym::Symbol, env=Const.GlobalEnv) = reval(sexp(sym),env)
 
 
 """

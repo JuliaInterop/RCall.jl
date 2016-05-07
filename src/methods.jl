@@ -395,12 +395,18 @@ function setindex!(e::Ptr{EnvSxp},v,s)
 end
 setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)
 
-"create a new environment which extends env"
+"""
+    newEnvironment([env])
+
+Create a new environment which extends environment `env` (`globalEnv` by default).
+"""
 function newEnvironment(env::Ptr{EnvSxp})
     ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
             (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),sexp(Const.NilValue),sexp(Const.Const.NilValue),env)
 end
 newEnvironment(env::RObject{EnvSxp}) = newEnvironment(sexp(env))
+newEnvironment() = newEnvironment(globalEnv)
+
 
 "find namespace by name of the namespace, it is not error tolerant."
 function findNamespace(str::ByteString)
