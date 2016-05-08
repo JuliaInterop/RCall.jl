@@ -8,10 +8,10 @@ Parses an inline R script, substituting invalid "\$" signs for Julia symbols
 function rscript(script::ASCIIString)
     sf = protect(rcall_p(:srcfile,"xx"))
     status = Array(Cint,1)
-    k = 0
+    k = 1
     rsyms = ASCIIString[]
     exprs = Any[]
-    jsymdict = Dict{Symbol,ASCIIString}()
+    symdict = OrderedDict{ASCIIString,Any}()
     local ret, parsedata
 
     try
@@ -56,48 +56,68 @@ function rscript(script::ASCIIString)
             # assuming no unicode, see
             # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
             i_stop = prevind(script,i)
+            
             c,i = next(script,i)
             c == '\$' || error("RCall.jl: incorrect R parsing")
 
-
-
             expr,i = parse(script,i,greedy=false)
 
-            push!(exprs,expr)
-
-            k += 1
-            sym = "##RCall##$k"
-            push!(rsyms,sym)
-
+            if isa(expr,Symbol)
+                sym = "\$$expr"
+            else
+                sym = "\$($expr)"
+                # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
+                if haskey(symdict, sym)
+                    sym *= "##$k"
+                end
+            end
+            symdict[sym] = expr
 
             script = string(script[1:i_stop],'`',sym,'`',script[i:end])
         end
     finally
         unprotect(1)
     end
-    return script, rsyms, exprs
+    return script, symdict
 end
 
 """
-Allows inline R scripts, e.g
+    R"..."
 
-    foo = R"glm(Sepal.Length ~ Sepal.Width, data=\$iris)"
+An inline R expression, the result of which is evaluated and returned as an `RObject`.
 
-Does not yet support assigning to Julia variables, so can only return results.
+It supports substitution of Julia variables and expressions via prefix with `\$` whenever
+not valid R syntax (i.e. when not immediately following another completed R expression):
+
+    R"glm(Sepal.Length ~ Sepal.Width, data=\$iris)"
+
+It is also possible to pass Julia expressions:
+
+    R"plot($(x -> exp(x)*sin(x)))"
+
+All such Julia expressions are evaluated once, before the R expression is evaluated.
+
+The expression does not support assigning to Julia variables, so the only way retrieve
+values from R via the return value.
+
+The R expression is evaluated each time in a new environment, so standard R variable
+assignments (`=` or `<-`) will not persist between expressions, or even multiple calls of
+the same expression. In order to persist variables, you should use the the
+double-assignment operator (`<<-`), which assigns the variable to the global environment.
+
 """
-macro R_str(script)
-    script, rsyms, exprs = rscript(script)
+macro R_str(script) script, symdict = rscript(script)
 
     blk_ld = Expr(:block)
-    blk_rm = Expr(:block)
-    for (rsym, expr) in zip(rsyms,exprs)
-        push!(blk_ld.args,:(Const.GlobalEnv[$rsym] = $(esc(expr))))
-        push!(blk_rm.args,:(rcall(:rm,$rsym)))
+    for (rsym, expr) in symdict
+        push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
     end
     quote
+        env = newEnvironment()
+        protect(env)
         $blk_ld
-        ret = reval($script, Const.GlobalEnv)
-        $blk_rm
+        ret = reval($script, env)
+        unprotect(1)
         ret
     end
 end

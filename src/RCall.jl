@@ -2,6 +2,8 @@ __precompile__()
 module RCall
 using DataFrames,DataArrays
 
+import DataStructures: OrderedDict
+
 import Base: eltype, show, convert, isascii,
     length, size, getindex, setindex!, start, next, done
 
