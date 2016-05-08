@@ -141,7 +141,7 @@
 <p>This will initialize the R process in the background.</p>
 <p><a id='R""-string-macro-1'></a></p>
 <h2 id="r-string-macro"><code>R""</code> string macro<a class="headerlink" href="#r-string-macro" title="Permanent link">&para;</a></h2>
-<p>The simplest way to use RCall is via the <a href="../{ref}"><code>R""</code></a> string macro:</p>
+<p>The simplest way to use RCall is via the <a href="../public/#RCall.@R_str"><code>R""</code></a> string macro:</p>
 <pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
 ERROR: UndefVarError: @R_str not defined
 </code></pre>
@@ -150,16 +150,16 @@ ERROR: UndefVarError: @R_str not defined
 <p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
 <pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.57747
- -1.42257
- -0.127489
-  0.104284
-  0.789637
- -0.594556
- -0.683225
-  0.246141
- -0.774074
- -0.0617599
+ -0.48659
+ -0.320695
+  0.848692
+ -0.0393587
+ -0.0413953
+  0.160898
+ -0.958722
+  0.535707
+  2.37673
+  0.0657815
 
 julia&gt; R&quot;t.test($x)&quot;
 ERROR: UndefVarError: @R_str not defined
