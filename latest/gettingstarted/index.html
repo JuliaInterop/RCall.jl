@@ -79,7 +79,9 @@
             
                 <li class="toctree-l3"><a href="#getting-started">Getting started</a></li>
                 
-                    <li><a class="toctree-l4" href="#r-string-macro-and-rcopy">R"" string macro and rcopy</a></li>
+                    <li><a class="toctree-l4" href="#r-string-macro">R"" string macro</a></li>
+                
+                    <li><a class="toctree-l4" href="#rcopy">rcopy</a></li>
                 
             
             </ul>
@@ -133,56 +135,60 @@
                 <p><a id='Getting-started-1'></a></p>
 <h1 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
 <p>The RCall package is loaded via</p>
-<pre><code>julia&gt; using RCall
+<pre><code class="julia">julia&gt; using RCall
 </code></pre>
 
 <p>This will initialize the R process in the background.</p>
-<p><a id='R""-string-macro-and-rcopy-1'></a></p>
-<h2 id="r-string-macro-and-rcopy"><code>R""</code> string macro and <code>rcopy</code><a class="headerlink" href="#r-string-macro-and-rcopy" title="Permanent link">&para;</a></h2>
-<p>The simplest way to use RCall is via the <code>R""</code> string macro:</p>
-<pre><code>julia&gt; x = R&quot;rnorm(10)&quot;
-RCall.RObject{RCall.RealSxp}
- [1]  2.14715927 -1.54768482 -2.15976616 -0.60222806  0.53387481 -1.00477140
- [7]  1.59695873 -0.05140429  0.87452673  0.64201625
-R&quot;
+<p><a id='R""-string-macro-1'></a></p>
+<h2 id="r-string-macro"><code>R""</code> string macro<a class="headerlink" href="#r-string-macro" title="Permanent link">&para;</a></h2>
+<p>The simplest way to use RCall is via the <a href="../{ref}"><code>R""</code></a> string macro:</p>
+<pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
+ERROR: UndefVarError: @R_str not defined
 </code></pre>
 
-<p>This evaluates the expression inside the string, and returns the result as an <code>RObject</code>, which is a Julia wrapper around an R object. This can be converted to a native Julia object via <code>rcopy</code>:</p>
-<pre><code>julia&gt; rcopy(x)
+<p>This evaluates the expression inside the string in R, and returns the result as an <a href="../public/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
+<p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
+<pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  2.14716  
- -1.54768  
- -2.15977  
- -0.602228 
-  0.533875 
- -1.00477  
-  1.59696  
- -0.0514043
-  0.874527 
-  0.642016 
+  0.57747
+ -1.42257
+ -0.127489
+  0.104284
+  0.789637
+ -0.594556
+ -0.683225
+  0.246141
+ -0.774074
+ -0.0617599
+
+julia&gt; R&quot;t.test($x)&quot;
+ERROR: UndefVarError: @R_str not defined
 </code></pre>
 
-<p>R's <code>data.frame</code> objects are automatically converted to Julia <code>DataFrame</code>s:</p>
-<pre><code>julia&gt; iris = rcopy(R&quot;iris&quot;)
-150x5 DataFrames.DataFrame
-│ Row │ Sepal.Length │ Sepal.Width │ Petal.Length │ Petal.Width │ Species     │
-┝━━━━━┿━━━━━━━━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━━┥
-│ 1   │ 5.1          │ 3.5         │ 1.4          │ 0.2         │ &quot;setosa&quot;    │
-│ 2   │ 4.9          │ 3.0         │ 1.4          │ 0.2         │ &quot;setosa&quot;    │
-│ 3   │ 4.7          │ 3.2         │ 1.3          │ 0.2         │ &quot;setosa&quot;    │
-...
+<p>It is also possible to pass Julia expressions, though they should be included in parentheses</p>
+<pre><code class="julia">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method='BFGS')&quot;
+ERROR: UndefVarError: @R_str not defined
 </code></pre>
 
-<p>The <code>R""</code> macro also supports substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol such as <code>aa$bb</code>):</p>
-<pre><code>julia&gt; R&quot;lm(Sepal.Length ~ Sepal.Width + Species, data=$iris)&quot;
-RCall.RObject{RCall.VecSxp}
+<p><a id='rcopy-1'></a></p>
+<h2 id="rcopy"><code>rcopy</code><a class="headerlink" href="#rcopy" title="Permanent link">&para;</a></h2>
+<p>The <a href="../public/#RCall.rcopy"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p>
+<pre><code class="julia">julia&gt; rcopy(R&quot;c(1)&quot;)
+ERROR: UndefVarError: @R_str not defined
 
-Call:
-lm(formula = Sepal.Length ~ Sepal.Width + Species, data = `##RCall##1`)
+julia&gt; rcopy(R&quot;c(1,2)&quot;)
+ERROR: UndefVarError: @R_str not defined
 
-Coefficients:
-      (Intercept)        Sepal.Width  Speciesversicolor   Speciesvirginica  
-           2.2514             0.8036             1.4587             1.9468  
+julia&gt; rcopy(R&quot;list(1,'zz')&quot;)
+ERROR: UndefVarError: @R_str not defined
+
+julia&gt; rcopy(R&quot;list(a=1,b='zz')&quot;)
+ERROR: UndefVarError: @R_str not defined
+</code></pre>
+
+<p>It is possible to force a specific conversion by passing the output type as the first argument:</p>
+<pre><code class="julia">julia&gt; rcopy(Array{Int},R&quot;c(1,2)&quot;)
+ERROR: UndefVarError: @R_str not defined
 </code></pre>
               
             </div>
