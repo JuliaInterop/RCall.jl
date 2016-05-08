@@ -56,7 +56,7 @@ function rscript(script::ASCIIString)
             # assuming no unicode, see
             # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
             i_stop = prevind(script,i)
-            
+
             c,i = next(script,i)
             c == '\$' || error("RCall.jl: incorrect R parsing")
 
@@ -93,7 +93,7 @@ not valid R syntax (i.e. when not immediately following another completed R expr
 
 It is also possible to pass Julia expressions:
 
-    R"plot($(x -> exp(x)*sin(x)))"
+    R"plot($(x -> exp(x).*sin(x)))"
 
 All such Julia expressions are evaluated once, before the R expression is evaluated.
 
