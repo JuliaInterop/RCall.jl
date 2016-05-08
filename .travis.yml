@@ -3,7 +3,7 @@ os:
   - linux
   - osx
 julia:
-  - 0.4
+  - release
   - nightly
 notifications:
   email: false
@@ -28,7 +28,7 @@ script:
 after_success:
   # only deploy on linux nightly builds of master branch or tags
   # Documenter has not yet released, need to install from source
-  - if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == false ] && [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_JULIA_VERSION" == "nightly" ]; then
+  - if ([ "$TRAVIS_BRANCH" == "master" ] || [ -n "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == false ] && [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_JULIA_VERSION" == "release" ]; then
       julia -e 'Pkg.clone("https://github.com/MichaelHatherly/Documenter.jl")';
       julia -e 'cd(Pkg.dir("RCall")); include(joinpath("docs", "make.jl"))';
     fi
