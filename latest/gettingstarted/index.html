@@ -143,52 +143,88 @@
 <h2 id="r-string-macro"><code>R""</code> string macro<a class="headerlink" href="#r-string-macro" title="Permanent link">&para;</a></h2>
 <p>The simplest way to use RCall is via the <a href="../public/#RCall.@R_str"><code>R""</code></a> string macro:</p>
 <pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
-ERROR: UndefVarError: @R_str not defined
+RCall.RObject{RCall.RealSxp}
+ [1] -1.0341110  1.0864740  1.0160358  1.1226408 -1.0076538 -0.1142121
+ [7]  2.0073117  0.2487689 -2.6916020 -0.5559933
 </code></pre>
 
 <p>This evaluates the expression inside the string in R, and returns the result as an <a href="../public/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
 <p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
 <pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.518425
-  0.129928
- -1.15341
- -0.210464
- -0.111062
- -0.129175
-  0.118162
-  0.369735
- -0.928979
- -0.59041
+  0.125847
+ -0.528093
+ -1.54445
+  0.0610107
+ -0.762245
+  0.170839
+  1.08155
+ -0.809921
+  0.512608
+ -0.0466842
 
 julia&gt; R&quot;t.test($x)&quot;
-ERROR: UndefVarError: @R_str not defined
+RCall.RObject{RCall.VecSxp}
+
+    One Sample t-test
+
+data:  $x
+t = -0.73204, df = 9, p-value = 0.4828
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ -0.7115053  0.3635970
+sample estimates:
+ mean of x
+-0.1739541
 </code></pre>
 
-<p>It is also possible to pass Julia expressions, though they should be included in parentheses</p>
+<p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p>
 <pre><code class="julia">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method='BFGS')&quot;
-ERROR: UndefVarError: @R_str not defined
+RCall.RObject{RCall.VecSxp}
+$par
+[1] -1.56343
+
+$value
+[1] -1.570796
+
+$counts
+function gradient
+      14       13
+
+$convergence
+[1] 0
+
+$message
+NULL
 </code></pre>
 
 <p><a id='rcopy-1'></a></p>
 <h2 id="rcopy"><code>rcopy</code><a class="headerlink" href="#rcopy" title="Permanent link">&para;</a></h2>
 <p>The <a href="../public/#RCall.rcopy"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p>
 <pre><code class="julia">julia&gt; rcopy(R&quot;c(1)&quot;)
-ERROR: UndefVarError: @R_str not defined
+1.0
 
 julia&gt; rcopy(R&quot;c(1,2)&quot;)
-ERROR: UndefVarError: @R_str not defined
+2-element Array{Float64,1}:
+ 1.0
+ 2.0
 
 julia&gt; rcopy(R&quot;list(1,'zz')&quot;)
-ERROR: UndefVarError: @R_str not defined
+2-element Array{Any,1}:
+ 1.0
+  &quot;zz&quot;
 
 julia&gt; rcopy(R&quot;list(a=1,b='zz')&quot;)
-ERROR: UndefVarError: @R_str not defined
+Dict{Symbol,Any} with 2 entries:
+  :a =&gt; 1.0
+  :b =&gt; &quot;zz&quot;
 </code></pre>
 
 <p>It is possible to force a specific conversion by passing the output type as the first argument:</p>
 <pre><code class="julia">julia&gt; rcopy(Array{Int},R&quot;c(1,2)&quot;)
-ERROR: UndefVarError: @R_str not defined
+2-element Array{Int64,1}:
+ 1
+ 2
 </code></pre>
               
             </div>
