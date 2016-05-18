@@ -35,5 +35,5 @@ Base.call{S<:Union{SymSxp,LangSxp,PromSxp,FunctionSxp}}(f::RObject{S},args...;kw
 Returns a variable named "str". Useful for passing keyword arguments containing dots.
 """
 macro var_str(str)
-    esc(symbol(str))
+    esc(Symbol(str))
 end

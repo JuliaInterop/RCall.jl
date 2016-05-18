@@ -93,7 +93,7 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
         else
             # Rf_PrintValueRec not found on unix!?
             # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-            reval(rlang_p(Const.BaseNamespace[symbol("print.default")], :x),env)
+            reval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x),env)
         end
         env[:x] = Const.NilValue
         write(io,takebuf_string(printBuffer))

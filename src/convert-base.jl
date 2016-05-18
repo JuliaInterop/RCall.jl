@@ -45,7 +45,7 @@ sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
 "Generic function for constructing Sxps from Julia objects."
 sexp(s::Symbol) = sexp(SymSxp,s)
 
-rcopy(::Type{Symbol},ss::SymSxp) = symbol(rcopy(AbstractString,ss))
+rcopy(::Type{Symbol},ss::SymSxp) = Symbol(rcopy(AbstractString,ss))
 rcopy(::Type{AbstractString},ss::SymSxp) = rcopy(AbstractString,ss.name)
 rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
     rcopy(T,unsafe_load(s))
@@ -66,7 +66,7 @@ sexp(::Type{CharSxp},sym::Symbol) = sexp(CharSxp,string(sym))
 
 
 rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
-rcopy(::Type{Symbol},s::CharSxpPtr) = symbol(rcopy(AbstractString,s))
+rcopy(::Type{Symbol},s::CharSxpPtr) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
 
 "Create a `StrSxp` from an `AbstractString`"
