@@ -8,7 +8,7 @@ function makeNativeSymbol(fptr::Ptr{Void})
     # Rdynpriv.h
     rexfn = ccall((:R_MakeExternalPtrFn,libR), ExtPtrSxpPtr,
                      (Ptr{Void}, Ptr{Void}, Ptr{Void}),
-                     fptr, sexp(symbol("native symbol")), sexp(Const.NilValue))
+                     fptr, sexp(Symbol("native symbol")), sexp(Const.NilValue))
     setAttrib!(rexfn, Const.ClassSymbol, sexp("NativeSymbol"))
     preserve(rexfn)
     rexfn
@@ -121,7 +121,7 @@ Constructs the following R code
 
 """
 function sexp(::Type{ClosSxp}, f)
-    body = protect(rlang_p(symbol(".External"),
+    body = protect(rlang_p(Symbol(".External"),
                            juliaCallback,
                            sexp(ExtPtrSxp,f),
                            Const.DotsSymbol))

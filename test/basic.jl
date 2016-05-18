@@ -18,7 +18,7 @@ langsexp[2] = RObject([1 2; 0 0])
 globalEnv[:x] = RObject([1,2,3])
 @test rcopy(globalEnv[:x]) == [1,2,3]
 globalEnv[:y] = RObject([4,5,6])
-@test rcopy(rcall(symbol("+"),:x,:y)) == [5,7,9]
+@test rcopy(rcall(Symbol("+"),:x,:y)) == [5,7,9]
 
 x = 1:10
 @rput x
@@ -64,7 +64,7 @@ RCall.rgui_init()
 f = tempname()
 rcall(:png,f)
 rcall(:plot,1:10)
-rcall(symbol("dev.off"))
+rcall(Symbol("dev.off"))
 @test isfile(f)
 @test !RCall.rgui_start(true)
 @test_throws ErrorException RCall.rgui_start()

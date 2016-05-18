@@ -16,11 +16,11 @@ function rwrap(pkg::ASCIIString,s::Symbol)
     m = Module(s)
     consts = [Expr(:const,
                     Expr(:(=),
-                    symbol(x),
-                    rcall(symbol("::"),symbol(pkg),symbol(x)))
+                    Symbol(x),
+                    rcall(Symbol("::"),Symbol(pkg),Symbol(x)))
                 ) for x in members]
     id = Expr(:(=), :__package__, pkg)
-    exports = [symbol(x) for x in members]
+    exports = [Symbol(x) for x in members]
     s in exports && error("$pkg has a function with the same name as $(pkg), use `@rimport $pkg as ...` instead.")
     eval(m, Expr(:toplevel, consts..., Expr(:export, exports...), id, Expr(:(=), :__exports__, exports)))
     m
@@ -62,11 +62,11 @@ macro rlibrary(x)
         members = rcopy("ls('package:$($pkg)')")
         filter!(x -> !(x in reserved), members)
         for m in members
-            sym = symbol(m)
+            sym = Symbol(m)
             eval(current_module(), Expr(
                     :(=),
                     sym,
-                    Expr(:call, :rcall, QuoteNode(symbol("::")), QuoteNode($pkg), QuoteNode(sym))
+                    Expr(:call, :rcall, QuoteNode(Symbol("::")), QuoteNode($pkg), QuoteNode(sym))
                 )
             )
         end
