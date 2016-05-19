@@ -2,26 +2,28 @@
 
 ## Types
 
-    {autodocs}
-    Modules = [RCall]
-    Order   = [:type]
-
+```@autodocs
+Modules = [RCall]
+Order   = [:type]
+```
 
 ## Methods
 
-    {autodocs}
-    Modules = [RCall]
-    Order   = [:function]
-
+```@autodocs
+Modules = [RCall]
+Order   = [:function]
+```
 
 ## Macros
 
-    {autodocs}
-    Modules = [RCall]
-    Order   = [:macro]
+```@autodocs
+Modules = [RCall]
+Order   = [:macro]
+```
 
 ## Constants
 
-    {autodocs}
-    Modules = [RCall]
-    Order   = [:constant]
+```@autodocs
+Modules = [RCall]
+Order   = [:constant]
+```
