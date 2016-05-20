@@ -144,24 +144,24 @@
 <p>The simplest way to use RCall is via the <a href="../public/#RCall.@R_str"><code>R""</code></a> string macro:</p>
 <pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  0.71449729  1.91438150  0.29310348  0.13395586  0.20525332  0.47226468
- [7] -0.07477172 -1.08372924  0.69688609  0.44899253
+ [1]  0.7583787  0.6455377  1.0902359  0.8865887 -1.9016974  0.5854076
+ [7]  0.1387594  0.6240821  0.7590897 -1.7694434
 </code></pre>
 
 <p>This evaluates the expression inside the string in R, and returns the result as an <a href="../public/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
 <p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
 <pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.153531
- -0.251804
- -0.98158
- -1.10114
- -1.88051
- -0.689532
- -0.48168
- -0.0373291
- -0.956723
-  0.134799
+ -0.33899
+  0.892095
+  1.07637
+  0.258873
+ -0.342536
+  0.795877
+ -0.119094
+ -0.255865
+ -0.222567
+ -0.382294
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
@@ -169,13 +169,13 @@ RCall.RObject{RCall.VecSxp}
     One Sample t-test
 
 data:  $x
-t = -2.9923, df = 9, p-value = 0.01515
+t = 0.74881, df = 9, p-value = 0.4731
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -1.0697516 -0.1486412
+ -0.2752349  0.5476087
 sample estimates:
- mean of x
--0.6091964
+mean of x
+0.1361869
 </code></pre>
 
 <p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p>
