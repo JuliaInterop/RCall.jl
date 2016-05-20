@@ -55,8 +55,8 @@ function initEmbeddedR()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
         
-        ccall(:_wputenv,Cint,(Ptr{UInt16},),utf16("PATH="*ENV["PATH"]*";"*dirname(libR)))
-        ccall(:_wputenv,Cint,(Ptr{UInt16},),utf16("HOME="*homedir())) 
+        ccall(:_wputenv,Cint,(Cwstring,),"PATH="*ENV["PATH"]*";"*dirname(libR))
+        ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
 
         argv = ["REmbeddedJulia","--silent","--no-save"]
         i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
