@@ -43,7 +43,7 @@ function sexp(v::DataArray)
 end
 
 ## PooledDataArray to sexp conversion.
-function sexp{T<:ByteString,R<:Integer}(v::PooledDataArray{T,R})
+function sexp{T<:Compat.String,R<:Integer}(v::PooledDataArray{T,R})
     rv = sexp(v.refs)
     setAttrib!(rv, Const.LevelsSymbol, sexp(v.pool))
     setAttrib!(rv, Const.ClassSymbol, sexp("factor"))
@@ -95,3 +95,4 @@ function rlang_formula(e::Expr)
     end
 end
 rlang_formula(e::Symbol) = e
+rlang_formula(n::Number) = n

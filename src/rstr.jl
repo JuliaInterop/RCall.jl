@@ -5,13 +5,16 @@ rscript(script::AbstractString) = error("Unicode R scripts not supported by R_st
 """
 Parses an inline R script, substituting invalid "\$" signs for Julia symbols
 """
-function rscript(script::ASCIIString)
+function rscript(script::Compat.ASCIIString)
+    if !isascii(script)
+        error("Unicode R scripts not supported by R_str, due to\n    https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524")
+    end
     sf = protect(rcall_p(:srcfile,"xx"))
     status = Array(Cint,1)
     k = 1
-    rsyms = ASCIIString[]
+    rsyms = Compat.ASCIIString[]
     exprs = Any[]
-    symdict = OrderedDict{ASCIIString,Any}()
+    symdict = OrderedDict{Compat.ASCIIString,Any}()
     local ret, parsedata
 
     try
@@ -31,7 +34,7 @@ function rscript(script::ASCIIString)
             lineno = parsedata[1][n]
             charno = parsedata[2][n] # this is the character no., not byte numbe
 
-            c = rcopy(UTF8String,parsedata[9][n])
+            c = rcopy(Compat.UTF8String, parsedata[9][n])
             unprotect(1)
 
             if status[1] == 1

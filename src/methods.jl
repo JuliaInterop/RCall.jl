@@ -414,4 +414,4 @@ function findNamespace(str::ByteString)
 end
 
 "get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound."
-getNamespace(str::ByteString) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespace"], str))
+getNamespace(str::Compat.String) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespace"], str))

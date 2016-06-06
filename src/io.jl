@@ -11,9 +11,9 @@ global const errorBuffer = PipeBuffer()
 
 function writeConsoleEx(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     if otype == 0
-        write(printBuffer, buf, buflen)
+        Compat.unsafe_write(printBuffer, buf, buflen)
     else
-        write(errorBuffer, buf, buflen)
+        Compat.unsafe_write(errorBuffer, buf, buflen)
     end
     return nothing
 end
@@ -21,7 +21,7 @@ end
 eventCallBack() = nothing
 
 function askYesNoCancel(prompt::Ptr{Cchar})
-	println(bytestring(prompt))
+    println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
 	query = readline(STDIN)
 	c = uppercase(query[1])
 	r::Cint

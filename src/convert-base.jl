@@ -39,7 +39,7 @@ rcopy(::Ptr{NilSxp}) = nothing
 
 # SymSxp
 "Create a `SymSxp` from a `Symbol`"
-sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install,libR),Ptr{SymSxp},(Ptr{UInt8},),bytestring(s))
+sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}, (Ptr{UInt8},), s)
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
 
 "Generic function for constructing Sxps from Julia objects."
@@ -56,16 +56,22 @@ rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
 """
 Create a `CharSxp` from a String.
 """
-sexp(::Type{CharSxp},st::ASCIIString) =
-    ccall((:Rf_mkCharLen,libR),CharSxpPtr,(Ptr{UInt8},Cint),st,sizeof(st))
-sexp(::Type{CharSxp},st::UTF8String) =
-    ccall((:Rf_mkCharLenCE,libR),CharSxpPtr,(Ptr{UInt8},Cint,Cint),st,sizeof(st),1)
+function sexp(::Type{CharSxp}, st::Compat.String)
+    if isascii(st)
+        ccall((:Rf_mkCharLen, libR), CharSxpPtr, (Ptr{UInt8}, Cint), st, sizeof(st))
+    else  # assume UTF-8, is there a way of checking?
+        ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
+            (Ptr{UInt8}, Cint, Cint), st, sizeof(st), 1)
+    end
+end
+sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, string(st))
+sexp(::Type{CharSxp}, sym::Symbol) = sexp(CharSxp, string(sym))
 
-sexp(::Type{CharSxp},st::AbstractString) = sexp(CharSxp,bytestring(st))
-sexp(::Type{CharSxp},sym::Symbol) = sexp(CharSxp,string(sym))
-
-
-rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
+if isdefined(Core, :String)
+    rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, String(unsafe_vec(s)))
+else
+    rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
+end
 rcopy(::Type{Symbol},s::CharSxpPtr) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
 
@@ -102,8 +108,11 @@ end
 
 # StrSxp
 sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
-
-rcopy(::Type{Array},s::StrSxpPtr) = rcopy(Array{isascii(s) ? ASCIIString : UTF8String}, s)
+if isdefined(Core, :String)
+    rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{String}, s)
+else
+    rcopy(::Type{Array},s::StrSxpPtr) = rcopy(Array{isascii(s) ? ASCIIString : UTF8String}, s)
+end
 rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
 
 

@@ -5,7 +5,7 @@ r = RObject(x)
 @test length(r) == 1
 @test rcopy(r) == x
 @test isascii(r)
-@test isa(rcopy(r),ASCIIString)
+@test isa(rcopy(r), Compat.ASCIIString)
 @test rcopy(r[1]) == x
 @test isa(r[1],RObject{CharSxp})
 
@@ -14,7 +14,7 @@ r = RObject(x)
 @test isa(r,RObject{StrSxp})
 @test length(r) == 1
 @test rcopy(r) == x
-@test isa(rcopy(r),UTF8String)
+@test isa(rcopy(r), Compat.UTF8String)
 
 v = ["ap","xα⟩","pp"]
 r = RObject(v)

@@ -1,15 +1,12 @@
 ## a list of reserved names from PyCall.jl
-const reserved = Set{ASCIIString}()
-for w in ("while", "if", "for", "try", "return", "break",
-          "continue", "function", "macro", "quote", "let", "local",
-          "global", "const", "abstract", "typealias", "type",
-          "bitstype", "immutable", "ccall", "do", "module",
-          "baremodule", "using", "import", "export", "importall",
-          "false", "true")
-    push!(reserved, w)
-end
+const reserved = Set(["while", "if", "for", "try", "return", "break",
+    "continue", "function", "macro", "quote", "let", "local",
+    "global", "const", "abstract", "typealias", "type",
+    "bitstype", "immutable", "ccall", "do", "module",
+    "baremodule", "using", "import", "export", "importall",
+    "false", "true"])
 
-function rwrap(pkg::ASCIIString,s::Symbol)
+function rwrap(pkg::Compat.String, s::Symbol)
     reval("library($pkg)")
     members = rcopy("ls('package:$pkg')")
     filter!(x -> !(x in reserved), members)
@@ -26,7 +23,7 @@ function rwrap(pkg::ASCIIString,s::Symbol)
     m
 end
 
-"Import a R Package as a Julia module. You can also use classic Python syntax to make an alias: `@rimport *module-name* as *shorthand*`"
+"Import an R Package as a Julia module. You can also use classic Python syntax to make an alias: `@rimport *module-name* as *shorthand*`"
 macro rimport(x, args...)
     if length(args)==2 && args[1] == :as
         m = args[2]

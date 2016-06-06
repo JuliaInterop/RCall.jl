@@ -111,7 +111,7 @@ rprint(s) = rprint(STDOUT,s)
 """
 Parse, evaluate and print the result of a string as an R expression.
 """
-rprint(io::IO,str::ByteString) = rprint(io,reval(str))
+rprint(io::IO,str::Compat.String) = rprint(io,reval(str))
 rprint(io::IO,sym::Symbol) = rprint(io,reval(sym))
 
 """
