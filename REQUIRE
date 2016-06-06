@@ -2,4 +2,5 @@ julia 0.4
 DataStructures
 DataArrays
 DataFrames
+Compat
 @windows WinReg
