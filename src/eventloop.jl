@@ -1,10 +1,10 @@
 function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0
-        if Sys.OS_NAME ∈ (:Darwin, :Windows)
+        if Compat.is_unix()
             ccall((:R_ProcessEvents, libR), Void, ())
         end
-        if Sys.OS_NAME != :Windows
+        if Compat.is_windows()
             what = ccall((:R_checkActivity,libR),Ptr{Void},(Cint,Cint),0,1)
             if what != C_NULL
                 R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Void}))
