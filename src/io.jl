@@ -29,7 +29,7 @@ function askYesNoCancel(prompt::Ptr{Cchar})
     return r
 end
 
-@windows_only begin
+if Compat.is_windows()
     """
         RStart
 

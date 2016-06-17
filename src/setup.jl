@@ -1,26 +1,26 @@
-@windows_only begin
+if Compat.is_windows()
     import WinReg
-    
+
     function locate_Rhome()
         if haskey(ENV,"R_HOME")
             Rhome = ENV["R_HOME"]
         else
             Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
         end
-        
+
         if isdir(Rhome)
             println("R installation found at \"$Rhome\"")
             return Rhome
         end
-        error("Could not locate R installation. Try setting \"R_HOME\" environmental variable.")        
+        error("Could not locate R installation. Try setting \"R_HOME\" environmental variable.")
     end
-    
+
     const Rhome = locate_Rhome()
     const Ruser = homedir()
     const libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",WORD_SIZE==64?"x64":"i386")])
 end
 
-@unix_only begin
+if Compat.is_unix()
     function locate_Rhome()
         if haskey(ENV,"R_HOME")
             Rhome = ENV["R_HOME"]
@@ -51,10 +51,10 @@ function initEmbeddedR()
     # disable R signal handling
     unsafe_store!(cglobal((:R_SignalHandlers,RCall.libR),Cint),0)
 
-    @windows_only begin
+    if Compat.is_windows()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
-        
+
         ccall(:_wputenv,Cint,(Cwstring,),"PATH="*ENV["PATH"]*";"*dirname(libR))
         ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
 
@@ -76,11 +76,11 @@ function initEmbeddedR()
         rs.Busy           = cglobal((:R_Busy,libR),Void)
         rs.WriteConsole   = C_NULL
         rs.WriteConsoleEx = cfunction(writeConsoleEx,Void,(Ptr{UInt8},Cint,Cint))
-        
+
         ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
     end
 
-    @unix_only begin
+    if Compat.is_unix()
         # set necessary environmental variables
         ENV["R_HOME"] = Rhome
         ENV["R_DOC_DIR"] = joinpath(Rhome,"doc")
@@ -111,7 +111,7 @@ end
 function __init__()
     # Check if R already running
     Rinited = unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
-    
+
     if !Rinited
         initEmbeddedR()
     end
