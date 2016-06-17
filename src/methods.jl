@@ -65,13 +65,13 @@ as `-2147483648`, the minimum 32-bit integer value.  Internally a `LglSxp` is
 represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 `-2147483648` is `NA` and all other values represent `true`.
 """
-unsafe_vec{S<:VectorSxp}(s::Ptr{S}) = pointer_to_array(dataptr(s), length(s))
+unsafe_vec{S<:VectorSxp}(s::Ptr{S}) = Compat.unsafe_wrap(dataptr(s), length(s))
 unsafe_vec{S<:VectorSxp}(r::RObject{S}) = unsafe_vec(r.p)
 
 """
 The same as `unsafe_vec`, except returns an appropriately sized array.
 """
-unsafe_array{S<:VectorSxp}(s::Ptr{S}) =  pointer_to_array(dataptr(s), size(s))
+unsafe_array{S<:VectorSxp}(s::Ptr{S}) =  Compat.unsafe_wrap(dataptr(s), size(s))
 unsafe_array{S<:VectorSxp}(r::RObject{S}) = unsafe_array(r.p)
 
 
