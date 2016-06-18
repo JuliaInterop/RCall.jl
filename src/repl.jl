@@ -36,7 +36,9 @@ function repl_init()
         for e in expr
             val = ccall((:R_tryEval,libR),UnknownSxpPtr,
                 (UnknownSxpPtr,Ptr{EnvSxp},Ptr{Cint}),e,sexp(Const.GlobalEnv),err)
-            print(STDOUT, takebuf_string(printBuffer))
+            if nb_available(printBuffer) != 0
+                print(STDOUT, takebuf_string(printBuffer))
+            end
         end
         unprotect(1)
         if err[1] !=0 || nb_available(errorBuffer) != 0

@@ -2,13 +2,17 @@
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
-function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
+function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}, silent::Bool=false)
     err = Array(Cint,1)
     protect(expr)
     protect(env)
     val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
     unprotect(2)
-    print(STDOUT, takebuf_string(printBuffer))
+    if !silent && nb_available(printBuffer) != 0
+        # it is needed when the expression contains `print` or `cat` statements
+        # which are not returning results
+        print(STDOUT, takebuf_string(printBuffer))
+    end
     if err[1] !=0
         error("RCall.jl ", takebuf_string(errorBuffer))
     elseif nb_available(errorBuffer) != 0
@@ -17,12 +21,12 @@ function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     sexp(val)
 end
 
-function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
+function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}, silent::Bool=false)
     local val           # the value of the last expression is returned
     protect(expr)
     try
         for e in expr
-            val = reval_p(e,env)
+            val = reval_p(e,env, silent)
         end
     finally
         unprotect(1)
@@ -30,16 +34,15 @@ function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     val
 end
 
-reval_p{S<:Sxp}(expr::Ptr{S}, env::RObject{EnvSxp}) = reval_p(expr,sexp(env))
-reval_p{S<:Sxp}(s::Ptr{S}) = reval_p(s,Const.GlobalEnv)
+reval_p{S<:Sxp}(expr::Ptr{S}, env=Const.GlobalEnv, silent::Bool=false) = reval_p(expr,sexp(env), silent)
 
 """
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """
-reval(s, env=Const.GlobalEnv) = RObject(reval_p(sexp(s),sexp(env)))
-reval(str::AbstractString, env=Const.GlobalEnv) = reval(rparse_p(str),env)
-reval(sym::Symbol, env=Const.GlobalEnv) = reval(sexp(sym),env)
+reval(s, env=Const.GlobalEnv,silent::Bool=false) = RObject(reval_p(sexp(s),sexp(env),silent))
+reval(str::AbstractString, env=Const.GlobalEnv,silent::Bool=false) = reval(rparse_p(str),env,silent)
+reval(sym::Symbol, env=Const.GlobalEnv,silent::Bool=false) = reval(sexp(sym),env,silent)
 
 
 """
@@ -86,15 +89,15 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
         if isObject(s) || isFunction(s)
             if isS4(s)
                 methodsNamespace = protect(findNamespace("methods"))
-                reval(rlang_p(methodsNamespace[:show], :x),env)
+                reval(rlang_p(methodsNamespace[:show], :x), env, true)
                 unprotect(1)
             else
-                reval(rlang_p(Const.BaseNamespace[:print], :x),env)
+                reval(rlang_p(Const.BaseNamespace[:print], :x) ,env, true)
             end
         else
             # Rf_PrintValueRec not found on unix!?
             # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-            reval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x),env)
+            reval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env, true)
         end
         env[:x] = Const.NilValue
         write(io,takebuf_string(printBuffer))
