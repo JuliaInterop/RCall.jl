@@ -8,10 +8,11 @@ function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     protect(env)
     val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
     unprotect(2)
+    print(STDOUT, takebuf_string(printBuffer))
     if err[1] !=0
-        error("RCall.jl ", Compat.readstring(RCall.errorBuffer))
+        error("RCall.jl ", takebuf_string(errorBuffer))
     elseif nb_available(errorBuffer) != 0
-        warn("RCall.jl ", Compat.readstring(RCall.errorBuffer))
+        warn("RCall.jl ", takebuf_string(errorBuffer))
     end
     sexp(val)
 end
