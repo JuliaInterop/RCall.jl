@@ -133,7 +133,7 @@ function __init__()
         # R gui eventloop
         isinteractive() && rgui_init()
         # R REPL mode
-        isinteractive() && repl_init()
+        isdefined(Base, :active_repl) && isinteractive() && repl_init()
     end
 
     # # IJulia hooks
