@@ -39,7 +39,7 @@ function ijulia_displayfile(m::MIME"image/svg+xml", f)
     # we get around this by renaming the elements.
     open(f) do f
         r = randstring()
-        d = readall(f)
+        d = Compat.read(f)
         d = replace(d,"id=\"glyph","id=\"glyph"*r)
         d = replace(d,"href=\"#glyph","href=\"#glyph"*r)
         display(Main.IPythonDisplay.InlineDisplay(),m,d)
