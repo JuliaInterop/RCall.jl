@@ -1,7 +1,7 @@
 import Base: REPL, LineEdit
 
 function return_callback(s)
-    st = sexp(String(LineEdit.buffer(s)))
+    st = sexp(Compat.String(LineEdit.buffer(s)))
     protect(st)
     status = Array(Cint,1)
     expr = ccall((:R_ParseVector,libR),UnknownSxpPtr,
