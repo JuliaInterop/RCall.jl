@@ -22,7 +22,7 @@ function evaluate_callback(line)
     s = status[1]
     if s != 1
         msg = Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
-        print(STDOUT, "Error: $msg")
+        print(STDERR, "Error: $msg")
         return nothing
     end
     expr = sexp(expr)
