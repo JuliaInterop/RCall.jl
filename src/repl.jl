@@ -65,14 +65,14 @@ function repl_init()
     push!(mirepl.interface.modes,panel)
 
     const rcall_keymap = Dict{Any,Any}(
-        '<' => function (s,args...)
+        '$' => function (s,args...)
             if isempty(s)
                 if !haskey(s.mode_state,panel)
                     s.mode_state[panel] = LineEdit.init_state(repl.t,panel)
                 end
                 LineEdit.transition(s,panel)
             else
-                LineEdit.edit_insert(s,'<')
+                LineEdit.edit_insert(s,'$')
             end
         end
     )
