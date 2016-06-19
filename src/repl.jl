@@ -1,5 +1,17 @@
 import Base: REPL, LineEdit
 
+
+function return_callback(s)
+    st = sexp(String(LineEdit.buffer(s)))
+    protect(st)
+    status = Array(Cint,1)
+    expr = ccall((:R_ParseVector,libR),UnknownSxpPtr,
+                (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
+                st,-1,status,sexp(Const.NilValue))
+    unprotect(1)
+    return status[1] == 1 || status[1] >= 3
+end
+
 function repl_init()
     repl = Base.active_repl
     mirepl = isdefined(repl,:mi) ? repl.mi : repl
@@ -8,7 +20,8 @@ function repl_init()
 
     panel = LineEdit.Prompt("R> ";
         prompt_prefix=Base.text_colors[:blue],
-        prompt_suffix=main_mode.prompt_suffix)
+        prompt_suffix=main_mode.prompt_suffix,
+        on_enter=return_callback)
 
     hp = main_mode.hist
     hp.mode_mapping[:r] = panel
@@ -24,9 +37,8 @@ function repl_init()
         unprotect(1)
         s = status[1]
         if s != 1
-            s == 2 && print(STDOUT, "Incomplete R expression.")
-            s == 3 && print(STDOUT, "Invalid R expression.")
-            s == 4 && print(STDOUT, "Parse Error.")
+            msg = Compat.String(cglobal((:R_ParseErrorMsg, libR), UInt8))
+            print(STDOUT, "Error: $msg")
             return nothing
         end
         expr = sexp(expr)

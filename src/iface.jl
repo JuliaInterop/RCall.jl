@@ -63,10 +63,11 @@ function rparse_p(st::Ptr{StrSxp})
                 st,-1,status,sexp(Const.NilValue))
     unprotect(1)
     s = status[1]
-    if s != 1
-        s == 2 && error("RCall.jl incomplete R expression")
-        s == 3 && error("RCall.jl invalid R expression")
-        s == 4 && throw(EOFError())
+    if s == 2 || s == 3
+        msg = Compat.String(cglobal((:R_ParseErrorMsg, libR), UInt8))
+        error(msg)
+    elseif s == 4
+        throw(EOFError())
     end
     sexp(val)
 end
