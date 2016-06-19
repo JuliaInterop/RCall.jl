@@ -1,8 +1,7 @@
 import Base: REPL, LineEdit
 
 function return_callback(s)
-    st = sexp(Compat.String(LineEdit.buffer(s)))
-    protect(st)
+    st = protect(sexp(Compat.String(LineEdit.buffer(s))))
     status = Array(Cint,1)
     expr = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
@@ -12,8 +11,7 @@ function return_callback(s)
 end
 
 function evaluate_callback(line)
-    st = sexp(line)
-    protect(st)
+    st = protect(sexp(line))
     status = Array(Cint,1)
     expr = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
@@ -22,27 +20,26 @@ function evaluate_callback(line)
     s = status[1]
     if s != 1
         msg = Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
-        print(STDERR, "Error: $msg")
+        println(STDERR, "Error: $msg")
         return nothing
     end
-    expr = sexp(expr)
-    protect(expr)
-    err = Array(Cint,1)
+    expr = protect(sexp(expr))
     local val
+    local status
     for e in expr
-        val = ccall((:R_tryEval,libR),UnknownSxpPtr,
-            (UnknownSxpPtr,Ptr{EnvSxp},Ptr{Cint}),e,sexp(Const.GlobalEnv),err)
-        if nb_available(printBuffer) != 0
-            print(STDOUT, takebuf_string(printBuffer))
-        end
+        val, status = tryEval(e, sexp(Const.GlobalEnv))
+        # print cached buffer
+        nb_available(printBuffer) != 0 && print(STDOUT, takebuf_string(printBuffer))
+        # print warning and error messages
+        ( status != 0 || nb_available(errorBuffer) != 0 ) && print(STDERR, takebuf_string(errorBuffer))
+        status != 0 && return nothing
     end
     unprotect(1)
-    if err[1] !=0 || nb_available(errorBuffer) != 0
-        print(STDERR, takebuf_string(errorBuffer))
-    end
+
     # print if the last expression is visible
-    R_Visible = unsafe_load(cglobal((:R_Visible, libR),Int))
-    err[1] == 0 && R_Visible == 1 && rprint(STDOUT, sexp(val))
+    if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
+         rprint(STDOUT, sexp(val))
+    end
     return nothing
 end
 
