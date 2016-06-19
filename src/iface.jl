@@ -63,8 +63,8 @@ rcopy{T}(::Type{T}, str::AbstractString) = rcopy(T, reval_p(rparse_p(str)))
 rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
-"Parse a string as an R expression, returning a Sxp pointer."
-function rparse_p(st::Ptr{StrSxp})
+"A pure julia wrapper of R_ParseVector"
+function ParseVector(st::Ptr{StrSxp})
     protect(st)
     status = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
@@ -72,10 +72,16 @@ function rparse_p(st::Ptr{StrSxp})
                 st,-1,status,sexp(Const.NilValue))
     unprotect(1)
     s = status[1]
-    if s == 2 || s == 3
-        msg = Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
+    msg = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
+    val, s, msg
+end
+
+"Parse a string as an R expression, returning a Sxp pointer."
+function rparse_p(st::Ptr{StrSxp})
+    val, status, msg = ParseVector(st)
+    if status == 2 || status == 3
         error(msg)
-    elseif s == 4
+    elseif status == 4
         throw(EOFError())
     end
     sexp(val)

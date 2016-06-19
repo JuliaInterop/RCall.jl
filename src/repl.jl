@@ -2,30 +2,23 @@ import Base: REPL, LineEdit
 
 function return_callback(s)
     st = protect(sexp(Compat.String(LineEdit.buffer(s))))
-    status = Array(Cint,1)
-    expr = ccall((:R_ParseVector,libR),UnknownSxpPtr,
-                (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
-                st,-1,status,sexp(Const.NilValue))
+    status = ParseVector(st)[2]
     unprotect(1)
-    return status[1] == 1 || status[1] >= 3
+    status == 1 || status >= 3
 end
 
 function evaluate_callback(line)
+    local status
+    local val
+
     st = protect(sexp(line))
-    status = Array(Cint,1)
-    expr = ccall((:R_ParseVector,libR),UnknownSxpPtr,
-                (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
-                st,-1,status,sexp(Const.NilValue))
+    expr, status, msg = ParseVector(st)
     unprotect(1)
-    s = status[1]
-    if s != 1
-        msg = Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
+    if status != 1
         println(STDERR, "Error: $msg")
         return nothing
     end
     expr = protect(sexp(expr))
-    local val
-    local status
     for e in expr
         val, status = tryEval(e, sexp(Const.GlobalEnv))
         # print cached buffer
