@@ -64,7 +64,7 @@ function rparse_p(st::Ptr{StrSxp})
     unprotect(1)
     s = status[1]
     if s == 2 || s == 3
-        msg = Compat.String(cglobal((:R_ParseErrorMsg, libR), UInt8))
+        msg = Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
         error(msg)
     elseif s == 4
         throw(EOFError())

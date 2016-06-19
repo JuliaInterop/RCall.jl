@@ -37,7 +37,7 @@ function repl_init()
         unprotect(1)
         s = status[1]
         if s != 1
-            msg = Compat.String(cglobal((:R_ParseErrorMsg, libR), UInt8))
+            msg = Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
             print(STDOUT, "Error: $msg")
             return nothing
         end
