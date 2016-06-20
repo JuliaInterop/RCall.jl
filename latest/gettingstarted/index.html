@@ -144,33 +144,38 @@
 <p>The simplest way to use RCall is via the <a href="../public/#RCall.@R_str"><code>R""</code></a> string macro:</p>
 <pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  0.6891140 -0.5254569 -2.4916883 -1.0357761  0.2655294 -0.9920265
- [7] -0.1384629  1.2868874 -0.1793151 -1.6794011
+ [1]  2.26085473 -0.83713058  0.88690836  0.02437045 -0.31087171  0.28709438
+ [7] -0.18229587 -1.40804822 -0.11869651  1.92901179
 </code></pre>
 
 <p>This evaluates the expression inside the string in R, and returns the result as an <a href="../public/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
 <p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
 <pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
- -0.630944
- -0.526676
-  0.44882
-  1.10843
- -0.622482
-  1.17836
-  0.0642456
-  1.33022
-  1.38736
- -2.24032
+  1.00344
+ -0.887509
+  0.439687
+ -1.03033
+ -0.398963
+  0.942934
+  1.69855
+ -0.499476
+ -0.936263
+  0.776115
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
-true mean is not equal to 0
+
+    One Sample t-test
+
+data:  $x
+t = 0.35874, df = 9, p-value = 0.7281
+alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.6891231  0.9885258
+ -0.5879917  0.8096283
 sample estimates:
 mean of x
-0.1497014
+0.1108183
 </code></pre>
 
 <p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p>
