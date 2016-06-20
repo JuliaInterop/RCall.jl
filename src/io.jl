@@ -18,8 +18,21 @@ function writeConsoleEx(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
+# mainly use to prevent eventCallBack stealing rprint output
+global PrintBufferLocked = false
+
+function flush_printBuffer(io::IO)
+    global PrintBufferLocked
+    # dump printBuffer's content which it is not locked
+    if ! PrintBufferLocked
+        nb_available(printBuffer) != 0  && write(io, takebuf_string(printBuffer))
+    end
+    nothing
+end
+
 function eventCallBack()
-    nb_available(printBuffer) != 0  && write(STDOUT, takebuf_string(printBuffer))
+    # dump printBuffer STDOUT when available
+    flush_printBuffer(STDOUT)
     nothing
 end
 

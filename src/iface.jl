@@ -16,8 +16,7 @@ try/catch block, returning a Sxp pointer.
 """
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     val, status = tryEval(expr, env)
-    # print outputs yield by `print` or `cat` statements
-    nb_available(printBuffer) != 0  && write(STDOUT, takebuf_string(printBuffer))
+    flush_printBuffer(STDOUT)
     if status !=0
         error("RCall.jl ", takebuf_string(errorBuffer))
     elseif nb_available(errorBuffer) != 0
@@ -94,6 +93,8 @@ rparse(st::AbstractString) = RObject(rparse_p(st))
 
 "Print the value of an Sxp using R's printing mechanism"
 function rprint{S<:Sxp}(io::IO, s::Ptr{S})
+    global PrintBufferLocked
+    PrintBufferLocked = true
     protect(s)
     # Rf_PrintValue can cause segfault if S3 objects has custom
     # print function as it doesn't use R_tryEval
@@ -120,6 +121,7 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     finally
         unprotect(2)
     end
+    PrintBufferLocked = false
     nothing
 end
 rprint(io::IO,r::RObject) = rprint(io,r.p)

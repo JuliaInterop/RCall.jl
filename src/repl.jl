@@ -26,8 +26,7 @@ function evaluate_callback(line)
     expr = protect(sexp(expr))
     for e in expr
         val, status = tryEval(e, sexp(Const.GlobalEnv))
-        # print cached buffer
-        nb_available(printBuffer) != 0 && write(REPL_STDOUT, takebuf_string(printBuffer))
+        flush_printBuffer(REPL_STDOUT)
         # print warning and error messages
         if status != 0 || nb_available(errorBuffer) != 0
             write(REPL_STDERR, takebuf_string(errorBuffer))
@@ -35,7 +34,6 @@ function evaluate_callback(line)
         status != 0 && return nothing
     end
     unprotect(1)
-
     # print if the last expression is visible
     if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
          rprint(REPL_STDOUT, sexp(val))
