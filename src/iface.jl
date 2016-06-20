@@ -17,7 +17,7 @@ try/catch block, returning a Sxp pointer.
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     val, status = tryEval(expr, env)
     # print outputs yield by `print` or `cat` statements
-    nb_available(printBuffer) != 0  && print(STDOUT, takebuf_string(printBuffer))
+    nb_available(printBuffer) != 0  && write(STDOUT, takebuf_string(printBuffer))
     if status !=0
         error("RCall.jl ", takebuf_string(errorBuffer))
     elseif nb_available(errorBuffer) != 0

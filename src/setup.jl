@@ -96,10 +96,12 @@ function initEmbeddedR()
         end
 
         pWriteConsoleEx = cfunction(writeConsoleEx,Void,(Ptr{UInt8},Cint,Cint))
+        pCallBack = cfunction(eventCallBack,Void,())
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
         unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), pWriteConsoleEx)
         unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
         unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
+        unsafe_store!(cglobal((:ptr_R_ProcessEvents,libR),Ptr{Void}), pCallBack)
 
     end
 

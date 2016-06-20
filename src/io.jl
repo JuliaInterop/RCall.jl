@@ -18,7 +18,10 @@ function writeConsoleEx(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
-eventCallBack() = nothing
+function eventCallBack()
+    nb_available(printBuffer) != 0  && write(STDOUT, takebuf_string(printBuffer))
+    nothing
+end
 
 function askYesNoCancel(prompt::Ptr{Cchar})
     println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
