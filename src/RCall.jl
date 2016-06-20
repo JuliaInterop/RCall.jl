@@ -34,6 +34,8 @@ include("callback.jl")
 include("IJulia.jl")
 include("rstr.jl")
 include("operators.jl")
+include("repl.jl")
+
 
 """
 R global Environment.

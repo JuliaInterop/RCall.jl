@@ -1,21 +1,34 @@
 """
+A pure julia wrapper of R_tryEval.
+"""
+function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
+    status = Array(Cint,1)
+    protect(expr)
+    protect(env)
+    val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,status)
+    unprotect(2)
+    return val, status[1]
+end
+
+"""
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
-    err = Array(Cint,1)
-    protect(expr)
-    protect(env)
-    val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,err)
-    unprotect(2)
-    if err[1] !=0
-        error("RCall.jl ", Compat.readstring(RCall.errorBuffer))
+    val, status = tryEval(expr, env)
+    # print outputs yield by `print` or `cat` statements
+    nb_available(printBuffer) != 0  && print(STDOUT, takebuf_string(printBuffer))
+    if status !=0
+        error("RCall.jl ", takebuf_string(errorBuffer))
     elseif nb_available(errorBuffer) != 0
-        warn("RCall.jl ", Compat.readstring(RCall.errorBuffer))
+        warn("RCall.jl ", takebuf_string(errorBuffer))
     end
     sexp(val)
 end
 
+"""
+Evaluate an R expression array iteratively.
+"""
 function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val           # the value of the last expression is returned
     protect(expr)
@@ -50,8 +63,8 @@ rcopy{T}(::Type{T}, str::AbstractString) = rcopy(T, reval_p(rparse_p(str)))
 rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
-"Parse a string as an R expression, returning a Sxp pointer."
-function rparse_p(st::Ptr{StrSxp})
+"A pure julia wrapper of R_ParseVector"
+function ParseVector(st::Ptr{StrSxp})
     protect(st)
     status = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
@@ -59,10 +72,17 @@ function rparse_p(st::Ptr{StrSxp})
                 st,-1,status,sexp(Const.NilValue))
     unprotect(1)
     s = status[1]
-    if s != 1
-        s == 2 && error("RCall.jl incomplete R expression")
-        s == 3 && error("RCall.jl invalid R expression")
-        s == 4 && throw(EOFError())
+    msg = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
+    val, s, msg
+end
+
+"Parse a string as an R expression, returning a Sxp pointer."
+function rparse_p(st::Ptr{StrSxp})
+    val, status, msg = ParseVector(st)
+    if status == 2 || status == 3
+        error(msg)
+    elseif status == 4
+        throw(EOFError())
     end
     sexp(val)
 end
@@ -85,15 +105,15 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
         if isObject(s) || isFunction(s)
             if isS4(s)
                 methodsNamespace = protect(findNamespace("methods"))
-                reval(rlang_p(methodsNamespace[:show], :x),env)
+                tryEval(rlang_p(methodsNamespace[:show], :x), env)
                 unprotect(1)
             else
-                reval(rlang_p(Const.BaseNamespace[:print], :x),env)
+                tryEval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
             end
         else
             # Rf_PrintValueRec not found on unix!?
             # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-            reval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x),env)
+            tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
         end
         env[:x] = Const.NilValue
         write(io,takebuf_string(printBuffer))

@@ -17,7 +17,7 @@ if Compat.is_windows()
 
     const Rhome = locate_Rhome()
     const Ruser = homedir()
-    const libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",WORD_SIZE==64?"x64":"i386")])
+    const libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386")])
 end
 
 if Compat.is_unix()
@@ -132,6 +132,8 @@ function __init__()
 
         # R gui eventloop
         isinteractive() && rgui_init()
+        # R REPL mode
+        isdefined(Base, :active_repl) && isinteractive() && repl_init(Base.active_repl)
     end
 
     # # IJulia hooks
