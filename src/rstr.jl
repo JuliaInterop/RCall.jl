@@ -66,17 +66,16 @@ function rscript(script::Compat.ASCIIString)
             expr,i = parse(script,i,greedy=false)
 
             if isa(expr,Symbol)
-                sym = "\$$expr"
+                sym = "$expr"
             else
-                sym = "\$($expr)"
+                sym = "($expr)"
                 # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
                 if haskey(symdict, sym)
                     sym *= "##$k"
                 end
             end
             symdict[sym] = expr
-
-            script = string(script[1:i_stop],'`',sym,'`',script[i:end])
+            script = string(script[1:i_stop],"`#JL`\$`",sym,'`',script[i:end])
         end
     finally
         unprotect(1)
@@ -117,10 +116,10 @@ macro R_str(script) script, symdict = rscript(script)
     end
     quote
         env = newEnvironment()
-        protect(env)
+        globalEnv["#JL"] = env
         $blk_ld
-        ret = reval($script, env)
-        unprotect(1)
+        ret = reval($script, globalEnv)
+        #globalEnv["#JL"] = nothing
         ret
     end
 end
