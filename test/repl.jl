@@ -2,7 +2,7 @@ import Base: REPL, LineEdit, Terminals
 using RCall
 using Compat
 
-if !Compat.is_windows()
+if !Compat.is_windows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
 
     type FakeTerminal <: Base.Terminals.UnixTerminal
         in_stream::Base.IO
@@ -58,6 +58,9 @@ if !Compat.is_windows()
     write(stdin_write, "paste0('pine', bar)\n")
     readuntil(stdout_read, "pineapple")
 
+    write(stdin_write, "mtca\t")
+    readuntil(stdout_read, "mtcars")
+
     write(stdin_write, "\n")
     readuntil(stdout_read, "\n")
 
@@ -67,5 +70,8 @@ if !Compat.is_windows()
 
     write(stdin_write, "stop('something is wrong')\n")
     readuntil(stderr_read, "something is wrong")
+
+    write(stdin_write, "unknown\n")
+    readuntil(stderr_read, "not found")
 
 end
