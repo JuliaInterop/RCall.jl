@@ -261,6 +261,9 @@ RObject{RealSxp}
 <p><a id='RCall.NAel' href='#RCall.NAel'>#</a>
 <strong><code>RCall.NAel</code></strong> &mdash; <em>Function</em>.</p>
 <p>NA element for each type</p>
+<p><a id='RCall.ParseVector' href='#RCall.ParseVector'>#</a>
+<strong><code>RCall.ParseVector</code></strong> &mdash; <em>Function</em>.</p>
+<p>A pure julia wrapper of R_ParseVector</p>
 <p><a id='RCall.anyNA' href='#RCall.anyNA'>#</a>
 <strong><code>RCall.anyNA</code></strong> &mdash; <em>Function</em>.</p>
 <p>Check if there are any NA values in the vector.</p>
@@ -363,6 +366,7 @@ RObject{RealSxp}
 <p><a id='RCall.reval_p' href='#RCall.reval_p'>#</a>
 <strong><code>RCall.reval_p</code></strong> &mdash; <em>Function</em>.</p>
 <p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning a Sxp pointer.</p>
+<p>Evaluate an R expression array iteratively.</p>
 <p><a id='RCall.rlang' href='#RCall.rlang'>#</a>
 <strong><code>RCall.rlang</code></strong> &mdash; <em>Function</em>.</p>
 <p>Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaulated</p>
@@ -414,6 +418,9 @@ RObject{RealSxp}
 <strong><code>RCall.sexpnum</code></strong> &mdash; <em>Function</em>.</p>
 <p>The SEXPTYPE number of a <code>Sxp</code></p>
 <p>Determined from the trailing 5 bits of the first 32-bit word. Is a 0-based index into the <code>info</code> field of a <code>SxpHead</code>.</p>
+<p><a id='RCall.tryEval' href='#RCall.tryEval'>#</a>
+<strong><code>RCall.tryEval</code></strong> &mdash; <em>Function</em>.</p>
+<p>A pure julia wrapper of R_tryEval.</p>
 <p><a id='RCall.unprotect' href='#RCall.unprotect'>#</a>
 <strong><code>RCall.unprotect</code></strong> &mdash; <em>Function</em>.</p>
 <p>Release last <code>n</code> objects gc-protected by <code>protect</code>.</p>
