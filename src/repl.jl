@@ -1,5 +1,8 @@
 import Base: REPL, LineEdit
 
+global REPL_STDOUT
+global REPL_STDERR
+
 function return_callback(s)
     st = protect(sexp(Compat.String(LineEdit.buffer(s))))
     status = ParseVector(st)[2]
@@ -8,6 +11,8 @@ function return_callback(s)
 end
 
 function evaluate_callback(line)
+    global REPL_STDOUT
+    global REPL_STDERR
     local status
     local val
 
@@ -15,23 +20,25 @@ function evaluate_callback(line)
     expr, status, msg = ParseVector(st)
     unprotect(1)
     if status != 1
-        println(STDERR, "Error: $msg")
+        write(REPL_STDERR, "Error: $msg\n")
         return nothing
     end
     expr = protect(sexp(expr))
     for e in expr
         val, status = tryEval(e, sexp(Const.GlobalEnv))
         # print cached buffer
-        nb_available(printBuffer) != 0 && print(STDOUT, takebuf_string(printBuffer))
+        nb_available(printBuffer) != 0 && write(REPL_STDOUT, takebuf_string(printBuffer))
         # print warning and error messages
-        ( status != 0 || nb_available(errorBuffer) != 0 ) && print(STDERR, takebuf_string(errorBuffer))
+        if status != 0 || nb_available(errorBuffer) != 0
+            write(REPL_STDERR, takebuf_string(errorBuffer))
+        end
         status != 0 && return nothing
     end
     unprotect(1)
 
     # print if the last expression is visible
     if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
-         rprint(STDOUT, sexp(val))
+         rprint(REPL_STDOUT, sexp(val))
     end
     return nothing
 end
@@ -55,8 +62,12 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     end
 end
 
-function repl_init()
-    repl = Base.active_repl
+function repl_init(repl)
+    global REPL_STDOUT
+    global REPL_STDERR
+    REPL_STDOUT = repl.t.out_stream
+    REPL_STDERR = repl.t.err_stream
+
     mirepl = isdefined(repl,:mi) ? repl.mi : repl
 
     main_mode = mirepl.interface.modes[1]

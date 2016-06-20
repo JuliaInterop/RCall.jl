@@ -11,7 +11,8 @@ using RCall
 tests = ["basic",
          "conversion",
          "dataframe",
-         "rstr"]
+         "rstr",
+         "repl"]
 
 println("Running tests:")
 
