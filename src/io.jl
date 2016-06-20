@@ -36,6 +36,13 @@ function eventCallBack()
     nothing
 end
 
+if Compat.is_unix()
+    function PolledEvents()
+        eventCallBack()
+        nothing
+    end
+end
+
 function askYesNoCancel(prompt::Ptr{Cchar})
     println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
 	query = readline(STDIN)

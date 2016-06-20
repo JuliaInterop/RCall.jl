@@ -101,26 +101,28 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     # below mirrors Rf_PrintValue
     env = protect(newEnvironment(Const.GlobalEnv))
-    try
-        env[:x] = s
-        if isObject(s) || isFunction(s)
-            if isS4(s)
-                methodsNamespace = protect(findNamespace("methods"))
-                tryEval(rlang_p(methodsNamespace[:show], :x), env)
-                unprotect(1)
-            else
-                tryEval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
-            end
+    env[:x] = s
+    if isObject(s) || isFunction(s)
+        if isS4(s)
+            methodsNamespace = protect(findNamespace("methods"))
+            tryEval(rlang_p(methodsNamespace[:show], :x), env)
+            unprotect(1)
         else
-            # Rf_PrintValueRec not found on unix!?
-            # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-            tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
+            tryEval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
         end
-        env[:x] = Const.NilValue
-        write(io,takebuf_string(printBuffer))
-    finally
-        unprotect(2)
+    else
+        # Rf_PrintValueRec not found on unix!?
+        # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
+        tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
     end
+    env[:x] = Const.NilValue
+    write(io,takebuf_string(printBuffer))
+
+    # in general, only S3/S4 custom print will fail
+    if nb_available(errorBuffer) != 0
+        warn(takebuf_string(errorBuffer))
+    end
+    unprotect(2)
     PrintBufferLocked = false
     nothing
 end
