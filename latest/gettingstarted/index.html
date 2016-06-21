@@ -79,9 +79,15 @@
             
                 <li class="toctree-l3"><a href="#getting-started">Getting started</a></li>
                 
-                    <li><a class="toctree-l4" href="#r-string-macro">R"" string macro</a></li>
+                    <li><a class="toctree-l4" href="#several-ways-to-use-rcall">Several Ways to use RCall</a></li>
                 
-                    <li><a class="toctree-l4" href="#rcopy">rcopy</a></li>
+                    <li><a class="toctree-l4" href="#r-repl-mode">R REPL mode</a></li>
+                
+                    <li><a class="toctree-l4" href="#rput-and-rget-macros">@rput and @rget macros</a></li>
+                
+                    <li><a class="toctree-l4" href="#r_str-string-macro">@R_str string macro</a></li>
+                
+                    <li><a class="toctree-l4" href="#rcall-api">RCall API</a></li>
                 
             
             </ul>
@@ -139,29 +145,92 @@
 </code></pre>
 
 <p>This will initialize the R process in the background.</p>
-<p><a id='R""-string-macro-1'></a></p>
-<h2 id="r-string-macro"><code>R""</code> string macro<a class="headerlink" href="#r-string-macro" title="Permanent link">&para;</a></h2>
-<p>The simplest way to use RCall is via the <a href="../public/#RCall.@R_str"><code>R""</code></a> string macro:</p>
+<p><a id='Several-Ways-to-use-RCall-1'></a></p>
+<h2 id="several-ways-to-use-rcall">Several Ways to use RCall<a class="headerlink" href="#several-ways-to-use-rcall" title="Permanent link">&para;</a></h2>
+<p>RCall provides multiple ways to allow R interacting with Julia. </p>
+<ul>
+<li>R REPL mode</li>
+<li><a href="../public/#RCall.@rput"><code>@rput</code></a> and <a href="../public/#RCall.@rget"><code>@rget</code></a> macros</li>
+<li><code>R""</code> string macro</li>
+<li>A low level API: <a href="../public/#RCall.reval"><code>reval</code></a>, <a href="../public/#RCall.rcall"><code>rcall</code></a> and <a href="../public/#RCall.rcopy"><code>rcopy</code></a> etc.</li>
+</ul>
+<p><a id='R-REPL-mode-1'></a></p>
+<h2 id="r-repl-mode">R REPL mode<a class="headerlink" href="#r-repl-mode" title="Permanent link">&para;</a></h2>
+<p>The R REPL mode allows real time switching between the Julia prompt and R promot. Press <code>$</code> to activate the R REPL mode and the R prompt will be shown. (Press <code>backspace</code> to leave R REPL mode in case you did not know.)</p>
+<pre><code class="r">julia&gt; foo = 1
+1
+
+R&gt; x &lt;- $foo
+
+R&gt; x
+[1] 1
+</code></pre>
+
+<p>The R REPL mode supports variable substitution of Julia objects via the <code>$</code> symbol. It is also possible to pass Julia expressions in the REPL mode.</p>
+<pre><code class="r">R&gt; x = $(rand(10))
+
+R&gt; sum(x)
+[1] 5.097083
+</code></pre>
+
+<p><a id='@rput-and-@rget-macros-1'></a></p>
+<h2 id="rput-and-rget-macros">@rput and @rget macros<a class="headerlink" href="#rput-and-rget-macros" title="Permanent link">&para;</a></h2>
+<p>These macros transfer variables between R and Julia environments. The copied variable will have the same name as the original.</p>
+<pre><code class="r">julia&gt; z = 1
+1
+
+julia&gt; @rput z
+1
+
+R&gt; z
+[1] 1
+
+R&gt; r = 2
+
+julia&gt; @rget r
+2.0
+
+julia&gt; r
+2.0
+</code></pre>
+
+<p>It is also possible to put and get multiple variables in one line.</p>
+<pre><code class="r">julia&gt; foo = 2
+2
+
+julia&gt; bar = 4
+4
+
+julia&gt; @rput foo bar
+4
+
+R&gt; foo + bar
+[1] 6
+</code></pre>
+
+<p><a id='@R_str-string-macro-1'></a></p>
+<h2 id="r_str-string-macro">@R_str string macro<a class="headerlink" href="#r_str-string-macro" title="Permanent link">&para;</a></h2>
+<p>Another way to use RCall is the <a href="../public/#RCall.@R_str"><code>R""</code></a> string macro, it is especially useful in script files.</p>
 <pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  0.59669983  0.64673842  0.49088713 -0.06829289 -0.60406018 -0.08580735
- [7] -0.11286410 -0.63429730 -0.94712918  0.36089117
+ [1]  1.1180553 -0.5126918 -1.1508515  1.3110968  1.5317419  1.5393477
+ [7] -1.7100229 -0.9186876 -1.0575378 -0.5143299
 </code></pre>
 
 <p>This evaluates the expression inside the string in R, and returns the result as an <a href="../public/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
 <p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
 <pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.596107
- -0.270459
-  1.80396
- -0.387416
- -0.505309
- -0.941522
-  0.0872266
- -0.0607951
-  0.114251
- -0.342403
+  0.561746
+ -0.714919
+ -0.0421999
+  0.329838
+ -1.03741
+  0.932234
+ -1.39468
+  1.03897
+ -0.151969
+  0.474975
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
@@ -169,13 +238,13 @@ RCall.RObject{RCall.VecSxp}
     One Sample t-test
 
 data:  `#JL`$x
-t = 0.039277, df = 9, p-value = 0.9695
+t = -0.0013059, df = 9, p-value = 0.999
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.5299477  0.5486754
+ -0.5919627  0.5912796
 sample estimates:
- mean of x
-0.00936384
+    mean of x
+-0.0003415258
 </code></pre>
 
 <p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p>
@@ -198,8 +267,42 @@ $message
 NULL
 </code></pre>
 
-<p><a id='rcopy-1'></a></p>
-<h2 id="rcopy"><code>rcopy</code><a class="headerlink" href="#rcopy" title="Permanent link">&para;</a></h2>
+<p>A large chunk of code could be quoted between triple string quotations</p>
+<pre><code class="julia">julia&gt; y = 1
+1
+
+julia&gt; R&quot;&quot;&quot;
+       f &lt;- function(x, y) x + y
+       ret &lt;- f(1, $y)
+       &quot;&quot;&quot;
+RCall.RObject{RCall.RealSxp}
+[1] 2
+</code></pre>
+
+<p><a id='RCall-API-1'></a></p>
+<h2 id="rcall-api">RCall API<a class="headerlink" href="#rcall-api" title="Permanent link">&para;</a></h2>
+<p>The <a href="../public/#RCall.reval"><code>reval</code></a> function evaluates any given input string as R code in the R environment. The returned result is an <code>RObject</code> object.</p>
+<pre><code class="julia">julia&gt; jmtcars = reval(&quot;mtcars&quot;);
+
+julia&gt; size(jmtcars)
+(11,)
+
+julia&gt; typeof(jmtcars)
+RCall.RObject{RCall.VecSxp}
+</code></pre>
+
+<p>The <a href="../public/#RCall.rcall"><code>rcall</code></a> function is used to construct function calls.</p>
+<pre><code class="julia">julia&gt; rcall(:dim, jmtcars)
+RCall.RObject{RCall.IntSxp}
+[1] 32 11
+</code></pre>
+
+<p>The arguments will be implicitly converted to <code>RObject</code> upon evaluation.</p>
+<pre><code class="julia">julia&gt; rcall(:sum, Float64[1.0, 4.0, 6.0])
+RCall.RObject{RCall.RealSxp}
+[1] 11
+</code></pre>
+
 <p>The <a href="../public/#RCall.rcopy"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p>
 <pre><code class="julia">julia&gt; rcopy(R&quot;c(1)&quot;)
 1.0
