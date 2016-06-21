@@ -63,12 +63,12 @@ rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
 "A pure julia wrapper of R_ParseVector"
-function ParseVector(st::Ptr{StrSxp})
+function ParseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
     status = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
-                st,-1,status,sexp(Const.NilValue))
+                st,-1,status,sf)
     unprotect(1)
     s = status[1]
     msg = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
