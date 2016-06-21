@@ -108,18 +108,23 @@ the same expression. In order to persist variables, you should use the the
 double-assignment operator (`<<-`), which assigns the variable to the global environment.
 
 """
-macro R_str(script) script, symdict = rscript(script)
-
+macro R_str(script)
+    script, symdict = rscript(script)
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
         push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
     end
     quote
-        env = newEnvironment()
+        env = protect(newEnvironment())
         globalEnv["#JL"] = env
         $blk_ld
-        ret = reval($script, globalEnv)
-        #globalEnv["#JL"] = nothing
+        try
+            ret = reval($script, globalEnv)
+        finally
+            unprotect(1)
+        end
+        # should we always keep the latest env!?
+        # globalEnv["#JL"] = nothing
         ret
     end
 end
