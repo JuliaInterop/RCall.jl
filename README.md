@@ -15,3 +15,8 @@
  
 #### Getting Started
 To get started, see [Getting Started](http://juliastats.github.io/RCall.jl/latest/gettingstarted/).
+
+
+#### ggplot2 demostration
+
+![](ggplot.png)
