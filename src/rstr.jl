@@ -110,16 +110,19 @@ macro R_str(script)
         push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
     end
     quote
-        env = protect(newEnvironment())
-        globalEnv["#JL"] = env
-        $blk_ld
-        try
-            ret = reval($script, globalEnv)
-        finally
-            unprotect(1)
+        let
+            local ret
+            env = protect(newEnvironment())
+            globalEnv["#JL"] = env
+            $blk_ld
+            try
+                ret = reval($script, globalEnv)
+            finally
+                unprotect(1)
+            end
+            # should we always keep the latest env!?
+            # globalEnv["#JL"] = nothing
+            ret
         end
-        # should we always keep the latest env!?
-        # globalEnv["#JL"] = nothing
-        ret
     end
 end
