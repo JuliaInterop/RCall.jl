@@ -66,17 +66,16 @@ function rscript(script::Compat.ASCIIString)
             expr,i = parse(script,i,greedy=false)
 
             if isa(expr,Symbol)
-                sym = "\$$expr"
+                sym = "$expr"
             else
-                sym = "\$($expr)"
+                sym = "($expr)"
                 # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
                 if haskey(symdict, sym)
                     sym *= "##$k"
                 end
             end
             symdict[sym] = expr
-
-            script = string(script[1:i_stop],'`',sym,'`',script[i:end])
+            script = string(script[1:i_stop],"`#JL`\$`",sym,'`',script[i:end])
         end
     finally
         unprotect(1)
@@ -103,24 +102,27 @@ All such Julia expressions are evaluated once, before the R expression is evalua
 The expression does not support assigning to Julia variables, so the only way retrieve
 values from R via the return value.
 
-The R expression is evaluated each time in a new environment, so standard R variable
-assignments (`=` or `<-`) will not persist between expressions, or even multiple calls of
-the same expression. In order to persist variables, you should use the the
-double-assignment operator (`<<-`), which assigns the variable to the global environment.
-
 """
-macro R_str(script) script, symdict = rscript(script)
-
+macro R_str(script)
+    script, symdict = rscript(script)
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
         push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
     end
     quote
-        env = newEnvironment()
-        protect(env)
-        $blk_ld
-        ret = reval($script, env)
-        unprotect(1)
-        ret
+        let
+            local ret
+            env = protect(newEnvironment())
+            globalEnv["#JL"] = env
+            $blk_ld
+            try
+                ret = reval($script, globalEnv)
+            finally
+                unprotect(1)
+            end
+            # should we always keep the latest env!?
+            # globalEnv["#JL"] = nothing
+            ret
+        end
     end
 end
