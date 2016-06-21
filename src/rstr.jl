@@ -102,11 +102,6 @@ All such Julia expressions are evaluated once, before the R expression is evalua
 The expression does not support assigning to Julia variables, so the only way retrieve
 values from R via the return value.
 
-The R expression is evaluated each time in a new environment, so standard R variable
-assignments (`=` or `<-`) will not persist between expressions, or even multiple calls of
-the same expression. In order to persist variables, you should use the the
-double-assignment operator (`<<-`), which assigns the variable to the global environment.
-
 """
 macro R_str(script)
     script, symdict = rscript(script)
