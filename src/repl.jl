@@ -3,10 +3,17 @@ import Base: REPL, LineEdit
 global REPL_STDOUT
 global REPL_STDERR
 
+function display_error(io::IO, er)
+    println("IO=", io)
+    Base.with_output_color(:red, io) do io
+        print(io, "ERROR: ")
+        Base.showerror(io, er)
+        println(io)
+    end
+end
+
 function return_callback(s)
-    st = protect(sexp(Compat.String(LineEdit.buffer(s))))
-    status = ParseVector(st)[2]
-    unprotect(1)
+    _, _, status, _ = parse_rscript(Compat.String(LineEdit.buffer(s)))
     status == 1 || status >= 3
 end
 
@@ -16,14 +23,35 @@ function evaluate_callback(line)
     local status
     local val
 
-    st = protect(sexp(line))
-    expr, status, msg = ParseVector(st)
-    unprotect(1)
+    script, symdict, status, msg = parse_rscript(line)
     if status != 1
         write(REPL_STDERR, "Error: $msg\n")
         return nothing
     end
-    expr = protect(sexp(expr))
+    blk_ld = Expr(:block)
+    for (rsym, expr) in symdict
+        push!(blk_ld.args,:(env[$rsym] = $(expr)))
+    end
+    jscript = quote
+        let env = RCall.protect(RCall.newEnvironment())
+            globalEnv["#JL"] = env
+            try
+                $blk_ld
+            finally
+                RCall.unprotect(1)
+            end
+            nothing
+        end
+    end
+
+    try
+        eval(Main, jscript)
+    catch e
+        display_error(REPL_STDERR, e)
+        return nothing
+    end
+
+    expr = protect(sexp(ParseVector(sexp(script))[1]))
     for e in expr
         val, status = tryEval(e, sexp(Const.GlobalEnv))
         flush_printBuffer(REPL_STDOUT)
@@ -86,13 +114,13 @@ function repl_init(repl)
 
     const rcall_keymap = Dict{Any,Any}(
         '$' => function (s,args...)
-            if isempty(s)
-                if !haskey(s.mode_state,panel)
-                    s.mode_state[panel] = LineEdit.init_state(repl.t,panel)
+            if isempty(s) || position(LineEdit.buffer(s)) == 0
+                buf = copy(LineEdit.buffer(s))
+                LineEdit.transition(s, panel) do
+                    LineEdit.state(s, panel).input_buffer = buf
                 end
-                LineEdit.transition(s,panel)
             else
-                LineEdit.edit_insert(s,'$')
+                LineEdit.edit_insert(s, '$')
             end
         end
     )

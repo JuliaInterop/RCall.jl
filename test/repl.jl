@@ -71,3 +71,22 @@ readuntil(stderr_read, "something is wrong")
 
 write(stdin_write, "unknown\n")
 readuntil(stderr_read, "not found")
+readuntil(stderr_read, "\n")
+
+write(stdin_write, "\b")
+readuntil(stdout_read, "julia> ")
+
+write(stdin_write, "x = \"orange\"\n")
+readuntil(stdout_read, "x = \"orange\"")
+
+write(stdin_write, "\$")
+readuntil(stdout_read, "R> ")
+
+write(stdin_write, "$x")
+readuntil(stdout_read, "orange")
+
+try
+    write(stdin_write, "$(y)")
+catch e
+    @test typeof(e) <: UndefVarError
+end

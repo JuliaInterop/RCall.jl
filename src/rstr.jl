@@ -1,49 +1,36 @@
-
-# Only works for ASCII, as UTF-8 character numbers are incorrect, see https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
-rscript(script::AbstractString) = error("Unicode R scripts not supported by R_str, due to\n    https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524")
-
 """
 Parses an inline R script, substituting invalid "\$" signs for Julia symbols
 """
-function rscript(script::Compat.ASCIIString)
-    if !isascii(script)
-        error("Unicode R scripts not supported by R_str, due to\n    https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524")
-    end
-    sf = protect(rcall_p(:srcfile,"xx"))
-    status = Array(Cint,1)
-    k = 1
-    rsyms = Compat.ASCIIString[]
-    exprs = Any[]
+function parse_rscript(script::Compat.String)
     symdict = OrderedDict{Compat.ASCIIString,Any}()
-    local ret, parsedata
+    sf = protect(rcall_p(:srcfile,"xx"))
+    local val
+    local status
+    local msg
 
     try
         while true
-            # attempt to parse string
-            ret = ccall((:R_ParseVector,libR),UnknownSxpPtr,
-                        (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{EnvSxp}),
-                        sexp(script),-1,status,sf)
+            val, status, msg = ParseVector(sexp(script), sf)
 
-            if status[1] == 2
-                error("RCall.jl incomplete R expression")
+            if status == 1 || status == 2
+                break
             end
 
-            parsedata = protect(rcall_p(:getParseData,sf))
+            if !isascii(script)
+                msg = "Unicode R scripts not supported, due to\n    https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524"
+                break
+            end
+
+            parsedata = protect(rcall_p(:getParseData, sf))
             n = length(parsedata[1])
 
             lineno = parsedata[1][n]
-            charno = parsedata[2][n] # this is the character no., not byte numbe
+            charno = parsedata[2][n] # this is the character no., not byte number
 
             c = rcopy(Compat.UTF8String, parsedata[9][n])
             unprotect(1)
 
-            if status[1] == 1
-                break # valid R string
-            end
-
-            if  c != "\$"
-                error("RCall.jl: invalid R expression")
-            end
+            c != "\$" && break
 
             # skip to string location
             i = start(script)
@@ -55,13 +42,13 @@ function rscript(script::Compat.ASCIIString)
                 i = nextind(script,i)
             end
 
-            # now script[i] == '\$'
             # assuming no unicode, see
             # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
             i_stop = prevind(script,i)
 
             c,i = next(script,i)
-            c == '\$' || error("RCall.jl: incorrect R parsing")
+
+            c != '\$' && break
 
             expr,i = parse(script,i,greedy=false)
 
@@ -77,11 +64,17 @@ function rscript(script::Compat.ASCIIString)
             symdict[sym] = expr
             script = string(script[1:i_stop],"`#JL`\$`",sym,'`',script[i:end])
         end
+
     finally
         unprotect(1)
     end
-    return script, symdict
+    if status == 1
+        return script, symdict, status, msg
+    else
+        return nothing, nothing, status, msg
+    end
 end
+
 
 """
     R"..."
@@ -104,25 +97,23 @@ values from R via the return value.
 
 """
 macro R_str(script)
-    script, symdict = rscript(script)
+    script, symdict, status, msg = parse_rscript(script)
+    status != 1 && error(msg)
+
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
         push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
     end
     quote
-        let
-            local ret
-            env = protect(newEnvironment())
+        let env = protect(newEnvironment())
             globalEnv["#JL"] = env
-            $blk_ld
             try
-                ret = reval($script, globalEnv)
+                $blk_ld
             finally
                 unprotect(1)
             end
-            # should we always keep the latest env!?
-            # globalEnv["#JL"] = nothing
-            ret
+            nothing
         end
+        reval($script, globalEnv)
     end
 end
