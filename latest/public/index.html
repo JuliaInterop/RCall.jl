@@ -450,7 +450,6 @@ RObject{RealSxp}
 
 <p>All such Julia expressions are evaluated once, before the R expression is evaluated.</p>
 <p>The expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.</p>
-<p>The R expression is evaluated each time in a new environment, so standard R variable assignments (<code>=</code> or <code>&lt;-</code>) will not persist between expressions, or even multiple calls of the same expression. In order to persist variables, you should use the the double-assignment operator (<code>&lt;&lt;-</code>), which assigns the variable to the global environment.</p>
 <p><a id='RCall.@rget' href='#RCall.@rget'>#</a>
 <strong><code>RCall.@rget</code></strong> &mdash; <em>Macro</em>.</p>
 <p>Copies variables from R to Julia using the same name.</p>
