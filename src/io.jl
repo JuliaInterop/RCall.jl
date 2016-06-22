@@ -51,6 +51,14 @@ function show(io::IO,r::RObject)
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
 end
 
+function display_error(io::IO, er)
+    Base.with_output_color(:red, io) do io
+        print(io, "ERROR: ")
+        Base.showerror(io, er)
+        println(io)
+    end
+end
+
 global const printBuffer = PipeBuffer()
 global const errorBuffer = PipeBuffer()
 
