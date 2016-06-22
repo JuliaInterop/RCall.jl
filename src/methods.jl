@@ -41,7 +41,7 @@ end
 isfactor{S<:Sxp}(r::RObject{S}) = isfactor(r.p)
 
 "Check whether an R variable is an ordered factor variable"
-isorder{S<:Sxp}(r::RObject{S}) = isorder(r.p)
+isordered{S<:Sxp}(r::RObject{S}) = isordered(r.p)
 
 const voffset = Ref{UInt}()
 
