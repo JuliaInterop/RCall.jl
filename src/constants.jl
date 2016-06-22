@@ -107,5 +107,12 @@ function load()
     @load_const UnboundValue
 end
 
+end # module
 
-end
+"""
+R global Environment.
+
+    globalEnv[:x] = 1
+    globalEnv[:x]
+"""
+const globalEnv = Const.GlobalEnv

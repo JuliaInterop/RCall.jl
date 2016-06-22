@@ -69,10 +69,3 @@ macro rlibrary(x)
         end
     end
 end
-
-macro rusing(x)
-    pkg = Expr(:quote, x)
-    quote
-        error("`@rusing $($pkg)` is deprecated, please use the syntax `@rlibrary $($pkg)`.")
-    end
-end

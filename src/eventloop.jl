@@ -1,3 +1,16 @@
+if Compat.is_unix()
+    function PolledEvents()
+        eventCallBack()
+        nothing
+    end
+end
+
+function eventCallBack()
+    # dump printBuffer STDOUT when available
+    flush_printBuffer(STDOUT)
+    nothing
+end
+
 function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0

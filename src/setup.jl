@@ -18,6 +18,55 @@ if Compat.is_windows()
     const Rhome = locate_Rhome()
     const Ruser = homedir()
     const libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386")])
+
+    function askYesNoCancel(prompt::Ptr{Cchar})
+        println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
+        query = readline(STDIN)
+        c = uppercase(query[1])
+        r::Cint
+        r = (c=='Y' ? 1 : c=='N' ? -1 : 0)
+        return r
+    end
+
+    """
+        RStart
+
+    This type mirrors `structRstart` in `R_ext/RStartup.h`. It is used to initialize the R engine.
+    """
+    type RStart # mirror structRstart in R_ext/RStartup.h
+        R_Quiet::Cint
+        R_Slave::Cint
+        R_Interactive::Cint
+        R_Verbose::Cint
+        LoadSiteFile::Cint
+        LoadInitFile::Cint
+        DebugInitFile::Cint
+        RestoreAction::Cint
+        SaveAction::Cint
+        vsize::Csize_t
+        nsize::Csize_t
+        max_vsize::Csize_t
+        max_nsize::Csize_t
+        ppsize::Csize_t
+        NoRenviron::Cint
+        rhome::Ptr{Cchar}
+        home::Ptr{Cchar}
+        ReadConsole::Ptr{Void}
+        WriteConsole::Ptr{Void}
+        CallBack::Ptr{Void}
+        ShowMessage::Ptr{Void}
+        YesNoCancel::Ptr{Void}
+        Busy::Ptr{Void}
+        CharacterMode::Cint
+        WriteConsoleEx::Ptr{Void}
+    end
+    RStart() = RStart(0,0,0,0,0,
+                      0,0,0,0,0,
+                      0,0,0,0,0,
+                      C_NULL,C_NULL,
+                      C_NULL,C_NULL,C_NULL,C_NULL,
+                      C_NULL,C_NULL,2,C_NULL)
+
 end
 
 if Compat.is_unix()
@@ -109,6 +158,18 @@ function initEmbeddedR()
 
 end
 
+"""
+    endEmbeddedR()
+
+Close embedded R session.
+"""
+function endEmbeddedR()
+    if Rembedded[]
+        ccall((:Rf_endEmbeddedR,libR),Void,(Cint,),0)
+        Rembedded[] = false
+    end
+end
+
 function __init__()
     # Check if R already running
     Rinited = unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
@@ -139,18 +200,4 @@ function __init__()
 
     # # IJulia hooks
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_init()
-end
-
-
-
-"""
-    endEmbeddedR()
-
-Close embedded R session.
-"""
-function endEmbeddedR()
-    if Rembedded[]
-        ccall((:Rf_endEmbeddedR,libR),Void,(Cint,),0)
-        Rembedded[] = false
-    end
 end

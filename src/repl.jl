@@ -12,7 +12,7 @@ function display_error(io::IO, er)
 end
 
 function return_callback(s)
-    _, _, status, _ = parse_rscript(Compat.String(LineEdit.buffer(s)))
+    _, _, status, _ = render_rscript(Compat.String(LineEdit.buffer(s)))
     status == 1 || status >= 3
 end
 
@@ -22,7 +22,7 @@ function evaluate_callback(line)
     local status
     local val
 
-    script, symdict, status, msg = parse_rscript(line)
+    script, symdict, status, msg = render_rscript(line)
     if status != 1
         write(REPL_STDERR, "Error: $msg\n")
         return nothing

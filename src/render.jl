@@ -1,7 +1,7 @@
 """
 Parses an inline R script, substituting invalid "\$" signs for Julia symbols
 """
-function parse_rscript(script::Compat.String)
+function render_rscript(script::Compat.String)
     symdict = OrderedDict{Compat.ASCIIString,Any}()
     sf = protect(rcall_p(:srcfile,"xx"))
     local val
@@ -72,48 +72,5 @@ function parse_rscript(script::Compat.String)
         return script, symdict, status, msg
     else
         return nothing, nothing, status, msg
-    end
-end
-
-
-"""
-    R"..."
-
-An inline R expression, the result of which is evaluated and returned as an `RObject`.
-
-It supports substitution of Julia variables and expressions via prefix with `\$` whenever
-not valid R syntax (i.e. when not immediately following another completed R expression):
-
-    R"glm(Sepal.Length ~ Sepal.Width, data=\$iris)"
-
-It is also possible to pass Julia expressions:
-
-    R"plot($(x -> exp(x).*sin(x)))"
-
-All such Julia expressions are evaluated once, before the R expression is evaluated.
-
-The expression does not support assigning to Julia variables, so the only way retrieve
-values from R via the return value.
-
-"""
-macro R_str(script)
-    script, symdict, status, msg = parse_rscript(script)
-    status != 1 && error(msg)
-
-    blk_ld = Expr(:block)
-    for (rsym, expr) in symdict
-        push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
-    end
-    quote
-        let env = protect(newEnvironment())
-            globalEnv["#JL"] = env
-            try
-                $blk_ld
-            finally
-                unprotect(1)
-            end
-            nothing
-        end
-        reval($script, globalEnv)
     end
 end

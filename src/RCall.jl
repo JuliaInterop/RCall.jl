@@ -9,13 +9,11 @@ import Base: eltype, show, convert, isascii,
     length, size, getindex, setindex!, start, next, done
 
 export RObject,
-   Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
-   ClosSxp,
+   Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp, ClosSxp,
    getAttrib, setAttrib!, getNames, setNames!,
    globalEnv,
    rcopy, rparse, rprint, reval, rcall, rlang,
-   isNA, anyNA, isFactor, isOrdered,
-   @rimport, @rusing, @rlibrary, @rput, @rget, @var_str, @R_str
+   @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
 
 include("setup.jl")
@@ -25,26 +23,16 @@ include("methods.jl")
 include("convert-base.jl")
 include("convert-data.jl")
 include("convert-default.jl")
-include("iface.jl")
+include("eventloop.jl")
+include("eval.jl")
 include("io.jl")
 include("functions.jl")
-include("library.jl")
-include("eventloop.jl")
 include("callback.jl")
-include("IJulia.jl")
-include("rstr.jl")
 include("operators.jl")
+include("library.jl")
+include("IJulia.jl")
+include("render.jl")
+include("macros.jl")
 include("repl.jl")
-
-
-"""
-R global Environment.
-
-    globalEnv[:x] = 1
-    globalEnv[:x]
-"""
-const globalEnv = Const.GlobalEnv
-
-
 
 end # module
