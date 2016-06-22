@@ -4,7 +4,6 @@ global REPL_STDOUT
 global REPL_STDERR
 
 function display_error(io::IO, er)
-    println("IO=", io)
     Base.with_output_color(:red, io) do io
         print(io, "ERROR: ")
         Base.showerror(io, er)
