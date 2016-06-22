@@ -1,13 +1,13 @@
 if Compat.is_unix()
-    function PolledEvents()
-        eventCallBack()
+    function polled_events()
+        event_callback()
         nothing
     end
 end
 
-function eventCallBack()
+function event_callback()
     # dump printBuffer STDOUT when available
-    flush_printBuffer(STDOUT)
+    flush_print_buffer(STDOUT)
     nothing
 end
 

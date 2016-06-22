@@ -67,7 +67,7 @@ macro R_str(script)
         push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
     end
     quote
-        let env = protect(newEnvironment())
+        let env = protect(new_environment())
             globalEnv["#JL"] = env
             try
                 $blk_ld

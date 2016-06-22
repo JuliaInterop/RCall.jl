@@ -1,7 +1,7 @@
 if Compat.is_windows()
     import WinReg
 
-    function locate_Rhome()
+    function locate_rhome()
         if haskey(ENV,"R_HOME")
             Rhome = ENV["R_HOME"]
         else
@@ -15,11 +15,11 @@ if Compat.is_windows()
         error("Could not locate R installation. Try setting \"R_HOME\" environmental variable.")
     end
 
-    const Rhome = locate_Rhome()
+    const Rhome = locate_rhome()
     const Ruser = homedir()
     const libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386")])
 
-    function askYesNoCancel(prompt::Ptr{Cchar})
+    function ask_yes_no_cancel(prompt::Ptr{Cchar})
         println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
         query = readline(STDIN)
         c = uppercase(query[1])
@@ -70,7 +70,7 @@ if Compat.is_windows()
 end
 
 if Compat.is_unix()
-    function locate_Rhome()
+    function locate_rhome()
         if haskey(ENV,"R_HOME")
             Rhome = ENV["R_HOME"]
         else
@@ -83,7 +83,7 @@ if Compat.is_unix()
         error("Could not find R installation. Try setting \"R_HOME\" environmental variable.")
     end
 
-    const Rhome = locate_Rhome()
+    const Rhome = locate_rhome()
     const libR  = Libdl.find_library(["libR"],[joinpath(Rhome,"lib")])
 end
 
@@ -119,12 +119,12 @@ function initEmbeddedR()
         rs.rhome          = ccall((:get_R_HOME,libR),Ptr{Cchar},())
         rs.home           = ccall((:getRUser,libR),Ptr{Cchar},())
         rs.ReadConsole    = cglobal((:R_ReadConsole,libR), Void)
-        rs.CallBack       = cfunction(eventCallBack,Void,())
+        rs.CallBack       = cfunction(event_callback,Void,())
         rs.ShowMessage    = cglobal((:R_ShowMessage,libR),Void)
-        rs.YesNoCancel    = cfunction(askYesNoCancel,Cint,(Ptr{Cchar},))
+        rs.YesNoCancel    = cfunction(ask_yes_no_cancel,Cint,(Ptr{Cchar},))
         rs.Busy           = cglobal((:R_Busy,libR),Void)
         rs.WriteConsole   = C_NULL
-        rs.WriteConsoleEx = cfunction(writeConsoleEx,Void,(Ptr{UInt8},Cint,Cint))
+        rs.WriteConsoleEx = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
 
         ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
     end
@@ -144,13 +144,13 @@ function initEmbeddedR()
             error("Could not start embedded R session.")
         end
 
-        pWriteConsoleEx = cfunction(writeConsoleEx,Void,(Ptr{UInt8},Cint,Cint))
+        pWriteConsoleEx = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
         unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), pWriteConsoleEx)
         unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
         unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
-        pPolledEvents = cfunction(PolledEvents,Void,())
-        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Void}), pPolledEvents)
+        ppolled_events = cfunction(polled_events,Void,())
+        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Void}), ppolled_events)
     end
 
     Rembedded[] = true
@@ -184,8 +184,8 @@ function __init__()
     Const.load()
 
     # set up function callbacks
-    juliaCallback.p = makeNativeSymbol(cfunction(callJuliaExtPtr,UnknownSxpPtr,(ListSxpPtr,)))
-    juliaDecref[] = cfunction(decrefExtPtr,Void,(ExtPtrSxpPtr,))
+    juliaCallback.p = make_native_symbol(cfunction(call_julia_extptr,UnknownSxpPtr,(ListSxpPtr,)))
+    juliaDecref[] = cfunction(decref_extptr,Void,(ExtPtrSxpPtr,))
 
     if !Rinited
         # print warnings as they arise

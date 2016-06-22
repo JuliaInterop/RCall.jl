@@ -4,23 +4,23 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     PrintBufferLocked = true
     protect(s)
     # Rf_PrintValue can cause segfault if S3 objects has custom
-    # print function as it doesn't use R_tryEval
+    # print function as it doesn't use R_try_eval
     # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     # below mirrors Rf_PrintValue
-    env = protect(newEnvironment(Const.GlobalEnv))
+    env = protect(new_environment(Const.GlobalEnv))
     env[:x] = s
-    if isObject(s) || isFunction(s)
-        if isS4(s)
-            methodsNamespace = protect(findNamespace("methods"))
-            tryEval(rlang_p(methodsNamespace[:show], :x), env)
+    if isobject(s) || isfunction(s)
+        if iss4(s)
+            methodsNamespace = protect(find_namespace("methods"))
+            try_eval(rlang_p(methodsNamespace[:show], :x), env)
             unprotect(1)
         else
-            tryEval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
+            try_eval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
         end
     else
         # Rf_PrintValueRec not found on unix!?
         # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-        tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
+        try_eval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
     end
     env[:x] = Const.NilValue
     write(io,takebuf_string(printBuffer))
@@ -54,7 +54,7 @@ end
 global const printBuffer = PipeBuffer()
 global const errorBuffer = PipeBuffer()
 
-function writeConsoleEx(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
+function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     if otype == 0
         Compat.unsafe_write(printBuffer, buf, buflen)
     else
@@ -63,10 +63,10 @@ function writeConsoleEx(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
-# mainly use to prevent eventCallBack stealing rprint output
+# mainly use to prevent event_callback stealing rprint output
 global PrintBufferLocked = false
 
-function flush_printBuffer(io::IO)
+function flush_print_buffer(io::IO)
     global PrintBufferLocked
     # dump printBuffer's content which it is not locked
     if ! PrintBufferLocked

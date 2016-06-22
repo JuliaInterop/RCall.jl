@@ -18,5 +18,5 @@ using RCall
 
 iris = rcopy(:iris)
 model =  R"lm(Sepal.Length ~ Sepal.Width,data=$iris)"
-@test rcopy(RCall.getClass(model)) == "lm"
+@test rcopy(RCall.getclass(model)) == "lm"
 @test isapprox(rcopy(R"sum($iris$Sepal.Length)"), sum(iris[Symbol("Sepal.Length")]), rtol=4*eps())

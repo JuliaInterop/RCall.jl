@@ -7,7 +7,7 @@ rcopy(s::SymSxpPtr) = rcopy(Symbol,s)
 rcopy(s::CharSxpPtr) = rcopy(AbstractString,s)
 
 function rcopy(s::StrSxpPtr)
-    if anyNA(s)
+    if anyna(s)
         rcopy(DataArray,s)
     elseif length(s) == 1
         rcopy(AbstractString,s)
@@ -16,7 +16,7 @@ function rcopy(s::StrSxpPtr)
     end
 end
 function rcopy(s::RealSxpPtr)
-    if anyNA(s)
+    if anyna(s)
         rcopy(DataArray{Float64},s)
     elseif length(s) == 1
         rcopy(Float64,s)
@@ -25,7 +25,7 @@ function rcopy(s::RealSxpPtr)
     end
 end
 function rcopy(s::CplxSxpPtr)
-    if anyNA(s)
+    if anyna(s)
         rcopy(DataArray{Complex128},s)
     elseif length(s) == 1
         rcopy(Complex128,s)
@@ -34,7 +34,7 @@ function rcopy(s::CplxSxpPtr)
     end
 end
 function rcopy(s::LglSxpPtr)
-    if anyNA(s)
+    if anyna(s)
         rcopy(DataArray{Bool},s)
     elseif length(s) == 1
         rcopy(Bool,s)
@@ -43,9 +43,9 @@ function rcopy(s::LglSxpPtr)
     end
 end
 function rcopy(s::IntSxpPtr)
-    if isFactor(s)
+    if isfactor(s)
         rcopy(PooledDataArray,s)
-    elseif anyNA(s)
+    elseif anyna(s)
         rcopy(DataArray{Int},s)
     elseif length(s) == 1
         rcopy(Cint,s)
@@ -55,9 +55,9 @@ function rcopy(s::IntSxpPtr)
 end
 
 function rcopy(s::VecSxpPtr)
-    if isFrame(s)
+    if isframe(s)
         rcopy(DataFrame,s)
-    elseif isNull(getNames(s))
+    elseif isnull(getnames(s))
         rcopy(Array{Any},s)
     else
         rcopy(Dict{Symbol,Any},s)

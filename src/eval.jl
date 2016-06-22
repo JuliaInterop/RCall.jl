@@ -1,7 +1,7 @@
 """
-A pure julia wrapper of R_tryEval.
+A pure julia wrapper of R_try_eval.
 """
-function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
+function try_eval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     status = Array(Cint,1)
     protect(expr)
     protect(env)
@@ -15,8 +15,8 @@ Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
-    val, status = tryEval(expr, env)
-    flush_printBuffer(STDOUT)
+    val, status = try_eval(expr, env)
+    flush_print_buffer(STDOUT)
     if status !=0
         error("RCall.jl ", takebuf_string(errorBuffer))
     elseif nb_available(errorBuffer) != 0
@@ -62,8 +62,8 @@ rcopy{T}(::Type{T}, str::AbstractString) = rcopy(T, reval_p(rparse_p(str)))
 rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
-"A pure julia wrapper of R_ParseVector"
-function ParseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
+"A pure julia wrapper of R_parse_vector"
+function parse_vector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
     status = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
@@ -77,7 +77,7 @@ end
 
 "Parse a string as an R expression, returning a Sxp pointer."
 function rparse_p(st::Ptr{StrSxp})
-    val, status, msg = ParseVector(st)
+    val, status, msg = parse_vector(st)
     if status == 2 || status == 3
         error(msg)
     elseif status == 4

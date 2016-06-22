@@ -10,8 +10,9 @@ import Base: eltype, show, convert, isascii,
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp, ClosSxp,
-   getAttrib, setAttrib!, getNames, setNames!,
+   getattrib, setattrib!, getnames, setnames!,
    globalEnv,
+   isna, anyna, isfactor, isordered,
    rcopy, rparse, rprint, reval, rcall, rlang,
    @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
@@ -34,5 +35,6 @@ include("IJulia.jl")
 include("render.jl")
 include("macros.jl")
 include("repl.jl")
+include("deprecated.jl")
 
 end # module
