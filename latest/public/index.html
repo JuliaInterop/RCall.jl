@@ -337,9 +337,6 @@ RObject{RealSxp}
 </code></pre>
 
 <p>Create a new environment which extends environment <code>env</code> (<code>globalEnv</code> by default).</p>
-<p><a id='RCall.parse_rscript' href='#RCall.parse_rscript'>#</a>
-<strong><code>RCall.parse_rscript</code></strong> &mdash; <em>Function</em>.</p>
-<p>Parses an inline R script, substituting invalid ":($(Expr(:incomplete, "incomplete: invalid string syntax")))</p>
 <p><a id='RCall.preserve' href='#RCall.preserve'>#</a>
 <strong><code>RCall.preserve</code></strong> &mdash; <em>Function</em>.</p>
 <p>Prevent garbage collection of an R object. Object can be released via <code>release</code>.</p>
@@ -363,6 +360,9 @@ RObject{RealSxp}
 <p><a id='RCall.release' href='#RCall.release'>#</a>
 <strong><code>RCall.release</code></strong> &mdash; <em>Function</em>.</p>
 <p>Release object that has been gc protected by <code>preserve</code>.</p>
+<p><a id='RCall.render_rscript' href='#RCall.render_rscript'>#</a>
+<strong><code>RCall.render_rscript</code></strong> &mdash; <em>Function</em>.</p>
+<p>Parses an inline R script, substituting invalid ":($(Expr(:incomplete, "incomplete: invalid string syntax")))</p>
 <p><a id='RCall.reval' href='#RCall.reval'>#</a>
 <strong><code>RCall.reval</code></strong> &mdash; <em>Function</em>.</p>
 <p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning an RObject.</p>
