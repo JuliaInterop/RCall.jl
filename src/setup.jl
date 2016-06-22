@@ -144,13 +144,13 @@ function initEmbeddedR()
             error("Could not start embedded R session.")
         end
 
-        pWriteConsoleEx = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
+        ptr_write_console_ex = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
-        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), pWriteConsoleEx)
+        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), ptr_write_console_ex)
         unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
         unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
-        ppolled_events = cfunction(polled_events,Void,())
-        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Void}), ppolled_events)
+        ptr_polled_events = cfunction(polled_events,Void,())
+        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Void}), ptr_polled_events)
     end
 
     Rembedded[] = true
@@ -184,7 +184,7 @@ function __init__()
     Const.load()
 
     # set up function callbacks
-    juliaCallback.p = make_native_symbol(cfunction(call_julia_extptr,UnknownSxpPtr,(ListSxpPtr,)))
+    juliaCallback.p = makeNativeSymbolRef(cfunction(julia_extptr_callback,UnknownSxpPtr,(ListSxpPtr,)))
     juliaDecref[] = cfunction(decref_extptr,Void,(ExtPtrSxpPtr,))
 
     if !Rinited

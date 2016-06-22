@@ -12,7 +12,7 @@ export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp, ClosSxp,
    getattrib, setattrib!, getnames, setnames!, getclass, setclass!,
    globalEnv,
-   isna, anyna, isfactor, isordered, isnull,
+   isna, anyna, isnull,
    rcopy, rparse, rprint, reval, rcall, rlang,
    @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 

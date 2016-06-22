@@ -1,7 +1,7 @@
 "Create a function call from a list of arguments"
 function rlang_p(f, args...; kwargs...)
     argn = length(args)+length(kwargs)
-    s = l = protect(alloc_array(LangSxp,argn+1))
+    s = l = protect(allocArray(LangSxp,argn+1))
     try
         setcar!(s,sexp(f))
         for argv in args

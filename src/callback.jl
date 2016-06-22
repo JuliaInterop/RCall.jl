@@ -4,8 +4,8 @@ Register a function pointer as an R NativeSymbol.
 This is completely undocumented, so may break: we technically are supposed to
 use R_registerRoutines, but this is _much_ easier for just 1 function.
 """
-function make_native_symbol(fptr::Ptr{Void})
-    # Rdynpriv.h
+function makeNativeSymbolRef(fptr::Ptr{Void})
+    # mirror Rf_MakeNativeSymbolRef of Rdynload.c
     rexfn = ccall((:R_MakeExternalPtrFn,libR), ExtPtrSxpPtr,
                      (Ptr{Void}, Ptr{Void}, Ptr{Void}),
                      fptr, sexp(Symbol("native symbol")), sexp(Const.NilValue))
@@ -16,7 +16,7 @@ end
 
 
 "Create an ExtPtrSxpPtr object"
-make_external_ptr(ptr::Ptr{Void}, tag=Const.NilValue, prot=Const.NilValue) =
+makeExternalPtr(ptr::Ptr{Void}, tag=Const.NilValue, prot=Const.NilValue) =
     ccall((:R_MakeExternalPtr,libR), ExtPtrSxpPtr,
           (Ptr{Void}, UnknownSxpPtr, UnknownSxpPtr),
           ptr, sexp(tag), sexp(prot))
@@ -30,7 +30,7 @@ It receives a `ListSxpPtr` containing
  - a pointer to the Julia function (`ExtPtrSxpPtr`)
  - any arguments (as `SxpPtr`)
 """
-function call_julia_extptr(p::ListSxpPtr)
+function julia_extptr_callback(p::ListSxpPtr)
     try
         l = cdr(p) # skip callback pointer
 
@@ -84,7 +84,7 @@ const juliaDecref = Ref{Ptr{Void}}()
 """
 Register finalizer to be called by the R GC.
 """
-function register_finalizer(s::ExtPtrSxpPtr)
+function registerCFinalizerEx(s::ExtPtrSxpPtr)
     ccall((:R_RegisterCFinalizerEx,libR),Void,
           (Ptr{ExtPtrSxp}, Ptr{Void}, Cint),
           s,juliaDecref[],0)
@@ -104,9 +104,9 @@ removed by the Julia GC.
 """
 function sexp(::Type{ExtPtrSxp}, j)
     jptr = pointer_from_objref(j)
-    s = make_external_ptr(jptr)
+    s = makeExternalPtr(jptr)
     jtypExtPtrs[s] = j
-    register_finalizer(s)
+    registerCFinalizerEx(s)
     s
 end
 
@@ -139,7 +139,7 @@ end
 Create an argument list for an R function call, with a varargs "dots" at the end.
 """
 function sexp_arglist_dots(args...;kwargs...)
-    rarglist = protect(alloc_list(length(args)+length(kwargs)+1))
+    rarglist = protect(allocList(length(args)+length(kwargs)+1))
     try
         rr = rarglist
         for var in args

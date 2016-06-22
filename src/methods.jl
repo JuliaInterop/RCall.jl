@@ -30,18 +30,11 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isReal,:isS4,:isString,:isTs,:isUnordered,:isUnsorted,
             :isUserBinop,:isValidString,:isValidStringF,:isVector,
             :isVectorAtomicSxp,:isVectorizable,:isVectorListSxp)
-    lsym = Compat.Symbol(lowercase(string(sym)))
     @eval begin
-        $lsym{S<:Sxp}(s::Ptr{S}) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{SxpPtrInfo},),s)
-        $lsym(r::RObject) = $lsym(r.p)
+        $sym{S<:Sxp}(s::Ptr{S}) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{SxpPtrInfo},),s)
+        $sym(r::RObject) = $sym(r.p)
     end
 end
-
-"Check whether an R variable is a factor variable"
-isfactor{S<:Sxp}(r::RObject{S}) = isfactor(r.p)
-
-"Check whether an R variable is an ordered factor variable"
-isordered{S<:Sxp}(r::RObject{S}) = isordered(r.p)
 
 const voffset = Ref{UInt}()
 
@@ -235,7 +228,7 @@ attributes{S<:Sxp}(s::Ptr{S}) = attributes(unsafe_load(s))
 
 
 function size{S<:Sxp}(s::Ptr{S})
-    isarray(s) || return (length(s),)
+    isArray(s) || return (length(s),)
     tuple(convert(Array{Int},unsafe_vec(getattrib(s,Const.DimSymbol)))...)
 end
 size(r::RObject) = size(sexp(r))
@@ -267,17 +260,17 @@ setclass!{S<:Sxp}(s::Ptr{S},c::Ptr{StrSxp}) = setattrib!(s,Const.ClassSymbol,c)
 setclass!(r::RObject,c) = RObject(setclass!(sexp(r)),sexp(StrSxp,c))
 
 
-alloc_list(n::Int) = ccall((:Rf_allocList,libR),Ptr{ListSxp},(Cint,),n)
-alloc_array{S<:Sxp}(::Type{S}, n::Integer) =
+allocList(n::Int) = ccall((:Rf_allocList,libR),Ptr{ListSxp},(Cint,),n)
+allocArray{S<:Sxp}(::Type{S}, n::Integer) =
     ccall((:Rf_allocVector,libR),Ptr{S},(Cint,Cptrdiff_t),sexpnum(S),n)
 
-alloc_array{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer) =
+allocArray{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer) =
     ccall((:Rf_allocMatrix,libR),Ptr{S},(Cint,Cint,Cint),sexpnum(S),n1,n2)
 
-alloc_array{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer, n3::Integer) =
+allocArray{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer, n3::Integer) =
     ccall((:Rf_alloc3DArray,libR),Ptr{S},(Cint,Cint,Cint,Cint),sexpnum(S),n1,n2,n3)
 
-function alloc_array{S<:Sxp}(::Type{S}, dims::Integer...)
+function allocArray{S<:Sxp}(::Type{S}, dims::Integer...)
     sdims = sexp(IntSxp,[dims...])
     ccall((:Rf_allocArray,libR),Ptr{S},(Cint,Ptr{IntSxp}),sexpnum(S),sdims)
 end
@@ -395,22 +388,22 @@ end
 setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)
 
 """
-    new_environment([env])
+    newEnvironment([env])
 
 Create a new environment which extends environment `env` (`globalEnv` by default).
 """
-function new_environment(env::Ptr{EnvSxp})
+function newEnvironment(env::Ptr{EnvSxp})
     ccall((:Rf_NewEnvironment,libR),Ptr{EnvSxp},
             (Ptr{NilSxp},Ptr{NilSxp},Ptr{EnvSxp}),sexp(Const.NilValue),sexp(Const.Const.NilValue),env)
 end
-new_environment(env::RObject{EnvSxp}) = new_environment(sexp(env))
-new_environment() = new_environment(globalEnv)
+newEnvironment(env::RObject{EnvSxp}) = newEnvironment(sexp(env))
+newEnvironment() = newEnvironment(globalEnv)
 
 
 "find namespace by name of the namespace, it is not error tolerant."
-function find_namespace(str::Compat.String)
+function findNamespace(str::Compat.String)
     ccall((:R_FindNamespace,libR),Ptr{EnvSxp}, (Ptr{StrSxp},), sexp(str))
 end
 
-"get namespace by name of the namespace. It is safer to be used than find_namespace as it checks bound."
-get_namespace(str::Compat.String) = reval(rlang_p(RCall.Const.BaseNamespace["get_namespace"], str))
+"get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound."
+getNamespace(str::Compat.String) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespace"], str))

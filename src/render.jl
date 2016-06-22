@@ -10,7 +10,7 @@ function render_rscript(script::Compat.String)
 
     try
         while true
-            val, status, msg = parse_vector(sexp(script), sf)
+            val, status, msg = parseVector(sexp(script), sf)
 
             if status == 1 || status == 2
                 break

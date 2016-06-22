@@ -88,7 +88,7 @@ sexp(st::AbstractString) = sexp(StrSxp,st)
 
 # general vectors
 function sexp{S<:VectorListSxp}(::Type{S}, a::AbstractArray)
-    ra = protect(alloc_array(S, size(a)...))
+    ra = protect(allocArray(S, size(a)...))
     try
         for i in 1:length(a)
             ra[i] = a[i]
@@ -123,12 +123,12 @@ for (J,S) in ((:Integer,:IntSxp),
     @eval begin
         # Could use Rf_Scalar... methods, but see weird error on Appveyor Windows for Complex.
         function sexp(::Type{$S},v::$J)
-            ra = alloc_array($S,1)
+            ra = allocArray($S,1)
             unsafe_store!(dataptr(ra),convert(eltype($S),v))
             ra
         end
         function sexp{T<:$J}(::Type{$S}, a::AbstractArray{T})
-            ra = alloc_array($S, size(a)...)
+            ra = allocArray($S, size(a)...)
             copy!(unsafe_vec(ra),a)
             ra
         end
@@ -155,7 +155,7 @@ end
 sexp(::Type{LglSxp},v::Union{Bool,Cint}) =
     ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
 function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
-    ra = alloc_array(LglSxp, size(a)...)
+    ra = allocArray(LglSxp, size(a)...)
     copy!(unsafe_vec(ra),a)
     ra
 end
@@ -217,8 +217,8 @@ end
 # used to this effect.
 function sexp{S<:VectorSxp}(::Type{S},d::Associative)
     n = length(d)
-    vs = protect(alloc_array(VecSxp,n))
-    ks = protect(alloc_array(StrSxp,n))
+    vs = protect(allocArray(VecSxp,n))
+    ks = protect(allocArray(StrSxp,n))
     try
         for (i,(k,v)) in enumerate(d)
             ks[i] = string(k)

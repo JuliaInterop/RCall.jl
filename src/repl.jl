@@ -32,7 +32,7 @@ function evaluate_callback(line)
         push!(blk_ld.args,:(env[$rsym] = $(expr)))
     end
     jscript = quote
-        let env = RCall.protect(RCall.new_environment())
+        let env = RCall.protect(RCall.newEnvironment())
             globalEnv["#JL"] = env
             try
                 $blk_ld
@@ -50,9 +50,9 @@ function evaluate_callback(line)
         return nothing
     end
 
-    expr = protect(sexp(parse_vector(sexp(script))[1]))
+    expr = protect(sexp(parseVector(sexp(script))[1]))
     for e in expr
-        val, status = try_eval(e, sexp(Const.GlobalEnv))
+        val, status = tryEval(e, sexp(Const.GlobalEnv))
         flush_print_buffer(REPL_STDOUT)
         # print warning and error messages
         if status != 0 || nb_available(errorBuffer) != 0

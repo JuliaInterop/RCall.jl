@@ -4,23 +4,23 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     PrintBufferLocked = true
     protect(s)
     # Rf_PrintValue can cause segfault if S3 objects has custom
-    # print function as it doesn't use R_try_eval
+    # print function as it doesn't use R_tryEval
     # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     # below mirrors Rf_PrintValue
-    env = protect(new_environment(Const.GlobalEnv))
+    env = protect(newEnvironment(Const.GlobalEnv))
     env[:x] = s
-    if isobject(s) || isfunction(s)
-        if iss4(s)
-            methodsNamespace = protect(find_namespace("methods"))
-            try_eval(rlang_p(methodsNamespace[:show], :x), env)
+    if isObject(s) || isFunction(s)
+        if isS4(s)
+            methodsNamespace = protect(findNamespace("methods"))
+            tryEval(rlang_p(methodsNamespace[:show], :x), env)
             unprotect(1)
         else
-            try_eval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
+            tryEval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
         end
     else
         # Rf_PrintValueRec not found on unix!?
         # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-        try_eval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
+        tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
     end
     env[:x] = Const.NilValue
     write(io,takebuf_string(printBuffer))

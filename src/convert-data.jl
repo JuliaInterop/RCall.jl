@@ -8,20 +8,20 @@ function rcopy{S<:VectorSxp}(::Type{DataArray}, s::Ptr{S})
 end
 
 function rcopy(::Type{DataArray}, s::Ptr{IntSxp})
-    isfactor(s) && error("$s is a R factor")
+    isFactor(s) && error("$s is a R factor")
     DataArray(rcopy(Array,s), isna(s))
 end
 function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
-    isfactor(s) || error("$s is not a R factor")
+    isFactor(s) || error("$s is not a R factor")
     refs = DataArrays.RefArray([isna(x) ? zero(Int32) : x for x in s])
     compact(PooledDataArray(refs,rcopy(getattrib(s,Const.LevelsSymbol))))
 end
 rcopy{S<:VectorSxp}(::Type{AbstractDataArray}, s::Ptr{S}) = rcopy(DataArray, s)
 rcopy(::Type{AbstractDataArray}, s::Ptr{IntSxp}) =
-    isfactor(s) ? rcopy(PooledDataArray,s) : rcopy(DataArray,s)
+    isFactor(s) ? rcopy(PooledDataArray,s) : rcopy(DataArray,s)
 
 function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
-    isframe(s) || error("s is not a R data frame")
+    isFrame(s) || error("s is not a R data frame")
     DataFrame([rcopy(AbstractDataArray, c) for c in s],
               rcopy(Array{Symbol},getnames(s)))
 end
@@ -53,7 +53,7 @@ end
 ## DataFrame to sexp conversion.
 function sexp(d::DataFrame)
     nr,nc = size(d)
-    rd = protect(alloc_array(VecSxp, nc))
+    rd = protect(allocArray(VecSxp, nc))
     try
         for i in 1:nc
             rd[i] = sexp(d[d.colindex.names[i]])

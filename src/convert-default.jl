@@ -43,7 +43,7 @@ function rcopy(s::LglSxpPtr)
     end
 end
 function rcopy(s::IntSxpPtr)
-    if isfactor(s)
+    if isFactor(s)
         rcopy(PooledDataArray,s)
     elseif anyna(s)
         rcopy(DataArray{Int},s)
@@ -55,7 +55,7 @@ function rcopy(s::IntSxpPtr)
 end
 
 function rcopy(s::VecSxpPtr)
-    if isframe(s)
+    if isFrame(s)
         rcopy(DataFrame,s)
     elseif isnull(getnames(s))
         rcopy(Array{Any},s)
