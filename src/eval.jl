@@ -1,5 +1,5 @@
 """
-A pure julia wrapper of R_try_eval.
+A pure julia wrapper of R_tryEval.
 """
 function try_eval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     status = Array(Cint,1)
@@ -62,7 +62,7 @@ rcopy{T}(::Type{T}, str::AbstractString) = rcopy(T, reval_p(rparse_p(str)))
 rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
 
 
-"A pure julia wrapper of R_parse_vector"
+"A pure julia wrapper of R_ParseVector"
 function parse_vector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
     status = Array(Cint,1)
