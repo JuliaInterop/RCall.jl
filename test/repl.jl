@@ -38,11 +38,7 @@ function check_repl(io::IO, x)
     t = Base.Timer((_) -> Base.throwto(read_task,
                 ErrorException("Expect \"$x\", but wait too long.")), 5)
     schedule(read_task)
-    try
-        wait(read_task)
-    catch e
-        rethrow(e)
-    end
+    wait(read_task)
     close(t)
 end
 
