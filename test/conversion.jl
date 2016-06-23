@@ -214,3 +214,6 @@ d = Dict(:a=>[1, 2, 4], :b=> ["e", "d", "f"])
 r = RObject(d)
 @test r[:a][3] == 4
 @test rcopy(r[:b][2]) == "d"
+l = rcopy("list(a=1,b=c(1,3,4))")
+@test l[:a] == 1
+@test l[:b][3] == 4

@@ -277,6 +277,12 @@ end
 
 
 """
+Check if values correspond to R's NULL object.
+"""
+isnull{S<:Sxp}(s::Ptr{S}) = isNull(s)
+isnull{S<:Sxp}(r::RObject{S}) = isnull(r.p)
+
+"""
 NA element for each type
 """
 naeltype(::Type{LglSxp}) = Const.NaInt
