@@ -33,16 +33,21 @@ end
 
 send_repl(x, enter=true) = write(stdin_write, enter? "$x\n" : x)
 
-function check_repl(x, io::IO)
+function check_repl(io::IO, x)
     read_task = @task readuntil(io, x)
-    t = Base.Timer((_) -> Base.throwto(read_task, InterruptException()), 5)
+    t = Base.Timer((_) -> Base.throwto(read_task,
+                ErrorException("Expect \"$x\", but wait too long.")), 5)
     schedule(read_task)
-    wait(read_task)
+    try
+        wait(read_task)
+    catch e
+        rethrow(e)
+    end
     close(t)
 end
 
-check_repl_stdout(x) = check_repl(x, stdout_read)
-check_repl_stderr(x) = check_repl(x, stderr_read)
+check_repl_stdout(x) = check_repl(stdout_read, x)
+check_repl_stderr(x) = check_repl(stderr_read, x)
 
 # waiting for the repl
 send_repl("using RCall")
