@@ -5,19 +5,12 @@ function return_callback(s)
     status == 1 || status >= 3
 end
 
-function eval_user_input(script::Compat.String, stdout::IO, stderr::IO)
-    local status
-    local val
-    script, symdict, status, msg = render_rscript(script)
-    if status != 1
-        write(stderr, "Error: $msg\n")
-        return nothing
-    end
+function repl_eval_inline_julia_code(symdict::OrderedDict)
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
         push!(blk_ld.args,:(env[$rsym] = $(expr)))
     end
-    jscript = quote
+    quote
         let env = RCall.protect(RCall.newEnvironment())
             globalEnv["#JL"] = env
             try
@@ -28,14 +21,22 @@ function eval_user_input(script::Compat.String, stdout::IO, stderr::IO)
             nothing
         end
     end
+end
 
+function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
+    local status
+    local val
+    script, symdict, status, msg = render_rscript(script)
+    if status != 1
+        write(stderr, "Error: $msg\n")
+        return nothing
+    end
     try
-        eval(Main, jscript)
+        eval(Main, repl_eval_inline_julia_code(symdict))
     catch e
         display_error(stderr, e)
         return nothing
     end
-
     expr = protect(sexp(parseVector(sexp(script))[1]))
     for e in expr
         val, status = tryEval(e, sexp(Const.GlobalEnv))
@@ -54,15 +55,71 @@ function eval_user_input(script::Compat.String, stdout::IO, stderr::IO)
     return nothing
 end
 
+function bracketed_paste_callback(s, o...)
+    input = LineEdit.bracketed_paste(s)
+    sbuffer = LineEdit.buffer(s)
+    curspos = position(sbuffer)
+    seek(sbuffer, 0)
+    shouldeval = (nb_available(sbuffer) == curspos && search(sbuffer, UInt8('\n')) == 0)
+    seek(sbuffer, curspos)
+    if curspos == 0
+        # if pasting at the beginning, strip leading whitespace
+        input = lstrip(input)
+    end
+
+    if !shouldeval
+        LineEdit.edit_insert(s, input)
+        return
+    end
+
+    LineEdit.edit_insert(sbuffer, input)
+    input = takebuf_string(sbuffer)
+
+    oldpos = start(input)
+    nextpos = 0
+    # parse the input line by line
+    while !done(input, oldpos)
+        nextpos = search(input, '\n', nextpos+1)
+        if nextpos == 0
+            nextpos = endof(input)
+        end
+        block = input[oldpos:nextpos]
+        status = render_rscript(block)[3]
+
+        if status >= 3  || (status == 2 && done(input, nextpos+1)) ||
+                (done(input, nextpos+1) && !endswith(input, '\n'))
+            # error / continue but no the end / at the end but no new line
+            LineEdit.replace_line(s, input[oldpos:end])
+            LineEdit.refresh_line(s)
+            break
+        elseif status == 2 && !done(input, nextpos+1)
+            continue
+        end
+
+        if !isempty(strip(block))
+            # put the line on the screen and history
+            LineEdit.replace_line(s, strip(block))
+            LineEdit.commit_line(s)
+            # execute the statement
+            terminal = LineEdit.terminal(s)
+            REPL.raw!(terminal, false) && LineEdit.disable_bracketed_paste(terminal)
+            LineEdit.mode(s).on_done(s, LineEdit.buffer(s), true)
+            REPL.raw!(terminal, true) && LineEdit.enable_bracketed_paste(terminal)
+        end
+        oldpos = nextpos + 1
+    end
+    LineEdit.refresh_line(s)
+end
+
 function respond(repl, main)
     (s, buf, ok) -> begin
         if !ok
             return REPL.transition(s, :abort)
         end
         script = takebuf_string(buf)
-        if !isempty(script)
+        if !isempty(strip(script))
             REPL.reset(repl)
-            eval_user_input(script, repl.t.out_stream, repl.t.err_stream)
+            repl_eval(script, repl.t.out_stream, repl.t.err_stream)
         end
         REPL.prepare_next(repl)
         REPL.reset_state(s)
@@ -89,31 +146,47 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     end
 end
 
-function repl_init(repl)
-    mirepl = isdefined(repl,:mi) ? repl.mi : repl
-
-    main_mode = mirepl.interface.modes[1]
-
-    panel = LineEdit.Prompt("R> ";
+function create_r_repl(repl, main)
+    r_mode = LineEdit.Prompt("R> ";
         prompt_prefix=Base.text_colors[:blue],
-        prompt_suffix=main_mode.prompt_suffix,
+        prompt_suffix=main.prompt_suffix,
         on_enter=return_callback,
-        on_done= respond(repl, main_mode),
+        on_done= respond(repl, main),
         sticky=true)
 
-    hp = main_mode.hist
-    hp.mode_mapping[:r] = panel
-    panel.hist = hp
-    panel.complete = RCompletionProvider(repl)
+    hp = main.hist
+    hp.mode_mapping[:r] = r_mode
+    r_mode.hist = hp
+    r_mode.complete = RCompletionProvider(repl)
+    const bracketed_paste_mode_keymap = Dict{Any,Any}(
+        "\e[200~" => bracketed_paste_callback
+    )
 
-    push!(mirepl.interface.modes,panel)
+    search_prompt, skeymap = LineEdit.setup_search_keymap(hp)
+    mk = REPL.mode_keymap(main)
 
-    const rcall_keymap = Dict{Any,Any}(
+    b = Dict{Any,Any}[
+        bracketed_paste_mode_keymap,
+        skeymap, mk, LineEdit.history_keymap,
+        LineEdit.default_keymap, LineEdit.escape_defaults
+    ]
+    r_mode.keymap_dict = LineEdit.keymap(b)
+
+    r_mode
+end
+
+function repl_init(repl)
+    mirepl = isdefined(repl,:mi) ? repl.mi : repl
+    main_mode = mirepl.interface.modes[1]
+    r_mode = create_r_repl(mirepl, main_mode)
+    push!(mirepl.interface.modes,r_mode)
+
+    const r_prompt_keymap = Dict{Any,Any}(
         '$' => function (s,args...)
             if isempty(s) || position(LineEdit.buffer(s)) == 0
                 buf = copy(LineEdit.buffer(s))
-                LineEdit.transition(s, panel) do
-                    LineEdit.state(s, panel).input_buffer = buf
+                LineEdit.transition(s, r_mode) do
+                    LineEdit.state(s, r_mode).input_buffer = buf
                 end
             else
                 LineEdit.edit_insert(s, '$')
@@ -121,12 +194,6 @@ function repl_init(repl)
         end
     )
 
-    search_prompt, skeymap = LineEdit.setup_search_keymap(hp)
-    mk = REPL.mode_keymap(main_mode)
-
-    b = Dict{Any,Any}[skeymap, mk, LineEdit.history_keymap, LineEdit.default_keymap, LineEdit.escape_defaults]
-    panel.keymap_dict = LineEdit.keymap(b)
-
-    main_mode.keymap_dict = LineEdit.keymap_merge(main_mode.keymap_dict, rcall_keymap);
+    main_mode.keymap_dict = LineEdit.keymap_merge(main_mode.keymap_dict, r_prompt_keymap);
     nothing
 end
