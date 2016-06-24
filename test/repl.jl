@@ -26,67 +26,62 @@ Base.link_pipe(stdout_read,true,stdout_write,true)
 Base.link_pipe(stderr_read,true,stderr_write,true)
 
 repl = Base.REPL.LineEditREPL(FakeTerminal(stdin_read, stdout_write, stderr_write,false))
-# repl.specialdisplay = Base.REPL.REPLDisplay(repl)
-repl.history_file = false
 
 repltask = @async begin
     Base.REPL.run_repl(repl)
 end
 
-sendrepl(cmd) = write(stdin_write,"inc || wait(b); r = $cmd; notify(c); r\r")
-inc = false
-b = Condition()
-c = Condition()
-sendrepl("\"Hello REPL\"")
-inc=true
-begin
-    notify(b)
-    wait(c)
+send_repl(x, enter=true) = write(stdin_write, enter? "$x\n" : x)
+
+function check_repl(io::IO, x)
+    read_task = @task readuntil(io, x)
+    t = Base.Timer((_) -> Base.throwto(read_task,
+                ErrorException("Expect \"$x\", but wait too long.")), 5)
+    schedule(read_task)
+    wait(read_task)
+    close(t)
 end
+
+check_repl_stdout(x) = check_repl(stdout_read, x)
+check_repl_stderr(x) = check_repl(stderr_read, x)
+
+# waiting for the repl
+send_repl("using RCall")
 
 RCall.repl_init(repl)
 
-write(stdin_write, "using RCall\n")
-write(stdin_write, "\$")
-readuntil(stdout_read, "R> ")
+send_repl("\$", false)
+check_repl_stdout("R> ")
 
-write(stdin_write, "bar = 'apple'\n")
-readuntil(stdout_read, "bar = 'apple'")
+send_repl("bar = 'apple'")
+check_repl_stdout("bar = 'apple'")
 
-write(stdin_write, "paste0('pine', bar)\n")
-readuntil(stdout_read, "pineapple")
+send_repl("paste0('pine', bar)")
+check_repl_stdout("pineapple")
 
-write(stdin_write, "mtca\t")
-readuntil(stdout_read, "mtcars")
+send_repl("mtca\t", false)
+check_repl_stdout("mtcars")
 
-write(stdin_write, "\n")
-readuntil(stdout_read, "\n")
+send_repl("foo]")
+check_repl_stderr("unexpected")
 
-write(stdin_write, "foo]\n")
-readuntil(stderr_read, "unexpected")
-readuntil(stderr_read, "\n")
+send_repl("stop('something is wrong')")
+check_repl_stderr("something is wrong")
 
-write(stdin_write, "stop('something is wrong')\n")
-readuntil(stderr_read, "something is wrong")
+send_repl("not_found")
+check_repl_stderr("not found")
 
-write(stdin_write, "unknown\n")
-readuntil(stderr_read, "not found")
-readuntil(stderr_read, "\n")
+send_repl("\b", false)
+check_repl_stdout("julia> ")
 
-write(stdin_write, "\b")
-readuntil(stdout_read, "julia> ")
+send_repl("x = \"orange\"")
+check_repl_stdout("x = \"orange\"")
 
-write(stdin_write, "x = \"orange\"\n")
-readuntil(stdout_read, "x = \"orange\"")
+send_repl("\$", false)
+check_repl_stdout("R> ")
 
-write(stdin_write, "\$")
-readuntil(stdout_read, "R> ")
+send_repl("\$x")
+check_repl_stdout("orange")
 
-write(stdin_write, "$x")
-readuntil(stdout_read, "orange")
-
-try
-    write(stdin_write, "$(y)")
-catch e
-    @test typeof(e) <: UndefVarError
-end
+send_repl("\$not_found")
+check_repl_stderr("UndefVarError")

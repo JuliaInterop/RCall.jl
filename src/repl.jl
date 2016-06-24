@@ -1,30 +1,16 @@
 import Base: REPL, LineEdit
 
-global REPL_STDOUT
-global REPL_STDERR
-
-function display_error(io::IO, er)
-    Base.with_output_color(:red, io) do io
-        print(io, "ERROR: ")
-        Base.showerror(io, er)
-        println(io)
-    end
-end
-
 function return_callback(s)
     _, _, status, _ = render_rscript(Compat.String(LineEdit.buffer(s)))
     status == 1 || status >= 3
 end
 
-function evaluate_callback(line)
-    global REPL_STDOUT
-    global REPL_STDERR
+function eval_user_input(script::Compat.String, stdout::IO, stderr::IO)
     local status
     local val
-
-    script, symdict, status, msg = render_rscript(line)
+    script, symdict, status, msg = render_rscript(script)
     if status != 1
-        write(REPL_STDERR, "Error: $msg\n")
+        write(stderr, "Error: $msg\n")
         return nothing
     end
     blk_ld = Expr(:block)
@@ -46,26 +32,42 @@ function evaluate_callback(line)
     try
         eval(Main, jscript)
     catch e
-        display_error(REPL_STDERR, e)
+        display_error(stderr, e)
         return nothing
     end
 
     expr = protect(sexp(parseVector(sexp(script))[1]))
     for e in expr
         val, status = tryEval(e, sexp(Const.GlobalEnv))
-        flush_print_buffer(REPL_STDOUT)
+        flush_print_buffer(stdout)
         # print warning and error messages
         if status != 0 || nb_available(errorBuffer) != 0
-            write(REPL_STDERR, takebuf_string(errorBuffer))
+            write(stderr, takebuf_string(errorBuffer))
         end
         status != 0 && return nothing
     end
     unprotect(1)
     # print if the last expression is visible
     if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
-         rprint(REPL_STDOUT, sexp(val))
+         rprint(stdout, sexp(val))
     end
     return nothing
+end
+
+function respond(repl, main)
+    (s, buf, ok) -> begin
+        if !ok
+            return REPL.transition(s, :abort)
+        end
+        script = takebuf_string(buf)
+        if !isempty(script)
+            REPL.reset(repl)
+            eval_user_input(script, repl.t.out_stream, repl.t.err_stream)
+        end
+        REPL.prepare_next(repl)
+        REPL.reset_state(s)
+        s.current_mode.sticky || REPL.transition(s, main)
+    end
 end
 
 type RCompletionProvider <: LineEdit.CompletionProvider
@@ -88,11 +90,6 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
 end
 
 function repl_init(repl)
-    global REPL_STDOUT
-    global REPL_STDERR
-    REPL_STDOUT = repl.t.out_stream
-    REPL_STDERR = repl.t.err_stream
-
     mirepl = isdefined(repl,:mi) ? repl.mi : repl
 
     main_mode = mirepl.interface.modes[1]
@@ -100,14 +97,14 @@ function repl_init(repl)
     panel = LineEdit.Prompt("R> ";
         prompt_prefix=Base.text_colors[:blue],
         prompt_suffix=main_mode.prompt_suffix,
-        on_enter=return_callback)
+        on_enter=return_callback,
+        on_done= respond(repl, main_mode),
+        sticky=true)
 
     hp = main_mode.hist
     hp.mode_mapping[:r] = panel
     panel.hist = hp
-    panel.on_done = REPL.respond(evaluate_callback, repl,panel; pass_empty = false)
     panel.complete = RCompletionProvider(repl)
-
 
     push!(mirepl.interface.modes,panel)
 

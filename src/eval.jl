@@ -18,9 +18,9 @@ function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     val, status = tryEval(expr, env)
     flush_print_buffer(STDOUT)
     if status !=0
-        error("RCall.jl ", takebuf_string(errorBuffer))
+        error("RCall.jl: ", takebuf_string(errorBuffer))
     elseif nb_available(errorBuffer) != 0
-        warn("RCall.jl ", takebuf_string(errorBuffer))
+        warn("RCall.jl: ", takebuf_string(errorBuffer))
     end
     sexp(val)
 end
@@ -79,7 +79,7 @@ end
 function rparse_p(st::Ptr{StrSxp})
     val, status, msg = parseVector(st)
     if status == 2 || status == 3
-        error(msg)
+        error("RCall.jl: ", msg)
     elseif status == 4
         throw(EOFError())
     end

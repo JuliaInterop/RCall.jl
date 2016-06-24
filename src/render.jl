@@ -1,10 +1,9 @@
 """
-Parses an inline R script, substituting invalid "\$" signs for Julia symbols
+Render an inline R script, substituting invalid "\$" signs for Julia symbols
 """
 function render_rscript(script::Compat.String)
     symdict = OrderedDict{Compat.ASCIIString,Any}()
     sf = protect(rcall_p(:srcfile,"xx"))
-    local val
     local status
     local msg
 
