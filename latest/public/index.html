@@ -258,27 +258,17 @@ RObject{RealSxp}
 <strong><code>Base.setindex!</code></strong> &mdash; <em>Function</em>.</p>
 <p>assign value v to symbol s in the environment e</p>
 <p>assign value v to the i-th element of LangSxp l</p>
-<p><a id='RCall.NAel' href='#RCall.NAel'>#</a>
-<strong><code>RCall.NAel</code></strong> &mdash; <em>Function</em>.</p>
-<p>NA element for each type</p>
-<p><a id='RCall.ParseVector' href='#RCall.ParseVector'>#</a>
-<strong><code>RCall.ParseVector</code></strong> &mdash; <em>Function</em>.</p>
-<p>A pure julia wrapper of R_ParseVector</p>
-<p><a id='RCall.anyNA' href='#RCall.anyNA'>#</a>
-<strong><code>RCall.anyNA</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.anyna' href='#RCall.anyna'>#</a>
+<strong><code>RCall.anyna</code></strong> &mdash; <em>Function</em>.</p>
 <p>Check if there are any NA values in the vector.</p>
 <p><a id='RCall.bound' href='#RCall.bound'>#</a>
 <strong><code>RCall.bound</code></strong> &mdash; <em>Function</em>.</p>
 <p>The R NAMED property, represented by 2 bits in the info field. This can take values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more symbols. See http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying</p>
-<p><a id='RCall.callJuliaExtPtr' href='#RCall.callJuliaExtPtr'>#</a>
-<strong><code>RCall.callJuliaExtPtr</code></strong> &mdash; <em>Function</em>.</p>
-<p>The function called by R .External for Julia callbacks.</p>
-<p>It receives a <code>ListSxpPtr</code> containing  - a pointer to the function itself (<code>ExtPtrSxpPtr</code>)  - a pointer to the Julia function (<code>ExtPtrSxpPtr</code>)  - any arguments (as <code>SxpPtr</code>)</p>
 <p><a id='RCall.dataptr' href='#RCall.dataptr'>#</a>
 <strong><code>RCall.dataptr</code></strong> &mdash; <em>Function</em>.</p>
 <p>Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.</p>
-<p><a id='RCall.decrefExtPtr' href='#RCall.decrefExtPtr'>#</a>
-<strong><code>RCall.decrefExtPtr</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.decref_extptr' href='#RCall.decref_extptr'>#</a>
+<strong><code>RCall.decref_extptr</code></strong> &mdash; <em>Function</em>.</p>
 <p>Called by the R finalizer.</p>
 <p><a id='RCall.endEmbeddedR' href='#RCall.endEmbeddedR'>#</a>
 <strong><code>RCall.endEmbeddedR</code></strong> &mdash; <em>Function</em>.</p>
@@ -289,18 +279,18 @@ RObject{RealSxp}
 <p><a id='RCall.findNamespace' href='#RCall.findNamespace'>#</a>
 <strong><code>RCall.findNamespace</code></strong> &mdash; <em>Function</em>.</p>
 <p>find namespace by name of the namespace, it is not error tolerant.</p>
-<p><a id='RCall.getAttrib' href='#RCall.getAttrib'>#</a>
-<strong><code>RCall.getAttrib</code></strong> &mdash; <em>Function</em>.</p>
-<p>Return a particular attribute of an RObject</p>
-<p><a id='RCall.getClass' href='#RCall.getClass'>#</a>
-<strong><code>RCall.getClass</code></strong> &mdash; <em>Function</em>.</p>
-<p>Returns the class of an R object.</p>
-<p><a id='RCall.getNames' href='#RCall.getNames'>#</a>
-<strong><code>RCall.getNames</code></strong> &mdash; <em>Function</em>.</p>
-<p>Returns the names of an R vector.</p>
 <p><a id='RCall.getNamespace' href='#RCall.getNamespace'>#</a>
 <strong><code>RCall.getNamespace</code></strong> &mdash; <em>Function</em>.</p>
 <p>get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound.</p>
+<p><a id='RCall.getattrib' href='#RCall.getattrib'>#</a>
+<strong><code>RCall.getattrib</code></strong> &mdash; <em>Function</em>.</p>
+<p>Return a particular attribute of an RObject</p>
+<p><a id='RCall.getclass' href='#RCall.getclass'>#</a>
+<strong><code>RCall.getclass</code></strong> &mdash; <em>Function</em>.</p>
+<p>Returns the class of an R object.</p>
+<p><a id='RCall.getnames' href='#RCall.getnames'>#</a>
+<strong><code>RCall.getnames</code></strong> &mdash; <em>Function</em>.</p>
+<p>Returns the names of an R vector.</p>
 <p><a id='RCall.ijulia_displayplots' href='#RCall.ijulia_displayplots'>#</a>
 <strong><code>RCall.ijulia_displayplots</code></strong> &mdash; <em>Function</em>.</p>
 <p>Called after cell evaluation. Closes graphics device and displays files in notebook.</p>
@@ -315,28 +305,35 @@ RObject{RealSxp}
 </code></pre>
 
 <p>This initializes an embedded R session. It should only be called when R is not already running (e.g. if Julia is running inside an R session)</p>
-<p><a id='RCall.isFactor' href='#RCall.isFactor'>#</a>
-<strong><code>RCall.isFactor</code></strong> &mdash; <em>Function</em>.</p>
-<p>Check whether an R variable is a factor variable</p>
-<p><a id='RCall.isNA' href='#RCall.isNA'>#</a>
-<strong><code>RCall.isNA</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.isna' href='#RCall.isna'>#</a>
+<strong><code>RCall.isna</code></strong> &mdash; <em>Function</em>.</p>
 <p>Check if values correspond to R's sentinel NA values.</p>
-<p><a id='RCall.isOrdered' href='#RCall.isOrdered'>#</a>
-<strong><code>RCall.isOrdered</code></strong> &mdash; <em>Function</em>.</p>
-<p>Check whether an R variable is an ordered factor variable</p>
+<p><a id='RCall.isnull' href='#RCall.isnull'>#</a>
+<strong><code>RCall.isnull</code></strong> &mdash; <em>Function</em>.</p>
+<p>Check if values correspond to R's NULL object.</p>
+<p><a id='RCall.julia_extptr_callback' href='#RCall.julia_extptr_callback'>#</a>
+<strong><code>RCall.julia_extptr_callback</code></strong> &mdash; <em>Function</em>.</p>
+<p>The function called by R .External for Julia callbacks.</p>
+<p>It receives a <code>ListSxpPtr</code> containing  - a pointer to the function itself (<code>ExtPtrSxpPtr</code>)  - a pointer to the Julia function (<code>ExtPtrSxpPtr</code>)  - any arguments (as <code>SxpPtr</code>)</p>
 <p><a id='RCall.makeExternalPtr' href='#RCall.makeExternalPtr'>#</a>
 <strong><code>RCall.makeExternalPtr</code></strong> &mdash; <em>Function</em>.</p>
 <p>Create an ExtPtrSxpPtr object</p>
-<p><a id='RCall.makeNativeSymbol' href='#RCall.makeNativeSymbol'>#</a>
-<strong><code>RCall.makeNativeSymbol</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.makeNativeSymbolRef' href='#RCall.makeNativeSymbolRef'>#</a>
+<strong><code>RCall.makeNativeSymbolRef</code></strong> &mdash; <em>Function</em>.</p>
 <p>Register a function pointer as an R NativeSymbol.</p>
 <p>This is completely undocumented, so may break: we technically are supposed to use R_registerRoutines, but this is <em>much</em> easier for just 1 function.</p>
+<p><a id='RCall.naeltype' href='#RCall.naeltype'>#</a>
+<strong><code>RCall.naeltype</code></strong> &mdash; <em>Function</em>.</p>
+<p>NA element for each type</p>
 <p><a id='RCall.newEnvironment' href='#RCall.newEnvironment'>#</a>
 <strong><code>RCall.newEnvironment</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>newEnvironment([env])
 </code></pre>
 
 <p>Create a new environment which extends environment <code>env</code> (<code>globalEnv</code> by default).</p>
+<p><a id='RCall.parseVector' href='#RCall.parseVector'>#</a>
+<strong><code>RCall.parseVector</code></strong> &mdash; <em>Function</em>.</p>
+<p>A pure julia wrapper of R_ParseVector</p>
 <p><a id='RCall.preserve' href='#RCall.preserve'>#</a>
 <strong><code>RCall.preserve</code></strong> &mdash; <em>Function</em>.</p>
 <p>Prevent garbage collection of an R object. Object can be released via <code>release</code>.</p>
@@ -354,15 +351,15 @@ RObject{RealSxp}
 <p><code>rcopy</code> copies the contents of an R object into a corresponding canonical Julia type.</p>
 <p><code>rcopy(T,p)</code> converts a pointer <code>p</code> to a Sxp object to a native Julia object of type T.</p>
 <p><code>rcopy(p)</code> performs a default conversion.</p>
-<p><a id='RCall.registerFinalizer' href='#RCall.registerFinalizer'>#</a>
-<strong><code>RCall.registerFinalizer</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.registerCFinalizerEx' href='#RCall.registerCFinalizerEx'>#</a>
+<strong><code>RCall.registerCFinalizerEx</code></strong> &mdash; <em>Function</em>.</p>
 <p>Register finalizer to be called by the R GC.</p>
 <p><a id='RCall.release' href='#RCall.release'>#</a>
 <strong><code>RCall.release</code></strong> &mdash; <em>Function</em>.</p>
 <p>Release object that has been gc protected by <code>preserve</code>.</p>
 <p><a id='RCall.render_rscript' href='#RCall.render_rscript'>#</a>
 <strong><code>RCall.render_rscript</code></strong> &mdash; <em>Function</em>.</p>
-<p>Parses an inline R script, substituting invalid ":($(Expr(:incomplete, "incomplete: invalid string syntax")))</p>
+<p>Render an inline R script, substituting invalid ":($(Expr(:incomplete, "incomplete: invalid string syntax")))</p>
 <p><a id='RCall.reval' href='#RCall.reval'>#</a>
 <strong><code>RCall.reval</code></strong> &mdash; <em>Function</em>.</p>
 <p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning an RObject.</p>
@@ -386,14 +383,14 @@ RObject{RealSxp}
 <strong><code>RCall.rprint</code></strong> &mdash; <em>Function</em>.</p>
 <p>Parse, evaluate and print the result of a string as an R expression.</p>
 <p>Print the value of an Sxp using R's printing mechanism</p>
-<p><a id='RCall.setAttrib!' href='#RCall.setAttrib!'>#</a>
-<strong><code>RCall.setAttrib!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setattrib!' href='#RCall.setattrib!'>#</a>
+<strong><code>RCall.setattrib!</code></strong> &mdash; <em>Function</em>.</p>
 <p>Set a particular attribute of an RObject</p>
-<p><a id='RCall.setClass!' href='#RCall.setClass!'>#</a>
-<strong><code>RCall.setClass!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setclass!' href='#RCall.setclass!'>#</a>
+<strong><code>RCall.setclass!</code></strong> &mdash; <em>Function</em>.</p>
 <p>Set the class of an R object.</p>
-<p><a id='RCall.setNames!' href='#RCall.setNames!'>#</a>
-<strong><code>RCall.setNames!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setnames!' href='#RCall.setnames!'>#</a>
+<strong><code>RCall.setnames!</code></strong> &mdash; <em>Function</em>.</p>
 <p>Set the names of an R vector.</p>
 <p><a id='RCall.sexp' href='#RCall.sexp'>#</a>
 <strong><code>RCall.sexp</code></strong> &mdash; <em>Function</em>.</p>
