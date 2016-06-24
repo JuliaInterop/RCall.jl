@@ -164,6 +164,8 @@ function create_r_repl(repl, main)
 
     search_prompt, skeymap = LineEdit.setup_search_keymap(hp)
     mk = REPL.mode_keymap(main)
+    # ^C should not exit prompt
+    delete!(mk, "^C")
 
     b = Dict{Any,Any}[
         bracketed_paste_mode_keymap,
