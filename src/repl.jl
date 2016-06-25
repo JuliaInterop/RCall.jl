@@ -37,17 +37,23 @@ function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
         display_error(stderr, e)
         return nothing
     end
-    expr = protect(sexp(parseVector(sexp(script))[1]))
-    for e in expr
-        val, status = tryEval(e, sexp(Const.GlobalEnv))
-        flush_print_buffer(stdout)
-        # print warning and error messages
-        if status != 0 || nb_available(errorBuffer) != 0
-            write(stderr, takebuf_string(errorBuffer))
+    try
+        expr = protect(sexp(parseVector(sexp(script))[1]))
+        for e in expr
+            val, status = tryEval(e, sexp(Const.GlobalEnv))
+            flush_print_buffer(stdout)
+            # print warning and error messages
+            if status != 0 || nb_available(errorBuffer) != 0
+                write(stderr, takebuf_string(errorBuffer))
+            end
+            status != 0 && return nothing
         end
-        status != 0 && return nothing
+    catch e
+        display_error(stderr, e)
+        return nothing
+    finally
+        unprotect(1)
     end
-    unprotect(1)
     # print if the last expression is visible
     if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
          rprint(stdout, sexp(val))

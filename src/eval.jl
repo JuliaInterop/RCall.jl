@@ -2,11 +2,13 @@
 A pure julia wrapper of R_tryEval.
 """
 function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
+    Base.sigatomic_begin()
     status = Array(Cint,1)
     protect(expr)
     protect(env)
     val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,status)
     unprotect(2)
+    Base.sigatomic_end()
     return val, status[1]
 end
 
