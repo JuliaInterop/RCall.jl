@@ -140,11 +140,11 @@ end
 function LineEdit.complete_line(c::RCompletionProvider, s)
     buf = s.input_buffer
     partial = Compat.String(buf.data[1:buf.ptr-1])
-    rcall(rlang(symbol(":::"), :utils, symbol(".assignLinebuffer")), partial)
-    rcall(rlang(symbol(":::"), :utils, symbol(".assignEnd")), length(partial))
-    token = rcopy(rcall(rlang(symbol(":::"), :utils, symbol(".guessTokenFromLine"))))
-    rcall(rlang(symbol(":::"), :utils, symbol(".completeToken")))
-    ret = rcopy(Array, rcall(rlang(symbol(":::"), :utils, symbol(".retrieveCompletions"))))
+    rcall(rlang(Symbol(":::"), :utils, Symbol(".assignLinebuffer")), partial)
+    rcall(rlang(Symbol(":::"), :utils, Symbol(".assignEnd")), length(partial))
+    token = rcopy(rcall(rlang(Symbol(":::"), :utils, Symbol(".guessTokenFromLine"))))
+    rcall(rlang(Symbol(":::"), :utils, Symbol(".completeToken")))
+    ret = rcopy(Array, rcall(rlang(Symbol(":::"), :utils, Symbol(".retrieveCompletions"))))
     if length(ret) > 0
         return ret, token, true
     else
