@@ -11,6 +11,16 @@ function event_callback()
     nothing
 end
 
+# there is no use now, maybe useful for the future.
+function interrupts_pending(s::Bool=true)
+    if Compat.is_windows()
+        unsafe_store!(cglobal((:UserBreak,libR),Cint), s?1:0)
+    else
+        unsafe_store!(cglobal((:R_interrupts_pending,libR),Cint), s?1:0)
+    end
+    nothing
+end
+
 function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0
