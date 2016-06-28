@@ -46,6 +46,12 @@ Firstly, try setting the `R_HOME` environmental variable to the location of your
 ENV["R_HOME"] = ...
 ```
 
+You may also need to specify the variable `LD_LIBRARY_PATH` before launching Julia, for example
+```bash
+export LD_LIBRARY_PATH="`R RHOME`/lib"
+julia
+```
+
 ### Windows PATH
 
 The `PATH` environmental variable should contain the location of your R binary, and the `HOME` variable should contain the current user's home directory. These need to be set before Julia is started.

@@ -136,16 +136,6 @@ function initEmbeddedR()
         ENV["R_INCLUDE_DIR"] = joinpath(Rhome,"include")
         ENV["R_SHARE_DIR"] = joinpath(Rhome,"share")
 
-        # make sure libR.so points to the correct library
-        # set LD_LIBRARY_PATH unless LD_LIBRARY_PATH is non-empty
-        if !haskey(ENV, "LD_LIBRARY_PATH")
-            Rexe = joinpath(Rhome,"bin","R")
-            LDPaths = readchomp(`$Rexe --slave -e 'cat(Sys.getenv("LD_LIBRARY_PATH"))'`)
-            if !isempty(LDPaths)
-                ENV["LD_LIBRARY_PATH"] = LDPaths
-            end
-        end
-
         # initialize library
         argv = ["REmbeddedJulia","--silent","--no-save"]
         i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
