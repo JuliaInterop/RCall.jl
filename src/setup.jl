@@ -143,7 +143,7 @@ function initEmbeddedR()
             LDPaths = readchomp(`$Rexe --slave -e 'cat(Sys.getenv("LD_LIBRARY_PATH"))'`)
             if !isempty(LDPaths)
                 ENV["LD_LIBRARY_PATH"] = LDPaths*";"*ENV["LD_LIBRARY_PATH"]
-            endg
+            end
         end
 
         # initialize library
