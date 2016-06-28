@@ -97,7 +97,7 @@
           
             <li>
     <li class="toctree-l1 ">
-        <a class="" href="../public/">Public API</a>
+        <a class="" href="../internal/">Internal API</a>
         
     </li>
 <li>
@@ -150,9 +150,9 @@
 <p>RCall provides multiple ways to allow R interacting with Julia. </p>
 <ul>
 <li>R REPL mode</li>
-<li><a href="../public/#RCall.@rput"><code>@rput</code></a> and <a href="../public/#RCall.@rget"><code>@rget</code></a> macros</li>
+<li><a href="../internal/#RCall.@rput"><code>@rput</code></a> and <a href="../internal/#RCall.@rget"><code>@rget</code></a> macros</li>
 <li><code>R""</code> string macro</li>
-<li>A low level API: <a href="../public/#RCall.reval"><code>reval</code></a>, <a href="../public/#RCall.rcall"><code>rcall</code></a> and <a href="../public/#RCall.rcopy"><code>rcopy</code></a> etc.</li>
+<li>A low level API: <a href="../internal/#RCall.reval"><code>reval</code></a>, <a href="../internal/#RCall.rcall"><code>rcall</code></a> and <a href="../internal/#RCall.rcopy"><code>rcopy</code></a> etc.</li>
 </ul>
 <p><a id='R-REPL-mode-1'></a></p>
 <h2 id="r-repl-mode">R REPL mode<a class="headerlink" href="#r-repl-mode" title="Permanent link">&para;</a></h2>
@@ -210,27 +210,27 @@ R&gt; foo + bar
 
 <p><a id='@R_str-string-macro-1'></a></p>
 <h2 id="r_str-string-macro">@R_str string macro<a class="headerlink" href="#r_str-string-macro" title="Permanent link">&para;</a></h2>
-<p>Another way to use RCall is the <a href="../public/#RCall.@R_str"><code>R""</code></a> string macro, it is especially useful in script files.</p>
+<p>Another way to use RCall is the <a href="../internal/#RCall.@R_str"><code>R""</code></a> string macro, it is especially useful in script files.</p>
 <pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  1.08303657 -0.70437371  0.01458469 -0.19445295  1.32762385 -0.51904691
- [7] -0.87741095 -0.43596495 -1.27304514 -0.31671936
+ [1]  0.5869364  2.5185910 -0.4505506 -0.7442412  1.6878126  1.2406749
+ [7] -1.5829119 -1.8653549  0.3668968 -0.2556358
 </code></pre>
 
-<p>This evaluates the expression inside the string in R, and returns the result as an <a href="../public/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
+<p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
 <p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
 <pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.559665
-  1.41333
- -2.08951
- -1.78089
- -0.20946
- -0.080203
- -0.123143
-  0.0525752
-  0.163329
-  1.53513
+ -0.576722
+  0.374444
+ -1.03621
+  0.642335
+  1.52906
+  1.54921
+  1.40985
+  1.77337
+  0.99612
+ -0.532828
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
@@ -238,13 +238,13 @@ RCall.RObject{RCall.VecSxp}
     One Sample t-test
 
 data:  `#JL`$x
-t = -0.15145, df = 9, p-value = 0.883
+t = 1.9014, df = 9, p-value = 0.08968
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.8911346  0.7793006
+ -0.1162679  1.3419904
 sample estimates:
 mean of x
--0.055917
+0.6128613
 </code></pre>
 
 <p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p>
@@ -281,7 +281,7 @@ RCall.RObject{RCall.RealSxp}
 
 <p><a id='RCall-API-1'></a></p>
 <h2 id="rcall-api">RCall API<a class="headerlink" href="#rcall-api" title="Permanent link">&para;</a></h2>
-<p>The <a href="../public/#RCall.reval"><code>reval</code></a> function evaluates any given input string as R code in the R environment. The returned result is an <code>RObject</code> object.</p>
+<p>The <a href="../internal/#RCall.reval"><code>reval</code></a> function evaluates any given input string as R code in the R environment. The returned result is an <code>RObject</code> object.</p>
 <pre><code class="julia">julia&gt; jmtcars = reval(&quot;mtcars&quot;);
 
 julia&gt; size(jmtcars)
@@ -291,7 +291,7 @@ julia&gt; typeof(jmtcars)
 RCall.RObject{RCall.VecSxp}
 </code></pre>
 
-<p>The <a href="../public/#RCall.rcall"><code>rcall</code></a> function is used to construct function calls.</p>
+<p>The <a href="../internal/#RCall.rcall"><code>rcall</code></a> function is used to construct function calls.</p>
 <pre><code class="julia">julia&gt; rcall(:dim, jmtcars)
 RCall.RObject{RCall.IntSxp}
 [1] 32 11
@@ -303,7 +303,7 @@ RCall.RObject{RCall.RealSxp}
 [1] 11
 </code></pre>
 
-<p>The <a href="../public/#RCall.rcopy"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p>
+<p>The <a href="../internal/#RCall.rcopy"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p>
 <pre><code class="julia">julia&gt; rcopy(R&quot;c(1)&quot;)
 1.0
 
@@ -336,7 +336,7 @@ Dict{Symbol,Any} with 2 entries:
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../public/" class="btn btn-neutral float-right" title="Public API">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../internal/" class="btn btn-neutral float-right" title="Internal API">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
         <a href="../installation/" class="btn btn-neutral" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
@@ -370,7 +370,7 @@ Dict{Symbol,Any} with 2 entries:
         <span><a href="../installation/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../public/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../internal/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

@@ -93,7 +93,7 @@
           
             <li>
     <li class="toctree-l1 ">
-        <a class="" href="../public/">Public API</a>
+        <a class="" href="../internal/">Internal API</a>
         
     </li>
 <li>
@@ -173,6 +173,11 @@ sudo apt-get install -y r-base r-base-dev
 <p>If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).</p>
 <p>Firstly, try setting the <code>R_HOME</code> environmental variable to the location of your R installation, which can be found by running <code>R.home()</code> from within R. This can be set in your <code>~/.juliarc.jl</code> file via the <code>ENV</code> global variable, e.g.</p>
 <pre><code class="julia">ENV[&quot;R_HOME&quot;] = ...
+</code></pre>
+
+<p>You may also need to specify the variable <code>LD_LIBRARY_PATH</code> before launching Julia, for example</p>
+<pre><code class="bash">export LD_LIBRARY_PATH=&quot;`R RHOME`/lib&quot;
+julia
 </code></pre>
 
 <p><a id='Windows-PATH-1'></a></p>
