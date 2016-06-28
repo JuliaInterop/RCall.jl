@@ -142,7 +142,7 @@ function initEmbeddedR()
             Rexe = joinpath(Rhome,"bin","R")
             LDPaths = readchomp(`$Rexe --slave -e 'cat(Sys.getenv("LD_LIBRARY_PATH"))'`)
             if !isempty(LDPaths)
-                ENV["LD_LIBRARY_PATH"] = LDPaths*";"*ENV["LD_LIBRARY_PATH"]
+                ENV["LD_LIBRARY_PATH"] = LDPaths
             end
         end
 
