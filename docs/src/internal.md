@@ -1,4 +1,4 @@
-# Public API
+# Internal API
 
 ## Types
 

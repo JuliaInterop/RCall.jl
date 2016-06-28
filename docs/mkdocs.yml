@@ -21,4 +21,4 @@ pages:
 - Introduction: index.md
 - Installation: installation.md
 - Getting started: gettingstarted.md
-- Public API: public.md
+- Internal API: internal.md
