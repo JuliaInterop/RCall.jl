@@ -3,43 +3,49 @@ Render an inline R script, substituting invalid "\$" signs for Julia symbols
 """
 function render_rscript(script::Compat.String)
     symdict = OrderedDict{Compat.String,Any}()
-    sf = protect(rcall_p(:srcfile,"xx"))
     local status
-    local msg
+    local msg = ""
+    while true
+        val, status, msg = parseVector(sexp(script))
 
-    try
-        while true
-            val, status, msg = parseVector(sexp(script), sf)
-
-            if status == 1 || status == 2
-                break
-            end
-
-            # there is a bug in the R parser https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
-            # R_ParseContextLast and R_ParseContext are not documentated, but they seem to work
-
-            # the position of the error byte
-            b = Int(unsafe_load(cglobal((:R_ParseContextLast, RCall.libR), Int32)))
-            # it is unsafe to use `unsafe_string` if the last byte is a part of a unicode,
-            c = Char(unsafe_load(cglobal((:R_ParseContext, RCall.libR), UInt8)+b))
-            c != '\$' && break
-
-            expr,i = parse(script,b+1,greedy=false)
-
-            if isa(expr,Symbol)
-                sym = "$expr"
-            else
-                sym = "($expr)"
-                # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
-                if haskey(symdict, sym)
-                    sym *= "##$k"
-                end
-            end
-            symdict[sym] = expr
-            script = string(script[1:b-1],"`#JL`\$`",sym,'`',script[i:end])
+        if status == 1 || status == 2
+            break
         end
-    finally
-        unprotect(1) #sf
+
+        # there is a bug in the R parser https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
+        # R_ParseContextLast and R_ParseContext are not documentated, but they seem to work
+
+        # the position of the error byte
+        b = Int(unsafe_load(cglobal((:R_ParseContextLast, RCall.libR), Int32)))
+        # it is unsafe to use `unsafe_string` if the last byte is a part of a unicode,
+        c = Char(unsafe_load(cglobal((:R_ParseContext, RCall.libR), UInt8)+b))
+        c != '\$' && break
+
+        ast,i = parse(script,b+1,greedy=false,raise=false)
+
+        if isa(ast,Symbol)
+            sym = "$ast"
+        elseif isa(ast, Expr) && !(ast.head == :error || ast.head == :continue || ast.head == :incomplete)
+            sym = "($ast)"
+            # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
+            if haskey(symdict, sym)
+                sym *= "##$k"
+            end
+        elseif isa(ast, Expr) && (ast.head == :error || ast.head == :continue)
+            status = 3
+            msg = ast.args[1]
+            break
+        elseif isa(ast, Expr) && ast.head == :incomplete
+            status = 2
+            msg = ast.args[1]
+            break
+        else
+            status = 3
+            msg = "unknown render error"
+            break
+        end
+        symdict[sym] = ast
+        script = string(script[1:b-1],"`#JL`\$`",sym,'`',script[i:end])
     end
 
     if status == 1

@@ -12,6 +12,10 @@ using RCall
 
 @test RCall.render_rscript("x = ]")[4] == "unexpected ']'"
 
+@test RCall.render_rscript("x = \$(begin")[3] == 2
+
+@test RCall.render_rscript("x = \$(begin)")[3] == 3
+
 @test RCall.render_rscript("x = ")[4] == "unexpected end of input"
 
 @test rcopy(R"sum($[7,1,3])") == sum([7,1,3])

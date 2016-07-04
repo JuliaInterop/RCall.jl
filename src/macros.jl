@@ -60,7 +60,7 @@ values from R via the return value.
 """
 macro R_str(script)
     script, symdict, status, msg = render_rscript(script)
-    status != 1 && error(msg)
+    status != 1 && error("RCall.jl: $msg")
 
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
