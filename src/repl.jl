@@ -11,13 +11,8 @@ function repl_eval_inline_julia_code(symdict::OrderedDict)
         push!(blk_ld.args,:(env[$rsym] = $(expr)))
     end
     quote
-        let env = RCall.protect(RCall.newEnvironment())
-            globalEnv["#JL"] = env
-            try
-                $blk_ld
-            finally
-                RCall.unprotect(1)
-            end
+        let env = RCall.reval_p(RCall.rparse_p("`#JL` <- new.env()"))
+            $blk_ld
             nothing
         end
     end
@@ -31,11 +26,13 @@ function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
         write(stderr, "Error: $msg\n")
         return nothing
     end
-    try
-        eval(Main, repl_eval_inline_julia_code(symdict))
-    catch e
-        display_error(stderr, e)
-        return nothing
+    if length(symdict) > 0
+        try
+            eval(Main, repl_eval_inline_julia_code(symdict))
+        catch e
+            display_error(stderr, e)
+            return nothing
+        end
     end
     try
         expr = protect(sexp(parseVector(sexp(script))[1]))
