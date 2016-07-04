@@ -2,7 +2,7 @@
 Render an inline R script, substituting invalid "\$" signs for Julia symbols
 """
 function render_rscript(script::Compat.String)
-    symdict = OrderedDict{Compat.ASCIIString,Any}()
+    symdict = OrderedDict{Compat.String,Any}()
     sf = protect(rcall_p(:srcfile,"xx"))
     local status
     local msg
@@ -15,41 +15,16 @@ function render_rscript(script::Compat.String)
                 break
             end
 
-            if !isascii(script)
-                msg = "Unicode R scripts not supported, due to\n    https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524"
-                break
-            end
+            # there is a bug in the R parser https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
+            # R_ParseContextLast and R_ParseContext are not documentated, but they seem to work
 
-            parsedata = protect(rcall_p(:getParseData, sf))
-            n = length(parsedata[1])
-
-            lineno = parsedata[1][n]
-            charno = parsedata[2][n] # this is the character no., not byte number
-
-            c = rcopy(Compat.UTF8String, parsedata[9][n])
-            unprotect(1)
-
-            c != "\$" && break
-
-            # skip to string location
-            i = start(script)
-            for j = 1:lineno-1
-                i = search(script,'\n',i)
-                i = nextind(script,i)
-            end
-            for j = 1:charno-1
-                i = nextind(script,i)
-            end
-
-            # assuming no unicode, see
-            # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
-            i_stop = prevind(script,i)
-
-            c,i = next(script,i)
-
+            # the position of the error byte
+            b = Int(unsafe_load(cglobal((:R_ParseContextLast, RCall.libR), Int32)))
+            # it is unsafe to use `unsafe_string` if the last byte is a part of a unicode,
+            c = Char(unsafe_load(cglobal((:R_ParseContext, RCall.libR), UInt8)+b))
             c != '\$' && break
 
-            expr,i = parse(script,i,greedy=false)
+            expr,i = parse(script,b+1,greedy=false)
 
             if isa(expr,Symbol)
                 sym = "$expr"
@@ -61,12 +36,12 @@ function render_rscript(script::Compat.String)
                 end
             end
             symdict[sym] = expr
-            script = string(script[1:i_stop],"`#JL`\$`",sym,'`',script[i:end])
+            script = string(script[1:b-1],"`#JL`\$`",sym,'`',script[i:end])
         end
-
     finally
-        unprotect(1)
+        unprotect(1) #sf
     end
+
     if status == 1
         return script, symdict, status, msg
     else
