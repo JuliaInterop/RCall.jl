@@ -5,7 +5,7 @@ function return_callback(s)
     status == 1 || status >= 3
 end
 
-function repl_eval_inline_julia_code(symdict::OrderedDict)
+function generate_inline_julia_code(symdict::OrderedDict)
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
         push!(blk_ld.args,:(env[$rsym] = $(expr)))
@@ -28,7 +28,7 @@ function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
     end
     if length(symdict) > 0
         try
-            eval(Main, repl_eval_inline_julia_code(symdict))
+            eval(Main, generate_inline_julia_code(symdict))
         catch e
             display_error(stderr, e)
             return nothing

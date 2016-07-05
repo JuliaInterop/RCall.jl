@@ -55,15 +55,6 @@ reval(str::AbstractString, env=Const.GlobalEnv) = reval(rparse_p(str),env)
 reval(sym::Symbol, env=Const.GlobalEnv) = reval(sexp(sym),env)
 
 
-"""
-Evaluate and convert the result of a string as an R expression.
-"""
-rcopy(str::AbstractString) = rcopy(reval_p(rparse_p(str)))
-rcopy(sym::Symbol) = rcopy(reval_p(sexp(sym)))
-rcopy{T}(::Type{T}, str::AbstractString) = rcopy(T, reval_p(rparse_p(str)))
-rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))
-
-
 "A pure julia wrapper of R_ParseVector"
 function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
@@ -73,7 +64,7 @@ function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
                 st,-1,status,sf)
     unprotect(1)
     s = status[1]
-    msg = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), Cchar))
+    msg::Compat.String = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), Cchar))
     val, s, msg
 end
 
@@ -91,3 +82,12 @@ rparse_p(st::AbstractString) = rparse_p(sexp(st))
 
 "Parse a string as an R expression, returning an RObject."
 rparse(st::AbstractString) = RObject(rparse_p(st))
+
+
+"""
+Evaluate and convert the result of a string as an R expression.
+"""
+rcopy(str::AbstractString) = rcopy(reval_p(rparse_p(str)))
+rcopy(sym::Symbol) = rcopy(reval_p(sexp(sym)))
+rcopy{T}(::Type{T}, str::AbstractString) = rcopy(T, reval_p(rparse_p(str)))
+rcopy{T}(::Type{T}, sym::Symbol) = rcopy(T, reval_p(sexp(sym)))

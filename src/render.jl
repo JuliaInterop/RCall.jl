@@ -50,9 +50,5 @@ function render_rscript(script::Compat.String)
         script = string(script[1:b-1],"`#JL`\$`",sym,'`',script[i:end])
     end
 
-    if status == 1
-        return script, symdict, status, msg
-    else
-        return nothing, nothing, status, msg
-    end
+    return script, symdict, status, msg
 end
