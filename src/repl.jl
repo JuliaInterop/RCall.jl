@@ -26,15 +26,10 @@ function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
         write(stderr, "Error: $msg\n")
         return nothing
     end
-    if length(symdict) > 0
-        try
-            eval(Main, generate_inline_julia_code(symdict))
-        catch e
-            display_error(stderr, e)
-            return nothing
-        end
-    end
     try
+        if length(symdict) > 0
+            eval(Main, generate_inline_julia_code(symdict))
+        end
         expr = protect(sexp(parseVector(sexp(script))[1]))
         for e in expr
             val, status = tryEval(e, sexp(Const.GlobalEnv))
