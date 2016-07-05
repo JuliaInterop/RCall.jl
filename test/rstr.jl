@@ -8,9 +8,13 @@ using RCall
 
 @test RCall.render_rscript("x = \$(rand(1))")[3] == 1
 
-@test contains(RCall.render_rscript("x = 'α'; x = \$y")[4], "not supported")
+@test RCall.render_rscript("x = \$α")[2]["α"] == :α
 
 @test RCall.render_rscript("x = ]")[4] == "unexpected ']'"
+
+@test RCall.render_rscript("x = \$(begin")[3] == 2
+
+@test RCall.render_rscript("x = \$(begin)")[3] == 3
 
 @test RCall.render_rscript("x = ")[4] == "unexpected end of input"
 

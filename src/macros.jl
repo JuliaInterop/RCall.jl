@@ -60,23 +60,24 @@ values from R via the return value.
 """
 macro R_str(script)
     script, symdict, status, msg = render_rscript(script)
-    status != 1 && error(msg)
+    status != 1 && error("RCall.jl: $msg")
 
-    blk_ld = Expr(:block)
-    for (rsym, expr) in symdict
-        push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
-    end
-    quote
-        let env = protect(newEnvironment())
-            globalEnv["#JL"] = env
-            try
-                $blk_ld
-            finally
-                unprotect(1)
-            end
-            nothing
+    if length(symdict) > 0
+        blk_ld = Expr(:block)
+        for (rsym, expr) in symdict
+            push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
         end
-        reval($script, globalEnv)
+        return quote
+            let env = reval_p(rparse_p("`#JL` <- new.env()"))
+                $blk_ld
+                nothing
+            end
+            reval($script, globalEnv)
+        end
+    else
+        return quote
+            reval($script, globalEnv)
+        end
     end
 end
 
