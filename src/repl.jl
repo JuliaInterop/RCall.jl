@@ -132,6 +132,14 @@ end
 function LineEdit.complete_line(c::RCompletionProvider, s)
     buf = s.input_buffer
     partial = Compat.String(buf.data[1:buf.ptr-1])
+    # complete latex
+    full = LineEdit.input_string(s)
+    ret, range, should_complete = REPLCompletions.bslash_completions(full, endof(partial))[2]
+    if length(ret) > 0 && should_complete
+        return ret, partial[range], true
+    end
+
+    # complete r
     rcall(rlang(Symbol(":::"), :utils, Symbol(".assignLinebuffer")), partial)
     rcall(rlang(Symbol(":::"), :utils, Symbol(".assignEnd")), length(partial))
     token = rcopy(rcall(rlang(Symbol(":::"), :utils, Symbol(".guessTokenFromLine"))))
@@ -139,13 +147,6 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     ret = rcopy(Array, rcall(rlang(Symbol(":::"), :utils, Symbol(".retrieveCompletions"))))
     if length(ret) > 0
         return ret, token, true
-    end
-
-    # complete latex
-    full = LineEdit.input_string(s)
-    ret2, range, should_complete = REPLCompletions.bslash_completions(full, endof(partial))[2]
-    if length(ret2) > 0 && should_complete
-        return ret2, partial[range], true
     end
 
     return Compat.String[], 0:-1, false
