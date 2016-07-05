@@ -71,12 +71,12 @@ function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
-# mainly use to prevent event_callback stealing rprint output
+# mainly use to prevent flush_print_buffer stealing rprint output
 global PrintBufferLocked = false
 
 function flush_print_buffer(io::IO)
     global PrintBufferLocked
-    # dump printBuffer's content which it is not locked
+    # dump printBuffer's content when it is not locked
     if ! PrintBufferLocked
         nb_available(printBuffer) != 0  && write(io, takebuf_string(printBuffer))
     end

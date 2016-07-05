@@ -6,7 +6,7 @@ if Compat.is_unix()
 end
 
 function event_callback()
-    # dump printBuffer STDOUT when available
+    # dump printBuffer to STDOUT when available
     flush_print_buffer(STDOUT)
     nothing
 end

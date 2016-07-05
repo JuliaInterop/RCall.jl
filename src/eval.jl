@@ -73,7 +73,7 @@ function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
                 st,-1,status,sf)
     unprotect(1)
     s = status[1]
-    msg = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
+    msg = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), Cchar))
     val, s, msg
 end
 
