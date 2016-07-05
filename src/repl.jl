@@ -1,4 +1,4 @@
-import Base: REPL, LineEdit
+import Base: LineEdit, REPL, REPLCompletions
 
 function return_callback(s)
     status = render(Compat.String(LineEdit.buffer(s)))[3]
@@ -139,9 +139,16 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     ret = rcopy(Array, rcall(rlang(Symbol(":::"), :utils, Symbol(".retrieveCompletions"))))
     if length(ret) > 0
         return ret, token, true
-    else
-        return Compat.String[], 0:-1, false
     end
+
+    # complete latex
+    full = LineEdit.input_string(s)
+    ret2, range, should_complete = REPLCompletions.bslash_completions(full, endof(partial))[2]
+    if length(ret2) > 0 && should_complete
+        return ret2, partial[range], true
+    end
+
+    return Compat.String[], 0:-1, false
 end
 
 function create_r_repl(repl, main)

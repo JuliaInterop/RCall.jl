@@ -62,6 +62,18 @@ check_repl_stdout("pineapple")
 send_repl("mtca\t", false)
 check_repl_stdout("mtcars")
 
+send_repl("")
+check_repl_stdout("\n")
+
+send_repl("\\alp\t", false)
+check_repl_stdout("\\alpha")
+
+send_repl("\t", false)
+check_repl_stdout("α")
+
+send_repl("")
+check_repl_stdout("\n")
+
 send_repl("foo]")
 check_repl_stderr("unexpected")
 
