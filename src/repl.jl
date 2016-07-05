@@ -1,7 +1,7 @@
 import Base: REPL, LineEdit
 
 function return_callback(s)
-    _, _, status, _ = render_rscript(Compat.String(LineEdit.buffer(s)))
+    status = render(Compat.String(LineEdit.buffer(s)))[3]
     status == 1 || status >= 3
 end
 
@@ -21,7 +21,7 @@ end
 function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
     local status
     local val
-    script, symdict, status, msg = render_rscript(script)
+    script, symdict, status, msg = render(script)
     if status != 1
         write(stderr, "Error: $msg\n")
         return nothing
@@ -82,7 +82,7 @@ function bracketed_paste_callback(s, o...)
             nextpos = endof(input)
         end
         block = input[oldpos:nextpos]
-        status = render_rscript(block)[3]
+        status = render(block)[3]
 
         if status >= 3  || (status == 2 && done(input, nextpos+1)) ||
                 (done(input, nextpos+1) && !endswith(input, '\n'))

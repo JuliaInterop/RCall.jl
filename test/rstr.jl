@@ -1,22 +1,22 @@
 using RCall
 
-@test RCall.render_rscript("x = 1")[3] == 1
+@test RCall.render("x = 1")[3] == 1
 
-@test RCall.render_rscript("x = 'α'")[3] == 1
+@test RCall.render("x = 'α'")[3] == 1
 
-@test RCall.render_rscript("x = \$y")[3] == 1
+@test RCall.render("x = \$y")[3] == 1
 
-@test RCall.render_rscript("x = \$(rand(1))")[3] == 1
+@test RCall.render("x = \$(rand(1))")[3] == 1
 
-@test RCall.render_rscript("x = \$α")[2]["α"] == :α
+@test RCall.render("x = \$α")[2]["α"] == :α
 
-@test RCall.render_rscript("x = ]")[4] == "unexpected ']'"
+@test RCall.render("x = ]")[4] == "unexpected ']'"
 
-@test RCall.render_rscript("x = \$(begin")[3] == 2
+@test RCall.render("x = \$(begin")[3] == 2
 
-@test RCall.render_rscript("x = \$(begin)")[3] == 3
+@test RCall.render("x = \$(begin)")[3] == 3
 
-@test RCall.render_rscript("x = ")[4] == "unexpected end of input"
+@test RCall.render("x = ")[4] == "unexpected end of input"
 
 @test rcopy(R"sum($[7,1,3])") == sum([7,1,3])
 

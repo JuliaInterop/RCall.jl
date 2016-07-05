@@ -1,15 +1,14 @@
 """
 Render an inline R script, substituting invalid "\$" signs for Julia symbols
 """
-function render_rscript(script::Compat.String)
+function render(script::Compat.String)
     symdict = OrderedDict{Compat.String,Any}()
     local status
     local msg = ""
     while true
-        val, status, msg = parseVector(sexp(script))
-
-        if status == 1 || status == 2
-            break
+        status = parseVector(sexp(script))[2]
+        if status != 1
+            msg = getParseErrorMsg()
         end
 
         #

@@ -63,16 +63,18 @@ function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
                 st,-1,status,sf)
     unprotect(1)
-    s = status[1]
-    msg::Compat.String = s == 1 ? "" : Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), Cchar))
-    val, s, msg
+    val, status[1]
+end
+
+function getParseErrorMsg()
+    Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
 end
 
 "Parse a string as an R expression, returning a Sxp pointer."
 function rparse_p(st::Ptr{StrSxp})
-    val, status, msg = parseVector(st)
+    val, status = parseVector(st)
     if status == 2 || status == 3
-        error("RCall.jl: ", msg)
+        error("RCall.jl: ", getParseErrorMsg())
     elseif status == 4
         throw(EOFError())
     end
