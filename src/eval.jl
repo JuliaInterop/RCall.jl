@@ -66,6 +66,7 @@ function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     val, status[1]
 end
 
+"Get the R parser error msg for the previous parsing result."
 function getParseErrorMsg()
     Compat.unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
 end

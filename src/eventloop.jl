@@ -1,10 +1,12 @@
 if Compat.is_unix()
+    "R eventloop hook on Unix system"
     function polled_events()
         event_callback()
         nothing
     end
 end
 
+"Event Callback: allows R to process Julia events when R is busy, e.g., write output to STDOUT."
 function event_callback()
     # dump printBuffer to STDOUT when available
     flush_print_buffer(STDOUT)
@@ -21,6 +23,7 @@ function interrupts_pending(s::Bool=true)
     nothing
 end
 
+# this shouldn't exists if we could hook into Julia eventloop.
 function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0
