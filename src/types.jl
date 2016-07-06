@@ -1,6 +1,6 @@
 """
-R symbolic expression (`SxpPtr`): these are represented by a pointer to a
-symbolic expression record (`Sxp`).
+RCall.jl's type `Sxp` mirrors the R symbolic expression record `SEXPREC` in R API.
+These are represented by a pointer `SxpPtr` (which is called `SEXP` in R API).
 """
 abstract Sxp # SEXPREC
 typealias SxpPtr{S<:Sxp} Ptr{S} # SEXP
