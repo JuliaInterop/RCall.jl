@@ -11,7 +11,9 @@ function render(script::Compat.String)
             msg = getParseErrorMsg()
         end
 
-        #
+        # break if not parse error (status = 3)
+        (status != 3) && break
+
         # due to a bug in the R parser https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
         # parse and getParseData do not work with unicode
         # R_ParseContextLast and R_ParseContext are not documentated, but they seem to work
