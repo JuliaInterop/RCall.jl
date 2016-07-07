@@ -82,19 +82,30 @@ end
 sexp(a::AbstractArray) = sexp(VecSxp,a)
 
 function rcopy{T,S<:VectorSxp}(::Type{Array{T}}, s::Ptr{S})
+    protect(s)
     v = T[rcopy(T,e) for e in s]
-    reshape(v,size(s))
+    ret = reshape(v,size(s))
+    unprotect(1)
+    ret
+end
+function rcopy{T,S<:VectorSxp}(::Type{Vector{T}}, s::Ptr{S})
+    protect(s)
+    ret = T[rcopy(T,e) for e in s]
+    unprotect(1)
+    ret
 end
 
 # StrSxp
-sexp(::Type{StrSxp}, s::CharSxpPtr) =
-    ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
+sexp(::Type{StrSxp}, s::CharSxpPtr) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
+"Create a `StrSxp` from an `Symbol`"
+sexp(::Type{StrSxp},s::Symbol) = sexp(StrSxp,sexp(CharSxp,s))
 "Create a `StrSxp` from an `AbstractString`"
 sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
 sexp(st::AbstractString) = sexp(StrSxp,st)
 "Create a `StrSxp` from an Abstract String Array"
 sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
 
+rcopy(::Type{Vector}, s::StrSxpPtr) = rcopy(Vector{Compat.String}, s)
 rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{Compat.String}, s)
 rcopy(::Type{Symbol}, s::StrSxpPtr) = rcopy(Symbol,s[1])
 rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
@@ -130,6 +141,7 @@ for (J,S) in ((:Integer,:IntSxp),
             copy!(a,unsafe_vec(s))
             a
         end
+        rcopy(::Type{Vector},s::Ptr{$S}) = rcopy(Vector{eltype($S)},s)
         rcopy(::Type{Array},s::Ptr{$S}) = rcopy(Array{eltype($S)},s)
     end
 end
@@ -185,6 +197,7 @@ function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
     a
 end
 rcopy(::Type{Array},s::Ptr{LglSxp}) = rcopy(Array{Bool},s)
+rcopy(::Type{Vector},s::Ptr{LglSxp}) = rcopy(Vector{Bool},s)
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a = BitArray(size(s)...)
     v = unsafe_vec(s)
@@ -220,17 +233,24 @@ sexp(d::Associative) = sexp(VecSxp,d)
 
 
 function rcopy{A<:Associative,S<:VectorSxp}(::Type{A}, s::Ptr{S})
-    a = A()
-    K = keytype(a)
-    V = valtype(a)
-    for (k,v) in zip(getnames(s),s)
-        a[rcopy(K,k)] = rcopy(V,v)
+    protect(s)
+    local a
+    try
+        a = A()
+        K = keytype(a)
+        V = valtype(a)
+        for (k,v) in zip(getnames(s),s)
+            a[rcopy(K,k)] = rcopy(V,v)
+        end
+    finally
+        unprotect(1)
     end
     a
 end
 
 function rcopy{A<:Associative,S<:PairListSxp}(::Type{A}, s::Ptr{S})
     protect(s)
+    local a
     try
         a = A()
         K = keytype(a)

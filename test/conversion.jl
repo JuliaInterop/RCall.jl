@@ -25,9 +25,10 @@ r = RObject(v)
 @test rcopy(r) == v
 @test rcopy(r[1]) == v[1]
 @test rcopy(Array, r)[1] == v[1]
+@test rcopy(Vector, r)[1] == v[1]
 @test rcopy(Array{Compat.String}, r)[2] == v[2]
 @test rcopy(Array{Symbol}, r)[2] == Symbol(v[2])
-
+@test isa(RCall.sexp(StrSxp, :a), Ptr{StrSxp})
 
 
 # logical
@@ -43,6 +44,8 @@ r = RObject(v)
 @test length(r) == length(v)
 @test size(r) == size(v)
 @test rcopy(r) == v
+@test rcopy(Vector, r) == v
+@test rcopy(Array, r) == v
 @test r[1] === convert(Cint,v[1])
 
 
@@ -62,6 +65,7 @@ r = RObject(v)
 @test size(r) == size(v)
 @test isa(rcopy(r), Vector{Cint})
 @test rcopy(r) == collect(v)
+@test rcopy(Vector, r) == collect(v)
 @test r[1] === convert(Cint,v[1])
 @test r[3] === convert(Cint,v[3])
 r[2] = -100
@@ -77,6 +81,7 @@ r = RObject(m)
 @test size(r) == size(m)
 @test isa(rcopy(r), Matrix{Cint})
 @test rcopy(r) == m
+@test rcopy(Array, r) == m
 @test r[1] === convert(Cint,m[1])
 @test r[3] === convert(Cint,m[3])
 @test r[2,2] === convert(Cint,m[2,2])
@@ -125,6 +130,7 @@ r = RObject(v)
 @test size(r) == size(v)
 @test isa(rcopy(r), Vector{Float64})
 @test rcopy(r) == collect(v)
+@test rcopy(Vector, r) == collect(v)
 @test r[1] === convert(Float64,v[1])
 @test r[3] === convert(Float64,v[3])
 
@@ -135,6 +141,7 @@ r = RObject(m)
 @test size(r) == size(m)
 @test isa(rcopy(r), Matrix{Float64})
 @test rcopy(r) == m
+@test rcopy(Array, r) == m
 @test r[1] === convert(Float64,m[1])
 @test r[3] === convert(Float64,m[3])
 @test r[2,2] === convert(Float64,m[2,2])
@@ -177,6 +184,7 @@ r = RObject(v)
 @test size(r) == size(v)
 @test isa(rcopy(r), Vector{Complex128})
 @test rcopy(r) == collect(v)
+@test rcopy(Vector, r) == collect(v)
 @test r[1] === convert(Complex128,v[1])
 @test r[3] === convert(Complex128,v[3])
 
@@ -187,6 +195,7 @@ r = RObject(m)
 @test size(r) == size(m)
 @test isa(rcopy(r), Matrix{Complex128})
 @test rcopy(r) == m
+@test rcopy(Array, r) == m
 @test r[1] === convert(Complex128,m[1])
 @test r[3] === convert(Complex128,m[3])
 @test r[2,2] === convert(Complex128,m[2,2])
