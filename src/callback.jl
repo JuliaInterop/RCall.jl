@@ -86,11 +86,10 @@ Register finalizer to be called by the R GC.
 """
 function registerCFinalizerEx(s::ExtPtrSxpPtr)
     protect(s)
-    val = ccall((:R_RegisterCFinalizerEx,libR),Void,
+    ccall((:R_RegisterCFinalizerEx,libR),Void,
           (Ptr{ExtPtrSxp}, Ptr{Void}, Cint),
           s,juliaDecref[],0)
     unprotect(1)
-    val
 end
 
 
