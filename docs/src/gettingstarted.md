@@ -119,7 +119,8 @@ The [`reval`](@ref) function evaluates any given input string as R code in the R
 
 ```@repl 1
 jmtcars = reval("mtcars");
-size(jmtcars)
+names(jmtcars)
+jmtcars[:mpg]
 typeof(jmtcars)
 ```
 

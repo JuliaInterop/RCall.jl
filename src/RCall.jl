@@ -6,11 +6,12 @@ import Compat.String
 import DataStructures: OrderedDict
 
 import Base: eltype, show, convert, isascii,
-    length, size, getindex, setindex!, start, next, done
+    length, size, getindex, setindex!, start, next, done, names
 
 export RObject,
-   Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp, ClosSxp,
-   getattrib, setattrib!, getnames, setnames!, getclass, setclass!,
+   Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
+   ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
+   getattrib, setattrib!, getnames, setnames!, getclass, setclass!, attributes,
    globalEnv,
    isna, anyna, isnull,
    rcopy, rparse, rprint, reval, rcall, rlang,

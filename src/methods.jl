@@ -237,13 +237,19 @@ size(r::RObject) = size(sexp(r))
 """
 Returns the names of an R vector.
 """
-getnames{S<:VectorSxp}(s::Ptr{S}) = getattrib(s,Const.NamesSymbol)
+getnames{S<:Sxp}(s::Ptr{S}) = getattrib(s,Const.NamesSymbol)
 getnames(r::RObject) = RObject(getnames(sexp(r)))
+
+
+"""
+Returns the names of an R vector, the result is converted to a Julia symbol array.
+"""
+names(r::RObject) = rcopy(Array{Symbol}, getnames(sexp(r)))
 
 """
 Set the names of an R vector.
 """
-setnames!{S<:VectorSxp}(s::Ptr{S}, n::Ptr{StrSxp}) = setattrib!(s,Const.NamesSymbol,n)
+setnames!{S<:Sxp}(s::Ptr{S}, n::Ptr{StrSxp}) = setattrib!(s,Const.NamesSymbol,n)
 setnames!(r::RObject,n) = RObject(setnames!(sexp(r),sexp(StrSxp,n)))
 
 """

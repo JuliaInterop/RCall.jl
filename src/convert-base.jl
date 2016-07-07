@@ -31,7 +31,6 @@ sexp(::Type{Float64},x) = convert(Float64,x)
 sexp(::Type{Complex128},x) = convert(Complex128,x)
 
 
-
 # NilSxp
 sexp(::Void) = sexp(Const.NilValue)
 rcopy(::Ptr{NilSxp}) = nothing
@@ -41,15 +40,11 @@ rcopy(::Ptr{NilSxp}) = nothing
 "Create a `SymSxp` from a `Symbol`"
 sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}, (Ptr{UInt8},), s)
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
-
-"Generic function for constructing Sxps from Julia objects."
 sexp(s::Symbol) = sexp(SymSxp,s)
-
 rcopy(::Type{Symbol},ss::SymSxp) = Symbol(rcopy(AbstractString,ss))
 rcopy(::Type{AbstractString},ss::SymSxp) = rcopy(AbstractString,ss.name)
 rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
     rcopy(T,unsafe_load(s))
-
 
 
 # CharSxp
@@ -67,27 +62,13 @@ end
 sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, string(st))
 sexp(::Type{CharSxp}, sym::Symbol) = sexp(CharSxp, string(sym))
 
-if isdefined(Core, :String)
-    rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, String(unsafe_vec(s)))
-else
-    rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, bytestring(unsafe_vec(s)))
-end
+rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, Compat.String(unsafe_vec(s)))
 rcopy(::Type{Symbol},s::CharSxpPtr) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
 
-"Create a `StrSxp` from an `AbstractString`"
-sexp(::Type{StrSxp}, s::CharSxpPtr) =
-    ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
-
-sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
-
-sexp(st::AbstractString) = sexp(StrSxp,st)
-
-
-
 
 # general vectors
-function sexp{S<:VectorListSxp}(::Type{S}, a::AbstractArray)
+function sexp{S<:VectorSxp}(::Type{S}, a::AbstractArray)
     ra = protect(allocArray(S, size(a)...))
     try
         for i in 1:length(a)
@@ -105,18 +86,21 @@ function rcopy{T,S<:VectorSxp}(::Type{Array{T}}, s::Ptr{S})
     reshape(v,size(s))
 end
 
-
 # StrSxp
+sexp(::Type{StrSxp}, s::CharSxpPtr) =
+    ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
+"Create a `StrSxp` from an `AbstractString`"
+sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
+sexp(st::AbstractString) = sexp(StrSxp,st)
+"Create a `StrSxp` from an Abstract String Array"
 sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
-if isdefined(Core, :String)
-    rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{String}, s)
-else
-    rcopy(::Type{Array},s::StrSxpPtr) = rcopy(Array{isascii(s) ? ASCIIString : UTF8String}, s)
-end
+
+rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{Compat.String}, s)
+rcopy(::Type{Symbol}, s::StrSxpPtr) = rcopy(Symbol,s[1])
 rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
 
 
-# LglSxp, IntSxp, RealSxp, CplxSxp
+# IntSxp, RealSxp, CplxSxp
 for (J,S) in ((:Integer,:IntSxp),
                  (:Real, :RealSxp),
                  (:Complex, :CplxSxp))
