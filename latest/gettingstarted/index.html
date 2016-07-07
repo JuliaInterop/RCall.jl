@@ -152,7 +152,7 @@
 <li>R REPL mode</li>
 <li><a href="../internal/#RCall.@rput"><code>@rput</code></a> and <a href="../internal/#RCall.@rget"><code>@rget</code></a> macros</li>
 <li><code>R""</code> string macro</li>
-<li>A low level API: <a href="../internal/#RCall.reval"><code>reval</code></a>, <a href="../internal/#RCall.rcall"><code>rcall</code></a> and <a href="../internal/#RCall.rcopy"><code>rcopy</code></a> etc.</li>
+<li>A low level API: <a href="../@ref"><code>reval</code></a>, <a href="../@ref"><code>rcall</code></a> and <a href="../@ref"><code>rcopy</code></a> etc.</li>
 </ul>
 <p><a id='R-REPL-mode-1'></a></p>
 <h2 id="r-repl-mode">R REPL mode<a class="headerlink" href="#r-repl-mode" title="Permanent link">&para;</a></h2>
@@ -213,24 +213,24 @@ R&gt; foo + bar
 <p>Another way to use RCall is the <a href="../internal/#RCall.@R_str"><code>R""</code></a> string macro, it is especially useful in script files.</p>
 <pre><code class="julia">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  0.99989461  0.01149390 -1.72381335  1.29845940  1.23686222  0.23418519
- [7]  0.60784926 -0.08587089  0.01814739 -0.60687787
+ [1] -0.37080937 -0.76627646 -1.71418151  0.04891111  0.41415133 -0.59126752
+ [7]  0.41775316 -1.15685965  0.51960674 -1.10239143
 </code></pre>
 
 <p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p>
 <p>The <code>R""</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p>
 <pre><code class="julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.336804
- -0.0694161
-  1.86556
- -0.0625691
-  0.418098
- -0.149085
- -0.358114
- -0.0801718
-  0.908685
-  2.92383
+ -0.598157
+  0.921028
+  0.696831
+ -0.223134
+  0.218456
+ -2.65941
+ -1.43595
+  0.419272
+ -0.123107
+  1.93537
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
@@ -238,13 +238,13 @@ RCall.RObject{RCall.VecSxp}
     One Sample t-test
 
 data:  `#JL`$x
-t = 1.7183, df = 9, p-value = 0.1199
+t = -0.2094, df = 9, p-value = 0.8388
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.1814907  1.3282161
+ -1.0018566  0.8320969
 sample estimates:
-mean of x
-0.5733627
+  mean of x
+-0.08487985
 </code></pre>
 
 <p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p>
@@ -281,17 +281,34 @@ RCall.RObject{RCall.RealSxp}
 
 <p><a id='RCall-API-1'></a></p>
 <h2 id="rcall-api">RCall API<a class="headerlink" href="#rcall-api" title="Permanent link">&para;</a></h2>
-<p>The <a href="../internal/#RCall.reval"><code>reval</code></a> function evaluates any given input string as R code in the R environment. The returned result is an <code>RObject</code> object.</p>
+<p>The <a href="../@ref"><code>reval</code></a> function evaluates any given input string as R code in the R environment. The returned result is an <code>RObject</code> object.</p>
 <pre><code class="julia">julia&gt; jmtcars = reval(&quot;mtcars&quot;);
 
-julia&gt; size(jmtcars)
-(11,)
+julia&gt; names(jmtcars)
+11-element Array{Symbol,1}:
+ :mpg
+ :cyl
+ :disp
+ :hp
+ :drat
+ :wt
+ :qsec
+ :vs
+ :am
+ :gear
+ :carb
+
+julia&gt; jmtcars[:mpg]
+RCall.RObject{RCall.RealSxp}
+ [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4
+[16] 10.4 14.7 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7
+[31] 15.0 21.4
 
 julia&gt; typeof(jmtcars)
 RCall.RObject{RCall.VecSxp}
 </code></pre>
 
-<p>The <a href="../internal/#RCall.rcall"><code>rcall</code></a> function is used to construct function calls.</p>
+<p>The <a href="../@ref"><code>rcall</code></a> function is used to construct function calls.</p>
 <pre><code class="julia">julia&gt; rcall(:dim, jmtcars)
 RCall.RObject{RCall.IntSxp}
 [1] 32 11
@@ -303,7 +320,7 @@ RCall.RObject{RCall.RealSxp}
 [1] 11
 </code></pre>
 
-<p>The <a href="../internal/#RCall.rcopy"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p>
+<p>The <a href="../@ref"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p>
 <pre><code class="julia">julia&gt; rcopy(R&quot;c(1)&quot;)
 1.0
 

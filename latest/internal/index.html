@@ -237,102 +237,113 @@ RObject{RealSxp}
 <p>R weak reference</p>
 <p><a id='Methods-1'></a></p>
 <h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
-<p><a id='Base.eltype' href='#Base.eltype'>#</a>
-<strong><code>Base.eltype</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='Base.eltype-Tuple{Type{RCall.LglSxp}}' href='#Base.eltype-Tuple{Type{RCall.LglSxp}}'>#</a>
+<strong><code>Base.eltype</code></strong> &mdash; <em>Method</em>.</p>
 <p>Element types of R vectors.</p>
-<p><a id='Base.getindex' href='#Base.getindex'>#</a>
-<strong><code>Base.getindex</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='Base.getindex-Tuple{Ptr{RCall.EnvSxp},Ptr{RCall.SymSxp}}' href='#Base.getindex-Tuple{Ptr{RCall.EnvSxp},Ptr{RCall.SymSxp}}'>#</a>
+<strong><code>Base.getindex</code></strong> &mdash; <em>Method</em>.</p>
 <p>extract the value of symbol s in the environment e</p>
+<p><a id='Base.getindex-Tuple{Ptr{S<:RCall.PairListSxp},Integer}' href='#Base.getindex-Tuple{Ptr{S<:RCall.PairListSxp},Integer}'>#</a>
+<strong><code>Base.getindex</code></strong> &mdash; <em>Method</em>.</p>
 <p>extract the i-th element of LangSxp l</p>
-<p>String indexing finds the first element with the matching name</p>
+<p><a id='Base.getindex-Tuple{Ptr{S<:RCall.VectorAtomicSxp},Real}' href='#Base.getindex-Tuple{Ptr{S<:RCall.VectorAtomicSxp},Real}'>#</a>
+<strong><code>Base.getindex</code></strong> &mdash; <em>Method</em>.</p>
 <p>Indexing into <code>VectorSxp</code> types uses Julia indexing into the <code>vec</code> result, except for <code>StrSxp</code> and the <code>VectorListSxp</code> types, which must apply <code>sexp</code> to the <code>Ptr{Void}</code> obtained by indexing into the <code>vec</code> result.</p>
-<p><a id='Base.isascii' href='#Base.isascii'>#</a>
-<strong><code>Base.isascii</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='Base.getindex-Tuple{Ptr{S<:RCall.VectorSxp},AbstractString}' href='#Base.getindex-Tuple{Ptr{S<:RCall.VectorSxp},AbstractString}'>#</a>
+<strong><code>Base.getindex</code></strong> &mdash; <em>Method</em>.</p>
+<p>String indexing finds the first element with the matching name</p>
+<p><a id='Base.isascii-Tuple{RCall.CharSxp}' href='#Base.isascii-Tuple{RCall.CharSxp}'>#</a>
+<strong><code>Base.isascii</code></strong> &mdash; <em>Method</em>.</p>
 <p>Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).  * 0x00_0002_00 (bit 1): set of bytes (no known encoding)  * 0x00_0004_00 (bit 2): Latin-1  * 0x00_0008_00 (bit 3): UTF-8  * 0x00_0040_00 (bit 6): ASCII</p>
 <p>We only support ASCII and UTF-8.</p>
-<p><a id='Base.length' href='#Base.length'>#</a>
-<strong><code>Base.length</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='Base.length-Tuple{Ptr{S<:RCall.Sxp}}' href='#Base.length-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>Base.length</code></strong> &mdash; <em>Method</em>.</p>
 <p>Sxp methods for <code>length</code> return the R length.</p>
 <p><code>Rf_xlength</code> handles Sxps that are not vector-like and R's "long vectors", which have a negative value for the <code>length</code> member.</p>
-<p><a id='Base.setindex!' href='#Base.setindex!'>#</a>
-<strong><code>Base.setindex!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='Base.names-Tuple{RCall.RObject{S<:RCall.Sxp}}' href='#Base.names-Tuple{RCall.RObject{S<:RCall.Sxp}}'>#</a>
+<strong><code>Base.names</code></strong> &mdash; <em>Method</em>.</p>
+<p>Returns the names of an R vector, the result is converted to a Julia symbol array.</p>
+<p><a id='Base.setindex!-Tuple{Ptr{RCall.EnvSxp},Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp}}' href='#Base.setindex!-Tuple{Ptr{RCall.EnvSxp},Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp}}'>#</a>
+<strong><code>Base.setindex!</code></strong> &mdash; <em>Method</em>.</p>
 <p>assign value v to symbol s in the environment e</p>
+<p><a id='Base.setindex!-Tuple{Ptr{S<:RCall.PairListSxp},Ptr{T<:RCall.Sxp},Integer}' href='#Base.setindex!-Tuple{Ptr{S<:RCall.PairListSxp},Ptr{T<:RCall.Sxp},Integer}'>#</a>
+<strong><code>Base.setindex!</code></strong> &mdash; <em>Method</em>.</p>
 <p>assign value v to the i-th element of LangSxp l</p>
-<p><a id='RCall.anyna' href='#RCall.anyna'>#</a>
-<strong><code>RCall.anyna</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.anyna-Tuple{Ptr{S<:RCall.VectorSxp}}' href='#RCall.anyna-Tuple{Ptr{S<:RCall.VectorSxp}}'>#</a>
+<strong><code>RCall.anyna</code></strong> &mdash; <em>Method</em>.</p>
 <p>Check if there are any NA values in the vector.</p>
-<p><a id='RCall.bound' href='#RCall.bound'>#</a>
-<strong><code>RCall.bound</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.bound-Tuple{Ptr{S<:RCall.Sxp}}' href='#RCall.bound-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.bound</code></strong> &mdash; <em>Method</em>.</p>
 <p>The R NAMED property, represented by 2 bits in the info field. This can take values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more symbols. See http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying</p>
-<p><a id='RCall.dataptr' href='#RCall.dataptr'>#</a>
-<strong><code>RCall.dataptr</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.dataptr-Tuple{Ptr{S<:RCall.VectorSxp}}' href='#RCall.dataptr-Tuple{Ptr{S<:RCall.VectorSxp}}'>#</a>
+<strong><code>RCall.dataptr</code></strong> &mdash; <em>Method</em>.</p>
 <p>Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.</p>
-<p><a id='RCall.decref_extptr' href='#RCall.decref_extptr'>#</a>
-<strong><code>RCall.decref_extptr</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.decref_extptr-Tuple{Ptr{RCall.ExtPtrSxp}}' href='#RCall.decref_extptr-Tuple{Ptr{RCall.ExtPtrSxp}}'>#</a>
+<strong><code>RCall.decref_extptr</code></strong> &mdash; <em>Method</em>.</p>
 <p>Called by the R finalizer.</p>
-<p><a id='RCall.endEmbeddedR' href='#RCall.endEmbeddedR'>#</a>
-<strong><code>RCall.endEmbeddedR</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.endEmbeddedR-Tuple{}' href='#RCall.endEmbeddedR-Tuple{}'>#</a>
+<strong><code>RCall.endEmbeddedR</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>endEmbeddedR()
 </code></pre>
 
 <p>Close embedded R session.</p>
-<p><a id='RCall.event_callback' href='#RCall.event_callback'>#</a>
-<strong><code>RCall.event_callback</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.event_callback-Tuple{}' href='#RCall.event_callback-Tuple{}'>#</a>
+<strong><code>RCall.event_callback</code></strong> &mdash; <em>Method</em>.</p>
 <p>Event Callback: allows R to process Julia events when R is busy. For example, writing output to STDOUT while running an expensive R command.</p>
-<p><a id='RCall.findNamespace' href='#RCall.findNamespace'>#</a>
-<strong><code>RCall.findNamespace</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.findNamespace-Tuple{ByteString}' href='#RCall.findNamespace-Tuple{ByteString}'>#</a>
+<strong><code>RCall.findNamespace</code></strong> &mdash; <em>Method</em>.</p>
 <p>find namespace by name of the namespace, it is not error tolerant.</p>
-<p><a id='RCall.getNamespace' href='#RCall.getNamespace'>#</a>
-<strong><code>RCall.getNamespace</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.getNamespace-Tuple{ByteString}' href='#RCall.getNamespace-Tuple{ByteString}'>#</a>
+<strong><code>RCall.getNamespace</code></strong> &mdash; <em>Method</em>.</p>
 <p>get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound.</p>
-<p><a id='RCall.getParseErrorMsg' href='#RCall.getParseErrorMsg'>#</a>
-<strong><code>RCall.getParseErrorMsg</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.getParseErrorMsg-Tuple{}' href='#RCall.getParseErrorMsg-Tuple{}'>#</a>
+<strong><code>RCall.getParseErrorMsg</code></strong> &mdash; <em>Method</em>.</p>
 <p>Get the R parser error msg for the previous parsing result.</p>
-<p><a id='RCall.getattrib' href='#RCall.getattrib'>#</a>
-<strong><code>RCall.getattrib</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.getattrib-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp}}' href='#RCall.getattrib-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp}}'>#</a>
+<strong><code>RCall.getattrib</code></strong> &mdash; <em>Method</em>.</p>
 <p>Return a particular attribute of an RObject</p>
-<p><a id='RCall.getclass' href='#RCall.getclass'>#</a>
-<strong><code>RCall.getclass</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.getclass-Tuple{Ptr{S<:RCall.Sxp}}' href='#RCall.getclass-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.getclass</code></strong> &mdash; <em>Method</em>.</p>
 <p>Returns the class of an R object.</p>
-<p><a id='RCall.getnames' href='#RCall.getnames'>#</a>
-<strong><code>RCall.getnames</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.getnames-Tuple{Ptr{S<:RCall.Sxp}}' href='#RCall.getnames-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.getnames</code></strong> &mdash; <em>Method</em>.</p>
 <p>Returns the names of an R vector.</p>
-<p><a id='RCall.ijulia_displayplots' href='#RCall.ijulia_displayplots'>#</a>
-<strong><code>RCall.ijulia_displayplots</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.ijulia_displayplots-Tuple{}' href='#RCall.ijulia_displayplots-Tuple{}'>#</a>
+<strong><code>RCall.ijulia_displayplots</code></strong> &mdash; <em>Method</em>.</p>
 <p>Called after cell evaluation. Closes graphics device and displays files in notebook.</p>
-<p><a id='RCall.ijulia_setdevice' href='#RCall.ijulia_setdevice'>#</a>
-<strong><code>RCall.ijulia_setdevice</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.ijulia_setdevice-Tuple{MIME{mime}}' href='#RCall.ijulia_setdevice-Tuple{MIME{mime}}'>#</a>
+<strong><code>RCall.ijulia_setdevice</code></strong> &mdash; <em>Method</em>.</p>
 <p>Set options for R plotting with IJulia.</p>
 <p>The first argument should be a MIME object: currently supported are * <code>MIME("image/png")</code> [default] * <code>MIME("image/svg+xml")</code></p>
 <p>The remaining arguments (keyword only) are passed to the appropriate R graphics device: see the relevant R help for details.</p>
-<p><a id='RCall.initEmbeddedR' href='#RCall.initEmbeddedR'>#</a>
-<strong><code>RCall.initEmbeddedR</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.initEmbeddedR-Tuple{}' href='#RCall.initEmbeddedR-Tuple{}'>#</a>
+<strong><code>RCall.initEmbeddedR</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>initEmbeddedR()
 </code></pre>
 
 <p>This initializes an embedded R session. It should only be called when R is not already running (e.g. if Julia is running inside an R session)</p>
-<p><a id='RCall.isna' href='#RCall.isna'>#</a>
-<strong><code>RCall.isna</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.isna-Tuple{Complex{Float64}}' href='#RCall.isna-Tuple{Complex{Float64}}'>#</a>
+<strong><code>RCall.isna</code></strong> &mdash; <em>Method</em>.</p>
 <p>Check if values correspond to R's sentinel NA values.</p>
-<p><a id='RCall.isnull' href='#RCall.isnull'>#</a>
-<strong><code>RCall.isnull</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.isnull-Tuple{Ptr{S<:RCall.Sxp}}' href='#RCall.isnull-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.isnull</code></strong> &mdash; <em>Method</em>.</p>
 <p>Check if values correspond to R's NULL object.</p>
-<p><a id='RCall.julia_extptr_callback' href='#RCall.julia_extptr_callback'>#</a>
-<strong><code>RCall.julia_extptr_callback</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.julia_extptr_callback-Tuple{Ptr{RCall.ListSxp}}' href='#RCall.julia_extptr_callback-Tuple{Ptr{RCall.ListSxp}}'>#</a>
+<strong><code>RCall.julia_extptr_callback</code></strong> &mdash; <em>Method</em>.</p>
 <p>The function called by R .External for Julia callbacks.</p>
 <p>It receives a <code>ListSxpPtr</code> containing  - a pointer to the function itself (<code>ExtPtrSxpPtr</code>)  - a pointer to the Julia function (<code>ExtPtrSxpPtr</code>)  - any arguments (as <code>SxpPtr</code>)</p>
 <p><a id='RCall.makeExternalPtr' href='#RCall.makeExternalPtr'>#</a>
 <strong><code>RCall.makeExternalPtr</code></strong> &mdash; <em>Function</em>.</p>
 <p>Create an ExtPtrSxpPtr object</p>
-<p><a id='RCall.makeNativeSymbolRef' href='#RCall.makeNativeSymbolRef'>#</a>
-<strong><code>RCall.makeNativeSymbolRef</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.makeNativeSymbolRef-Tuple{Ptr{Void}}' href='#RCall.makeNativeSymbolRef-Tuple{Ptr{Void}}'>#</a>
+<strong><code>RCall.makeNativeSymbolRef</code></strong> &mdash; <em>Method</em>.</p>
 <p>Register a function pointer as an R NativeSymbol.</p>
 <p>This is completely undocumented, so may break: we technically are supposed to use R_registerRoutines, but this is <em>much</em> easier for just 1 function.</p>
-<p><a id='RCall.naeltype' href='#RCall.naeltype'>#</a>
-<strong><code>RCall.naeltype</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.naeltype-Tuple{Type{RCall.LglSxp}}' href='#RCall.naeltype-Tuple{Type{RCall.LglSxp}}'>#</a>
+<strong><code>RCall.naeltype</code></strong> &mdash; <em>Method</em>.</p>
 <p>NA element for each type</p>
-<p><a id='RCall.newEnvironment' href='#RCall.newEnvironment'>#</a>
-<strong><code>RCall.newEnvironment</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.newEnvironment-Tuple{Ptr{RCall.EnvSxp}}' href='#RCall.newEnvironment-Tuple{Ptr{RCall.EnvSxp}}'>#</a>
+<strong><code>RCall.newEnvironment</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>newEnvironment([env])
 </code></pre>
 
@@ -340,98 +351,120 @@ RObject{RealSxp}
 <p><a id='RCall.parseVector' href='#RCall.parseVector'>#</a>
 <strong><code>RCall.parseVector</code></strong> &mdash; <em>Function</em>.</p>
 <p>A pure julia wrapper of R_ParseVector</p>
-<p><a id='RCall.preserve' href='#RCall.preserve'>#</a>
-<strong><code>RCall.preserve</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.preserve-Tuple{Ptr{S<:RCall.Sxp}}' href='#RCall.preserve-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.preserve</code></strong> &mdash; <em>Method</em>.</p>
 <p>Prevent garbage collection of an R object. Object can be released via <code>release</code>.</p>
 <p>This is slower than <code>protect</code>, as it requires searching an internal list, but more flexible.</p>
-<p><a id='RCall.protect' href='#RCall.protect'>#</a>
-<strong><code>RCall.protect</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.protect-Tuple{Ptr{S<:RCall.Sxp}}' href='#RCall.protect-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.protect</code></strong> &mdash; <em>Method</em>.</p>
 <p>Stack-based protection of garbage collection of R objects. Objects are released via <code>unprotect</code>. Returns the same pointer, allowing inline use.</p>
 <p>This is faster than <code>preserve</code>, but more restrictive. Really only useful inside functions.</p>
-<p><a id='RCall.rcall' href='#RCall.rcall'>#</a>
-<strong><code>RCall.rcall</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rcall-Tuple{Any,Vararg{Any}}' href='#RCall.rcall-Tuple{Any,Vararg{Any}}'>#</a>
+<strong><code>RCall.rcall</code></strong> &mdash; <em>Method</em>.</p>
 <p>Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a FunctionSxp type, a SymSxp or a Symbol.</p>
-<p><a id='RCall.rcopy' href='#RCall.rcopy'>#</a>
-<strong><code>RCall.rcopy</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rcopy-Tuple{AbstractString}' href='#RCall.rcopy-Tuple{AbstractString}'>#</a>
+<strong><code>RCall.rcopy</code></strong> &mdash; <em>Method</em>.</p>
 <p>Evaluate and convert the result of a string as an R expression.</p>
+<p><a id='RCall.rcopy-Tuple{Ptr{RCall.SymSxp}}' href='#RCall.rcopy-Tuple{Ptr{RCall.SymSxp}}'>#</a>
+<strong><code>RCall.rcopy</code></strong> &mdash; <em>Method</em>.</p>
 <p><code>rcopy</code> copies the contents of an R object into a corresponding canonical Julia type.</p>
+<p><a id='RCall.rcopy-Tuple{Type{Any},Ptr{S<:RCall.Sxp}}' href='#RCall.rcopy-Tuple{Type{Any},Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.rcopy</code></strong> &mdash; <em>Method</em>.</p>
 <p><code>rcopy(T,p)</code> converts a pointer <code>p</code> to a Sxp object to a native Julia object of type T.</p>
 <p><code>rcopy(p)</code> performs a default conversion.</p>
-<p><a id='RCall.registerCFinalizerEx' href='#RCall.registerCFinalizerEx'>#</a>
-<strong><code>RCall.registerCFinalizerEx</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.registerCFinalizerEx-Tuple{Ptr{RCall.ExtPtrSxp}}' href='#RCall.registerCFinalizerEx-Tuple{Ptr{RCall.ExtPtrSxp}}'>#</a>
+<strong><code>RCall.registerCFinalizerEx</code></strong> &mdash; <em>Method</em>.</p>
 <p>Register finalizer to be called by the R GC.</p>
-<p><a id='RCall.release' href='#RCall.release'>#</a>
-<strong><code>RCall.release</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.release-Tuple{Ptr{S<:RCall.Sxp}}' href='#RCall.release-Tuple{Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.release</code></strong> &mdash; <em>Method</em>.</p>
 <p>Release object that has been gc protected by <code>preserve</code>.</p>
-<p><a id='RCall.render' href='#RCall.render'>#</a>
-<strong><code>RCall.render</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.render-Tuple{ByteString}' href='#RCall.render-Tuple{ByteString}'>#</a>
+<strong><code>RCall.render</code></strong> &mdash; <em>Method</em>.</p>
 <p>Render an inline R script, substituting invalid ":($(Expr(:incomplete, "incomplete: invalid string syntax")))</p>
 <p><a id='RCall.reval' href='#RCall.reval'>#</a>
 <strong><code>RCall.reval</code></strong> &mdash; <em>Function</em>.</p>
 <p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning an RObject.</p>
-<p><a id='RCall.reval_p' href='#RCall.reval_p'>#</a>
-<strong><code>RCall.reval_p</code></strong> &mdash; <em>Function</em>.</p>
-<p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning a Sxp pointer.</p>
+<p><a id='RCall.reval_p-Tuple{Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp}}' href='#RCall.reval_p-Tuple{Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp}}'>#</a>
+<strong><code>RCall.reval_p</code></strong> &mdash; <em>Method</em>.</p>
 <p>Evaluate an R expression array iteratively.</p>
-<p><a id='RCall.rlang' href='#RCall.rlang'>#</a>
-<strong><code>RCall.rlang</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.reval_p-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp}}' href='#RCall.reval_p-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp}}'>#</a>
+<strong><code>RCall.reval_p</code></strong> &mdash; <em>Method</em>.</p>
+<p>Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning a Sxp pointer.</p>
+<p><a id='RCall.rlang-Tuple{Any,Vararg{Any}}' href='#RCall.rlang-Tuple{Any,Vararg{Any}}'>#</a>
+<strong><code>RCall.rlang</code></strong> &mdash; <em>Method</em>.</p>
 <p>Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaulated</p>
-<p><a id='RCall.rlang_p' href='#RCall.rlang_p'>#</a>
-<strong><code>RCall.rlang_p</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rlang_p-Tuple{Any,Vararg{Any}}' href='#RCall.rlang_p-Tuple{Any,Vararg{Any}}'>#</a>
+<strong><code>RCall.rlang_p</code></strong> &mdash; <em>Method</em>.</p>
 <p>Create a function call from a list of arguments</p>
-<p><a id='RCall.rparse' href='#RCall.rparse'>#</a>
-<strong><code>RCall.rparse</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rparse-Tuple{AbstractString}' href='#RCall.rparse-Tuple{AbstractString}'>#</a>
+<strong><code>RCall.rparse</code></strong> &mdash; <em>Method</em>.</p>
 <p>Parse a string as an R expression, returning an RObject.</p>
-<p><a id='RCall.rparse_p' href='#RCall.rparse_p'>#</a>
-<strong><code>RCall.rparse_p</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rparse_p-Tuple{Ptr{RCall.StrSxp}}' href='#RCall.rparse_p-Tuple{Ptr{RCall.StrSxp}}'>#</a>
+<strong><code>RCall.rparse_p</code></strong> &mdash; <em>Method</em>.</p>
 <p>Parse a string as an R expression, returning a Sxp pointer.</p>
-<p><a id='RCall.rprint' href='#RCall.rprint'>#</a>
-<strong><code>RCall.rprint</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.rprint-Tuple{IO,ByteString}' href='#RCall.rprint-Tuple{IO,ByteString}'>#</a>
+<strong><code>RCall.rprint</code></strong> &mdash; <em>Method</em>.</p>
 <p>Parse, evaluate and print the result of a string as an R expression.</p>
+<p><a id='RCall.rprint-Tuple{IO,Ptr{S<:RCall.Sxp}}' href='#RCall.rprint-Tuple{IO,Ptr{S<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.rprint</code></strong> &mdash; <em>Method</em>.</p>
 <p>Print the value of an Sxp using R's printing mechanism</p>
-<p><a id='RCall.setattrib!' href='#RCall.setattrib!'>#</a>
-<strong><code>RCall.setattrib!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setattrib!-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp},Ptr{T<:RCall.Sxp}}' href='#RCall.setattrib!-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp},Ptr{T<:RCall.Sxp}}'>#</a>
+<strong><code>RCall.setattrib!</code></strong> &mdash; <em>Method</em>.</p>
 <p>Set a particular attribute of an RObject</p>
-<p><a id='RCall.setclass!' href='#RCall.setclass!'>#</a>
-<strong><code>RCall.setclass!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setclass!-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.StrSxp}}' href='#RCall.setclass!-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.StrSxp}}'>#</a>
+<strong><code>RCall.setclass!</code></strong> &mdash; <em>Method</em>.</p>
 <p>Set the class of an R object.</p>
-<p><a id='RCall.setnames!' href='#RCall.setnames!'>#</a>
-<strong><code>RCall.setnames!</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.setnames!-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.StrSxp}}' href='#RCall.setnames!-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.StrSxp}}'>#</a>
+<strong><code>RCall.setnames!</code></strong> &mdash; <em>Method</em>.</p>
 <p>Set the names of an R vector.</p>
-<p><a id='RCall.sexp' href='#RCall.sexp'>#</a>
-<strong><code>RCall.sexp</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.sexp-Tuple{AbstractArray{S<:AbstractString,N}}' href='#RCall.sexp-Tuple{AbstractArray{S<:AbstractString,N}}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
+<p>Create a <code>StrSxp</code> from an Abstract String Array</p>
+<p><a id='RCall.sexp-Tuple{Ptr{RCall.SxpHead}}' href='#RCall.sexp-Tuple{Ptr{RCall.SxpHead}}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
+<p>Convert a <code>UnknownSxpPtr</code> to an approptiate <code>SxpPtr</code>.</p>
+<p><a id='RCall.sexp-Tuple{Type{Int32},Any}' href='#RCall.sexp-Tuple{Type{Int32},Any}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
+<p><code>sexp(S,x)</code> converts a Julia object <code>x</code> to a pointer to a Sxp object of type <code>S</code>.</p>
+<p><code>sexp(x)</code> performs a default conversion.</p>
+<p><a id='RCall.sexp-Tuple{Type{RCall.CharSxp},ByteString}' href='#RCall.sexp-Tuple{Type{RCall.CharSxp},ByteString}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
+<p>Create a <code>CharSxp</code> from a String.</p>
+<p><a id='RCall.sexp-Tuple{Type{RCall.ClosSxp},Any}' href='#RCall.sexp-Tuple{Type{RCall.ClosSxp},Any}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
 <p>Wrap a callable Julia object <code>f</code> an a R <code>ClosSxpPtr</code>.</p>
 <p>Constructs the following R code</p>
 <pre><code>function(...) .External(juliaCallback, fExPtr, ...)
 </code></pre>
 
+<p><a id='RCall.sexp-Tuple{Type{RCall.ExtPtrSxp},Any}' href='#RCall.sexp-Tuple{Type{RCall.ExtPtrSxp},Any}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
 <p>Wrap a Julia object an a R <code>ExtPtrSxpPtr</code>.</p>
 <p>We store the pointer and the object in a const Dict to prevent it being removed by the Julia GC.</p>
+<p><a id='RCall.sexp-Tuple{Type{RCall.StrSxp},AbstractString}' href='#RCall.sexp-Tuple{Type{RCall.StrSxp},AbstractString}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
 <p>Create a <code>StrSxp</code> from an <code>AbstractString</code></p>
-<p>Create a <code>CharSxp</code> from a String.</p>
-<p>Generic function for constructing Sxps from Julia objects.</p>
+<p><a id='RCall.sexp-Tuple{Type{RCall.SymSxp},AbstractString}' href='#RCall.sexp-Tuple{Type{RCall.SymSxp},AbstractString}'>#</a>
+<strong><code>RCall.sexp</code></strong> &mdash; <em>Method</em>.</p>
 <p>Create a <code>SymSxp</code> from a <code>Symbol</code></p>
-<p><code>sexp(S,x)</code> converts a Julia object <code>x</code> to a pointer to a Sxp object of type <code>S</code>.</p>
-<p><code>sexp(x)</code> performs a default conversion.</p>
-<p>Convert a <code>UnknownSxpPtr</code> to an approptiate <code>SxpPtr</code>.</p>
-<p><a id='RCall.sexp_arglist_dots' href='#RCall.sexp_arglist_dots'>#</a>
-<strong><code>RCall.sexp_arglist_dots</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.sexp_arglist_dots-Tuple' href='#RCall.sexp_arglist_dots-Tuple'>#</a>
+<strong><code>RCall.sexp_arglist_dots</code></strong> &mdash; <em>Method</em>.</p>
 <p>Create an argument list for an R function call, with a varargs "dots" at the end.</p>
-<p><a id='RCall.sexpnum' href='#RCall.sexpnum'>#</a>
-<strong><code>RCall.sexpnum</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.sexpnum-Tuple{RCall.SxpHead}' href='#RCall.sexpnum-Tuple{RCall.SxpHead}'>#</a>
+<strong><code>RCall.sexpnum</code></strong> &mdash; <em>Method</em>.</p>
 <p>The SEXPTYPE number of a <code>Sxp</code></p>
 <p>Determined from the trailing 5 bits of the first 32-bit word. Is a 0-based index into the <code>info</code> field of a <code>SxpHead</code>.</p>
-<p><a id='RCall.tryEval' href='#RCall.tryEval'>#</a>
-<strong><code>RCall.tryEval</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.tryEval-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp}}' href='#RCall.tryEval-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp}}'>#</a>
+<strong><code>RCall.tryEval</code></strong> &mdash; <em>Method</em>.</p>
 <p>A pure julia wrapper of R_tryEval.</p>
-<p><a id='RCall.unprotect' href='#RCall.unprotect'>#</a>
-<strong><code>RCall.unprotect</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.unprotect-Tuple{Integer}' href='#RCall.unprotect-Tuple{Integer}'>#</a>
+<strong><code>RCall.unprotect</code></strong> &mdash; <em>Method</em>.</p>
 <p>Release last <code>n</code> objects gc-protected by <code>protect</code>.</p>
-<p><a id='RCall.unsafe_array' href='#RCall.unsafe_array'>#</a>
-<strong><code>RCall.unsafe_array</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.unsafe_array-Tuple{Ptr{S<:RCall.VectorSxp}}' href='#RCall.unsafe_array-Tuple{Ptr{S<:RCall.VectorSxp}}'>#</a>
+<strong><code>RCall.unsafe_array</code></strong> &mdash; <em>Method</em>.</p>
 <p>The same as <code>unsafe_vec</code>, except returns an appropriately sized array.</p>
-<p><a id='RCall.unsafe_vec' href='#RCall.unsafe_vec'>#</a>
-<strong><code>RCall.unsafe_vec</code></strong> &mdash; <em>Function</em>.</p>
+<p><a id='RCall.unsafe_vec-Tuple{Ptr{S<:RCall.VectorSxp}}' href='#RCall.unsafe_vec-Tuple{Ptr{S<:RCall.VectorSxp}}'>#</a>
+<strong><code>RCall.unsafe_vec</code></strong> &mdash; <em>Method</em>.</p>
 <p>Represent the contents of a VectorSxp type as a <code>Vector</code>.</p>
 <p>This does <strong>not</strong> copy the contents.  If the argument is not named (in R) or otherwise protected from R's garbage collection (e.g. by keeping the containing RObject in scope) the contents of this vector can be modified or could cause a memory error when accessed.</p>
 <p>The contents are as stored in R.  Missing values (NA's) are represented in R by sentinels.  Missing data values in RealSxp and CplxSxp show up as <code>NaN</code> and <code>NaN + NaNim</code>, respectively.  Missing data in IntSxp show up as <code>-2147483648</code>, the minimum 32-bit integer value.  Internally a <code>LglSxp</code> is represented as <code>Vector{Int32}</code>.  The convention is that <code>0</code> is <code>false</code>, <code>-2147483648</code> is <code>NA</code> and all other values represent <code>true</code>.</p>
