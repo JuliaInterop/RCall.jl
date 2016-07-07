@@ -85,9 +85,12 @@ const juliaDecref = Ref{Ptr{Void}}()
 Register finalizer to be called by the R GC.
 """
 function registerCFinalizerEx(s::ExtPtrSxpPtr)
-    ccall((:R_RegisterCFinalizerEx,libR),Void,
+    protect(s)
+    val = ccall((:R_RegisterCFinalizerEx,libR),Void,
           (Ptr{ExtPtrSxp}, Ptr{Void}, Cint),
           s,juliaDecref[],0)
+    unprotect(1)
+    val
 end
 
 
@@ -121,16 +124,17 @@ Constructs the following R code
 
 """
 function sexp(::Type{ClosSxp}, f)
+    fptr = protect(sexp(ExtPtrSxp,f))
     body = protect(rlang_p(Symbol(".External"),
                            juliaCallback,
-                           sexp(ExtPtrSxp,f),
+                           fptr,
                            Const.DotsSymbol))
     local clos
     try
         lang = rlang_p(:function, sexp_arglist_dots(), body)
         clos = reval_p(lang)
     finally
-        unprotect(1)
+        unprotect(2)
     end
     clos
 end
