@@ -276,12 +276,18 @@ RObject{RealSxp}
 </code></pre>
 
 <p>Close embedded R session.</p>
+<p><a id='RCall.event_callback' href='#RCall.event_callback'>#</a>
+<strong><code>RCall.event_callback</code></strong> &mdash; <em>Function</em>.</p>
+<p>Event Callback: allows R to process Julia events when R is busy. For example, writing output to STDOUT while running an expensive R command.</p>
 <p><a id='RCall.findNamespace' href='#RCall.findNamespace'>#</a>
 <strong><code>RCall.findNamespace</code></strong> &mdash; <em>Function</em>.</p>
 <p>find namespace by name of the namespace, it is not error tolerant.</p>
 <p><a id='RCall.getNamespace' href='#RCall.getNamespace'>#</a>
 <strong><code>RCall.getNamespace</code></strong> &mdash; <em>Function</em>.</p>
 <p>get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound.</p>
+<p><a id='RCall.getParseErrorMsg' href='#RCall.getParseErrorMsg'>#</a>
+<strong><code>RCall.getParseErrorMsg</code></strong> &mdash; <em>Function</em>.</p>
+<p>Get the R parser error msg for the previous parsing result.</p>
 <p><a id='RCall.getattrib' href='#RCall.getattrib'>#</a>
 <strong><code>RCall.getattrib</code></strong> &mdash; <em>Function</em>.</p>
 <p>Return a particular attribute of an RObject</p>
