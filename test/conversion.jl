@@ -221,9 +221,21 @@ r = RObject(d)
 l = rcopy("list(a=1,b=c(1,3,4))")
 @test l[:a] == 1
 @test l[:b][3] == 4
+d = RObject(Dict(1=>2))
+@test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
+@test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
 
 
-# More tests
+# function
+function funk(x,y)
+    x+y
+end
+f1 = RObject(funk)
+@test rcopy(Function, f1)(1,2) == 3
+@test rcopy(Function, f1.p)(1,2) == 3
+
+
+# misc
 a = RObject(rand(10))
 @test length(rcopy(Any, a)) == 10
 @test typeof(RCall.sexp(Cint, 1)) == Cint
@@ -238,16 +250,6 @@ b = RObject(true)
 @test rcopy(Array{Cint}, b.p) == [1]
 @test rcopy(Vector{Bool}, b.p) == [true]
 @test rcopy(BitVector, b.p) == [true]
-function funk(x,y)
-    x+y
-end
-f1 = RObject(funk)
-@test rcopy(Function, f1)(1,2) == 3
-@test rcopy(Function, f1.p)(1,2) == 3
+
 #RCall.rlang_formula(parse("a+b"))
 @test RCall.rlang_formula(:a) == :a
-
-#Dictionaries
-d = RObject(Dict(1=>2))
-@test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
-@test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
