@@ -169,13 +169,15 @@ function create_r_repl(repl, main)
     )
 
     search_prompt, skeymap = LineEdit.setup_search_keymap(hp)
+    prefix_prompt, prefix_keymap = LineEdit.setup_prefix_keymap(hp, r_mode)
+
     mk = REPL.mode_keymap(main)
     # ^C should not exit prompt
     delete!(mk, "^C")
 
     b = Dict{Any,Any}[
         bracketed_paste_mode_keymap,
-        skeymap, mk, LineEdit.history_keymap,
+        skeymap, mk, prefix_keymap, LineEdit.history_keymap,
         LineEdit.default_keymap, LineEdit.escape_defaults
     ]
     r_mode.keymap_dict = LineEdit.keymap(b)
