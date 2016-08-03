@@ -16,13 +16,10 @@ function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
     refs = DataArrays.RefArray([isna(x) ? zero(Int32) : x for x in s])
     compact(PooledDataArray(refs,rcopy(getattrib(s,Const.LevelsSymbol))))
 end
-rcopy{S<:VectorSxp}(::Type{AbstractDataArray}, s::Ptr{S}) = rcopy(DataArray, s)
-rcopy(::Type{AbstractDataArray}, s::Ptr{IntSxp}) =
-    isFactor(s) ? rcopy(PooledDataArray,s) : rcopy(DataArray,s)
 
 function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
     isFrame(s) || error("s is not a R data frame")
-    DataFrame([rcopy(AbstractDataArray, c) for c in s],
+    DataFrame(Any[isFactor(c)? rcopy(PooledDataArray, c) : rcopy(DataArray, c) for c in s],
               rcopy(Array{Symbol},getnames(s)))
 end
 

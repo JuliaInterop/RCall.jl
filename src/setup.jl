@@ -23,7 +23,7 @@ if Compat.is_windows()
         println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
         query = readline(STDIN)
         c = uppercase(query[1])
-        r::Cint
+        local r::Cint
         r = (c=='Y' ? 1 : c=='N' ? -1 : 0)
         return r
     end

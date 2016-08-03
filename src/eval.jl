@@ -50,6 +50,7 @@ reval_p{S<:Sxp}(s::Ptr{S}) = reval_p(s,Const.GlobalEnv)
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """
+reval(r::RObject, env=Const.GlobalEnv) = reval(sexp(r), env)
 function reval{S<:Sxp}(s::Ptr{S}, env=Const.GlobalEnv)
     ss = protect(s)
     local val
@@ -60,9 +61,20 @@ function reval{S<:Sxp}(s::Ptr{S}, env=Const.GlobalEnv)
     end
     val
 end
-reval(r::RObject, env=Const.GlobalEnv) = reval(sexp(r), env)
-reval(str::AbstractString, env=Const.GlobalEnv) = reval(rparse_p(str),env)
-reval(sym::Symbol, env=Const.GlobalEnv) = reval(sexp(sym),env)
+for typ in (:AbstractString, :Symbol)
+    @eval begin
+        function reval(str::$typ, env=Const.GlobalEnv)
+            ss = protect(rparse_p(str))
+            local val
+            try
+                val = reval(ss, env)
+            finally
+                unprotect(1)
+            end
+            return val
+        end
+    end
+end
 
 
 "A pure julia wrapper of R_ParseVector"
