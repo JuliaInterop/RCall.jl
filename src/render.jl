@@ -5,6 +5,7 @@ function render(script::Compat.String)
     symdict = OrderedDict{Compat.String,Any}()
     local status
     local msg = ""
+    local k = 0
     while true
         status = parseVector(sexp(script))[2]
         if status != 1
@@ -33,6 +34,7 @@ function render(script::Compat.String)
             # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
             if haskey(symdict, sym)
                 sym *= "##$k"
+                k = k + 1
             end
         elseif isa(ast, Expr) && (ast.head == :error || ast.head == :continue)
             status = 3
