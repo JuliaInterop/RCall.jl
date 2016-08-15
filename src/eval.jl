@@ -61,21 +61,8 @@ function reval{S<:Sxp}(s::Ptr{S}, env=Const.GlobalEnv)
     end
     val
 end
-for typ in (:AbstractString, :Symbol)
-    @eval begin
-        function reval(str::$typ, env=Const.GlobalEnv)
-            ss = protect(rparse_p(str))
-            local val
-            try
-                val = reval(ss, env)
-            finally
-                unprotect(1)
-            end
-            return val
-        end
-    end
-end
-
+reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv) =
+    reval(rparse_p(str))
 
 "A pure julia wrapper of R_ParseVector"
 function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))

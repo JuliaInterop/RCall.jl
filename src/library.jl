@@ -11,15 +11,11 @@ function rwrap(pkg::Compat.String, s::Symbol)
     members = rcopy("ls('package:$pkg')")
     filter!(x -> !(x in reserved), members)
     m = Module(s)
-    consts = [Expr(:const,
-                    Expr(:(=),
-                    Symbol(x),
-                    rcall(Symbol("::"),Symbol(pkg),Symbol(x)))
-                ) for x in members]
+    consts = [:(const $(Symbol(x)) = rcall(Symbol("::"),$(QuoteNode(Symbol(pkg))),$(QuoteNode(Symbol(x))))) for x in members]
     id = Expr(:(=), :__package__, pkg)
     exports = [Symbol(x) for x in members]
     s in exports && error("$pkg has a function with the same name as $(pkg), use `@rimport $pkg as ...` instead.")
-    eval(m, Expr(:toplevel, consts..., Expr(:export, exports...), id, Expr(:(=), :__exports__, exports)))
+    eval(m, Expr(:toplevel, :(import RCall.rcall), consts..., Expr(:export, exports...), id, :(__exports__ = $exports)))
     m
 end
 
