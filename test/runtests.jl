@@ -12,8 +12,9 @@ tests = ["basic",
          "conversion",
          "dataframe",
          "rstr",
+         "library",
          "repl",
-         "library"]
+         ]
 
 println("Running tests:")
 

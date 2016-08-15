@@ -51,14 +51,9 @@ rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
 """
 Create a `CharSxp` from a String.
 """
-function sexp(::Type{CharSxp}, st::Compat.String)
-    if isascii(st)
-        ccall((:Rf_mkCharLen, libR), CharSxpPtr, (Ptr{UInt8}, Cint), st, sizeof(st))
-    else  # assume UTF-8, is there a way of checking?
-        ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
-            (Ptr{UInt8}, Cint, Cint), st, sizeof(st), 1)
-    end
-end
+sexp(::Type{CharSxp}, st::Compat.String) =
+    ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
+          (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
 sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, string(st))
 sexp(::Type{CharSxp}, sym::Symbol) = sexp(CharSxp, string(sym))
 
