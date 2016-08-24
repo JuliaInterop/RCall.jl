@@ -30,7 +30,7 @@ rdevicename(m::MIME"image/svg+xml") = :svg
 function ijulia_displayfile(m::MIME"image/png", f)
     open(f) do f
         d = readbytes(f)
-        display(Main.IPythonDisplay.InlineDisplay(),m,d)
+        display(m,d)
     end
 end
 function ijulia_displayfile(m::MIME"image/svg+xml", f)
@@ -42,7 +42,7 @@ function ijulia_displayfile(m::MIME"image/svg+xml", f)
         d = Compat.readstring(f)
         d = replace(d,"id=\"glyph","id=\"glyph"*r)
         d = replace(d,"href=\"#glyph","href=\"#glyph"*r)
-        display(Main.IPythonDisplay.InlineDisplay(),m,d)
+        display(m,d)
     end
 end
 
