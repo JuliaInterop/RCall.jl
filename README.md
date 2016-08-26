@@ -9,7 +9,7 @@
 * Windows: [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/y3kxma63apcig150/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/rcall-jl)
 * Coverage: [![Coverage Status](https://coveralls.io/repos/github/JuliaStats/RCall.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaStats/RCall.jl?branch=master)
 
-#### Lastest Documentataion
+#### Lastest Documentation
 
 [Latest Documentation](http://juliastats.github.io/RCall.jl/latest).
  
