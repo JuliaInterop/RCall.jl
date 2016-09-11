@@ -27,8 +27,6 @@ script:
   - julia --check-bounds=yes -e 'Pkg.clone(pwd()); Pkg.build("RCall"); Pkg.test("RCall"; coverage=true)'
 
 after_success:
-  # only deploy on linux nightly builds of master branch or tags
-  # Documenter has not yet released, need to install from source
   - if ([ "$TRAVIS_BRANCH" == "master" ] || [ -n "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == false ] && [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_JULIA_VERSION" == "0.4" ]; then
       julia -e 'Pkg.add("Documenter")';
       julia -e 'cd(Pkg.dir("RCall")); include(joinpath("docs", "make.jl"))';
