@@ -30,6 +30,14 @@ sexp(::Type{Cint},x) = convert(Cint,x)
 sexp(::Type{Float64},x) = convert(Float64,x)
 sexp(::Type{Complex128},x) = convert(Complex128,x)
 
+# handle Nullable objects
+function sexp{T}(x::Nullable{T})
+    if x.isnull
+        return sexp(natype(T))
+    else
+        return sexp(x.value)
+    end
+end
 
 # NilSxp
 sexp(::Void) = sexp(Const.NilValue)
