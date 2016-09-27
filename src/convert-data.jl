@@ -81,7 +81,7 @@ for typ in [:NullableCategoricalArray, :CategoricalArray]
                 end
                 # due to a bug of CategoricalArrays, we use index(v.pool) instead of index(v)
                 setattrib!(rv, Const.LevelsSymbol, sexp(CategoricalArrays.index(v.pool)))
-                setattrib!(rv, Const.ClassSymbol, sexp(["factor"]))
+                setattrib!(rv, Const.ClassSymbol, sexp("factor"))
                 if CategoricalArrays.ordered(v)
                     rv = rcall(:ordered, rv, CategoricalArrays.levels(v))
                 end
