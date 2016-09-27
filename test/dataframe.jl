@@ -25,10 +25,10 @@ station = attenu[:station]
 @test isequal(rcopy(NullableArray,"c(NA,1L)"), NullableArray([true,one(Int32)], [true,false]))
 @test isequal(rcopy(NullableArray,"c(NA,'NA')"), NullableArray(["", "NA"], [true,false]))
 @test_throws ErrorException rcopy(NullableArray,"as.factor(c('a','a','c'))")
-@test rcopy(CategoricalArray,"factor(c('a','a','c'))").pool.levels == ["a","c"]
-@test rcopy(NullableCategoricalArray,"factor(c('a',NA,'c'))").pool.levels == ["a","c"]
-@test rcopy(CategoricalArray,"ordered(c('a','a','c'))").pool.ordered
-@test rcopy(NullableCategoricalArray,"ordered(c('a',NA,'c'))").pool.ordered
+@test CategoricalArrays.levels(rcopy(CategoricalArray,"factor(c('a','a','c'))")) == ["a","c"]
+@test CategoricalArrays.levels(rcopy(NullableCategoricalArray,"factor(c('a',NA,'c'))")) == ["a","c"]
+@test CategoricalArrays.ordered(rcopy(CategoricalArray,"ordered(c('a','a','c'))"))
+@test CategoricalArrays.ordered(rcopy(NullableCategoricalArray,"ordered(c('a',NA,'c'))"))
 
 v = NullableArray([true,true], [true,false])
 @test isequal(rcopy(NullableArray,RObject(v)), v)
