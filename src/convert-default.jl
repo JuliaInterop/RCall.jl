@@ -44,7 +44,11 @@ function rcopy(s::LglSxpPtr)
 end
 function rcopy(s::IntSxpPtr)
     if isFactor(s)
-        rcopy(NullableCategoricalArray,s)
+        if anyna(s)
+            rcopy(NullableCategoricalArray,s)
+        else
+            rcopy(CategoricalArray,s)
+        end
     elseif anyna(s)
         rcopy(NullableArray{Int},s)
     elseif length(s) == 1

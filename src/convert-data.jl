@@ -11,17 +11,23 @@ function rcopy(::Type{NullableArray}, s::Ptr{IntSxp})
     isFactor(s) && error("$s is a R factor")
     NullableArray(rcopy(Array,s), isna(s))
 end
+function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
+    isFactor(s) || error("$s is not a R factor")
+    refs = UInt32[x for x in s]
+    levels = rcopy(getattrib(s,Const.LevelsSymbol))
+    pool = CategoricalPool(levels, isOrdered(s))
+    CategoricalArray(refs, pool)
+end
 function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
     isFactor(s) || error("$s is not a R factor")
     refs = UInt32[isna(x) ? zero(UInt32) : UInt32(x) for x in s]
-    pool = CategoricalPool(rcopy(getattrib(s,Const.LevelsSymbol)))
+    levels = rcopy(getattrib(s,Const.LevelsSymbol))
+    pool = CategoricalPool(levels, isOrdered(s))
     NullableCategoricalArray(refs, pool)
 end
-
 function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
     isFrame(s) || error("s is not a R data frame")
-    DataFrame(Any[isFactor(c)? rcopy(NullableCategoricalArray, c) : rcopy(NullableArray, c) for c in s],
-              rcopy(Array{Symbol},getnames(s)))
+    DataFrame(Any[rcopy(c) for c in s], rcopy(Array{Symbol},getnames(s)))
 end
 
 
@@ -40,12 +46,28 @@ function sexp(v::NullableArray)
     rv
 end
 
-## NullableCategoricalArray to sexp conversion.
-function sexp{T<:Compat.String,N,R<:Integer}(v::NullableCategoricalArray{T,N,R})
-    rv = sexp(v.refs)
-    setattrib!(rv, Const.LevelsSymbol, sexp(v.pool.levels))
-    setattrib!(rv, Const.ClassSymbol, sexp("factor"))
-    rv
+## CategoricalArray to sexp conversion.
+for typ in [:NullableCategoricalArray, :CategoricalArray]
+    @eval begin
+        function sexp{T<:Compat.String,N,R<:Integer}(v::$typ{T,N,R})
+            rv = protect(sexp(v.refs))
+            try
+                for (i,isna) = enumerate(v.refs .== 0)
+                    if isna
+                        rv[i] = naeltype(eltype(rv))
+                    end
+                end
+                setattrib!(rv, Const.LevelsSymbol, sexp(v.pool.index))
+                setattrib!(rv, Const.ClassSymbol, sexp(["factor"]))
+                if v.pool.ordered
+                    rv = rcall(:ordered, rv, v.pool.levels)
+                end
+            finally
+                unprotect(1)
+            end
+            rv
+        end
+    end
 end
 
 ## DataFrame to sexp conversion.
