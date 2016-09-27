@@ -1,5 +1,10 @@
 using NullableArrays,CategoricalArrays,DataFrames
 
+@test rcopy(Nullable, RObject(1)).value == 1
+@test rcopy(Nullable, RObject("abc")).value == "abc"
+@test rcopy(RObject(Nullable(1))) == 1
+@test rcopy(Nullable, RObject(Nullable(1, true))).isnull
+
 v110 = rcopy(NullableArray,reval("c(1L, NA)"))
 @test isa(v110,NullableVector)
 @test eltype(v110) == Nullable{Int32}

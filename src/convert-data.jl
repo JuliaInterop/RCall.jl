@@ -1,5 +1,18 @@
 # conversion methods for NullableArrays, CategoricalArrays and DataFrames
 
+function rcopy{T,S<:Sxp}(::Type{Nullable{T}}, s::Ptr{S})
+    length(s) == 1 || error("length of $s must be 1.")
+    rcopy(NullableArray{T}, s)[1]
+end
+
+function rcopy{S<:VectorSxp}(::Type{Nullable}, s::Ptr{S})
+    rcopy(Nullable{eltype(S)}, s)
+end
+
+function rcopy{S<:StrSxp}(::Type{Nullable}, s::Ptr{S})
+    rcopy(Nullable{Compat.String}, s)
+end
+
 function rcopy{T,S<:VectorSxp}(::Type{NullableArray{T}}, s::Ptr{S})
     NullableArray(rcopy(Array{T},s), isna(s))
 end
@@ -30,6 +43,15 @@ function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
     DataFrame(Any[rcopy(c) for c in s], rcopy(Array{Symbol},getnames(s)))
 end
 
+
+# Nullable to sexp conversion.
+function sexp{T}(x::Nullable{T})
+    if x.isnull
+        return sexp(natype(T))
+    else
+        return sexp(x.value)
+    end
+end
 
 ## NullableArray to sexp conversion.
 function sexp(v::NullableArray)
