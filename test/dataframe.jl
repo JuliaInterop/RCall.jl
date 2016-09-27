@@ -1,7 +1,7 @@
 using NullableArrays,CategoricalArrays,DataFrames
 
-@test rcopy(Nullable, RObject(1)).value == 1
-@test rcopy(Nullable, RObject("abc")).value == "abc"
+@test isequal(rcopy(Nullable, RObject(1)), Nullable(1))
+@test isequal(rcopy(Nullable, RObject("abc")), Nullable("abc"))
 @test rcopy(RObject(Nullable(1))) == 1
 @test isnull(rcopy(Nullable, RObject(Nullable(1, true))))
 
