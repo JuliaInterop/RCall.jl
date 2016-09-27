@@ -46,7 +46,7 @@ end
 
 # Nullable to sexp conversion.
 function sexp{T}(x::Nullable{T})
-    if x.isnull
+    if isnull(x)
         return sexp(natype(T))
     else
         return sexp(x.value)
@@ -57,7 +57,7 @@ end
 function sexp(v::NullableArray)
     rv = protect(sexp(v.values))
     try
-        for (i,isna) = enumerate(v.isnull)
+        for (i,isna) = enumerate(isnull(v))
             if isna
                 rv[i] = naeltype(eltype(rv))
             end
@@ -74,15 +74,16 @@ for typ in [:NullableCategoricalArray, :CategoricalArray]
         function sexp{T<:Compat.String,N,R<:Integer}(v::$typ{T,N,R})
             rv = protect(sexp(v.refs))
             try
-                for (i,isna) = enumerate(v.refs .== 0)
-                    if isna
+                for (i,ref) = enumerate(v.refs)
+                    if ref == 0
                         rv[i] = naeltype(eltype(rv))
                     end
                 end
-                setattrib!(rv, Const.LevelsSymbol, sexp(v.pool.index))
+                # due to a bug of CategoricalArrays, we use index(v.pool) instead of index(v)
+                setattrib!(rv, Const.LevelsSymbol, sexp(CategoricalArrays.index(v.pool)))
                 setattrib!(rv, Const.ClassSymbol, sexp(["factor"]))
-                if v.pool.ordered
-                    rv = rcall(:ordered, rv, v.pool.levels)
+                if CategoricalArrays.ordered(v)
+                    rv = rcall(:ordered, rv, CategoricalArrays.levels(v))
                 end
             finally
                 unprotect(1)
