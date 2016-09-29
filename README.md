@@ -1,8 +1,8 @@
 # RCall.jl
 
 #### Most recent release
-[![RCall](http://pkg.julialang.org/badges/RCall_0.4.svg)](http://pkg.julialang.org/?pkg=RCall&ver=0.4)
 [![RCall](http://pkg.julialang.org/badges/RCall_0.5.svg)](http://pkg.julialang.org/?pkg=RCall&ver=0.5)
+[![RCall](http://pkg.julialang.org/badges/RCall_0.6.svg)](http://pkg.julialang.org/?pkg=RCall&ver=0.6)
 
 #### Development version
 * Linux & OSX: [![Travis Build Status](https://travis-ci.org/JuliaInterop/RCall.jl.svg?branch=master)](https://travis-ci.org/JuliaInterop/RCall.jl)
