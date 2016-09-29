@@ -77,6 +77,7 @@ end
 function rgui_init()
     f = rlang(rgui_start, true)
     set_hook("plot.new", f)
+    set_hook("persp", f)
     set_hook("grid.newpage", f)
     set_hook(rlang(:packageEvent, "rgl", "onLoad"), f)
 end
