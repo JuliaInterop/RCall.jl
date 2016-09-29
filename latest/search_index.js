@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "Several Ways to use RCall",
     "category": "section",
-    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput\n and \n@rget\n macros\nR\"\"\n string macro\nA low level API: \nreval\n, \nrcall\n and \nrcopy\n etc."
+    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput and @rget macros\nR\"\" string macro\nA low level API: reval, rcall and rcopy etc."
 },
 
 {
@@ -433,15 +433,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.isnull-Tuple{Ptr{S<:RCall.Sxp}}",
-    "page": "Internal",
-    "title": "RCall.isnull",
-    "category": "Method",
-    "text": "Check if values correspond to R's NULL object.\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.rcall-Tuple{Any,Vararg{Any}}",
+    "location": "internal.html#RCall.rcall-Tuple{Any,Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.rcall",
     "category": "Method",
@@ -481,7 +473,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rlang-Tuple{Any,Vararg{Any}}",
+    "location": "internal.html#RCall.rlang-Tuple{Any,Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.rlang",
     "category": "Method",
@@ -497,19 +489,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rprint-Tuple{IO,ByteString}",
-    "page": "Internal",
-    "title": "RCall.rprint",
-    "category": "Method",
-    "text": "Parse, evaluate and print the result of a string as an R expression.\n\n\n\n"
-},
-
-{
     "location": "internal.html#RCall.rprint-Tuple{IO,Ptr{S<:RCall.Sxp}}",
     "page": "Internal",
     "title": "RCall.rprint",
     "category": "Method",
     "text": "Print the value of an Sxp using R's printing mechanism\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.rprint-Tuple{IO,String}",
+    "page": "Internal",
+    "title": "RCall.rprint",
+    "category": "Method",
+    "text": "Parse, evaluate and print the result of a string as an R expression.\n\n\n\n"
 },
 
 {
@@ -581,7 +573,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "Base.isascii",
     "category": "Method",
-    "text": "Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).  * 0x00_0002_00 (bit 1): set of bytes (no known encoding)  * 0x00_0004_00 (bit 2): Latin-1  * 0x00_0008_00 (bit 3): UTF-8  * 0x00_0040_00 (bit 6): ASCII\n\nWe only support ASCII and UTF-8.\n\n\n\n"
+    "text": "Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).\n\n0x00_0002_00 (bit 1): set of bytes (no known encoding)\n0x00_0004_00 (bit 2): Latin-1\n0x00_0008_00 (bit 3): UTF-8\n0x00_0040_00 (bit 6): ASCII\n\nWe only support ASCII and UTF-8.\n\n\n\n"
+},
+
+{
+    "location": "internal.html#Base.isnull-Tuple{Ptr{S<:RCall.Sxp}}",
+    "page": "Internal",
+    "title": "Base.isnull",
+    "category": "Method",
+    "text": "Check if values correspond to R's NULL object.\n\n\n\n"
 },
 
 {
@@ -593,7 +593,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#Base.names-Tuple{RCall.RObject{S<:RCall.Sxp}}",
+    "location": "internal.html#Base.names-Tuple{RCall.RObject}",
     "page": "Internal",
     "title": "Base.names",
     "category": "Method",
@@ -657,7 +657,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.findNamespace-Tuple{ByteString}",
+    "location": "internal.html#RCall.findNamespace-Tuple{String}",
     "page": "Internal",
     "title": "RCall.findNamespace",
     "category": "Method",
@@ -665,7 +665,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.getNamespace-Tuple{ByteString}",
+    "location": "internal.html#RCall.getNamespace-Tuple{String}",
     "page": "Internal",
     "title": "RCall.getNamespace",
     "category": "Method",
@@ -689,11 +689,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.ijulia_setdevice-Tuple{MIME{mime}}",
+    "location": "internal.html#RCall.ijulia_setdevice-Tuple{MIME}",
     "page": "Internal",
     "title": "RCall.ijulia_setdevice",
     "category": "Method",
-    "text": "Set options for R plotting with IJulia.\n\nThe first argument should be a MIME object: currently supported are * MIME(\"image/png\") [default] * MIME(\"image/svg+xml\")\n\nThe remaining arguments (keyword only) are passed to the appropriate R graphics device: see the relevant R help for details.\n\n\n\n"
+    "text": "Set options for R plotting with IJulia.\n\nThe first argument should be a MIME object: currently supported are\n\nMIME(\"image/png\") [default]\nMIME(\"image/svg+xml\")\n\nThe remaining arguments (keyword only) are passed to the appropriate R graphics device: see the relevant R help for details.\n\n\n\n"
 },
 
 {
@@ -709,7 +709,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.julia_extptr_callback",
     "category": "Method",
-    "text": "The function called by R .External for Julia callbacks.\n\nIt receives a ListSxpPtr containing  - a pointer to the function itself (ExtPtrSxpPtr)  - a pointer to the Julia function (ExtPtrSxpPtr)  - any arguments (as SxpPtr)\n\n\n\n"
+    "text": "The function called by R .External for Julia callbacks.\n\nIt receives a ListSxpPtr containing\n\na pointer to the function itself (ExtPtrSxpPtr)\na pointer to the Julia function (ExtPtrSxpPtr)\nany arguments (as SxpPtr)\n\n\n\n"
 },
 
 {
@@ -785,7 +785,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.render-Tuple{ByteString}",
+    "location": "internal.html#RCall.render-Tuple{String}",
     "page": "Internal",
     "title": "RCall.render",
     "category": "Method",
@@ -809,7 +809,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rlang_p-Tuple{Any,Vararg{Any}}",
+    "location": "internal.html#RCall.rlang_p-Tuple{Any,Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.rlang_p",
     "category": "Method",
@@ -849,7 +849,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.CharSxp},ByteString}",
+    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.CharSxp},String}",
     "page": "Internal",
     "title": "RCall.sexp",
     "category": "Method",
@@ -897,7 +897,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.sexp_arglist_dots-Tuple",
+    "location": "internal.html#RCall.sexp_arglist_dots-Tuple{Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.sexp_arglist_dots",
     "category": "Method",
@@ -953,15 +953,15 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.@R_str",
+    "location": "internal.html#RCall.@R_str-Tuple{Any}",
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "Macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot((anonymous function))\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#34)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
 },
 
 {
-    "location": "internal.html#RCall.@rget",
+    "location": "internal.html#RCall.@rget-Tuple{Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.@rget",
     "category": "Macro",
@@ -969,7 +969,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.@rimport",
+    "location": "internal.html#RCall.@rimport-Tuple{Any,Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.@rimport",
     "category": "Macro",
@@ -977,7 +977,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.@rlibrary",
+    "location": "internal.html#RCall.@rlibrary-Tuple{Any}",
     "page": "Internal",
     "title": "RCall.@rlibrary",
     "category": "Macro",
@@ -985,7 +985,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.@rput",
+    "location": "internal.html#RCall.@rput-Tuple{Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.@rput",
     "category": "Macro",
@@ -993,7 +993,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.@var_str",
+    "location": "internal.html#RCall.@var_str-Tuple{Any}",
     "page": "Internal",
     "title": "RCall.@var_str",
     "category": "Macro",
