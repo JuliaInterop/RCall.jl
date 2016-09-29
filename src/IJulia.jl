@@ -29,7 +29,7 @@ rdevicename(m::MIME"image/svg+xml") = :svg
 
 function ijulia_displayfile(m::MIME"image/png", f)
     open(f) do f
-        d = readbytes(f)
+        d = Compat.read(f)
         display(m,d)
     end
 end
