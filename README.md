@@ -9,13 +9,13 @@
 * Windows: [![Appveyor Build status](https://ci.appveyor.com/api/projects/status/u4xs4f83m4271d8a?svg=true)](https://ci.appveyor.com/project/randy3k/rcall-jl)
 * Coverage: [![Coverage Status](https://coveralls.io/repos/github/JuliaInterop/RCall.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaInterop/RCall.jl?branch=master)
 
-#### Lastest Documentation
+#### Documentation
 
-[Latest Documentation](http://juliastats.github.io/RCall.jl/latest).
+[Stable Documentation](http://juliainterop.github.io/RCall.jl/stable).
+[Development Documentation](http://juliainterop.github.io/RCall.jl/latest).
  
 #### Getting Started
-To get started, see [Getting Started](http://juliastats.github.io/RCall.jl/latest/gettingstarted).
-
+To get started, see [Getting Started](http://juliainterop.github.io/RCall.jl/stable/gettingstarted).
 
 #### ggplot2 demostration
 
