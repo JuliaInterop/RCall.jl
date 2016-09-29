@@ -11,8 +11,9 @@
 
 #### Documentation
 
-[Stable Documentation](http://juliainterop.github.io/RCall.jl/stable).
-[Development Documentation](http://juliainterop.github.io/RCall.jl/latest).
+[![Doc Stable](https://img.shields.io/badge/docs-stable-blue.svg)](http://juliainterop.github.io/RCall.jl/stable)
+
+[![Doc Development](https://img.shields.io/badge/docs-latest-blue.svg)](http://juliainterop.github.io/RCall.jl/latest)
  
 #### Getting Started
 To get started, see [Getting Started](http://juliainterop.github.io/RCall.jl/stable/gettingstarted).
