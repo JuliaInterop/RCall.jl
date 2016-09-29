@@ -1,11 +1,11 @@
 __precompile__()
 module RCall
-using Compat, DataFrames, DataArrays
+using Compat, DataFrames, NullableArrays, CategoricalArrays
 import Compat.String
 
 import DataStructures: OrderedDict
 
-import Base: eltype, show, convert, isascii,
+import Base: eltype, show, convert, isascii, isnull,
     length, size, getindex, setindex!, start, next, done, names
 
 export RObject,
@@ -13,7 +13,7 @@ export RObject,
    ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
    getattrib, setattrib!, getnames, setnames!, getclass, setclass!, attributes,
    globalEnv,
-   isna, anyna, isnull,
+   isna, anyna,
    rcopy, rparse, rprint, reval, rcall, rlang,
    @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 

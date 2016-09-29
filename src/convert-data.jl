@@ -1,34 +1,63 @@
-# conversion methods for DataArrays and DataFrames
+# conversion methods for NullableArrays, CategoricalArrays and DataFrames
 
-function rcopy{T,S<:VectorSxp}(::Type{DataArray{T}}, s::Ptr{S})
-    DataArray(rcopy(Array{T},s), isna(s))
-end
-function rcopy{S<:VectorSxp}(::Type{DataArray}, s::Ptr{S})
-    DataArray(rcopy(Array,s), isna(s))
+function rcopy{T,S<:Sxp}(::Type{Nullable{T}}, s::Ptr{S})
+    length(s) == 1 || error("length of $s must be 1.")
+    rcopy(NullableArray{T}, s)[1]
 end
 
-function rcopy(::Type{DataArray}, s::Ptr{IntSxp})
+function rcopy{S<:VectorSxp}(::Type{Nullable}, s::Ptr{S})
+    rcopy(Nullable{eltype(S)}, s)
+end
+
+function rcopy{S<:StrSxp}(::Type{Nullable}, s::Ptr{S})
+    rcopy(Nullable{Compat.String}, s)
+end
+
+function rcopy{T,S<:VectorSxp}(::Type{NullableArray{T}}, s::Ptr{S})
+    NullableArray(rcopy(Array{T},s), isna(s))
+end
+function rcopy{S<:VectorSxp}(::Type{NullableArray}, s::Ptr{S})
+    NullableArray(rcopy(Array,s), isna(s))
+end
+
+function rcopy(::Type{NullableArray}, s::Ptr{IntSxp})
     isFactor(s) && error("$s is a R factor")
-    DataArray(rcopy(Array,s), isna(s))
+    NullableArray(rcopy(Array,s), isna(s))
 end
-function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
+function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
     isFactor(s) || error("$s is not a R factor")
-    refs = DataArrays.RefArray([isna(x) ? zero(Int32) : x for x in s])
-    compact(PooledDataArray(refs,rcopy(getattrib(s,Const.LevelsSymbol))))
+    refs = UInt32[x for x in s]
+    levels = rcopy(getattrib(s,Const.LevelsSymbol))
+    pool = CategoricalPool(levels, isOrdered(s))
+    CategoricalArray(refs, pool)
 end
-
+function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
+    isFactor(s) || error("$s is not a R factor")
+    refs = UInt32[isna(x) ? zero(UInt32) : UInt32(x) for x in s]
+    levels = rcopy(getattrib(s,Const.LevelsSymbol))
+    pool = CategoricalPool(levels, isOrdered(s))
+    NullableCategoricalArray(refs, pool)
+end
 function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
     isFrame(s) || error("s is not a R data frame")
-    DataFrame(Any[isFactor(c)? rcopy(PooledDataArray, c) : rcopy(DataArray, c) for c in s],
-              rcopy(Array{Symbol},getnames(s)))
+    DataFrame(Any[rcopy(c) for c in s], rcopy(Array{Symbol},getnames(s)))
 end
 
 
-## DataArray to sexp conversion.
-function sexp(v::DataArray)
-    rv = protect(sexp(v.data))
+# Nullable to sexp conversion.
+function sexp{T}(x::Nullable{T})
+    if isnull(x)
+        return sexp(natype(T))
+    else
+        return sexp(x.value)
+    end
+end
+
+## NullableArray to sexp conversion.
+function sexp(v::NullableArray)
+    rv = protect(sexp(v.values))
     try
-        for (i,isna) = enumerate(v.na)
+        for (i,isna) = enumerate(isnull(v))
             if isna
                 rv[i] = naeltype(eltype(rv))
             end
@@ -39,12 +68,29 @@ function sexp(v::DataArray)
     rv
 end
 
-## PooledDataArray to sexp conversion.
-function sexp{T<:Compat.String,R<:Integer}(v::PooledDataArray{T,R})
-    rv = sexp(v.refs)
-    setattrib!(rv, Const.LevelsSymbol, sexp(v.pool))
-    setattrib!(rv, Const.ClassSymbol, sexp("factor"))
-    rv
+## CategoricalArray to sexp conversion.
+for typ in [:NullableCategoricalArray, :CategoricalArray]
+    @eval begin
+        function sexp{T<:Compat.String,N,R<:Integer}(v::$typ{T,N,R})
+            rv = protect(sexp(v.refs))
+            try
+                for (i,ref) = enumerate(v.refs)
+                    if ref == 0
+                        rv[i] = naeltype(eltype(rv))
+                    end
+                end
+                # due to a bug of CategoricalArrays, we use index(v.pool) instead of index(v)
+                setattrib!(rv, Const.LevelsSymbol, sexp(CategoricalArrays.index(v.pool)))
+                setattrib!(rv, Const.ClassSymbol, sexp("factor"))
+                if CategoricalArrays.ordered(v)
+                    rv = rcall(:ordered, rv, CategoricalArrays.levels(v))
+                end
+            finally
+                unprotect(1)
+            end
+            rv
+        end
+    end
 end
 
 ## DataFrame to sexp conversion.

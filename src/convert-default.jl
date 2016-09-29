@@ -8,7 +8,7 @@ rcopy(s::CharSxpPtr) = rcopy(Compat.String,s)
 
 function rcopy(s::StrSxpPtr)
     if anyna(s)
-        rcopy(DataArray,s)
+        rcopy(NullableArray,s)
     elseif length(s) == 1
         rcopy(Compat.String,s)
     else
@@ -17,7 +17,7 @@ function rcopy(s::StrSxpPtr)
 end
 function rcopy(s::RealSxpPtr)
     if anyna(s)
-        rcopy(DataArray{Float64},s)
+        rcopy(NullableArray{Float64},s)
     elseif length(s) == 1
         rcopy(Float64,s)
     else
@@ -26,7 +26,7 @@ function rcopy(s::RealSxpPtr)
 end
 function rcopy(s::CplxSxpPtr)
     if anyna(s)
-        rcopy(DataArray{Complex128},s)
+        rcopy(NullableArray{Complex128},s)
     elseif length(s) == 1
         rcopy(Complex128,s)
     else
@@ -35,7 +35,7 @@ function rcopy(s::CplxSxpPtr)
 end
 function rcopy(s::LglSxpPtr)
     if anyna(s)
-        rcopy(DataArray{Bool},s)
+        rcopy(NullableArray{Bool},s)
     elseif length(s) == 1
         rcopy(Bool,s)
     else
@@ -44,9 +44,13 @@ function rcopy(s::LglSxpPtr)
 end
 function rcopy(s::IntSxpPtr)
     if isFactor(s)
-        rcopy(PooledDataArray,s)
+        if anyna(s)
+            rcopy(NullableCategoricalArray,s)
+        else
+            rcopy(CategoricalArray,s)
+        end
     elseif anyna(s)
-        rcopy(DataArray{Int},s)
+        rcopy(NullableArray{Int},s)
     elseif length(s) == 1
         rcopy(Cint,s)
     else

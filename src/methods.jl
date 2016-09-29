@@ -140,7 +140,9 @@ start{S<:VectorSxp}(s::Ptr{S}) = 0
 next{S<:VectorSxp}(s::Ptr{S},state) = (state += 1;(s[state],state))
 done{S<:VectorSxp}(s::Ptr{S},state) = state ≥ length(s)
 
-
+start{S<:VectorSxp}(s::RObject{S}) = start(s.p)
+next{S<:VectorSxp}(s::RObject{S},state) = next(s.p, state)
+done{S<:VectorSxp}(s::RObject{S},state) = done(s.p, state)
 
 # PairListSxps
 
@@ -298,6 +300,10 @@ naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 naeltype(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
 
+natype{S<:Integer}(::Type{S}) = Const.NaInt
+natype{S<:Real}(::Type{S}) = Const.NaReal
+natype(::Type{Complex}) = complex(Const.NaReal,Const.NaReal)
+natype{S<:Compat.String}(::Type{S}) = sexp(Const.NaString)
 
 """
 Check if values correspond to R's sentinel NA values.
@@ -310,7 +316,7 @@ isna(s::CharSxpPtr) = s === sexp(Const.NaString)
 
 # this doesn't allow us to check VecSxp s
 function isna{S<:VectorSxp}(s::Ptr{S})
-    b = BitArray(size(s)...)
+    b = Array{Bool}(size(s)...)
     for (i,e) in enumerate(s)
         b[i] = isna(e)
     end

@@ -30,7 +30,6 @@ sexp(::Type{Cint},x) = convert(Cint,x)
 sexp(::Type{Float64},x) = convert(Float64,x)
 sexp(::Type{Complex128},x) = convert(Complex128,x)
 
-
 # NilSxp
 sexp(::Void) = sexp(Const.NilValue)
 rcopy(::Ptr{NilSxp}) = nothing

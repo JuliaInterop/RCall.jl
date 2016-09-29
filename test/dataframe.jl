@@ -1,31 +1,52 @@
-using DataArrays,DataFrames
+using NullableArrays,CategoricalArrays,DataFrames
 
-v110 = rcopy(DataArray,reval("x <- 1:10"))
-@test isa(v110,DataVector)
-@test eltype(v110) == Cint
+@test isequal(rcopy(Nullable, RObject(1)), Nullable(1))
+@test isequal(rcopy(Nullable, RObject("abc")), Nullable("abc"))
+@test rcopy(RObject(Nullable(1))) == 1
+@test isnull(rcopy(Nullable, RObject(Nullable(1, true))))
+
+v110 = rcopy(NullableArray,reval("c(1L, NA)"))
+@test isa(v110,NullableVector)
+@test eltype(v110) == Nullable{Int32}
+@test isnull(rcopy(NullableArray, RObject(v110[2]))[1])
 
 attenu = rcopy(DataFrame,:attenu)
 @test isa(attenu,DataFrame)
 @test size(attenu) == (182,5)
 
 dist = attenu[:dist]
-@test isa(dist,DataArray{Float64})
+@test isa(dist,Vector{Float64})
+station = attenu[:station]
+@test isa(station,NullableCategoricalArray)
 
-@test rcopy(DataArray,"c(NA,TRUE)").na == @data([NA,true]).na
-@test rcopy(DataArray,"c(NA,1)").na == @data([NA,1.0]).na
-@test rcopy(DataArray,"c(NA,1+0i)").na == @data([NA,1.0+0.0*im]).na
-@test rcopy(DataArray,"c(NA,1L)").na == @data([NA,one(Int32)]).na
-@test rcopy(DataArray,"c(NA,'NA')").na == @data([NA,"NA"]).na
-@test_throws ErrorException rcopy(DataArray,"as.factor(c('a','a','c'))")
-@test rcopy(PooledDataArray,"as.factor(c('a','a','c'))").pool == ["a","c"]
+@test isequal(rcopy(NullableArray,"c(NA,TRUE)"), NullableArray([true,true], [true,false]))
+@test isequal(rcopy(NullableArray,"c(NA,1)"), NullableArray([true,1.], [true,false]))
+@test isequal(rcopy(NullableArray,"c(NA,1+0i)"), NullableArray([true,1.+0*im], [true,false]))
+@test isequal(rcopy(NullableArray,"c(NA,1L)"), NullableArray([true,one(Int32)], [true,false]))
+@test isequal(rcopy(NullableArray,"c(NA,'NA')"), NullableArray(["", "NA"], [true,false]))
+@test_throws ErrorException rcopy(NullableArray,"as.factor(c('a','a','c'))")
+@test CategoricalArrays.levels(rcopy(CategoricalArray,"factor(c('a','a','c'))")) == ["a","c"]
+@test CategoricalArrays.levels(rcopy(NullableCategoricalArray,"factor(c('a',NA,'c'))")) == ["a","c"]
+@test CategoricalArrays.ordered(rcopy(CategoricalArray,"ordered(c('a','a','c'))"))
+@test CategoricalArrays.ordered(rcopy(NullableCategoricalArray,"ordered(c('a',NA,'c'))"))
 
-@test rcopy(DataArray,RObject(@data([NA,true]))).na == @data([NA,true]).na
-@test rcopy(DataArray,RObject(@data([NA,1]))).na == @data([NA,1]).na
-@test rcopy(DataArray,RObject(@data([NA,1.]))).na == @data([NA,1.]).na
-@test rcopy(DataArray,RObject(@data([NA,1.+0*im]))).na == @data([NA,1.+0*im]).na
-@test rcopy(DataArray,RObject(@data([NA,NA,"a","b"]))).na == @data([NA,NA,"a","b"]).na
-pda = PooledDataArray(repeat(["a", "b"], inner = [5]))
-@test rcopy(PooledDataArray,RObject(pda)).refs == repeat([1,2], inner = [5])
+v = NullableArray([true,true], [true,false])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray([1,2], [true,false])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray([1.,2.], [true,false])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray([0,1.+0*im], [true,false])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray(["","abc"], [true,false])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+v = CategoricalArray(repeat(["a", "b"], inner = 5))
+@test isequal(rcopy(CategoricalArray,RObject(v)), v)
+v = NullableCategoricalArray(repeat(["a", "b"], inner = 5), repeat([true, false], outer = 5))
+@test isequal(rcopy(NullableCategoricalArray,RObject(v)), v)
+v = CategoricalArray(repeat(["a", "b"], inner = 5), ordered=true)
+@test isequal(rcopy(CategoricalArray,RObject(v)), v)
+v = NullableCategoricalArray(repeat(["a", "b"], inner = 5), repeat([true, false], outer = 5), ordered=true)
+@test isequal(rcopy(NullableCategoricalArray,RObject(v)), v)
 
 @test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
-
