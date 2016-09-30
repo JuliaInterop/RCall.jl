@@ -1,4 +1,4 @@
-if Compat.is_windows()
+if is_windows()
     import WinReg
 
     function locate_rhome()
@@ -69,7 +69,7 @@ if Compat.is_windows()
 
 end
 
-if Compat.is_unix()
+if is_unix()
     function locate_rhome()
         if haskey(ENV,"R_HOME")
             Rhome = ENV["R_HOME"]
@@ -100,7 +100,7 @@ function initEmbeddedR()
     # disable R signal handling
     unsafe_store!(cglobal((:R_SignalHandlers,RCall.libR),Cint),0)
 
-    if Compat.is_windows()
+    if is_windows()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
 
@@ -129,7 +129,7 @@ function initEmbeddedR()
         ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
     end
 
-    if Compat.is_unix()
+    if is_unix()
         # set necessary environmental variables
         ENV["R_HOME"] = Rhome
         ENV["R_DOC_DIR"] = joinpath(Rhome,"doc")

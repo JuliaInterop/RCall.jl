@@ -1,7 +1,6 @@
 __precompile__()
 module RCall
 using Compat, DataFrames, NullableArrays, CategoricalArrays
-import Compat.String
 
 import DataStructures: OrderedDict
 

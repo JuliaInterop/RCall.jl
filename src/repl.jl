@@ -1,7 +1,7 @@
 import Base: LineEdit, REPL, REPLCompletions
 
 function return_callback(s)
-    status = render(Compat.String(LineEdit.buffer(s)))[3]
+    status = render(String(LineEdit.buffer(s)))[3]
     status == 1 || status >= 3
 end
 
@@ -18,7 +18,7 @@ function generate_inline_julia_code(symdict::OrderedDict)
     end
 end
 
-function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
+function repl_eval(script::String, stdout::IO, stderr::IO)
     local status
     local val
     script, symdict, status, msg = render(script)
@@ -133,7 +133,7 @@ end
 
 function LineEdit.complete_line(c::RCompletionProvider, s)
     buf = s.input_buffer
-    partial = Compat.String(buf.data[1:buf.ptr-1])
+    partial = String(buf.data[1:buf.ptr-1])
     # complete latex
     full = LineEdit.input_string(s)
     ret, range, should_complete = REPLCompletions.bslash_completions(full, endof(partial))[2]
@@ -151,7 +151,7 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
         return ret, token, true
     end
 
-    return Compat.String[], 0:-1, false
+    return String[], 0:-1, false
 end
 
 function create_r_repl(repl, main)

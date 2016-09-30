@@ -28,8 +28,8 @@ x = 1:10
 
 y = "foo"
 @rput x y::StrSxp
-@rget x y::Array{Compat.UTF8String}
-@test isa(y,Vector{Compat.UTF8String})
+@rget x y::Array{String}
+@test isa(y,Vector{String})
 @test y[1] == "foo"
 
 @test sprint(io -> rprint(io,RObject([1,2,3]))) == "[1] 1 2 3\n"

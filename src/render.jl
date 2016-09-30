@@ -1,8 +1,8 @@
 """
 Render an inline R script, substituting invalid "\$" signs for Julia symbols
 """
-function render(script::Compat.String)
-    symdict = OrderedDict{Compat.String,Any}()
+function render(script::String)
+    symdict = OrderedDict{String,Any}()
     local status
     local msg = ""
     local k = 0
