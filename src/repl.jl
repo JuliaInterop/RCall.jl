@@ -46,6 +46,8 @@ function repl_eval(script::Compat.String, stdout::IO, stderr::IO)
     finally
         unprotect(1)
     end
+    # set .Last.value
+    set_last_value(val)
     # print if the last expression is visible
     if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
          rprint(stdout, sexp(val))

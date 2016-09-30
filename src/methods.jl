@@ -425,3 +425,9 @@ end
 
 "get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound."
 getNamespace(str::Compat.String) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespace"], str))
+
+
+"Set the variable .Last.value to a given value"
+function set_last_value{S<:Sxp}(s::Ptr{S})
+    ccall((:SET_SYMVALUE,libR),Void,(Ptr{Void},Ptr{Void}),sexp(Const.LastvalueSymbol),s)
+end
