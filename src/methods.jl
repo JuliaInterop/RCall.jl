@@ -428,6 +428,6 @@ getNamespace(str::Compat.String) = reval(rlang_p(RCall.Const.BaseNamespace["getN
 
 "Set the variable .Last.value to a given value"
 function set_last_value{S<:Sxp}(s::Ptr{S})
-    ccall((:SET_SYMVALUE,libR),Void,(Ptr{Void},Ptr{Void}),sexp(Const.LastvalueSymbol),s)
+    ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},UnknownSxpPtr),sexp(Const.LastvalueSymbol),s)
     nothing
 end
