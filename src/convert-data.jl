@@ -47,7 +47,7 @@ end
 # Nullable to sexp conversion.
 function sexp{T}(x::Nullable{T})
     if isnull(x)
-        return sexp(natype(T))
+        return sexp(naeltype(T))
     else
         return sexp(x.value)
     end
