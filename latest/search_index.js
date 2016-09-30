@@ -433,14 +433,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rcall-Tuple{Any,Vararg{Any,N}}",
-    "page": "Internal",
-    "title": "RCall.rcall",
-    "category": "Method",
-    "text": "Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a FunctionSxp type, a SymSxp or a Symbol.\n\n\n\n"
-},
-
-{
     "location": "internal.html#RCall.rcopy-Tuple{AbstractString}",
     "page": "Internal",
     "title": "RCall.rcopy",
@@ -769,6 +761,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.rcall_p-Tuple{Any,Vararg{Any,N}}",
+    "page": "Internal",
+    "title": "RCall.rcall_p",
+    "category": "Method",
+    "text": "Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a FunctionSxp type, a SymSxp or a Symbol.\n\n\n\n"
+},
+
+{
     "location": "internal.html#RCall.registerCFinalizerEx-Tuple{Ptr{RCall.ExtPtrSxp}}",
     "page": "Internal",
     "title": "RCall.registerCFinalizerEx",
@@ -822,6 +822,14 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.rparse_p",
     "category": "Method",
     "text": "Parse a string as an R expression, returning a Sxp pointer.\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.set_last_value-Tuple{Ptr{S<:RCall.Sxp}}",
+    "page": "Internal",
+    "title": "RCall.set_last_value",
+    "category": "Method",
+    "text": "Set the variable .Last.value to a given value\n\n\n\n"
 },
 
 {
