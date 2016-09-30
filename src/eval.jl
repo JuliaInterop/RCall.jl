@@ -33,12 +33,13 @@ Evaluate an R expression array iteratively.
 function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val           # the value of the last expression is returned
     protect(expr)
+    protect(env)
     try
         for e in expr
             val = reval_p(e,env)
         end
     finally
-        unprotect(1)
+        unprotect(2)
     end
     # set .Last.value
     set_last_value(val)
@@ -57,11 +58,12 @@ reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv) = RObject(reval_p(
 "A pure julia wrapper of R_ParseVector"
 function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
+    protect(sf)
     status = Array(Cint,1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
                 st,-1,status,sf)
-    unprotect(1)
+    unprotect(2)
     val, status[1]
 end
 
