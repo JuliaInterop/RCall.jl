@@ -6,6 +6,7 @@ function render(script::String)
     local status
     local msg = ""
     local k = 0
+    local c = ' '
     while true
         st = protect(sexp(script))
         sf = protect(rcall_p(:srcfile,"xx"))
@@ -17,12 +18,14 @@ function render(script::String)
         # break if not parse error (status = 3)
         (status != 3) && break
 
+        # break if the parse error is not caused by $
+        n = length(parsedata[1])
+        rcopy(parsedata[:text][n]) != "\$" && break
+
         # due to a bug in the R parser https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
         # unicode script parse error column location does not work
-        # for unicode < 256 bytes, R_ParseContextLast is used instead
 
         if isascii(script)
-            n = length(parsedata[1])
             line = parsedata[1][n]
             col = parsedata[2][n]
             index = 0
@@ -30,25 +33,28 @@ function render(script::String)
                 index = search(script, '\n', index+1)
             end
             b = index + col
-            c = script[b]
-            c != '\$' && break
-
+        elseif is_windows()
+            # the trick of R_ParseContextLast does not work on Windows
+            msg = "Subsitution in unicode expression is not supported on Windows."
+            break
+        elseif sizeof(script) >= 256
+            # `R_ParseContextLast` is only good for script < 256 bytes since
+            # `R_ParseContext` uses circular buffer
+            msg = "Subsitution in unicode expression of length >= 256 bytes is not supported."
+            break
         else
-            if is_windows()
-                msg = "Subsitution in unicode expression is not supported on Windows."
-                break
-            end
-            # `R_ParseContextLast` is only good for script < 256 bytes since `R_ParseContext` uses
-            # circular buffer
-            if sizeof(script) >= 256
-                msg = "Subsitution in unicode expression of length >= 256 bytes is not supported."
-                break
-            end
             # the position of the error byte
             b = Int(unsafe_load(cglobal((:R_ParseContextLast, libR), Cint)))
-            # it is unsafe to use `unsafe_string` if the last byte is a part of a unicode,
-            c = Char(unsafe_load(cglobal((:R_ParseContext, libR), Cchar)+b))
-            c != '\$' && break
+        end
+
+        try
+            c = script[b]
+        catch e
+            c = ' '
+        end
+        if c != '\$'
+            msg = "Error in locating julia expressions"
+            break
         end
 
         ast,i = parse(script,b+1,greedy=false,raise=false)
