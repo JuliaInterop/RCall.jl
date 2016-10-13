@@ -1,7 +1,7 @@
 """
 A pure julia wrapper of R_tryEval.
 """
-function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
+function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv))
     disable_sigint() do
         status = Array(Cint,1)
         protect(expr)
