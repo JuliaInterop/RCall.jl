@@ -11,23 +11,29 @@ function render(script::String)
         st = protect(sexp(script))
         sf = protect(rcall_p(:srcfile,"xx"))
         status = parseVector(st, sf)[2]
-        parsedata = protect(rcall_p(:getParseData,sf))
-        unprotect(2)
+        unprotect(1)
         msg = status == 1 ? "" : getParseErrorMsg()
 
         # break if not parse error (status = 3)
-        (status != 3) && break
+        if status != 3
+            unprotect(1)
+            break
+        else
+            parsedata = protect(rcall_p(:getParseData,sf))
+            n = length(parsedata[1])
+            line = parsedata[1][n]
+            col = parsedata[2][n]
+            c = rcopy(parsedata[:text][n])[1]
+            unprotect(2)
+        end
 
         # break if the parse error is not caused by $
-        n = length(parsedata[1])
-        rcopy(parsedata[:text][n]) != "\$" && break
+        c != '\$' && break
 
         # due to a bug in the R parser https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
         # unicode script parse error column location does not work
 
         if isascii(script)
-            line = parsedata[1][n]
-            col = parsedata[2][n]
             index = 0
             for i in 1:(line-1)
                 index = search(script, '\n', index+1)
@@ -84,7 +90,6 @@ function render(script::String)
         symdict[sym] = ast
         script = string(script[1:b-1],"`#JL`\$`",sym,'`',script[i:end])
     end
-    unprotect(1) # sf
 
     return script, symdict, status, msg
 end
