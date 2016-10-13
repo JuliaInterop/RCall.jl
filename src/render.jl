@@ -6,8 +6,11 @@ function render(script::String)
     local status
     local msg = ""
     local k = 0
+    sf = protect(rcall_p(:srcfile,"xx"))
     while true
-        status = parseVector(sexp(script))[2]
+        st = protect(sexp(script))
+        status = parseVector(st, sf)[2]
+        unprotect(1)
         msg = status == 1 ? "" : getParseErrorMsg()
 
         # break if not parse error (status = 3)
@@ -18,8 +21,10 @@ function render(script::String)
         # for unicode < 256 bytes, R_ParseContextLast is used instead
 
         if isascii(script)
-            line = Int(unsafe_load(cglobal((:R_ParseContextLine, libR), Cint)))
-            col = Int(unsafe_load(cglobal((:R_ParseErrorCol, libR), Cint)))
+            parsedata = protect(rcall_p(:getParseData,sf))
+            n = length(parsedata[1])
+            line = parsedata[1][n]
+            col = parsedata[2][n]
             index = 0
             for i in 1:(line-1)
                 index = search(script, '\n', index+1)
@@ -70,6 +75,7 @@ function render(script::String)
         symdict[sym] = ast
         script = string(script[1:b-1],"`#JL`\$`",sym,'`',script[i:end])
     end
+    unprotect(1) # sf
 
     return script, symdict, status, msg
 end
