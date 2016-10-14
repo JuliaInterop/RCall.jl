@@ -10,7 +10,7 @@ function rcopy{S<:VectorSxp}(::Type{Nullable}, s::Ptr{S})
 end
 
 function rcopy{S<:StrSxp}(::Type{Nullable}, s::Ptr{S})
-    rcopy(Nullable{Compat.String}, s)
+    rcopy(Nullable{String}, s)
 end
 
 function rcopy{T,S<:VectorSxp}(::Type{NullableArray{T}}, s::Ptr{S})
@@ -71,7 +71,7 @@ end
 ## CategoricalArray to sexp conversion.
 for typ in [:NullableCategoricalArray, :CategoricalArray]
     @eval begin
-        function sexp{T<:Compat.String,N,R<:Integer}(v::$typ{T,N,R})
+        function sexp{T<:String,N,R<:Integer}(v::$typ{T,N,R})
             rv = protect(sexp(v.refs))
             try
                 for (i,ref) = enumerate(v.refs)

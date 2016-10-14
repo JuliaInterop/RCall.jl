@@ -39,7 +39,7 @@ rprint(s) = rprint(STDOUT,s)
 """
 Parse, evaluate and print the result of a string as an R expression.
 """
-rprint(io::IO,str::Compat.String) = rprint(io,reval(str))
+rprint(io::IO,str::String) = rprint(io,reval(str))
 rprint(io::IO,sym::Symbol) = rprint(io,reval(sym))
 
 
@@ -64,9 +64,9 @@ global const errorBuffer = PipeBuffer()
 
 function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     if otype == 0
-        Compat.unsafe_write(printBuffer, buf, buflen)
+        unsafe_write(printBuffer, buf, buflen)
     else
-        Compat.unsafe_write(errorBuffer, buf, buflen)
+        unsafe_write(errorBuffer, buf, buflen)
     end
     return nothing
 end

@@ -29,7 +29,7 @@ rdevicename(m::MIME"image/svg+xml") = :svg
 
 function ijulia_displayfile(m::MIME"image/png", f)
     open(f) do f
-        d = Compat.read(f)
+        d = read(f)
         display(m,d)
     end
 end
@@ -39,7 +39,7 @@ function ijulia_displayfile(m::MIME"image/svg+xml", f)
     # we get around this by renaming the elements.
     open(f) do f
         r = randstring()
-        d = Compat.readstring(f)
+        d = readstring(f)
         d = replace(d,"id=\"glyph","id=\"glyph"*r)
         d = replace(d,"href=\"#glyph","href=\"#glyph"*r)
         display(m,d)

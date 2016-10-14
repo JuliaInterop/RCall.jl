@@ -1,6 +1,5 @@
 import Base: REPL, LineEdit, Terminals
 using RCall
-using Compat
 
 type FakeTerminal <: Base.Terminals.UnixTerminal
     in_stream::Base.IO

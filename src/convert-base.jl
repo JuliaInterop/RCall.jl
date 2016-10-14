@@ -50,13 +50,13 @@ rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
 """
 Create a `CharSxp` from a String.
 """
-sexp(::Type{CharSxp}, st::Compat.String) =
+sexp(::Type{CharSxp}, st::String) =
     ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
           (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
 sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, string(st))
 sexp(::Type{CharSxp}, sym::Symbol) = sexp(CharSxp, string(sym))
 
-rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, Compat.String(unsafe_vec(s)))
+rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, String(unsafe_vec(s)))
 rcopy(::Type{Symbol},s::CharSxpPtr) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
 
@@ -99,8 +99,8 @@ sexp(st::AbstractString) = sexp(StrSxp,st)
 "Create a `StrSxp` from an Abstract String Array"
 sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
 
-rcopy(::Type{Vector}, s::StrSxpPtr) = rcopy(Vector{Compat.String}, s)
-rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{Compat.String}, s)
+rcopy(::Type{Vector}, s::StrSxpPtr) = rcopy(Vector{String}, s)
+rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{String}, s)
 rcopy(::Type{Symbol}, s::StrSxpPtr) = rcopy(Symbol,s[1])
 rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
 

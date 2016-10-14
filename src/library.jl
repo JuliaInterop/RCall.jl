@@ -6,7 +6,7 @@ const reserved = Set(["while", "if", "for", "try", "return", "break",
     "baremodule", "using", "import", "export", "importall",
     "false", "true"])
 
-function rwrap(pkg::Compat.String, s::Symbol)
+function rwrap(pkg::String, s::Symbol)
     reval("library($pkg)")
     members = rcopy("ls('package:$pkg')")
     filter!(x -> !(x in reserved), members)
