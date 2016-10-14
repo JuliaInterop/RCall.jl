@@ -30,22 +30,21 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         if length(symdict) > 0
             eval(Main, generate_inline_julia_code(symdict))
         end
-        expr = protect(sexp(parseVector(sexp(script))[1]))
-        for e in expr
-            val, status = tryEval(e, sexp(Const.GlobalEnv))
-            flush_print_buffer(stdout)
-            # print warning and error messages
-            if status != 0 || nb_available(errorBuffer) != 0
-                write(stderr, takebuf_string(errorBuffer))
-            end
-            status != 0 && return nothing
-        end
     catch e
         display_error(stderr, e)
         return nothing
-    finally
-        unprotect(1)
     end
+    expr = protect(sexp(parseVector(sexp(script))[1]))
+    for e in expr
+        val, status = tryEval(e)
+        flush_print_buffer(stdout)
+        # print warning and error messages
+        if status != 0 || nb_available(errorBuffer) != 0
+            write(stderr, takebuf_string(errorBuffer))
+        end
+        status != 0 && return nothing
+    end
+    unprotect(1)
     # set .Last.value
     set_last_value(val)
     # print if the last expression is visible
