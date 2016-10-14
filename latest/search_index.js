@@ -921,10 +921,10 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.tryEval-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp}}",
+    "location": "internal.html#RCall.tryEval",
     "page": "Internal",
     "title": "RCall.tryEval",
-    "category": "Method",
+    "category": "Function",
     "text": "A pure julia wrapper of R_tryEval.\n\n\n\n"
 },
 
