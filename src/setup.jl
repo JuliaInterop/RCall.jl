@@ -1,23 +1,57 @@
-if is_windows()
+"""
+    validate_libR(libR)
+
+Checks that the R library `libR` can be loaded and is satisfies version requirements.
+Returns `true` if valid, throws an error if not.
+"""
+function validate_libR(libR)
+    libR != "" || error("Library $libR not found.")
+    # Issue #143
+    # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
+    libptr = Libdl.dlopen(libR)
+    if libptr == C_NULL
+        if is_windows()
+            error("Could not load library $libR. Try adding $(dirname(libR)) to the \"PATH\" environmental variable and restarting Julia.")
+        else
+            error("Could not load library $libR. Try adding $(dirname(libR)) to the \"LD_LIBRARY_PATH\" environmental variable and restarting Julia.")
+        end
+    end
+    # Issue #74
+    # R_BlankScalarString is only available on v3.2.0 or later.
+    if Libdl.dlsym_e(libptr,"R_BlankScalarString") == C_NULL
+        error("R libary $libR appears to be too old. RCall.jl requires R 3.2.0 or later")
+    end
+    Libdl.dlclose(libptr)
+    return true
+end
+
+
+@static if is_windows()
     import WinReg
 
-    function locate_rhome()
-        if haskey(ENV,"R_HOME")
-            Rhome = ENV["R_HOME"]
+    function locate_Rhome_libR()
+        Rhome = if haskey(ENV,"R_HOME")
+            ENV["R_HOME"]
         else
-            Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
+            try
+                WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
+            catch e
+                ""
+            end
         end
 
-        if isdir(Rhome)
-            println("R installation found at \"$Rhome\"")
-            return Rhome
+        libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386")])
+
+        if isdir(Rhome) && validate_libR(libR)
+            info("Using R installation at $Rhome")
+            return Rhome, libR
         end
         error("Could not locate R installation. Try setting \"R_HOME\" environmental variable.")
     end
 
-    const Rhome = locate_rhome()
+    const Rhome, libR = locate_Rhome_libR()
     const Ruser = homedir()
-    const libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386")])
+
 
     function ask_yes_no_cancel(prompt::Ptr{Cchar})
         println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
@@ -69,22 +103,28 @@ if is_windows()
 
 end
 
-if is_unix()
-    function locate_rhome()
-        if haskey(ENV,"R_HOME")
-            Rhome = ENV["R_HOME"]
+@static if is_unix()
+    function locate_Rhome_libR()
+        Rhome = if haskey(ENV,"R_HOME")
+            ENV["R_HOME"]
         else
-            Rhome = readchomp(`R RHOME`)
+            try
+                readchomp(`R RHOME`)
+            catch e
+                ""
+            end
         end
-        if isdir(Rhome)
-            println("R installation found at \"$Rhome\"")
-            return Rhome
+
+        libR  = Libdl.find_library(["libR"],[joinpath(Rhome,"lib")])
+
+        if isdir(Rhome) && validate_libR(libR)
+            info("Using R installation at $Rhome")
+            return Rhome, libR
         end
-        error("Could not find R installation. Try setting \"R_HOME\" environmental variable.")
+        error("Could not find R installation. Either set the \"R_HOME\" environmental variable, or ensure the R executable is available in \"PATH\".")
     end
 
-    const Rhome = locate_rhome()
-    const libR  = Libdl.find_library(["libR"],[joinpath(Rhome,"lib")])
+    const Rhome, libR = locate_Rhome_libR()
 end
 
 const Rembedded = Ref{Bool}(false)
@@ -100,7 +140,7 @@ function initEmbeddedR()
     # disable R signal handling
     unsafe_store!(cglobal((:R_SignalHandlers,RCall.libR),Cint),0)
 
-    if is_windows()
+    @static if is_windows()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
 
@@ -129,7 +169,7 @@ function initEmbeddedR()
         ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
     end
 
-    if is_unix()
+    @static if is_unix()
         # set necessary environmental variables
         ENV["R_HOME"] = Rhome
         ENV["R_DOC_DIR"] = joinpath(Rhome,"doc")
@@ -170,6 +210,8 @@ function endEmbeddedR()
 end
 
 function __init__()
+    validate_libR(libR)
+
     # Check if R already running
     Rinited = unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
 
