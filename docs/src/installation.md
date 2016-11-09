@@ -28,8 +28,6 @@ The following will update R on recent versions of Ubuntu:
     sudo apt-get update -y
     sudo apt-get install -y r-base r-base-dev
 
-
-
 ## Updating R
 
 If you have updated the R installation, you may need to rebuild the RCall cache via
