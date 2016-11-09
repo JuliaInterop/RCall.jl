@@ -953,6 +953,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.validate_libR-Tuple{Any}",
+    "page": "Internal",
+    "title": "RCall.validate_libR",
+    "category": "Method",
+    "text": "validate_libR(libR)\n\nChecks that the R library libR can be loaded and is satisfies version requirements. Returns true if valid, throws an error if not.\n\n\n\n"
+},
+
+{
     "location": "internal.html#Methods-1",
     "page": "Internal",
     "title": "Methods",
