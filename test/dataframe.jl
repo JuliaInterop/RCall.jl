@@ -3,7 +3,7 @@ using NullableArrays,CategoricalArrays,DataFrames
 @test isequal(rcopy(Nullable, RObject(1)), Nullable(1))
 @test isequal(rcopy(Nullable, RObject("abc")), Nullable("abc"))
 @test rcopy(RObject(Nullable(1))) == 1
-@test isnull(rcopy(Nullable, RObject(Nullable(1, true))))
+@test isnull(rcopy(Nullable, RObject(Nullable())))
 
 v110 = rcopy(NullableArray,reval("c(1L, NA)"))
 @test isa(v110,NullableVector)
