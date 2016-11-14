@@ -12,21 +12,16 @@
  * License: MIT
  */
 
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css');
-@import url("https://fonts.googleapis.com/css?family=Lato");
-@import url("https://fontlibrary.org/face/fantasque-sans-mono");
-
 /* fonts */
 body, input {
-  font-family: "Lato", Arial, sans-serif;
+  font-family: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  color: #222;
+  text-rendering: optimizeLegibility;
 }
 
 pre, code {
-  font-family: 'Fantasque Sans Mono', monospace;
-}
-
-body {
-    color: #333;
+  font-family: 'Ubuntu Mono', Monaco, courier, monospace;
 }
 
 a {
@@ -129,19 +124,12 @@ article section.docstring h6 {
 
 /* Navigation */
 nav.toc {
-    /* TODO: would be nice to have the navigation fixed, but the simple
-     * solution (below) has problems with scrolling focus if there's overflow.
-     *
-     *   position: fixed;
-     *   overflow-y: auto;
-     *   height: calc(100% - 2em);
-     *
-     */
-    position: absolute;
-    width: 20em;
-    min-height: calc(100% - 2em);
+    position: fixed;
     top: 0;
     left: 0;
+    bottom: 0;
+    width: 20em;
+    overflow-y: auto;
     padding: 1em 0;
     background-color: #fcfcfc;
     box-shadow: inset -14px 0px 5px -12px rgb(210,210,210);
@@ -208,6 +196,10 @@ nav.toc ul.internal {
 nav.toc ul.internal li.toplevel {
     border-top: 1px solid #c9c9c9;
     font-weight: bold;
+}
+
+nav.toc ul.internal li.toplevel:first-child {
+    border-top: none;
 }
 
 nav.toc .toctext {
@@ -389,4 +381,14 @@ article section.docstring a.source-link {
 
 #search-results .category:before {
     content: " ";
+}
+
+/* Overriding the <code> block style of highligh.js.
+ * We have to override the padding and the background-color, since we style this
+ * part ourselves. Specifically, we style the <pre> surrounding the <code>, while
+ * highlight.js applies the .hljs style directly to the <code> tag.
+ */
+.hljs {
+    background-color: transparent;
+    padding: 0;
 }
