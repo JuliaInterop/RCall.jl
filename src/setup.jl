@@ -8,7 +8,7 @@ function validate_libR(libR)
     libR != "" || error("Library $libR not found.")
     # Issue #143
     # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
-    libptr = Libdl.dlopen(libR)
+    libptr = Libdl.dlopen_e(libR)
     if libptr == C_NULL
         if is_windows()
             error("Could not load library $libR. Try adding $(dirname(libR)) to the \"PATH\" environmental variable and restarting Julia.")
