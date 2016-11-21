@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Other methods",
     "category": "section",
-    "text": "If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).Firstly, try setting the R_HOME environmental variable to the location of your R installation, which can be found by running R.home() from within R. This can be set in your ~/.juliarc.jl file via the ENV global variable, e.g.ENV[\"R_HOME\"] = ...You may also need to specify the variable LD_LIBRARY_PATH before launching Julia, for exampleexport LD_LIBRARY_PATH=\"`R RHOME`/lib\"\njulia"
+    "text": "If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).Firstly, try setting the R_HOME environmental variable to the location of your R installation, which can be found by running R.home() from within R. This can be set in your ~/.juliarc.jl file via the ENV global variable, e.g.ENV[\"R_HOME\"] = ...You may also need to specify the variable LD_LIBRARY_PATH before launching Julia, for exampleexport LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:`R RHOME`/lib\"\njulia"
 },
 
 {
