@@ -46,7 +46,7 @@ ENV["R_HOME"] = ...
 
 You may also need to specify the variable `LD_LIBRARY_PATH` before launching Julia, for example
 ```bash
-export LD_LIBRARY_PATH="`R RHOME`/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
 julia
 ```
 
