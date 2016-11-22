@@ -28,6 +28,7 @@ function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
     isFactor(s) || error("$s is not a R factor")
     refs = UInt32[x for x in s]
     levels = rcopy(getattrib(s,Const.LevelsSymbol))
+    isa(levels, Array) || (levels = [levels])  # force a vector
     pool = CategoricalPool(levels, isOrdered(s))
     CategoricalArray(refs, pool)
 end
