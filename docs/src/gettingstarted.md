@@ -19,7 +19,7 @@ RCall provides multiple ways to allow R interacting with Julia.
 - A low level API: [`reval`](@ref), [`rcall`](@ref) and [`rcopy`](@ref) etc.
 
 ## R REPL mode
-The R REPL mode allows real time switching between the Julia prompt and R promot. Press `$` to activate the R REPL mode and the R prompt will be shown. (Press `backspace` to leave R REPL mode in case you did not know.)
+The R REPL mode allows real time switching between the Julia prompt and R promt. Press `$` to activate the R REPL mode and the R prompt will be shown. (Press `backspace` to leave R REPL mode in case you did not know.)
 
 ```r
 julia> foo = 1
