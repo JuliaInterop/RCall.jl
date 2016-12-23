@@ -5,7 +5,6 @@ Checks that the R library `libR` can be loaded and is satisfies version requirem
 Returns `true` if valid, throws an error if not.
 """
 function validate_libR(libR)
-    libR != "" || error("Library $libR not found.")
     # Issue #143
     # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
     libptr = Libdl.dlopen_e(libR)
@@ -114,10 +113,8 @@ end
                 ""
             end
         end
-
-        libR  = Libdl.find_library(["libR"],[joinpath(Rhome,"lib")])
-
-        if isdir(Rhome) && validate_libR(libR)
+        libR = joinpath(Rhome,"lib","libR.$(Libdl.dlext)")
+        if isdir(Rhome) && isfile(libR) && validate_libR(libR)
             info("Using R installation at $Rhome")
             return Rhome, libR
         end
