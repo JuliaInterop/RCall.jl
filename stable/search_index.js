@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "R REPL mode",
     "category": "section",
-    "text": "The R REPL mode allows real time switching between the Julia prompt and R promot. Press $ to activate the R REPL mode and the R prompt will be shown. (Press backspace to leave R REPL mode in case you did not know.)julia> foo = 1\n1\n\nR> x <- $foo\n\nR> x\n[1] 1The R REPL mode supports variable substitution of Julia objects via the $ symbol. It is also possible to pass Julia expressions in the REPL mode.R> x = $(rand(10))\n\nR> sum(x)\n[1] 5.097083"
+    "text": "The R REPL mode allows real time switching between the Julia prompt and R prompt. Press $ to activate the R REPL mode and the R prompt will be shown. (Press backspace to leave R REPL mode in case you did not know.)julia> foo = 1\n1\n\nR> x <- $foo\n\nR> x\n[1] 1The R REPL mode supports variable substitution of Julia objects via the $ symbol. It is also possible to pass Julia expressions in the REPL mode.R> x = $(rand(10))\n\nR> sum(x)\n[1] 5.097083"
 },
 
 {
