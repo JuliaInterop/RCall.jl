@@ -168,6 +168,73 @@ r = RObject(a)
 @test r[3] === convert(Float64,a[3])
 @test r[2,3,1,2] === convert(Float64,a[2,3,1,2])
 
+# date
+s = "2012-12-12"
+d = Date(s)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == "Date"
+@test length(r) == 1
+@test size(r) == (1,)
+@test rcopy(r) === d
+@test rcopy(R"as.Date($s)") == d
+@test rcopy(R"identical(as.Date($s), $d)")
+
+s = ["2001-01-01", "1111-11-11", "2012-12-12"]
+d = Date.(s)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == "Date"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(r) == d
+@test rcopy(R"as.Date($s)") == d
+@test rcopy(R"identical(as.Date($s), $d)")
+
+d = Date[]
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == "Date"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(r) == d
+@test rcopy("as.Date(character(0))") == Date[]
+
+# dateTime
+s = "2012-12-12T12:12:12"
+d = DateTime(s)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
+@test rcopy(getattrib(r, "tzone")) == "UTC"
+@test length(r) == 1
+@test size(r) == (1,)
+@test rcopy(r) === d
+@test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
+@test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
+
+s = ["2001-01-01T01:01:01", "1111-11-11T11:11:00", "2012-12-12T12:12:12"]
+d = DateTime.(s)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
+@test rcopy(getattrib(r, "tzone")) == "UTC"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(r) == d
+@test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
+@test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
+
+d = DateTime[]
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
+@test rcopy(getattrib(r, "tzone")) == "UTC"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(r) == d
+@test rcopy("as.POSIXct(character(0))") == Date[]
+
 # complex
 x = 7.0-2.0*im
 r = RObject(x)
