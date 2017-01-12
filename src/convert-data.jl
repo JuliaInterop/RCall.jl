@@ -14,7 +14,13 @@ function rcopy{S<:StrSxp}(::Type{Nullable}, s::Ptr{S})
 end
 
 function rcopy{T,S<:VectorSxp}(::Type{NullableArray{T}}, s::Ptr{S})
-    NullableArray(rcopy(Array{T},s), isna(s))
+    if T == Date || T == DateTime
+        # Can not convert NaN to Date or DateTime which are internally stored as Int
+        value = T[isna(x) ? convert(T, 0.0) : rcopy(T, x) for x in s]
+        NullableArray(value, isna(s))
+    else
+        NullableArray(rcopy(Array{T},s), isna(s))
+    end
 end
 function rcopy{S<:VectorSxp}(::Type{NullableArray}, s::Ptr{S})
     NullableArray(rcopy(Array,s), isna(s))
