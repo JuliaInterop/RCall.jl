@@ -13,33 +13,58 @@ v110 = rcopy(NullableArray,reval("c(1L, NA)"))
 attenu = rcopy(DataFrame,:attenu)
 @test isa(attenu,DataFrame)
 @test size(attenu) == (182,5)
+@test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
 
 dist = attenu[:dist]
 @test isa(dist,Vector{Float64})
 station = attenu[:station]
 @test isa(station,NullableCategoricalArray)
 
-@test isequal(rcopy(NullableArray,"c(NA,TRUE)"), NullableArray([true,true], [true,false]))
-@test isequal(rcopy(NullableArray,"c(NA,1)"), NullableArray([true,1.], [true,false]))
-@test isequal(rcopy(NullableArray,"c(NA,1+0i)"), NullableArray([true,1.+0*im], [true,false]))
-@test isequal(rcopy(NullableArray,"c(NA,1L)"), NullableArray([true,one(Int32)], [true,false]))
-@test isequal(rcopy(NullableArray,"c(NA,'NA')"), NullableArray(["", "NA"], [true,false]))
-@test_throws ErrorException rcopy(NullableArray,"as.factor(c('a','a','c'))")
-@test CategoricalArrays.levels(rcopy(CategoricalArray,"factor(c('a','a','c'))")) == ["a","c"]
-@test CategoricalArrays.levels(rcopy(NullableCategoricalArray,"factor(c('a',NA,'c'))")) == ["a","c"]
-@test CategoricalArrays.ordered(rcopy(CategoricalArray,"ordered(c('a','a','c'))"))
-@test CategoricalArrays.ordered(rcopy(NullableCategoricalArray,"ordered(c('a',NA,'c'))"))
-
+# NullableArrays
+# bool
 v = NullableArray([true,true], [true,false])
 @test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray([true,true], [false,true])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+@test isequal(rcopy(NullableArray,"c(NA,TRUE)"), NullableArray([true,true], [true,false]))
+@test isequal(rcopy(NullableArray,"c(TRUE, NA)"), NullableArray([true,true], [false,true]))
+# int64
 v = NullableArray([1,2], [true,false])
 @test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray([1,2], [false,true])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+@test isequal(rcopy(NullableArray,"c(NA,1L)"), NullableArray([0,1], [true,false]))
+@test isequal(rcopy(NullableArray,"c(1L,NA)"), NullableArray([1,0], [false,true]))
+# int32
+v = NullableArray(Int32[1,2], [true,false])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray(Int32[1,2], [false,true])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+@test isequal(rcopy(NullableArray,"c(NA,1L)"), NullableArray(Int32[0,1], [true,false]))
+@test isequal(rcopy(NullableArray,"c(1L,NA)"), NullableArray(Int32[1,0], [false,true]))
+# real
 v = NullableArray([1.,2.], [true,false])
 @test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray([1.,2.], [false,true])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+@test isequal(rcopy(NullableArray,"c(NA,1)"), NullableArray([0,1.], [true,false]))
+@test isequal(rcopy(NullableArray,"c(1,NA)"), NullableArray([1.,0], [false,true]))
+# complex
 v = NullableArray([0,1.+0*im], [true,false])
 @test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray([0,1.+0*im], [false,true])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+@test isequal(rcopy(NullableArray,"c(NA,1+0i)"), NullableArray([0,1.+0*im], [true,false]))
+@test isequal(rcopy(NullableArray,"c(1+0i,NA)"), NullableArray([1.+0*im,0], [false,true]))
+# string
 v = NullableArray(["","abc"], [true,false])
 @test isequal(rcopy(NullableArray,RObject(v)), v)
+v = NullableArray(["","abc"], [false,true])
+@test isequal(rcopy(NullableArray,RObject(v)), v)
+@test isequal(rcopy(NullableArray,"c(NA,'NA')"), NullableArray(["","NA"], [true,false]))
+@test isequal(rcopy(NullableArray,"c('NA',NA)"), NullableArray(["NA",""], [false,true]))
+
+# CategoricalArrays
 v = CategoricalArray(repeat(["a", "b"], inner = 5))
 @test isequal(rcopy(CategoricalArray,RObject(v)), v)
 v = NullableCategoricalArray(repeat(["a", "b"], inner = 5), repeat([true, false], outer = 5))
@@ -48,5 +73,8 @@ v = CategoricalArray(repeat(["a", "b"], inner = 5), ordered=true)
 @test isequal(rcopy(CategoricalArray,RObject(v)), v)
 v = NullableCategoricalArray(repeat(["a", "b"], inner = 5), repeat([true, false], outer = 5), ordered=true)
 @test isequal(rcopy(NullableCategoricalArray,RObject(v)), v)
-
-@test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
+@test_throws ErrorException rcopy(NullableArray,"as.factor(c('a','a','c'))")
+@test CategoricalArrays.levels(rcopy(CategoricalArray,"factor(c('a','a','c'))")) == ["a","c"]
+@test CategoricalArrays.levels(rcopy(NullableCategoricalArray,"factor(c('a',NA,'c'))")) == ["a","c"]
+@test CategoricalArrays.ordered(rcopy(CategoricalArray,"ordered(c('a','a','c'))"))
+@test CategoricalArrays.ordered(rcopy(NullableCategoricalArray,"ordered(c('a',NA,'c'))"))

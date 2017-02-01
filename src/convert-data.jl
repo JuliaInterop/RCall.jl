@@ -57,7 +57,7 @@ end
 function sexp(v::NullableArray)
     rv = protect(sexp(v.values))
     try
-        for (i,isna) = enumerate(isnull(v))
+        for (i,isna) = enumerate(v.isnull)
             if isna
                 rv[i] = naeltype(eltype(rv))
             end
