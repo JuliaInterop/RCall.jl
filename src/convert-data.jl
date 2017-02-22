@@ -94,14 +94,15 @@ for typ in [:NullableCategoricalArray, :CategoricalArray]
 end
 
 ## DataFrame to sexp conversion.
-function sexp(d::DataFrame)
+function sexp(d::AbstractDataFrame)
     nr,nc = size(d)
+    nv = names(d)
     rd = protect(allocArray(VecSxp, nc))
     try
         for i in 1:nc
-            rd[i] = sexp(d[d.colindex.names[i]])
+            rd[i] = sexp(d[nv[i]])
         end
-        setattrib!(rd,Const.NamesSymbol, sexp([string(n) for n in d.colindex.names]))
+        setattrib!(rd,Const.NamesSymbol, sexp([string(n) for n in nv]))
         setattrib!(rd,Const.ClassSymbol, sexp("data.frame"))
         setattrib!(rd,Const.RowNamesSymbol, sexp(1:nr))
     finally
