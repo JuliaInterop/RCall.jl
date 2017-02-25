@@ -77,5 +77,5 @@ v = NullableCategoricalArray(repeat(["a", "b"], inner = 5), repeat([true, false]
 @test_throws ErrorException rcopy(NullableArray,"as.factor(c('a','a','c'))")
 @test CategoricalArrays.levels(rcopy(CategoricalArray,"factor(c('a','a','c'))")) == ["a","c"]
 @test CategoricalArrays.levels(rcopy(NullableCategoricalArray,"factor(c('a',NA,'c'))")) == ["a","c"]
-@test CategoricalArrays.ordered(rcopy(CategoricalArray,"ordered(c('a','a','c'))"))
-@test CategoricalArrays.ordered(rcopy(NullableCategoricalArray,"ordered(c('a',NA,'c'))"))
+@test CategoricalArrays.isordered(rcopy(CategoricalArray,"ordered(c('a','a','c'))"))
+@test CategoricalArrays.isordered(rcopy(NullableCategoricalArray,"ordered(c('a',NA,'c'))"))
