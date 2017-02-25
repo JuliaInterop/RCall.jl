@@ -14,7 +14,7 @@ attenu = rcopy(DataFrame,:attenu)
 @test isa(attenu,DataFrame)
 @test size(attenu) == (182,5)
 @test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
-@test nrow(by(df -> R"lm(data=$df, dist  ~ accel)", attenu, :event)) == 23
+@test rcopy(rcall(:dim, RObject(sub(attenu, 1:2)))) == [2, 5]
 
 dist = attenu[:dist]
 @test isa(dist,Vector{Float64})
