@@ -2,10 +2,9 @@ using Documenter, RCall
 
 makedocs(
     modules = [RCall],
-    clean   = false,
-    format   = Documenter.Formats.HTML,
+    format   = :html,
     sitename = "RCall.jl",
-    pages    = Any[
+    pages    = [
         "Introduction" => "index.md",
         "Installation" => "installation.md",
         "Getting Started" => "gettingstarted.md",
@@ -15,7 +14,6 @@ makedocs(
 
 deploydocs(
     repo = "github.com/JuliaInterop/RCall.jl.git",
-    julia  = "0.5",
     target = "build",
     deps = nothing,
     make = nothing
