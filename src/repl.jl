@@ -34,10 +34,7 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         for e in expr
             val, status = tryEval(e)
             flush_print_buffer(stdout)
-            # print warning and error messages
-            if status != 0 || nb_available(errorBuffer) != 0
-                write(stderr, takebuf_string(errorBuffer))
-            end
+            flush_error_buffer(stderr)
             status != 0 && return nothing
         end
         unprotect(1)
@@ -47,6 +44,7 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
              rprint(stdout, sexp(val))
         end
+        flush_error_buffer(stderr)
     catch e
         display_error(stderr, e)
     finally

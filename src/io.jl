@@ -3,9 +3,8 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     global PrintBufferLocked
     PrintBufferLocked = true
     protect(s)
-    # Rf_PrintValue can cause segfault if S3 objects has custom
+    # Rf_PrintValue can cause segfault if a S3/S4 object has custom
     # print function as it doesn't use R_tryEval
-    # ccall((:Rf_PrintValue,libR),Void,(Ptr{S},),s)
     # below mirrors Rf_PrintValue
     env = protect(newEnvironment(Const.GlobalEnv))
     env[:x] = s
@@ -24,11 +23,6 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
     end
     env[:x] = Const.NilValue
     write(io,takebuf_string(printBuffer))
-
-    # in general, only S3/S4 custom print will fail
-    if nb_available(errorBuffer) != 0
-        warn(takebuf_string(errorBuffer))
-    end
     unprotect(2)
     PrintBufferLocked = false
     nothing
@@ -46,6 +40,12 @@ rprint(io::IO,sym::Symbol) = rprint(io,reval(sym))
 function show(io::IO,r::RObject)
     println(io,typeof(r))
     rprint(io,r.p)
+    # print error messages or warnings
+    # in general, only S3/S4 custom print will fail
+    if nb_available(errorBuffer) != 0
+        warn(takebuf_string(errorBuffer))
+    end
+
     # ggplot2's plot is displayed after `print` function is invoked,
     # so we have to clear any displayed plots.
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
@@ -77,8 +77,15 @@ global PrintBufferLocked = false
 function flush_print_buffer(io::IO)
     global PrintBufferLocked
     # dump printBuffer's content when it is not locked
-    if ! PrintBufferLocked
-        nb_available(printBuffer) != 0  && write(io, takebuf_string(printBuffer))
+    if !PrintBufferLocked && nb_available(printBuffer) != 0
+        write(io, takebuf_string(printBuffer))
+    end
+    nothing
+end
+
+function flush_error_buffer(io::IO)
+    if nb_available(errorBuffer) != 0
+        write(io, takebuf_string(errorBuffer))
     end
     nothing
 end
