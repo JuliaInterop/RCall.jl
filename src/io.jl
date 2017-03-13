@@ -22,7 +22,7 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
         tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
     end
     env[:x] = Const.NilValue
-    write(io,takebuf_string(printBuffer))
+    write(io, String(take!(printBuffer)))
     unprotect(2)
     PrintBufferLocked = false
     nothing

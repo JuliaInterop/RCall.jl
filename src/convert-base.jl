@@ -126,12 +126,12 @@ for (J,S) in ((:Integer,:IntSxp),
 
         rcopy{T<:$J}(::Type{T},s::Ptr{$S}) = convert(T,s[1])
         function rcopy{T<:$J}(::Type{Vector{T}},s::Ptr{$S})
-            a = Array(T,length(s))
+            a = Array{T}(length(s))
             copy!(a,unsafe_vec(s))
             a
         end
         function rcopy{T<:$J}(::Type{Array{T}},s::Ptr{$S})
-            a = Array(T,size(s)...)
+            a = Array{T}(size(s)...)
             copy!(a,unsafe_vec(s))
             a
         end
@@ -157,12 +157,12 @@ rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(Cint,s[1])
 rcopy(::Type{Bool},s::Ptr{LglSxp}) = s[1]!=0
 
 function rcopy(::Type{Vector{Cint}},s::Ptr{LglSxp})
-    a = Array(Cint,length(s))
+    a = Array{Cint}(length(s))
     copy!(a,unsafe_vec(s))
     a
 end
 function rcopy(::Type{Vector{Bool}},s::Ptr{LglSxp})
-    a = Array(Bool,length(s))
+    a = Array{Bool}(length(s))
     v = unsafe_vec(s)
     for i = 1:length(a)
         a[i] = v[i] != 0
@@ -178,12 +178,12 @@ function rcopy(::Type{BitVector},s::Ptr{LglSxp})
     a
 end
 function rcopy(::Type{Array{Cint}},s::Ptr{LglSxp})
-    a = Array(Cint,size(s)...)
+    a = Array{Cint}(size(s)...)
     copy!(a,unsafe_vec(s))
     a
 end
 function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
-    a = Array(Bool,size(s)...)
+    a = Array{Bool}(size(s)...)
     v = unsafe_vec(s)
     for i = 1:length(a)
         a[i] = v[i] != 0
