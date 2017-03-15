@@ -140,6 +140,35 @@ for (J,S) in ((:Integer,:IntSxp),
     end
 end
 
+# Date and DateTime
+function sexp(d::Date)
+    res = sexp(RealSxp, convert(Float64, d - Dates.Day(719163)))
+    setclass!(res, sexp("Date"))
+    res
+end
+function sexp(a::AbstractArray{Date})
+    res = sexp(RealSxp, convert(AbstractArray{Float64}, a - Dates.Day(719163)))
+    setclass!(res, sexp("Date"))
+    res
+end
+function sexp(d::DateTime)
+    res = sexp(RealSxp, convert(Float64, d - Dates.Day(719163)) / 1000)
+    setclass!(res, sexp(["POSIXct", "POSIXt"]))
+    setattrib!(res, "tzone", sexp("UTC"))
+    res
+end
+function sexp(a::AbstractArray{DateTime})
+    res = sexp(RealSxp, convert(AbstractArray{Float64}, a - Dates.Day(719163)) / 1000)
+    setclass!(res, sexp(["POSIXct", "POSIXt"]))
+    setattrib!(res, "tzone", sexp("UTC"))
+    res
+end
+rcopy(::Type{Date}, s::RealSxpPtr) = rcopy(Date, s[1])
+rcopy(::Type{DateTime}, s::RealSxpPtr) = rcopy(DateTime, s[1])
+
+rcopy(::Type{Date}, x::Float64) = convert(Date, x) + Dates.Day(719163)
+rcopy(::Type{DateTime}, x::Float64) = convert(DateTime, x*1000) + Dates.Day(719163)
+
 
 # Handle LglSxp seperately
 sexp(::Type{LglSxp},v::Union{Bool,Cint}) =

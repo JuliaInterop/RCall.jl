@@ -16,12 +16,22 @@ function rcopy(s::StrSxpPtr)
     end
 end
 function rcopy(s::RealSxpPtr)
+    T = Float64
+    classPtr = sexp(getclass(s))
+    if typeof(classPtr) == StrSxpPtr
+        class = rcopy(Vector{String}, classPtr)
+        if  "Date" in class
+            T = Date
+        elseif "POSIXct" in class
+            T = DateTime
+        end
+    end
     if anyna(s)
-        rcopy(NullableArray{Float64},s)
+        rcopy(NullableArray{T},s)
     elseif length(s) == 1
-        rcopy(Float64,s)
+        rcopy(T,s)
     else
-        rcopy(Array{Float64},s)
+        rcopy(Array{T},s)
     end
 end
 function rcopy(s::CplxSxpPtr)
