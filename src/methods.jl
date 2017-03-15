@@ -303,6 +303,7 @@ naeltype{S<:Integer}(::Type{S}) = Const.NaInt
 naeltype{S<:Real}(::Type{S}) = Const.NaReal
 naeltype(::Type{Complex}) = complex(Const.NaReal,Const.NaReal)
 naeltype{S<:String}(::Type{S}) = sexp(Const.NaString)
+naeltype(::Type{Union{}}) = Const.NaInt
 
 """
 Check if values correspond to R's sentinel NA values.

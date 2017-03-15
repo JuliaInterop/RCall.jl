@@ -1,4 +1,5 @@
 import Base: REPL, LineEdit, Terminals
+using Compat
 using RCall
 
 type FakeTerminal <: Base.Terminals.UnixTerminal
