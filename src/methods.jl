@@ -257,7 +257,9 @@ setnames!(r::RObject,n) = RObject(setnames!(sexp(r),sexp(StrSxp,n)))
 """
 Returns the class of an R object.
 """
-getclass{S<:Sxp}(s::Ptr{S}) = getattrib(s,Const.ClassSymbol)
+function getclass{S<:Sxp}(s::Ptr{S})
+    sexp(ccall((:R_data_class,libR),UnknownSxpPtr,(Ptr{S},Cint),s,0))
+end
 getclass(r::RObject) = RObject(getclass(sexp(r)))
 
 

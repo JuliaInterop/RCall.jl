@@ -94,3 +94,13 @@ b = reval("b=c(4,5,6)")
 @test rcopy(a*b)==rcopy("a*b")
 @test rcopy(a/b)==rcopy("a/b")
 @test rcopy(a^b)==rcopy("a^b")
+
+
+# getclass
+@test rcopy(getclass(reval("1"))) == "numeric"
+@test rcopy(getclass(reval("1L"))) == "integer"
+@test rcopy(getclass(reval("complex(1,2)"))) == "complex"
+@test rcopy(getclass(reval("matrix(1)"))) == "matrix"
+@test rcopy(getclass(reval("function(x) x"))) == "function"
+@test rcopy(getclass(reval("data.frame(x=1)"))) == "data.frame"
+@test rcopy(getclass(reval("quote(zzz)"))) == "name"
