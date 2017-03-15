@@ -2,8 +2,8 @@
 RCall.jl's type `Sxp` mirrors the R symbolic expression record `SEXPREC` in R API.
 These are represented by a pointer `SxpPtr` (which is called `SEXP` in R API).
 """
-abstract type Sxp end # SEXPREC
-SxpPtr{S<:Sxp} = Ptr{S} # SEXP
+@compat abstract type Sxp end # SEXPREC
+@compat SxpPtr{S<:Sxp} = Ptr{S} # SEXP
 const SxpPtrInfo = UInt32 # sxpinfo_struct
 
 
@@ -16,12 +16,12 @@ immutable SxpHead <: Sxp # SEXPREC_HEADER
 end
 const UnknownSxpPtr = Ptr{SxpHead}
 
-abstract type VectorSxp <: Sxp end
-abstract type VectorAtomicSxp <: VectorSxp end
-abstract type VectorNumericSxp <: VectorAtomicSxp end
-abstract type VectorListSxp <: VectorSxp end
-abstract type PairListSxp <: Sxp end
-abstract type FunctionSxp <: Sxp end
+@compat abstract type VectorSxp <: Sxp end
+@compat abstract type VectorAtomicSxp <: VectorSxp end
+@compat abstract type VectorNumericSxp <: VectorAtomicSxp end
+@compat abstract type VectorListSxp <: VectorSxp end
+@compat abstract type PairListSxp <: Sxp end
+@compat abstract type FunctionSxp <: Sxp end
 
 
 "R NULL value"
@@ -208,12 +208,12 @@ end
 const S4SxpPtr = Ptr{S4Sxp}
 
 
-const VectorSxpPtr{S<:VectorSxp} = Ptr{S}
-const VectorAtomicSxpPtr{S<:VectorAtomicSxp} = Ptr{S}
-const VectorNumericSxpPtr{S<:VectorNumericSxp} = Ptr{S}
-const VectorListSxpPtr{S<:VectorListSxp} = Ptr{S}
-const PairListSxpPtr{S<:PairListSxp} = Ptr{S}
-const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
+@compat const VectorSxpPtr{S<:VectorSxp} = Ptr{S}
+@compat const VectorAtomicSxpPtr{S<:VectorAtomicSxp} = Ptr{S}
+@compat const VectorNumericSxpPtr{S<:VectorNumericSxp} = Ptr{S}
+@compat const VectorListSxpPtr{S<:VectorListSxp} = Ptr{S}
+@compat const PairListSxpPtr{S<:PairListSxp} = Ptr{S}
+@compat const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
 
 
 """
@@ -231,10 +231,9 @@ eltype(::Type{VecSxp}) = UnknownSxpPtr
 eltype(::Type{ExprSxp}) = UnknownSxpPtr
 
 
-
-
-
+RObjectDocs =
 """
+\"\"\"
 An `RObject` is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the `RObject` itself is finalized by Julia. The parameter is the type of the S-expression.
 
 When called with a Julia object as an argument, a corresponding R object is constructed.
@@ -253,22 +252,53 @@ RObject{RealSxp}
 [1] 1 2 3
 ```
 
+\"\"\"
+
 """
-type RObject{S<:Sxp}
-    p::Ptr{S}
-    # used for pre-defined constants
-    function RObject{S}() where S
-        new(C_NULL)
+
+# Compat.jl not yet provide support for the new syntax for inner consturctor
+# https://github.com/JuliaLang/Compat.jl/issues/332
+# and the new syntax cannot be parse in julie v0.5, therefore using string.
+if VERSION < v"0.6.0-"
+    RObjectQuote =
+    """
+    type RObject{S<:Sxp}
+        p::Ptr{S}
+        # used for pre-defined constants
+        function RObject()
+            new(C_NULL)
+        end
+        function RObject(p::Ptr{S})
+            preserve(p)
+            r = new(p)
+            finalizer(r, release)
+            r
+        end
+        # SymSxps are not garbage collected, so preserve not necessary.
+        RObject(p::Ptr{SymSxp}) = new(p)
     end
-    function RObject{S}(p::Ptr{S}) where S
-        preserve(p)
-        r = new(p)
-        finalizer(r, release)
-        r
+    """
+else
+    RObjectQuote =
+    """
+    type RObject{S<:Sxp}
+        p::Ptr{S}
+        # used for pre-defined constants
+        function RObject{S}() where S
+            new(C_NULL)
+        end
+        function RObject{S}(p::Ptr{S}) where S
+            preserve(p)
+            r = new(p)
+            finalizer(r, release)
+            r
+        end
+        # SymSxps are not garbage collected, so preserve not necessary.
+        RObject{S}(p::Ptr{SymSxp}) where S = new(p)
     end
-    # SymSxps are not garbage collected, so preserve not necessary.
-    RObject{S}(p::Ptr{SymSxp}) where S = new(p)
+    """
 end
+eval(parse(RObjectDocs * RObjectQuote))
 
 RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
