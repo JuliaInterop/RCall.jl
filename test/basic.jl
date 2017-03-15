@@ -52,9 +52,9 @@ r = rcall(testfn, 1, 2,b=6)
 @test rcopy(r) == [1,2,3,6]
 
 r = rcall(:optimize,sin,[-2,0])
-@test r[:minimum][1] ≈ -pi/2 atol=eps()^0.25
+@test isapprox(r[:minimum][1], -pi/2, atol=eps()^0.25)
 r = rcall(:optimize,sin,[0,2],maximum=true)
-@test r[:maximum][1] ≈ pi/2 atol=eps()^0.25
+@test isapprox(r[:maximum][1], pi/2, atol=eps()^0.25)
 
 nullfn() = nothing
 @test isa(rcall(nullfn), RObject{NilSxp})
