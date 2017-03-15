@@ -70,7 +70,7 @@ function bracketed_paste_callback(s, o...)
     end
 
     LineEdit.edit_insert(sbuffer, input)
-    input = takebuf_string(sbuffer)
+    input = String(take!(sbuffer))
 
     oldpos = start(input)
     nextpos = 0
@@ -113,7 +113,7 @@ function respond(repl, main)
         if !ok
             return REPL.transition(s, :abort)
         end
-        script = takebuf_string(buf)
+        script = String(take!(buf))
         if !isempty(strip(script))
             REPL.reset(repl)
             repl_eval(script, repl.t.out_stream, repl.t.err_stream)

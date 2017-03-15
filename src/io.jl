@@ -22,7 +22,7 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
         tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
     end
     env[:x] = Const.NilValue
-    write(io,takebuf_string(printBuffer))
+    write(io, String(take!(printBuffer)))
     unprotect(2)
     PrintBufferLocked = false
     nothing
@@ -43,11 +43,11 @@ function show(io::IO,r::RObject)
     # print error messages or warnings
     # in general, only S3/S4 custom print will fail
     if nb_available(errorBuffer) != 0
-        warn(takebuf_string(errorBuffer))
+        warn(String(take!(errorBuffer)))
     end
 
     # ggplot2's plot is displayed after `print` function is invoked,
-    # so we have to clear any displayed plots.
+    # so we have to clear any displayed String(take!(plots.)
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
 end
 
@@ -78,14 +78,14 @@ function flush_print_buffer(io::IO)
     global PrintBufferLocked
     # dump printBuffer's content when it is not locked
     if !PrintBufferLocked && nb_available(printBuffer) != 0
-        write(io, takebuf_string(printBuffer))
+        write(io, String(take!(printBuffer)))
     end
     nothing
 end
 
 function flush_error_buffer(io::IO)
     if nb_available(errorBuffer) != 0
-        write(io, takebuf_string(errorBuffer))
+        write(io, String(take!(errorBuffer)))
     end
     nothing
 end

@@ -34,8 +34,8 @@ y = "foo"
 
 @test sprint(io -> rprint(io,RObject([1,2,3]))) == "[1] 1 2 3\n"
 
-@test_approx_eq rcopy(rcall(:besselI, 1.0, 2.0)) besseli(2.0,1.0)
-@test_approx_eq rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) besselix(2.0,1.0)
+@test rcopy(rcall(:besselI, 1.0, 2.0)) ≈ besseli(2.0,1.0)
+@test rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) ≈ besselix(2.0,1.0)
 
 
 # callbacks
@@ -52,9 +52,9 @@ r = rcall(testfn, 1, 2,b=6)
 @test rcopy(r) == [1,2,3,6]
 
 r = rcall(:optimize,sin,[-2,0])
-@test_approx_eq_eps r[:minimum][1] -pi/2 eps()^0.25
+@test isapprox(r[:minimum][1], -pi/2, atol=eps()^0.25)
 r = rcall(:optimize,sin,[0,2],maximum=true)
-@test_approx_eq_eps r[:maximum][1] pi/2 eps()^0.25
+@test isapprox(r[:maximum][1], pi/2, atol=eps()^0.25)
 
 nullfn() = nothing
 @test isa(rcall(nullfn), RObject{NilSxp})

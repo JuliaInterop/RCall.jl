@@ -3,7 +3,7 @@ A pure julia wrapper of R_tryEval.
 """
 function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv))
     disable_sigint() do
-        status = Array(Cint,1)
+        status = Array{Cint}(1)
         protect(expr)
         protect(env)
         val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,status)
@@ -20,9 +20,9 @@ function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     val, status = tryEval(expr, env)
     flush_print_buffer(STDOUT)
     if status !=0
-        error("RCall.jl: ", takebuf_string(errorBuffer))
+        error("RCall.jl: ", String(take!(errorBuffer)))
     elseif nb_available(errorBuffer) != 0
-        warn("RCall.jl: ", takebuf_string(errorBuffer))
+        warn("RCall.jl: ", String(take!(errorBuffer)))
     end
     sexp(val)
 end
@@ -59,7 +59,7 @@ reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv) = RObject(reval_p(
 function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
     protect(sf)
-    status = Array(Cint,1)
+    status = Array{Cint}(1)
     val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
                 (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
                 st,-1,status,sf)

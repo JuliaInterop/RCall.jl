@@ -2,9 +2,9 @@
 RCall.jl's type `Sxp` mirrors the R symbolic expression record `SEXPREC` in R API.
 These are represented by a pointer `SxpPtr` (which is called `SEXP` in R API).
 """
-abstract Sxp # SEXPREC
-typealias SxpPtr{S<:Sxp} Ptr{S} # SEXP
-typealias SxpPtrInfo UInt32 # sxpinfo_struct
+@compat abstract type Sxp end # SEXPREC
+@compat SxpPtr{S<:Sxp} = Ptr{S} # SEXP
+const SxpPtrInfo = UInt32 # sxpinfo_struct
 
 
 "R Sxp header: a pointer to this is used for unknown types."
@@ -14,21 +14,21 @@ immutable SxpHead <: Sxp # SEXPREC_HEADER
     gc_next::Ptr{SxpHead}
     gc_prev::Ptr{SxpHead}
 end
-typealias UnknownSxpPtr Ptr{SxpHead}
+const UnknownSxpPtr = Ptr{SxpHead}
 
-abstract VectorSxp <: Sxp
-abstract VectorAtomicSxp <: VectorSxp
-abstract VectorNumericSxp <: VectorAtomicSxp
-abstract VectorListSxp <: VectorSxp
-abstract PairListSxp <: Sxp
-abstract FunctionSxp <: Sxp
+@compat abstract type VectorSxp <: Sxp end
+@compat abstract type VectorAtomicSxp <: VectorSxp end
+@compat abstract type VectorNumericSxp <: VectorAtomicSxp end
+@compat abstract type VectorListSxp <: VectorSxp end
+@compat abstract type PairListSxp <: Sxp end
+@compat abstract type FunctionSxp <: Sxp end
 
 
 "R NULL value"
 immutable NilSxp <: PairListSxp   # type tag 0
     head::SxpHead
 end
-typealias NilSxpPtr Ptr{NilSxp}
+const NilSxpPtr = Ptr{NilSxp}
 
 "R pairs (cons) list cell"
 immutable ListSxp <: PairListSxp  # type tag 2
@@ -37,7 +37,7 @@ immutable ListSxp <: PairListSxp  # type tag 2
     cdr::UnknownSxpPtr
     tag::UnknownSxpPtr
 end
-typealias ListSxpPtr Ptr{ListSxp}
+const ListSxpPtr = Ptr{ListSxp}
 
 "R function closure"
 immutable ClosSxp <: FunctionSxp  # type tag 3
@@ -46,7 +46,7 @@ immutable ClosSxp <: FunctionSxp  # type tag 3
     body::UnknownSxpPtr
     env::UnknownSxpPtr
 end
-typealias ClosSxpPtr Ptr{ClosSxp}
+const ClosSxpPtr = Ptr{ClosSxp}
 
 "R environment"
 immutable EnvSxp <: Sxp  # type tag 4
@@ -55,7 +55,7 @@ immutable EnvSxp <: Sxp  # type tag 4
     enclos::UnknownSxpPtr
     hashtab::UnknownSxpPtr
 end
-typealias EnvSxpPtr Ptr{EnvSxp}
+const EnvSxpPtr = Ptr{EnvSxp}
 
 "R promise"
 immutable PromSxp <: Sxp  # type tag 5
@@ -64,7 +64,7 @@ immutable PromSxp <: Sxp  # type tag 5
     expr::UnknownSxpPtr
     env::UnknownSxpPtr
 end
-typealias PromSxpPtr Ptr{PromSxp}
+const PromSxpPtr = Ptr{PromSxp}
 
 "R function call"
 immutable LangSxp <: PairListSxp  # type tag 6
@@ -73,19 +73,19 @@ immutable LangSxp <: PairListSxp  # type tag 6
     cdr::UnknownSxpPtr
     tag::UnknownSxpPtr
 end
-typealias LangSxpPtr Ptr{LangSxp}
+const LangSxpPtr = Ptr{LangSxp}
 
 "R special function"
 immutable SpecialSxp <: FunctionSxp  # type tag 7
     head::SxpHead
 end
-typealias SpecialSxpPtr Ptr{SpecialSxp}
+const SpecialSxpPtr = Ptr{SpecialSxp}
 
 "R built-in function"
 immutable BuiltinSxp <: FunctionSxp  # type tag 8
     head::SxpHead
 end
-typealias BuiltinSxpPtr Ptr{BuiltinSxp}
+const BuiltinSxpPtr = Ptr{BuiltinSxp}
 
 "R character string"
 immutable CharSxp <: VectorAtomicSxp     # type tag 9
@@ -93,7 +93,7 @@ immutable CharSxp <: VectorAtomicSxp     # type tag 9
     length::Cint
     truelength::Cint
 end
-typealias CharSxpPtr Ptr{CharSxp}
+const CharSxpPtr = Ptr{CharSxp}
 
 "R symbol"
 immutable SymSxp <: Sxp   # type tag 1
@@ -102,7 +102,7 @@ immutable SymSxp <: Sxp   # type tag 1
     value::UnknownSxpPtr
     internal::UnknownSxpPtr
 end
-typealias SymSxpPtr Ptr{SymSxp}
+const SymSxpPtr = Ptr{SymSxp}
 
 "R logical vector"
 immutable LglSxp <: VectorNumericSxp     # type tag 10
@@ -110,7 +110,7 @@ immutable LglSxp <: VectorNumericSxp     # type tag 10
     length::Cint
     truelength::Cint
 end
-typealias LglSxpPtr Ptr{LglSxp}
+const LglSxpPtr = Ptr{LglSxp}
 
 "R integer vector"
 immutable IntSxp <: VectorNumericSxp     # type tag 13
@@ -118,7 +118,7 @@ immutable IntSxp <: VectorNumericSxp     # type tag 13
     length::Cint
     truelength::Cint
 end
-typealias IntSxpPtr Ptr{IntSxp}
+const IntSxpPtr = Ptr{IntSxp}
 
 "R real vector"
 immutable RealSxp <: VectorNumericSxp    # type tag 14
@@ -126,7 +126,7 @@ immutable RealSxp <: VectorNumericSxp    # type tag 14
     length::Cint
     truelength::Cint
 end
-typealias RealSxpPtr Ptr{RealSxp}
+const RealSxpPtr = Ptr{RealSxp}
 
 "R complex vector"
 immutable CplxSxp <: VectorNumericSxp    # type tag 15
@@ -134,7 +134,7 @@ immutable CplxSxp <: VectorNumericSxp    # type tag 15
     length::Cint
     truelength::Cint
 end
-typealias CplxSxpPtr Ptr{CplxSxp}
+const CplxSxpPtr = Ptr{CplxSxp}
 
 "R vector of character strings"
 immutable StrSxp <: VectorListSxp     # type tag 16
@@ -142,19 +142,19 @@ immutable StrSxp <: VectorListSxp     # type tag 16
     length::Cint
     truelength::Cint
 end
-typealias StrSxpPtr Ptr{StrSxp}
+const StrSxpPtr = Ptr{StrSxp}
 
 "R dot-dot-dot object"
 immutable DotSxp <: Sxp     # type tag 17
     head::SxpHead
 end
-typealias DotSxpPtr Ptr{DotSxp}
+const DotSxpPtr = Ptr{DotSxp}
 
 "R \"any\" object"
 immutable AnySxp <: Sxp     # type tag 18
     head::SxpHead
 end
-typealias AnySxpPtr Ptr{AnySxp}
+const AnySxpPtr = Ptr{AnySxp}
 
 "R list (i.e. Array{Any,1})"
 immutable VecSxp <: VectorListSxp     # type tag 19
@@ -162,7 +162,7 @@ immutable VecSxp <: VectorListSxp     # type tag 19
     length::Cint
     truelength::Cint
 end
-typealias VecSxpPtr Ptr{VecSxp}
+const VecSxpPtr = Ptr{VecSxp}
 
 "R expression vector"
 immutable ExprSxp <: VectorListSxp    # type tag 20
@@ -170,13 +170,13 @@ immutable ExprSxp <: VectorListSxp    # type tag 20
     length::Cint
     truelength::Cint
 end
-typealias ExprSxpPtr Ptr{ExprSxp}
+const ExprSxpPtr = Ptr{ExprSxp}
 
 "R byte code"
 immutable BcodeSxp <: Sxp   # type tag 21
     head::SxpHead
 end
-typealias BcodeSxpPtr Ptr{BcodeSxp}
+const BcodeSxpPtr = Ptr{BcodeSxp}
 
 "R external pointer"
 immutable ExtPtrSxp <: Sxp  # type tag 22
@@ -185,13 +185,13 @@ immutable ExtPtrSxp <: Sxp  # type tag 22
     prot::Ptr{Void}
     tag::UnknownSxpPtr
 end
-typealias ExtPtrSxpPtr Ptr{ExtPtrSxp}
+const ExtPtrSxpPtr = Ptr{ExtPtrSxp}
 
 "R weak reference"
 immutable WeakRefSxp <: Sxp  # type tag 23
     head::SxpHead
 end
-typealias WeakRefSxpPtr Ptr{WeakRefSxp}
+const WeakRefSxpPtr = Ptr{WeakRefSxp}
 
 "R byte vector"
 immutable RawSxp <: VectorAtomicSxp      # type tag 24
@@ -199,21 +199,21 @@ immutable RawSxp <: VectorAtomicSxp      # type tag 24
     length::Cint
     truelength::Cint
 end
-typealias RawSxpPtr Ptr{RawSxp}
+const RawSxpPtr = Ptr{RawSxp}
 
 "R S4 object"
 immutable S4Sxp <: Sxp      # type tag 25
     head::SxpHead
 end
-typealias S4SxpPtr Ptr{S4Sxp}
+const S4SxpPtr = Ptr{S4Sxp}
 
 
-typealias VectorSxpPtr{S<:VectorSxp} Ptr{S}
-typealias VectorAtomicSxpPtr{S<:VectorAtomicSxp} Ptr{S}
-typealias VectorNumericSxpPtr{S<:VectorNumericSxp} Ptr{S}
-typealias VectorListSxpPtr{S<:VectorListSxp} Ptr{S}
-typealias PairListSxpPtr{S<:PairListSxp} Ptr{S}
-typealias FunctionSxpPtr{S<:FunctionSxp} Ptr{S}
+@compat const VectorSxpPtr{S<:VectorSxp} = Ptr{S}
+@compat const VectorAtomicSxpPtr{S<:VectorAtomicSxp} = Ptr{S}
+@compat const VectorNumericSxpPtr{S<:VectorNumericSxp} = Ptr{S}
+@compat const VectorListSxpPtr{S<:VectorListSxp} = Ptr{S}
+@compat const PairListSxpPtr{S<:PairListSxp} = Ptr{S}
+@compat const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
 
 
 """
@@ -231,10 +231,9 @@ eltype(::Type{VecSxp}) = UnknownSxpPtr
 eltype(::Type{ExprSxp}) = UnknownSxpPtr
 
 
-
-
-
+RObjectDocs =
 """
+\"\"\"
 An `RObject` is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the `RObject` itself is finalized by Julia. The parameter is the type of the S-expression.
 
 When called with a Julia object as an argument, a corresponding R object is constructed.
@@ -253,22 +252,54 @@ RObject{RealSxp}
 [1] 1 2 3
 ```
 
+\"\"\"
+
 """
-type RObject{S<:Sxp}
-    p::Ptr{S}
-    # used for pre-defined constants
-    function RObject()
-        new(C_NULL)
+
+# Compat.jl not yet provide support for the new syntax for inner consturctor
+# https://github.com/JuliaLang/Compat.jl/issues/332
+# and the new syntax cannot be parse in julie v0.5, therefore using string.
+if VERSION < v"0.6.0-"
+    RObjectQuote =
+    """
+    type RObject{S<:Sxp}
+        p::Ptr{S}
+        # used for pre-defined constants
+        function RObject()
+            new(C_NULL)
+        end
+        function RObject(p::Ptr{S})
+            preserve(p)
+            r = new(p)
+            finalizer(r, release)
+            r
+        end
+        # SymSxps are not garbage collected, so preserve not necessary.
+        RObject(p::Ptr{SymSxp}) = new(p)
     end
-    function RObject(p::Ptr{S})
-        preserve(p)
-        r = new(p)
-        finalizer(r, release)
-        r
+    """
+else
+    RObjectQuote =
+    """
+    type RObject{S<:Sxp}
+        p::Ptr{S}
+        # used for pre-defined constants
+        function RObject{S}() where S
+            new(C_NULL)
+        end
+        function RObject{S}(p::Ptr{S}) where S
+            preserve(p)
+            r = new(p)
+            finalizer(r, release)
+            r
+        end
+        # SymSxps are not garbage collected, so preserve not necessary.
+        RObject{S}(p::Ptr{SymSxp}) where S = new(p)
     end
-    # SymSxps are not garbage collected, so preserve not necessary.
-    RObject(p::Ptr{SymSxp}) = new(p)
+    """
 end
+eval(parse(RObjectDocs * RObjectQuote))
+
 RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
 RObject(x) = RObject(sexp(x))
