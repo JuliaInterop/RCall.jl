@@ -26,10 +26,10 @@ length(r::RObject) = length(r.p)
 for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isFrame,:isFree,:isFunction,:isInteger,:isLanguage,:isList,
             :isLogical,:isSymbol,:isMatrix,:isNewList,:isNull,:isNumeric,
-            :isNumber,:isObject,:isOrdered,:isPairListSxp,:isPrimitiveSxp,
+            :isNumber,:isObject,:isOrdered,:isPairList,:isPrimitive,
             :isReal,:isS4,:isString,:isTs,:isUnordered,:isUnsorted,
             :isUserBinop,:isValidString,:isValidStringF,:isVector,
-            :isVectorAtomicSxp,:isVectorizable,:isVectorListSxp)
+            :isVectorAtomic,:isVectorizable,:isVectorList)
     @eval begin
         $sym{S<:Sxp}(s::Ptr{S}) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{SxpPtrInfo},),s)
         $sym(r::RObject) = $sym(r.p)
