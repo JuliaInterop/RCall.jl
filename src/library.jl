@@ -8,7 +8,7 @@ const reserved = Set(["while", "if", "for", "try", "return", "break",
 
 function rwrap(pkg::String, s::Symbol)
     reval("library($pkg)")
-    members = rcopy("ls('package:$pkg')")
+    members = rcopy(reval("ls('package:$pkg')"))
     filter!(x -> !(x in reserved), members)
     m = Module(s)
     consts = [:(const $(Symbol(x)) = rcall(Symbol("::"),$(QuoteNode(Symbol(pkg))),$(QuoteNode(Symbol(x))))) for x in members]
@@ -52,7 +52,7 @@ macro rlibrary(x)
     pkg = Expr(:quote, x)
     quote
         reval("library($($pkg))")
-        members = rcopy("ls('package:$($pkg)')")
+        members = rcopy(reval("ls('package:$($pkg)')"))
         filter!(x -> !(x in reserved), members)
         for m in members
             sym = Symbol(m)

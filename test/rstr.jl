@@ -44,7 +44,7 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 y = \$β
 """)[3] == 3
 
-iris = rcopy(:iris)
+iris = rcopy(reval(:iris))
 model =  R"lm(Sepal.Length ~ Sepal.Width,data=$iris)"
 @test rcopy(RCall.getclass(model)) == "lm"
 @test isapprox(rcopy(R"sum($iris$Sepal.Length)"), sum(iris[Symbol("Sepal.Length")]), rtol=4*eps())

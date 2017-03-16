@@ -89,8 +89,8 @@ rprint(io, reval("""
 # operators
 a = reval("a=c(1,2,3)")
 b = reval("b=c(4,5,6)")
-@test rcopy(a+b)==rcopy("a+b")
-@test rcopy(a-b)==rcopy("a-b")
-@test rcopy(a*b)==rcopy("a*b")
-@test rcopy(a/b)==rcopy("a/b")
-@test rcopy(a^b)==rcopy("a^b")
+@test rcopy(a+b)==rcopy(R"a+b")
+@test rcopy(a-b)==rcopy(R"a-b")
+@test rcopy(a*b)==rcopy(R"a*b")
+@test rcopy(a/b)==rcopy(R"a/b")
+@test rcopy(a^b)==rcopy(R"a^b")
