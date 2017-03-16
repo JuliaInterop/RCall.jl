@@ -1,49 +1,36 @@
 # conversion methods for Base Julia types
 
-# Fallbacks
-"""
-`rcopy(T,p)` converts a pointer `p` to a Sxp object to a native Julia object of type T.
-
-`rcopy(p)` performs a default conversion.
-"""
-rcopy{S<:Sxp}(::Type{Any},x::Ptr{S}) = rcopy(x)
-
-# used in vector indexing
-for T in [:Cint, :Float64, :Complex128]
-    @eval begin
-        rcopy(x::$T) = x
-        rcopy(::Type{$T}, x::$T) = x
-    end
-end
-
-rcopy(r::RObject) = rcopy(r.p)
+# allow `Int(R"1+1")`
+convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T,r.p)
+convert{S<:Sxp}(::Type{RObject{S}}, r::RObject{S}) = r
 rcopy{T}(::Type{T},r::RObject) = rcopy(T,r.p)
 
+# # used in vector indexing
+# for T in [:Cint, :Float64, :Complex128]
+#     @eval begin
+#         rcopy(x::$T) = x
+#         rcopy(::Type{$T}, x::$T) = x
+#     end
+# end
 
-"""
-`sexp(S,x)` converts a Julia object `x` to a pointer to a Sxp object of type `S`.
-
-`sexp(x)` performs a default conversion.
-"""
-# used in vector indexing
-sexp(::Type{Cint},x) = convert(Cint,x)
-sexp(::Type{Float64},x) = convert(Float64,x)
-sexp(::Type{Complex128},x) = convert(Complex128,x)
+# """
+# `sexp(S,x)` converts a Julia object `x` to a pointer to a Sxp object of type `S`.
+# """
+# # used in vector indexing
+# sexp(::Type{Cint},x) = convert(Cint,x)
+# sexp(::Type{Float64},x) = convert(Float64,x)
+# sexp(::Type{Complex128},x) = convert(Complex128,x)
 
 # NilSxp
-sexp(::Void) = sexp(Const.NilValue)
-rcopy(::Ptr{NilSxp}) = nothing
+sexp{S<:Sxp}(::Type{S}, ::Void) = sexp(Const.NilValue)
+rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = T(nothing)
 
 
 # SymSxp
 "Create a `SymSxp` from a `Symbol`"
 sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}, (Ptr{UInt8},), s)
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
-sexp(s::Symbol) = sexp(SymSxp,s)
-rcopy(::Type{Symbol},ss::SymSxp) = Symbol(rcopy(AbstractString,ss))
-rcopy(::Type{AbstractString},ss::SymSxp) = rcopy(AbstractString,ss.name)
-rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) =
-    rcopy(T,unsafe_load(s))
+rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) = rcopy(T, sexp(unsafe_load(s).name))
 
 
 # CharSxp
@@ -61,7 +48,7 @@ rcopy(::Type{Symbol},s::CharSxpPtr) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
 
 
-# general vectors
+# Arrays
 function sexp{S<:VectorSxp}(::Type{S}, a::AbstractArray)
     ra = protect(allocArray(S, size(a)...))
     try
@@ -73,7 +60,6 @@ function sexp{S<:VectorSxp}(::Type{S}, a::AbstractArray)
     end
     ra
 end
-sexp(a::AbstractArray) = sexp(VecSxp,a)
 
 function rcopy{T,S<:VectorSxp}(::Type{Array{T}}, s::Ptr{S})
     protect(s)
@@ -95,9 +81,6 @@ sexp(::Type{StrSxp}, s::CharSxpPtr) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},
 sexp(::Type{StrSxp},s::Symbol) = sexp(StrSxp,sexp(CharSxp,s))
 "Create a `StrSxp` from an `AbstractString`"
 sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
-sexp(st::AbstractString) = sexp(StrSxp,st)
-"Create a `StrSxp` from an Abstract String Array"
-sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
 
 rcopy(::Type{Vector}, s::StrSxpPtr) = rcopy(Vector{String}, s)
 rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{String}, s)
@@ -121,8 +104,6 @@ for (J,S) in ((:Integer,:IntSxp),
             copy!(unsafe_vec(ra),a)
             ra
         end
-        sexp(v::$J) = sexp($S,v)
-        sexp{T<:$J}(a::AbstractArray{T}) = sexp($S,a)
 
         rcopy{T<:$J}(::Type{T},s::Ptr{$S}) = convert(T,s[1])
         function rcopy{T<:$J}(::Type{Vector{T}},s::Ptr{$S})
@@ -149,9 +130,6 @@ function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
     copy!(unsafe_vec(ra),a)
     ra
 end
-sexp(v::Bool) = sexp(LglSxp,v)
-sexp(a::AbstractArray{Bool}) = sexp(LglSxp,a)
-
 
 rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(Cint,s[1])
 rcopy(::Type{Bool},s::Ptr{LglSxp}) = s[1]!=0
@@ -202,7 +180,7 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
 end
 
 
-# Associative types
+# VecSxp
 
 # R does not have a native dictionary type, but named vectors/lists are often
 # used to this effect.
@@ -222,9 +200,6 @@ function sexp{S<:VectorSxp}(::Type{S},d::Associative)
     end
     vs
 end
-sexp{K,V<:AbstractString}(d::Associative{K,V}) = sexp(StrSxp,d)
-sexp(d::Associative) = sexp(VecSxp,d)
-
 
 function rcopy{A<:Associative,S<:VectorSxp}(::Type{A}, s::Ptr{S})
     protect(s)

@@ -302,10 +302,7 @@ eval(parse(RObjectDocs * RObjectQuote))
 
 RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
-RObject(x) = RObject(sexp(x))
 
-
-# convert{T}(::Type{T}, r::RObject) = convert(T,r.p)
 
 """
 Prevent garbage collection of an R object. Object can be released via `release`.
@@ -366,7 +363,7 @@ function sexp(p::UnknownSxpPtr)
     typ = sexpnum(p)
     0 ≤ typ ≤ 10 || 13 ≤ typ ≤ 25 || error("Unknown SEXPTYPE $typ")
     styp = typs[typ+1]
-    convert(Ptr{styp},p)
+    Ptr{styp}(p)
 end
 sexp(s::SxpPtr) = s
 sexp(r::RObject) = r.p
