@@ -38,40 +38,38 @@ function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
     pool = CategoricalPool(levels, isOrdered(s))
     NullableCategoricalArray(refs, pool)
 end
-function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
-    isFrame(s) || error("s is not a R data frame")
-    DataFrame(Any[rcopy(c) for c in s], rcopy(Array{Symbol},getnames(s)))
-end
 
 
-# Nullable to sexp conversion.
-function sexp{T}(x::Nullable{T})
-    if isnull(x)
-        return sexp(naeltype(T))
-    else
-        return sexp(x.value)
-    end
-end
-
-## NullableArray to sexp conversion.
-function sexp(v::NullableArray)
-    rv = protect(sexp(v.values))
-    try
-        for (i,isna) = enumerate(v.isnull)
-            if isna
-                rv[i] = naeltype(eltype(rv))
+# Nullable and NullableArray to sexp conversion.
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
+    @eval begin
+        function sexp(::Type{$S}, x::Nullable)
+            if isnull(x)
+                return sexp($S, naeltype($S))
+            else
+                return sexp($S, x.value)
             end
         end
-    finally
-        unprotect(1)
+        function sexp(::Type{$S}, v::NullableArray)
+            rv = protect(sexp($S, v.values))
+            try
+                for (i,isna) = enumerate(v.isnull)
+                    if isna
+                        rv[i] = naeltype($S)
+                    end
+                end
+            finally
+                unprotect(1)
+            end
+            rv
+        end
     end
-    rv
 end
 
 ## CategoricalArray to sexp conversion.
 for typ in [:NullableCategoricalArray, :CategoricalArray]
     @eval begin
-        function sexp{T<:String,N,R<:Integer}(v::$typ{T,N,R})
+        function sexp{T<:String,N,R<:Integer}(::Type{IntSxp}, v::$typ{T,N,R})
             rv = protect(sexp(v.refs))
             try
                 for (i,ref) = enumerate(v.refs)

@@ -4,25 +4,18 @@
 `rcopy(r)` copies the contents of an R object into a corresponding canonical Julia type.
 """
 rcopy(r::RObject) = rcopy(r.p)
-RObject(s) = RObject(sexp(s))
 
-# Fallbacks
+# Fallback
 rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
 
 # NilSxp
-sexp(::Void) = sexp(Const.NilValue)
 rcopy(::Ptr{NilSxp}) = nothing
 
 # SymSxp and CharSxp
-sexp(s::Symbol) = sexp(SymSxp,s)
 rcopy(s::SymSxpPtr) = rcopy(Symbol,s)
 rcopy(s::CharSxpPtr) = rcopy(String,s)
 
 # StrSxp
-"Create a `StrSxp` from an Abstract String Array"
-sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
-sexp(st::AbstractString) = sexp(StrSxp,st)
-
 function rcopy(s::StrSxpPtr)
     if anyna(s)
         rcopy(NullableArray,s)
@@ -34,34 +27,20 @@ function rcopy(s::StrSxpPtr)
 end
 
 # IntSxp, RealSxp, CplxSxp, LglSxp
-for (J,S) in ((:Integer,:IntSxp),
-                 (:Real, :RealSxp),
-                 (:Complex, :CplxSxp),
-                 (:Bool, :LglSxp))
-    @eval begin
-        sexp{T<:$J}(a::AbstractArray{T}) = sexp($S,a)
-        sexp(v::$J) = sexp($S,v)
-    end
-end
-
 function rcopy(s::IntSxpPtr)
     if isFactor(s)
-        if anyna(s)
-            rcopy(NullableCategoricalArray,s)
-        else
-            rcopy(CategoricalArray,s)
-        end
+        rcopy(PooledDataArray,s)
     elseif anyna(s)
-        rcopy(NullableArray{Int},s)
+        rcopy(DataArray{Float64},s)
     elseif length(s) == 1
         rcopy(Cint,s)
     else
-        rcopy(Array{Cint},s)
+        rcopy(Array,s)
     end
 end
 function rcopy(s::RealSxpPtr)
     if anyna(s)
-        rcopy(NullableArray{Float64},s)
+        rcopy(DataArray{Float64},s)
     elseif length(s) == 1
         rcopy(Float64,s)
     else
@@ -70,7 +49,7 @@ function rcopy(s::RealSxpPtr)
 end
 function rcopy(s::CplxSxpPtr)
     if anyna(s)
-        rcopy(NullableArray{Complex128},s)
+        rcopy(DataArray{Complex128},s)
     elseif length(s) == 1
         rcopy(Complex128,s)
     else
@@ -79,7 +58,7 @@ function rcopy(s::CplxSxpPtr)
 end
 function rcopy(s::LglSxpPtr)
     if anyna(s)
-        rcopy(NullableArray{Bool},s)
+        rcopy(DataArray{Bool},s)
     elseif length(s) == 1
         rcopy(Bool,s)
     else
@@ -88,7 +67,6 @@ function rcopy(s::LglSxpPtr)
 end
 
 # VecSxp
-sexp(a::AbstractArray) = sexp(VecSxp,a)
 function rcopy(s::VecSxpPtr)
     if isFrame(s)
         rcopy(DataFrame,s)
@@ -98,12 +76,68 @@ function rcopy(s::VecSxpPtr)
         rcopy(Dict{Symbol,Any},s)
     end
 end
-sexp{K,V<:AbstractString}(d::Associative{K,V}) = sexp(StrSxp,d)
-sexp(d::Associative) = sexp(VecSxp,d)
 
 # FunctionSxp
 rcopy(s::FunctionSxpPtr) = rcopy(Function,s)
 
 # TODO
-rcopy(l::LangSxpPtr) = l
-rcopy(r::RObject{LangSxp}) = r
+# rcopy(l::LangSxpPtr) = l
+# rcopy(r::RObject{LangSxp}) = r
+
+# logic of default sexp
+
+"""
+`sexp(x)` converts a Julia object `x` to a pointer to a corresponding Sxp Object.
+"""
+
+RObject(s) = RObject(sexp(s))
+
+# nothing
+sexp(::Void) = sexp(Const.NilValue)
+
+# symbol
+sexp(s::Symbol) = sexp(SymSxp,s)
+
+# string and string array
+sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
+sexp(st::AbstractString) = sexp(StrSxp,st)
+
+# DataFrames
+sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
+
+# PooledDataArray
+sexp(a::PooledDataArray) = sexp(IntSxp,a)
+sexp{S<:AbstractString}(a::PooledDataArray{S}) = sexp(IntSxp,a)
+
+# number
+for (J,S) in ((:Integer,:IntSxp),
+                 (:Real, :RealSxp),
+                 (:Complex, :CplxSxp),
+                 (:Bool, :LglSxp))
+    @eval begin
+        sexp{T<:$J}(a::AbstractArray{T}) = sexp($S,a)
+        sexp{T<:$J}(a::DataArray{T}) = sexp($S,a)
+        sexp(v::$J) = sexp($S,v)
+    end
+end
+
+# Fallback: convert abstractArray to VecSxp (R list)
+sexp(a::AbstractArray) = sexp(VecSxp,a)
+
+# associative
+sexp(d::Associative) = sexp(VecSxp,d)
+
+# Nullable
+for (J,S) in ((:Integer,:IntSxp),
+                 (:Real, :RealSxp),
+                 (:Complex, :CplxSxp),
+                 (:Bool, :LglSxp),
+                 (:AbstractString, :StrSxp))
+    @eval begin
+        sexp{T<:$J}(x::Nullable{T}) = sexp($S, x)
+        sexp{T<:$J}(v::NullableArray{T}) = sexp($S, v)
+    end
+end
+for typ in [:NullableCategoricalArray, :CategoricalArray]
+    @eval sexp(v::$typ) = sexp(IntSxp, v)
+end

@@ -74,13 +74,13 @@ Indexing into `VectorSxp` types uses Julia indexing into the `vec` result,
 except for `StrSxp` and the `VectorListSxp` types, which must apply `sexp`
 to the `Ptr{Void}` obtained by indexing into the `vec` result.
 """
-getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real) = getindex(unsafe_vec(s),I)
+getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Integer) = getindex(unsafe_vec(s),I)
+getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Integer...) = getindex(unsafe_array(s),I...)
 getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::AbstractVector) = getindex(unsafe_vec(s),I)
-getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real...) = getindex(unsafe_array(s),I...)
 
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real) = sexp(getindex(unsafe_vec(s),I))
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = sexp(getindex(unsafe_vec(s),I))
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real...) = sexp(getindex(unsafe_array(s),I...))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::Integer) = sexp(getindex(unsafe_vec(s),I))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::Integer...) = sexp(getindex(unsafe_array(s),I...))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = map(sexp, getindex(unsafe_vec(s),I))
 
 """
 String indexing finds the first element with the matching name
@@ -103,10 +103,10 @@ getindex{S<:VectorListSxp}(r::RObject{S}, I...) = RObject(getindex(sexp(r), I...
 getindex{S<:VectorListSxp}(r::RObject{S}, I::AbstractArray) = map(RObject,getindex(sexp(r),I))
 
 
-function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I...)
+function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer...)
     setindex!(unsafe_array(s), value, I...)
 end
-function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I)
+function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer)
     setindex!(unsafe_vec(s), value, I)
 end
 function setindex!(s::Ptr{StrSxp}, value::CharSxpPtr, key::Integer)
@@ -299,11 +299,7 @@ naeltype(::Type{RealSxp}) = Const.NaReal
 naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 naeltype(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
-naeltype{S<:Integer}(::Type{S}) = Const.NaInt
-naeltype{S<:Real}(::Type{S}) = Const.NaReal
-naeltype(::Type{Complex}) = complex(Const.NaReal,Const.NaReal)
-naeltype{S<:String}(::Type{S}) = sexp(Const.NaString)
-naeltype(::Type{Union{}}) = Const.NaInt
+naeltype{S<:Sxp}(::Type{S}) = Const.NaInt
 
 """
 Check if values correspond to R's sentinel NA values.
