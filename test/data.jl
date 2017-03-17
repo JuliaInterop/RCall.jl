@@ -1,5 +1,3 @@
-using NullableArrays,CategoricalArrays,DataFrames
-
 # DataFrame
 attenu = rcopy(DataFrame,reval(:attenu))
 @test isa(attenu,DataFrame)

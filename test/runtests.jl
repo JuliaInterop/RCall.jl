@@ -1,3 +1,4 @@
+using NullableArrays,CategoricalArrays,DataFrames,AxisArrays
 using Base.Test
 hd = homedir()
 pd = Pkg.dir()
@@ -10,7 +11,7 @@ using RCall
 
 tests = ["basic",
          "conversion",
-         "dataframe",
+         "data",
          "rstr",
          "library",
          "repl",

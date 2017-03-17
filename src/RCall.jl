@@ -10,6 +10,9 @@ import NullableArrays: NullableArray
 import CategoricalArrays
 import CategoricalArrays: CategoricalArray, CategoricalPool, NullableCategoricalArray
 
+import AxisArrays
+import AxisArrays: AxisArray, Axis
+
 import DataStructures: OrderedDict
 
 import Base: eltype, show, convert, isascii, isnull,
@@ -32,6 +35,7 @@ include("methods.jl")
 include("convert/base.jl")
 include("convert/dataframe.jl")
 include("convert/datatable.jl")
+include("convert/axisarray.jl")
 include("convert/default.jl")
 include("eventloop.jl")
 include("eval.jl")
