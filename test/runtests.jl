@@ -12,6 +12,7 @@ using Compat
 tests = ["basic",
          "convert/base",
          "convert/data",
+         "convert/datetime",
          "convert/axisarray",
          "library",
          "render",
