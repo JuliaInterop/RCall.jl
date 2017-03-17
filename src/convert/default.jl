@@ -95,28 +95,25 @@ RObject(s) = RObject(sexp(s))
 # nothing
 sexp(::Void) = sexp(Const.NilValue)
 
-# symbol
+# Symbol
 sexp(s::Symbol) = sexp(SymSxp,s)
 
-# string and string array
-sexp{S<:AbstractString}(a::AbstractArray{S}) = sexp(StrSxp,a)
-sexp(st::AbstractString) = sexp(StrSxp,st)
-
-# DataFrames
+# DataFrame
 sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
 
-# DataTables
+# DataTable
 sexp(d::AbstractDataTable) = sexp(VecSxp, d)
 
 # PooledDataArray
 sexp(a::PooledDataArray) = sexp(IntSxp,a)
 sexp{S<:AbstractString}(a::PooledDataArray{S}) = sexp(IntSxp,a)
 
-# number
+# Number, Array and DataArray
 for (J,S) in ((:Integer,:IntSxp),
-                 (:Real, :RealSxp),
+                 (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
-                 (:Bool, :LglSxp))
+                 (:Bool, :LglSxp),
+                 (:AbstractString, :StrSxp))
     @eval begin
         sexp{T<:$J}(a::AbstractArray{T}) = sexp($S,a)
         sexp{T<:$J}(a::DataArray{T}) = sexp($S,a)
@@ -124,17 +121,17 @@ for (J,S) in ((:Integer,:IntSxp),
     end
 end
 
-# Fallback: convert abstractArray to VecSxp (R list)
+# Fallback: convert AbstractArray to VecSxp (R list)
 sexp(a::AbstractArray) = sexp(VecSxp,a)
 
-# associative
+# Associative
 sexp(d::Associative) = sexp(VecSxp,d)
 
 # Nullable
 sexp(x::Nullable{Union{}}) = sexp(NaInt)
 
 for (J,S) in ((:Integer,:IntSxp),
-                 (:Real, :RealSxp),
+                 (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
@@ -149,9 +146,20 @@ end
 
 # AxisArray
 for (J,S) in ((:Integer,:IntSxp),
-                 (:Real, :RealSxp),
+                 (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
     @eval sexp{T<:$J}(aa::AxisArray{T}) = sexp($S, aa)
 end
+
+# DataTime
+sexp(d::Date) = sexp(RealSxp, d)
+sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
+sexp(d::NullableArray{Date}) = sexp(RealSxp, d)
+sexp(d::DateTime) = sexp(RealSxp, d)
+sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
+sexp(d::NullableArray{DateTime}) = sexp(RealSxp, d)
+
+# Function
+sexp(f::Function) = sexp(ClosSxp, f)

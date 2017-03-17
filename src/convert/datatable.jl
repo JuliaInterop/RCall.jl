@@ -81,7 +81,7 @@ for typ in [:NullableCategoricalArray, :CategoricalArray]
             try
                 for (i,ref) = enumerate(v.refs)
                     if ref == 0
-                        rv[i] = naeltype(eltype(rv))
+                        rv[i] = naeltype(IntSxp)
                     end
                 end
                 # due to a bug of CategoricalArrays, we use index(v.pool) instead of index(v)

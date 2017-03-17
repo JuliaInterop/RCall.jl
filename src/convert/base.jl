@@ -5,6 +5,19 @@ rcopy{T}(::Type{T},r::RObject) = rcopy(T,r.p)
 convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T,r.p)
 convert{S<:Sxp}(::Type{RObject{S}}, r::RObject{S}) = r
 
+# conversion between numbers which understands different NAs
+function rcopy{T<:Number, R<:Number}(::Type{T}, x::R)
+    if (R <: AbstractFloat && !isnan(x)) || (R == Int32 && !isna(x))
+        return T(x)
+    elseif R == Int32 && T <: AbstractFloat
+        return T(NaN)
+    elseif R <: AbstractFloat && T == Int32
+        return Const.NaInt
+    else
+        return T(x)
+    end
+end
+
 # NilSxp
 rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = T(nothing)
 
@@ -16,30 +29,28 @@ rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, String(unsafe_vec
 rcopy(::Type{Symbol},s::CharSxpPtr) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
 
-# VectorSxp fallbacks
-function rcopy{T,S<:VectorSxp}(::Type{Array{T}}, s::Ptr{S})
-    protect(s)
-    v = T[rcopy(T,e) for e in s]
-    ret = reshape(v,size(s))
-    unprotect(1)
-    ret
-end
-function rcopy{T,S<:VectorSxp}(::Type{Vector{T}}, s::Ptr{S})
-    protect(s)
-    ret = T[rcopy(T,e) for e in s]
-    unprotect(1)
-    ret
+# IntSxp, RealSxp, CplxSxp, LglSxp, StrSxp, VecSxp to Array{T}
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :VecSxp)
+    @eval begin
+        function rcopy{T}(::Type{Array{T}}, s::Ptr{$S})
+            protect(s)
+            v = T[rcopy(T,e) for e in s]
+            ret = reshape(v,size(s))
+            unprotect(1)
+            ret
+        end
+        function rcopy{T}(::Type{Vector{T}}, s::Ptr{$S})
+            protect(s)
+            ret = T[rcopy(T,e) for e in s]
+            unprotect(1)
+            ret
+        end
+    end
 end
 
-# StrSxp
-rcopy(::Type{Vector}, s::StrSxpPtr) = rcopy(Vector{String}, s)
-rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{String}, s)
-rcopy(::Type{Symbol}, s::StrSxpPtr) = rcopy(Symbol,s[1])
-rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
-
-# IntSxp, RealSxp, CplxSxp
+# IntSxp, RealSxp, CplxSxp to their corresponding Julia types.
 for (J,S) in ((:Integer,:IntSxp),
-                 (:Real, :RealSxp),
+                 (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp))
     @eval begin
         rcopy{T<:$J}(::Type{T},s::Ptr{$S}) = convert(T,s[1])
@@ -107,7 +118,15 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a
 end
 
+# StrSxp
+rcopy(::Type{Vector}, s::StrSxpPtr) = rcopy(Vector{String}, s)
+rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{String}, s)
+rcopy(::Type{Symbol}, s::StrSxpPtr) = rcopy(Symbol,s[1])
+rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
+
 # VecSxp
+rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)
+rcopy(::Type{Vector}, s::Ptr{VecSxp}) = rcopy(Vector{Any}, s)
 function rcopy{A<:Associative}(::Type{A}, s::Ptr{VecSxp})
     protect(s)
     local a
@@ -124,6 +143,7 @@ function rcopy{A<:Associative}(::Type{A}, s::Ptr{VecSxp})
     a
 end
 
+
 # FunctionSxp
 function rcopy{S<:FunctionSxp}(::Type{Function}, s::Ptr{S})
     (args...) -> rcopy(rcall_p(s,args...))
@@ -131,6 +151,7 @@ end
 function rcopy{S<:FunctionSxp}(::Type{Function}, r::RObject{S})
     (args...) -> rcopy(rcall_p(r,args...))
 end
+
 
 # conversion from Base Julia types
 
@@ -142,32 +163,10 @@ sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
 sexp(::Type{CharSxp}, sym::Symbol) = sexp(CharSxp, string(sym))
 sexp(::Type{StrSxp},s::Symbol) = sexp(StrSxp,sexp(CharSxp,s))
 
-# string
-sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}, (Ptr{UInt8},), s)
-sexp(::Type{CharSxp}, st::String) =
-    ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
-          (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
-sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, string(st))
-sexp(::Type{StrSxp}, s::CharSxpPtr) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
-sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
-
-
-# AbstractArray
-function sexp{S<:VectorSxp}(::Type{S}, a::AbstractArray)
-    ra = protect(allocArray(S, size(a)...))
-    try
-        for i in 1:length(a)
-            ra[i] = a[i]
-        end
-    finally
-        unprotect(1)
-    end
-    ra
-end
 
 # number and numeric array
 for (J,S) in ((:Integer,:IntSxp),
-                 (:Real, :RealSxp),
+                 (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp))
     @eval begin
         # Could use Rf_Scalar... methods, but see weird error on Appveyor Windows for Complex.
@@ -193,9 +192,27 @@ function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
     ra
 end
 
+# String
+sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}, (Ptr{UInt8},), s)
+sexp(::Type{CharSxp}, st::String) =
+    ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
+          (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
+sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, string(st))
+sexp(::Type{StrSxp}, s::CharSxpPtr) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
+sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
+function sexp{T<:AbstractString}(::Type{StrSxp}, a::AbstractArray{T})
+    ra = protect(allocArray(StrSxp, size(a)...))
+    try
+        for i in 1:length(a)
+            ra[i] = a[i]
+        end
+    finally
+        unprotect(1)
+    end
+    ra
+end
 
-# Associative
-
+# Associative to VecSxp
 # R does not have a native dictionary type, but named lists is often
 # used to this effect.
 function sexp(::Type{VecSxp},d::Associative)
@@ -212,4 +229,42 @@ function sexp(::Type{VecSxp},d::Associative)
         unprotect(2)
     end
     vs
+end
+
+# AbstractArray to VecSxp
+function sexp(::Type{VecSxp}, a::AbstractArray)
+    ra = protect(allocArray(VecSxp, size(a)...))
+    try
+        for i in 1:length(a)
+            ra[i] = a[i]
+        end
+    finally
+        unprotect(1)
+    end
+    ra
+end
+
+# Function
+"""
+Wrap a callable Julia object `f` an a R `ClosSxpPtr`.
+
+Constructs the following R code
+
+    function(...) .External(juliaCallback, fExPtr, ...)
+
+"""
+function sexp(::Type{ClosSxp}, f)
+    fptr = protect(sexp(ExtPtrSxp,f))
+    body = protect(rlang_p(Symbol(".External"),
+                           juliaCallback,
+                           fptr,
+                           Const.DotsSymbol))
+    local clos
+    try
+        lang = rlang_p(:function, sexp_arglist_dots(), body)
+        clos = reval_p(lang)
+    finally
+        unprotect(2)
+    end
+    clos
 end

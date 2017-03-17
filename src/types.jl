@@ -216,21 +216,6 @@ const S4SxpPtr = Ptr{S4Sxp}
 @compat const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
 
 
-"""
-Element types of R vectors.
-"""
-eltype(::Type{LglSxp}) = Cint
-eltype(::Type{IntSxp}) = Cint
-eltype(::Type{RealSxp}) = Float64
-eltype(::Type{CplxSxp}) = Complex128
-eltype(::Type{CharSxp}) = UInt8
-eltype(::Type{RawSxp}) = UInt8
-
-eltype(::Type{StrSxp}) = Ptr{CharSxp}
-eltype(::Type{VecSxp}) = UnknownSxpPtr
-eltype(::Type{ExprSxp}) = UnknownSxpPtr
-
-
 RObjectDocs =
 """
 \"\"\"
@@ -302,6 +287,23 @@ eval(parse(RObjectDocs * RObjectQuote))
 
 RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
+
+"""
+Element types of R vectors.
+"""
+eltype(::Type{LglSxp}) = Cint
+eltype(::Type{IntSxp}) = Cint
+eltype(::Type{RealSxp}) = Float64
+eltype(::Type{CplxSxp}) = Complex128
+eltype(::Type{CharSxp}) = UInt8
+eltype(::Type{RawSxp}) = UInt8
+
+eltype(::Type{StrSxp}) = Ptr{CharSxp}
+eltype(::Type{VecSxp}) = UnknownSxpPtr
+eltype(::Type{ExprSxp}) = UnknownSxpPtr
+
+eltype{S<:Sxp}(s::Ptr{S}) = eltype(S)
+eltype{S<:Sxp}(s::RObject{S}) = eltype(S)
 
 
 """

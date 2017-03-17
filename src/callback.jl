@@ -93,11 +93,6 @@ function registerCFinalizerEx(s::ExtPtrSxpPtr)
 end
 
 
-sexp(::Type{ExtPtrSxp}, s::Ptr{ExtPtrSxp}) = s
-sexp(::Type{ExtPtrSxp}, r::RObject{ExtPtrSxp}) = sexp(r)
-sexp(::Type{ClosSxp}, s::Ptr{ClosSxp}) = s
-sexp(::Type{ClosSxp}, r::RObject{ClosSxp}) = sexp(r)
-
 """
 Wrap a Julia object an a R `ExtPtrSxpPtr`.
 
@@ -113,30 +108,6 @@ function sexp(::Type{ExtPtrSxp}, j)
 end
 
 const juliaCallback = RObject{ExtPtrSxp}()
-
-"""
-Wrap a callable Julia object `f` an a R `ClosSxpPtr`.
-
-Constructs the following R code
-
-    function(...) .External(juliaCallback, fExPtr, ...)
-
-"""
-function sexp(::Type{ClosSxp}, f)
-    fptr = protect(sexp(ExtPtrSxp,f))
-    body = protect(rlang_p(Symbol(".External"),
-                           juliaCallback,
-                           fptr,
-                           Const.DotsSymbol))
-    local clos
-    try
-        lang = rlang_p(:function, sexp_arglist_dots(), body)
-        clos = reval_p(lang)
-    finally
-        unprotect(2)
-    end
-    clos
-end
 
 """
 Create an argument list for an R function call, with a varargs "dots" at the end.
@@ -162,5 +133,3 @@ function sexp_arglist_dots(args...;kwargs...)
     end
     rarglist
 end
-
-sexp(f::Function) = sexp(ClosSxp, f)
