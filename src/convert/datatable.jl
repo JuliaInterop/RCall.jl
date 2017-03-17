@@ -1,7 +1,7 @@
 # conversion methods for NullableArrays, CategoricalArrays and DataTables
 
 function rcopy{T,S<:Sxp}(::Type{Nullable{T}}, s::Ptr{S})
-    length(s) == 1 || error("length of $s must be 1.")
+    length(s) == 1 || error("length of s must be 1.")
     rcopy(NullableArray{T}, s)[1]
 end
 
@@ -21,18 +21,18 @@ function rcopy{S<:VectorSxp}(::Type{NullableArray}, s::Ptr{S})
 end
 
 function rcopy(::Type{NullableArray}, s::Ptr{IntSxp})
-    isFactor(s) && error("$s is a R factor")
+    isFactor(s) && error("s is an R factor")
     NullableArray(rcopy(Array,s), isna(s))
 end
 function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
-    isFactor(s) || error("$s is not a R factor")
+    isFactor(s) || error("s is not an R factor")
     refs = UInt32[x for x in s]
     levels = rcopy(Array, getattrib(s,Const.LevelsSymbol))
     pool = CategoricalPool(levels, isOrdered(s))
     CategoricalArray(refs, pool)
 end
 function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
-    isFactor(s) || error("$s is not a R factor")
+    isFactor(s) || error("s is not an R factor")
     refs = UInt32[isna(x) ? zero(UInt32) : UInt32(x) for x in s]
     levels = rcopy(Array, getattrib(s,Const.LevelsSymbol))
     pool = CategoricalPool(levels, isOrdered(s))

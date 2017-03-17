@@ -8,17 +8,17 @@ function rcopy{S<:VectorSxp}(::Type{DataArray}, s::Ptr{S})
 end
 
 function rcopy(::Type{DataArray}, s::Ptr{IntSxp})
-    isFactor(s) && error("$s is a R factor")
+    isFactor(s) && error("s is an R factor")
     DataArray(rcopy(Array,s), isna(s))
 end
 function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
-    isFactor(s) || error("$s is not a R factor")
+    isFactor(s) || error("s is not an R factor")
     refs = DataArrays.RefArray([isna(x) ? zero(Int32) : x for x in s])
     DataArrays.compact(PooledDataArray(refs,rcopy(getattrib(s,Const.LevelsSymbol))))
 end
 
 function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
-    isFrame(s) || error("s is not a R data frame")
+    isFrame(s) || error("s is not an R data frame")
     DataFrame(Any[rcopy(c) for c in s], rcopy(Array{Symbol},getnames(s)))
 end
 
