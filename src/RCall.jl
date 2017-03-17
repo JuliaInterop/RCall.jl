@@ -2,16 +2,9 @@ __precompile__()
 module RCall
 using Compat
 
-import DataFrames: DataFrame, AbstractDataFrame, Formula
-import DataArrays
-import DataArrays: DataArray, PooledDataArray, AbstractDataArray, RefArray
-
-import NullableArrays: NullableArray
-import CategoricalArrays
-import CategoricalArrays: CategoricalArray, CategoricalPool, NullableCategoricalArray
-
-import AxisArrays
-import AxisArrays: AxisArray, Axis
+using DataFrames
+using DataTables
+using AxisArrays
 
 import DataStructures: OrderedDict
 

@@ -234,13 +234,6 @@ d = RObject(Dict(1=>2))
 @test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
 @test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
 
-# AxisArray
-aa = rcopy(AxisArray, R"Titanic")
-@test size(aa) == (4, 2, 2, 2)
-@test length(aa.axes[1]) == 4
-@test_throws ErrorException rcopy(AxisArray, R"c(1,1)")
-@test names(getattrib(RObject(aa), :dimnames))[1] == :Class
-
 # function
 function funk(x,y)
     x+y
@@ -248,7 +241,6 @@ end
 f1 = RObject(funk)
 @test rcopy(Function, f1)(1,2) == 3
 @test rcopy(Function, f1.p)(1,2) == 3
-
 
 # misc
 a = RObject(rand(10))

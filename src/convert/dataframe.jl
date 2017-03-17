@@ -17,9 +17,11 @@ function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
     DataArrays.compact(PooledDataArray(refs,rcopy(getattrib(s,Const.LevelsSymbol))))
 end
 
-function rcopy(::Type{DataFrame}, s::Ptr{VecSxp})
+function rcopy{T<:AbstractDataFrame}(::Type{T}, s::Ptr{VecSxp})
     isFrame(s) || error("s is not an R data frame")
-    DataFrame(Any[rcopy(c) for c in s], rcopy(Array{Symbol},getnames(s)))
+    DataFrame(
+        Any[isFactor(c)? rcopy(PooledDataArray, c) : rcopy(DataArray, c) for c in s],
+        rcopy(Array{Symbol},getnames(s)))
 end
 
 ## DataArray to sexp conversion.

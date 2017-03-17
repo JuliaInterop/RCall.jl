@@ -1,19 +1,20 @@
-using NullableArrays,CategoricalArrays,DataFrames,AxisArrays
 using Base.Test
 hd = homedir()
 pd = Pkg.dir()
 
 using RCall
+using Compat
 
 # https://github.com/JuliaStats/RCall.jl/issues/68
 @test hd == homedir()
 @test pd == Pkg.dir()
 
 tests = ["basic",
-         "conversion",
-         "data",
-         "rstr",
+         "convert/base",
+         "convert/data",
+         "convert/axisarray",
          "library",
+         "render",
          "repl",
          ]
 

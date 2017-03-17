@@ -1,8 +1,7 @@
 julia 0.5
 DataStructures 0.4.3
 DataFrames 0.9
-NullableArrays 0.0.10
-CategoricalArrays 0.0.6
+DataTables 0.0.1
 AxisArrays 0.0.6
 Compat 0.20.0
 @windows WinReg 0.2.0

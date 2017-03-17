@@ -37,8 +37,6 @@ y = "foo"
 @test rcopy(rcall(:besselI, 1.0, 2.0)) ≈ besseli(2.0,1.0)
 @test rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) ≈ besselix(2.0,1.0)
 
-x = reval("LETTERS")
-
 
 # callbacks
 function testfn(x,y;a=3,b=4)

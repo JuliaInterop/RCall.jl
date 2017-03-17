@@ -105,6 +105,9 @@ sexp(st::AbstractString) = sexp(StrSxp,st)
 # DataFrames
 sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
 
+# DataTables
+sexp(d::AbstractDataTable) = sexp(VecSxp, d)
+
 # PooledDataArray
 sexp(a::PooledDataArray) = sexp(IntSxp,a)
 sexp{S<:AbstractString}(a::PooledDataArray{S}) = sexp(IntSxp,a)
@@ -128,6 +131,8 @@ sexp(a::AbstractArray) = sexp(VecSxp,a)
 sexp(d::Associative) = sexp(VecSxp,d)
 
 # Nullable
+sexp(x::Nullable{Union{}}) = sexp(NaInt)
+
 for (J,S) in ((:Integer,:IntSxp),
                  (:Real, :RealSxp),
                  (:Complex, :CplxSxp),

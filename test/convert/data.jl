@@ -1,13 +1,29 @@
+using DataFrames
+using DataTables
+
 # DataFrame
 attenu = rcopy(DataFrame,reval(:attenu))
 @test isa(attenu,DataFrame)
 @test size(attenu) == (182,5)
 @test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
 @test rcopy(rcall(:dim, RObject(attenu[1:2, :]))) == [2, 5]
+@test rcopy(rcall(:dim, RObject(view(attenu, 1:2)))) == [2, 5]
 dist = attenu[:dist]
-@test isa(dist,Vector{Float64})
+@test isa(dist,DataArray{Float64})
 station = attenu[:station]
 @test isa(station,PooledDataArray)
+
+# DataTable
+attenu = rcopy(DataTable,reval(:attenu))
+@test isa(attenu,DataTable)
+@test size(attenu) == (182,5)
+@test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
+@test rcopy(rcall(:dim, RObject(attenu[1:2, :]))) == [2, 5]
+@test rcopy(rcall(:dim, RObject(view(attenu, 1:2)))) == [2, 5]
+dist = attenu[:dist]
+@test isa(dist,NullableArray{Float64})
+station = attenu[:station]
+@test isa(station,NullableCategoricalArray)
 
 # DataArray
 
@@ -68,7 +84,7 @@ v = PooledDataArray(repeat(["a", "b"], inner = 5), repeat([true, false], outer =
 @test isequal(rcopy(Nullable, RObject(1)), Nullable(1))
 @test isequal(rcopy(Nullable, RObject("abc")), Nullable("abc"))
 @test rcopy(RObject(Nullable(1))) == 1
-@test isnull(rcopy(Nullable, RObject(Nullable())))
+@test isnull(rcopy(Nullable, RObject(@compat Nullable(1, false))))
 
 # NullableArrays
 v110 = rcopy(NullableArray,reval("c(1L, NA)"))
@@ -133,3 +149,6 @@ v = NullableCategoricalArray(repeat(["a", "b"], inner = 5), repeat([true, false]
 @test CategoricalArrays.levels(rcopy(NullableCategoricalArray,R"factor(c('a',NA,'c'))")) == ["a","c"]
 @test CategoricalArrays.isordered(rcopy(CategoricalArray,R"ordered(c('a','a','c'))"))
 @test CategoricalArrays.isordered(rcopy(NullableCategoricalArray,R"ordered(c('a',NA,'c'))"))
+
+#RCall.rlang_formula(parse("a+b"))
+@test RCall.rlang_formula(:a) == :a
