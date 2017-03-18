@@ -40,11 +40,15 @@ function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
 end
 
 # DataTable
-function rcopy{T<:AbstractDataTable}(::Type{T}, s::Ptr{VecSxp})
+function rcopy{T<:AbstractDataTable}(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true)
     isFrame(s) || error("s is not an R data frame")
+    vnames = rcopy(Array{Symbol},getnames(s))
+    if sanitize
+        vnames = [Symbol(replace(string(v), '.', '_')) for v in vnames]
+    end
     DataTable(
         Any[isFactor(c)? rcopy(NullableCategoricalArray, c) : rcopy(NullableArray, c) for c in s],
-        rcopy(Array{Symbol},getnames(s)))
+        vnames)
 end
 
 # Nullable and NullableArray to sexp conversion.

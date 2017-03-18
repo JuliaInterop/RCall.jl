@@ -94,3 +94,9 @@ b = reval("b=c(4,5,6)")
 @test rcopy(a*b)==rcopy(R"a*b")
 @test rcopy(a/b)==rcopy(R"a/b")
 @test rcopy(a^b)==rcopy(R"a^b")
+
+# misc
+iris = rcopy(reval(:iris))
+model =  R"lm(Sepal_Length ~ Sepal_Width,data=$iris)"
+@test rcopy(RCall.getclass(model)) == "lm"
+@test isapprox(rcopy(R"sum($iris$Sepal_Length)"), sum(iris[:Sepal_Length]), rtol=4*eps())
