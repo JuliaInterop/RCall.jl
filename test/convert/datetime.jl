@@ -39,7 +39,7 @@ r = RObject(d)
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(DataArray{Date}, r).na == d.na
-@test rcopy(DataArray{Date}, r).data[!d.na] == d.data[!d.na]
+@test rcopy(DataArray{Date}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(R"identical(as.Date($s), $d)")
 @test rcopy(R"identical(as.character($d), $s)")
 
@@ -64,7 +64,7 @@ r = RObject(d)
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(NullableArray{Date}, r).isnull == d.isnull
-@test rcopy(NullableArray{Date}, r).values[!d.isnull] == d.values[!d.isnull]
+@test rcopy(NullableArray{Date}, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
 @test rcopy(R"identical(as.Date($s), $d)")
 @test rcopy(R"identical(as.character($d), $s)")
 
@@ -125,7 +125,7 @@ r = RObject(d)
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(DataArray{DateTime}, r).na == d.na
-@test rcopy(DataArray{DateTime}, r).data[!d.na] == d.data[!d.na]
+@test rcopy(DataArray{DateTime}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(R"identical(as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S'), $d)")
 @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
@@ -152,7 +152,7 @@ r = RObject(d)
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(NullableArray{DateTime}, r).isnull == d.isnull
-@test rcopy(NullableArray{DateTime}, r).values[!d.isnull] == d.values[!d.isnull]
+@test rcopy(NullableArray{DateTime}, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
 @test rcopy(R"identical(as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S'), $d)")
 @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
