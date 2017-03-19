@@ -39,12 +39,20 @@ function rcopy(s::IntSxpPtr)
     end
 end
 function rcopy(s::RealSxpPtr)
-    if anyna(s)
-        rcopy(DataArray{Float64},s)
-    elseif length(s) == 1
-        rcopy(Float64,s)
+    classes = rcopy(Vector, getclass(s))
+    if "Date" in classes
+        T = Date
+    elseif "POSIXct" in classes && "POSIXt" in classes
+        T = DateTime
     else
-        rcopy(Array{Float64},s)
+        T = Float64
+    end
+    if anyna(s)
+        rcopy(DataArray{T},s)
+    elseif length(s) == 1
+        rcopy(T,s)
+    else
+        rcopy(Array{T},s)
     end
 end
 function rcopy(s::CplxSxpPtr)

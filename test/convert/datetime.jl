@@ -17,8 +17,8 @@ r = RObject(d)
 @test rcopy(getclass(r)) == "Date"
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(Array{Date}, r) == d
-@test rcopy(Array{Date}, R"as.Date($s)") == d
+@test rcopy(r) == d
+@test rcopy(R"as.Date($s)") == d
 @test rcopy(R"identical(as.Date($s), $d)")
 
 d = Date[]
@@ -27,7 +27,7 @@ r = RObject(d)
 @test rcopy(getclass(r)) == "Date"
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(Array{Date}, r) == d
+@test rcopy(r) == d
 @test rcopy(R"as.Date(character(0))") == Date[]
 
 # DataArray date
@@ -38,8 +38,8 @@ r = RObject(d)
 @test rcopy(getclass(r)) == "Date"
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(DataArray{Date}, r).na == d.na
-@test rcopy(DataArray{Date}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
+@test rcopy(r).na == d.na
+@test rcopy(r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(R"identical(as.Date($s), $d)")
 @test rcopy(R"identical(as.character($d), $s)")
 
@@ -89,8 +89,8 @@ r = RObject(d)
 @test rcopy(getattrib(r, "tzone")) == "UTC"
 @test length(r) == 1
 @test size(r) == (1,)
-@test rcopy(DateTime, r) === d
-@test rcopy(DateTime, R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
+@test rcopy(r) === d
+@test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
 @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
 s = ["2001-01-01T01:01:01", "1111-11-11T11:11:00", "2012-12-12T12:12:12"]
@@ -101,8 +101,8 @@ r = RObject(d)
 @test rcopy(getattrib(r, "tzone")) == "UTC"
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(Array{DateTime},r) == d
-@test rcopy(Array{DateTime},R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
+@test rcopy(r) == d
+@test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
 @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
 d = DateTime[]
@@ -112,8 +112,8 @@ r = RObject(d)
 @test rcopy(getattrib(r, "tzone")) == "UTC"
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(Array{DateTime},r) == d
-@test rcopy(Array{DateTime},R"as.POSIXct(character(0))") == Date[]
+@test rcopy(r) == d
+@test rcopy(R"as.POSIXct(character(0))") == Date[]
 
 # DataArray dateTime
 s = DataArray(["0001-01-01", "2012-12-12T12:12:12"], [true, false])
@@ -124,8 +124,8 @@ r = RObject(d)
 @test rcopy(getattrib(r, "tzone")) == "UTC"
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(DataArray{DateTime}, r).na == d.na
-@test rcopy(DataArray{DateTime}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
+@test rcopy(r).na == d.na
+@test rcopy(r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(R"identical(as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S'), $d)")
 @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
