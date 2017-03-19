@@ -120,7 +120,6 @@ function setindex!(s::Ptr{StrSxp}, value::AbstractString, key::Integer)
     setindex!(s,sexp(CharSxp,value),key)
 end
 
-
 function setindex!{S<:Union{VecSxp,ExprSxp},T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_VECTOR_ELT,libR), Ptr{T},
@@ -130,8 +129,23 @@ end
 function setindex!{S<:Union{VecSxp,ExprSxp}}(s::Ptr{S}, value, key::Integer)
     setindex!(s,sexp(value),key)
 end
+"""
+Set element of a VectorSxp by a label.
+"""
+function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
+    ls = unsafe_vec(getnames(s))
+    for (i,l) in enumerate(ls)
+        if rcopy(l) == label
+            s[i] = value
+            return
+        end
+    end
+    throw(BoundsError())
+end
+setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Symbol) = setindex!(s, value, string(label))
+setindex!{S<:VectorSxp}(s::Ptr{S}, value, label) = setindex!(s, sexp(value), label)
 
-setindex!(r::RObject, value, keys...) = setindex!(sexp(r), value, keys...)
+setindex!{S<:VectorSxp}(r::RObject{S}, value, keys...) = setindex!(sexp(r), value, keys...)
 
 
 
@@ -178,7 +192,8 @@ function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
 end
 done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == sexp(Const.NilValue)
 
-"extract the i-th element of LangSxp l"
+
+"extract the i-th element of a PairListSxp"
 function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
@@ -186,10 +201,23 @@ function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
     end
     car(l)
 end
-
 getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I))
 
-"assign value v to the i-th element of LangSxp l"
+"extract an element from a PairListSxp by label"
+function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
+    ls = unsafe_vec(getnames(s))
+    for (i,l) in enumerate(ls)
+        if rcopy(l) == label
+            return s[i]
+        end
+    end
+    throw(BoundsError())
+end
+getindex{S<:PairListSxp}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
+getindex{S<:PairListSxp}(s::RObject{S}, label) = RObject(getindex(s.p,label))
+
+
+"assign value v to the i-th element of a PairListSxp"
 function setindex!{S<:PairListSxp,T<:Sxp}(l::Ptr{S},v::Ptr{T},I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
@@ -200,6 +228,24 @@ end
 function setindex!{S<:PairListSxp}(s::Ptr{S}, value, key::Integer)
     setindex!(s,sexp(value),key)
 end
+
+"""
+Set element of a PairListSxp by a label.
+"""
+function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
+    ls = unsafe_vec(getnames(s))
+    for (i,l) in enumerate(ls)
+        if rcopy(l) == label
+            s[i] = value
+            return
+        end
+    end
+    throw(BoundsError())
+end
+setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Symbol) = setindex!(s, value, string(label))
+setindex!{S<:PairListSxp}(s::Ptr{S}, value, label) = setindex!(s, sexp(value), label)
+
+setindex!{S<:PairListSxp}(r::RObject{S}, value, label) = setindex!(sexp(r), value, label)
 
 
 "Return a particular attribute of an RObject"
@@ -227,6 +273,7 @@ setattrib!(r::RObject, sym, t) = setattrib!(r.p, sym, t)
 attributes(s::SxpHead) = sexp(s.attrib)
 attributes(s::Sxp) = attributes(s.head)
 attributes{S<:Sxp}(s::Ptr{S}) = attributes(unsafe_load(s))
+attributes{S<:Sxp}(s::RObject{S}) = RObject(attributes(s.p))
 
 
 function size{S<:Sxp}(s::Ptr{S})
@@ -246,7 +293,7 @@ getnames(r::RObject) = RObject(getnames(sexp(r)))
 """
 Returns the names of an R vector, the result is converted to a Julia symbol array.
 """
-names(r::RObject) = rcopy(Array{Symbol}, getnames(sexp(r)))
+names(r::RObject) = rcopy(Vector{Symbol}, getnames(sexp(r)))
 
 """
 Set the names of an R vector.

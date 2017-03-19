@@ -19,7 +19,8 @@ function rcopy{T<:Number, R<:Number}(::Type{T}, x::R)
 end
 
 # NilSxp
-rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = T(nothing)
+rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = nothing
+rcopy{T<:AbstractArray}(::Type{T}, ::Ptr{NilSxp}) = T()
 
 # SymSxp
 rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) = rcopy(T, sexp(unsafe_load(s).name))
