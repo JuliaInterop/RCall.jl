@@ -11,7 +11,8 @@ using Compat
 
 tests = ["basic",
          "convert/base",
-         "convert/data",
+         "convert/dataframe",
+         "convert/datatable",
          "convert/datetime",
          "convert/axisarray",
          "library",
