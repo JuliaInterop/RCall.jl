@@ -3,7 +3,8 @@ module RCall
 using Compat
 
 using DataFrames
-using DataTables
+# using DataTables
+using NullableArrays, CategoricalArrays
 using AxisArrays
 
 import DataStructures: OrderedDict

@@ -102,7 +102,7 @@ sexp(s::Symbol) = sexp(SymSxp,s)
 sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
 
 # DataTable
-sexp(d::AbstractDataTable) = sexp(VecSxp, d)
+# sexp(d::AbstractDataTable) = sexp(VecSxp, d)
 
 # PooledDataArray
 sexp(a::PooledDataArray) = sexp(IntSxp,a)
