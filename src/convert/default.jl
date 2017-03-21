@@ -18,7 +18,7 @@ rcopy(s::CharSxpPtr) = rcopy(String,s)
 # StrSxp
 function rcopy(s::StrSxpPtr)
     if anyna(s)
-        rcopy(NullableArray,s)
+        rcopy(DataArray,s)
     elseif length(s) == 1
         rcopy(String,s)
     else
