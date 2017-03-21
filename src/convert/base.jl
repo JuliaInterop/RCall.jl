@@ -51,12 +51,18 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :VecSxp)
     end
 end
 
+# IntSxp, RealSxp, CplxSxp, LglSxp scalar conversion
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp)
+    @eval begin
+        rcopy{T<:Number}(::Type{T},s::Ptr{$S}) = rcopy(T,s[1])
+    end
+end
+
 # IntSxp, RealSxp, CplxSxp to their corresponding Julia types.
 for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp))
     @eval begin
-        rcopy{T<:$J}(::Type{T},s::Ptr{$S}) = rcopy(T,s[1])
         function rcopy{T<:$J}(::Type{Vector{T}},s::Ptr{$S})
             a = Array{T}(length(s))
             copy!(a,unsafe_vec(s))
@@ -71,9 +77,6 @@ for (J,S) in ((:Integer,:IntSxp),
         rcopy(::Type{Array},s::Ptr{$S}) = rcopy(Array{eltype($S)},s)
     end
 end
-# handle scalar RealSxp to Integer conversion
-rcopy{T<:Integer}(::Type{T},s::Ptr{RealSxp}) = rcopy(T,s[1])
-
 
 # LglSxp
 rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(Cint,s[1])
