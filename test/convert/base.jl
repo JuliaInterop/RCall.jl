@@ -30,6 +30,13 @@ r = RObject(v)
 @test rcopy(Array{Symbol}, r)[2] == Symbol(v[2])
 @test isa(RCall.sexp(StrSxp, :a), Ptr{StrSxp})
 
+s = SubString{String}["a","b"]
+r = RObject(s)
+@test isa(r,RObject{StrSxp})
+@test length(r) == length(s)
+@test rcopy(r) == s
+@test rcopy(r[1]) == s[1]
+
 
 # logical
 r = RObject(false)

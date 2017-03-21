@@ -198,7 +198,7 @@ sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}
 sexp(::Type{CharSxp}, st::String) =
     ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
           (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
-sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, string(st))
+sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, String(st))
 sexp(::Type{StrSxp}, s::CharSxpPtr) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
 sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
 function sexp{T<:AbstractString}(::Type{StrSxp}, a::AbstractArray{T})
