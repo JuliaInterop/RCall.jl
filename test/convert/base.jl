@@ -57,6 +57,10 @@ r = RObject(v)
 
 
 # integer
+@test rcopy(Int, R"TRUE") == 1
+@test rcopy(Int, R"1") == 1
+@test rcopy(Array{Int}, R"c(1,2,3)") == [1,2,3]
+
 x = 7
 r = RObject(x)
 @test isa(r,RObject{IntSxp})
@@ -64,6 +68,7 @@ r = RObject(x)
 @test size(r) == (1,)
 @test rcopy(r) === convert(Cint,x)
 @test r[1] === convert(Cint,x)
+
 
 v = -7:3
 r = RObject(v)
@@ -122,6 +127,10 @@ r = RObject(a)
 
 
 # real
+@test rcopy(Float64, R"TRUE") == 1.0
+@test rcopy(Float64, R"1L") == 1.0
+@test rcopy(Array{Float64}, R"c(1L,2L,3L)") == [1.0,2.0,3.0]
+
 x = 7.0
 r = RObject(x)
 @test isa(r,RObject{RealSxp})
@@ -240,6 +249,14 @@ l = rcopy(R"list(a=1,b=c(1,3,4))")
 d = RObject(Dict(1=>2))
 @test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
 @test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
+
+# list
+a = Any[1, 1:10]
+r = RObject(a)
+@test isa(r, RObject{VecSxp})
+@test isa(rcopy(r), Array{Any})
+@test isa(rcopy(Array, r), Array{Any})
+
 
 # function
 function funk(x,y)
