@@ -3,7 +3,7 @@
 """
 `rcopy(r)` copies the contents of an R object into a corresponding canonical Julia type.
 """
-rcopy(r::RObject) = rcopy(r.p)
+rcopy(r::RObject; kwargs...) = rcopy(r.p; kwargs...)
 
 # Fallback
 rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
@@ -75,9 +75,9 @@ function rcopy(s::LglSxpPtr)
 end
 
 # VecSxp
-function rcopy(s::VecSxpPtr)
+function rcopy(s::VecSxpPtr; kwargs...)
     if isFrame(s)
-        rcopy(DataFrame,s)
+        rcopy(DataFrame,s; kwargs...)
     elseif isnull(getnames(s))
         rcopy(Array{Any},s)
     else

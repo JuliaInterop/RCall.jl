@@ -1,8 +1,8 @@
 # conversion to Base Julia types
 
 # allow `Int(R"1+1")`
-rcopy{T}(::Type{T},r::RObject) = rcopy(T,r.p)
-convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T,r.p)
+rcopy{T}(::Type{T},r::RObject; kwargs...) = rcopy(T, r.p; kwargs...)
+convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T, r.p)
 convert{S<:Sxp}(::Type{RObject{S}}, r::RObject{S}) = r
 
 # conversion between numbers which understands different NAs
@@ -12,7 +12,9 @@ function rcopy{T<:Number, R<:Number}(::Type{T}, x::R)
     elseif R == Int32 && T <: AbstractFloat
         return T(NaN)
     elseif R <: AbstractFloat && T == Int32
-        return Const.NaInt
+        return T(Const.NaInt)
+    elseif R <: AbstractFloat && T <: Integer
+        error("Cannot convert $R(NaN) to type $T.")
     else
         return T(x)
     end
@@ -54,7 +56,7 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp))
     @eval begin
-        rcopy{T<:$J}(::Type{T},s::Ptr{$S}) = convert(T,s[1])
+        rcopy{T<:$J}(::Type{T},s::Ptr{$S}) = rcopy(T,s[1])
         function rcopy{T<:$J}(::Type{Vector{T}},s::Ptr{$S})
             a = Array{T}(length(s))
             copy!(a,unsafe_vec(s))
@@ -69,6 +71,9 @@ for (J,S) in ((:Integer,:IntSxp),
         rcopy(::Type{Array},s::Ptr{$S}) = rcopy(Array{eltype($S)},s)
     end
 end
+# handle scalar RealSxp to Integer conversion
+rcopy{T<:Integer}(::Type{T},s::Ptr{RealSxp}) = rcopy(T,s[1])
+
 
 # LglSxp
 rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(Cint,s[1])
