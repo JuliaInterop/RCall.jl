@@ -13,7 +13,9 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
             try
                 d = OrderedDict(
                     k => v.val for (k, v) in zip(axisnames(aa), axes(aa)))
-                setattrib!(rv, Const.DimNamesSymbol, sexp(VecSxp, d))
+                setattrib!(rv, Const.ClassSymbol, "array")
+                setattrib!(rv, Const.DimSymbol, collect(size(aa)))
+                setattrib!(rv, Const.DimNamesSymbol, d)
             finally
                 unprotect(1)
             end
