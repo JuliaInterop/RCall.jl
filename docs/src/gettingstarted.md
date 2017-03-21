@@ -16,7 +16,7 @@ RCall provides multiple ways to allow R interacting with Julia.
 - R REPL mode
 - [`@rput`](@ref) and [`@rget`](@ref) macros
 - `R""` string macro
-- A low level API: [`reval`](@ref), [`rcall`](@ref) and [`rcopy`](@ref) etc.
+- RCall API: [`reval`](@ref), [`rcall`](@ref) and [`rcopy`](@ref) etc.
 
 ## R REPL mode
 The R REPL mode allows real time switching between the Julia prompt and R prompt. Press `$` to activate the R REPL mode and the R prompt will be shown. (Press `backspace` to leave R REPL mode in case you did not know.)
@@ -140,13 +140,20 @@ The [`rcopy`](@ref) function converts `RObject`s to Julia objects. It uses a var
 
 ```@repl 1
 rcopy(R"c(1)")
-rcopy(R"c(1,2)")
-rcopy(R"list(1,'zz')")
-rcopy(R"list(a=1,b='zz')")
+rcopy(R"c(1, 2)")
+rcopy(R"list(1, 'zz')")
+rcopy(R"list(a=1, b='zz')")
 ```
 
 It is possible to force a specific conversion by passing the output type as the first argument:
 
 ```@repl 1
-rcopy(Array{Int},R"c(1,2)")
+rcopy(Array{Int}, R"c(1,2)")
+```
+
+Converters and Constructors could also be used specifically to yield the desired type.
+
+```@repl 1
+convert(Array{Float64}, R"c(1,2)")
+Float64(R"1+3")
 ```
