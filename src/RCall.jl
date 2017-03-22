@@ -1,6 +1,11 @@
 __precompile__()
 module RCall
-using Compat, DataFrames, NullableArrays, CategoricalArrays
+using Compat
+
+using DataFrames
+# using DataTables
+using NullableArrays, CategoricalArrays
+using AxisArrays, NamedArrays
 
 import DataStructures: OrderedDict
 
@@ -21,9 +26,13 @@ include("setup.jl")
 include("types.jl")
 include("constants.jl")
 include("methods.jl")
-include("convert-base.jl")
-include("convert-data.jl")
-include("convert-default.jl")
+include("convert/base.jl")
+include("convert/dataframe.jl")
+include("convert/datatable.jl")
+include("convert/datetime.jl")
+include("convert/axisarray.jl")
+include("convert/namedarray.jl")
+include("convert/default.jl")
 include("eventloop.jl")
 include("eval.jl")
 include("io.jl")

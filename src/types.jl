@@ -216,21 +216,6 @@ const S4SxpPtr = Ptr{S4Sxp}
 @compat const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
 
 
-"""
-Element types of R vectors.
-"""
-eltype(::Type{LglSxp}) = Cint
-eltype(::Type{IntSxp}) = Cint
-eltype(::Type{RealSxp}) = Float64
-eltype(::Type{CplxSxp}) = Complex128
-eltype(::Type{CharSxp}) = UInt8
-eltype(::Type{RawSxp}) = UInt8
-
-eltype(::Type{StrSxp}) = Ptr{CharSxp}
-eltype(::Type{VecSxp}) = UnknownSxpPtr
-eltype(::Type{ExprSxp}) = UnknownSxpPtr
-
-
 RObjectDocs =
 """
 \"\"\"
@@ -302,10 +287,24 @@ eval(parse(RObjectDocs * RObjectQuote))
 
 RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
-RObject(x) = RObject(sexp(x))
 
+"""
+Element types of R vectors.
+"""
+eltype(::Type{LglSxp}) = Cint
+eltype(::Type{IntSxp}) = Cint
+eltype(::Type{RealSxp}) = Float64
+eltype(::Type{CplxSxp}) = Complex128
+eltype(::Type{CharSxp}) = UInt8
+eltype(::Type{RawSxp}) = UInt8
 
-# convert{T}(::Type{T}, r::RObject) = convert(T,r.p)
+eltype(::Type{StrSxp}) = Ptr{CharSxp}
+eltype(::Type{VecSxp}) = UnknownSxpPtr
+eltype(::Type{ExprSxp}) = UnknownSxpPtr
+
+eltype{S<:Sxp}(s::Ptr{S}) = eltype(S)
+eltype{S<:Sxp}(s::RObject{S}) = eltype(S)
+
 
 """
 Prevent garbage collection of an R object. Object can be released via `release`.
@@ -366,7 +365,7 @@ function sexp(p::UnknownSxpPtr)
     typ = sexpnum(p)
     0 ≤ typ ≤ 10 || 13 ≤ typ ≤ 25 || error("Unknown SEXPTYPE $typ")
     styp = typs[typ+1]
-    convert(Ptr{styp},p)
+    Ptr{styp}(p)
 end
 sexp(s::SxpPtr) = s
 sexp(r::RObject) = r.p

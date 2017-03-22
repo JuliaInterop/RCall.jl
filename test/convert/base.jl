@@ -30,6 +30,13 @@ r = RObject(v)
 @test rcopy(Array{Symbol}, r)[2] == Symbol(v[2])
 @test isa(RCall.sexp(StrSxp, :a), Ptr{StrSxp})
 
+s = SubString{String}["a","b"]
+r = RObject(s)
+@test isa(r,RObject{StrSxp})
+@test length(r) == length(s)
+@test rcopy(r) == s
+@test rcopy(r[1]) == s[1]
+
 
 # logical
 r = RObject(false)
@@ -50,6 +57,10 @@ r = RObject(v)
 
 
 # integer
+@test rcopy(Int, R"TRUE") == 1
+@test rcopy(Int, R"1") == 1
+@test rcopy(Array{Int}, R"c(1,2,3)") == [1,2,3]
+
 x = 7
 r = RObject(x)
 @test isa(r,RObject{IntSxp})
@@ -57,6 +68,7 @@ r = RObject(x)
 @test size(r) == (1,)
 @test rcopy(r) === convert(Cint,x)
 @test r[1] === convert(Cint,x)
+
 
 v = -7:3
 r = RObject(v)
@@ -115,6 +127,10 @@ r = RObject(a)
 
 
 # real
+@test rcopy(Float64, R"TRUE") == 1.0
+@test rcopy(Float64, R"1L") == 1.0
+@test rcopy(Array{Float64}, R"c(1L,2L,3L)") == [1.0,2.0,3.0]
+
 x = 7.0
 r = RObject(x)
 @test isa(r,RObject{RealSxp})
@@ -227,12 +243,19 @@ d = Dict(:a=>[1, 2, 4], :b=> ["e", "d", "f"])
 r = RObject(d)
 @test r[:a][3] == 4
 @test rcopy(r[:b][2]) == "d"
-l = rcopy("list(a=1,b=c(1,3,4))")
+l = rcopy(R"list(a=1,b=c(1,3,4))")
 @test l[:a] == 1
 @test l[:b][3] == 4
 d = RObject(Dict(1=>2))
 @test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
 @test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
+
+# list
+a = Any[1, 1:10]
+r = RObject(a)
+@test isa(r, RObject{VecSxp})
+@test isa(rcopy(r), Array{Any})
+@test isa(rcopy(Array, r), Array{Any})
 
 
 # function
@@ -243,17 +266,16 @@ f1 = RObject(funk)
 @test rcopy(Function, f1)(1,2) == 3
 @test rcopy(Function, f1.p)(1,2) == 3
 
-
 # misc
 a = RObject(rand(10))
 @test length(rcopy(Any, a)) == 10
-@test typeof(RCall.sexp(Cint, 1)) == Cint
-@test typeof(RCall.sexp(Float64, 1)) == Float64
-@test typeof(RCall.sexp(Complex128, 1)) == Complex128
+# @test typeof(RCall.sexp(Cint, 1)) == Cint
+# @test typeof(RCall.sexp(Float64, 1)) == Float64
+# @test typeof(RCall.sexp(Complex128, 1)) == Complex128
 @test typeof(rcopy(Vector{Float64}, a.p)) == Vector{Float64}
 b = RObject(true)
-@test rcopy(Int32(1)) == 1
-@test rcopy(Cint, Int32(1)) == 1
+# @test rcopy(Int32(1)) == 1
+# @test rcopy(Cint, Int32(1)) == 1
 @test rcopy(Cint, b.p) == 1
 @test rcopy(Vector{Cint}, b.p) == [1]
 @test rcopy(Array{Cint}, b.p) == [1]

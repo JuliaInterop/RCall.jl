@@ -27,6 +27,12 @@ Evaluate a function in the global environment. The first argument corresponds
 to the function to be called. It can be either a FunctionSxp type, a SymSxp or
 a Symbol."""
 rcall_p(f,args...;kwargs...) = reval_p(rlang_p(f,args...;kwargs...))
+
+"""
+Evaluate a function in the global environment. The first argument corresponds
+to the function to be called. It can be either a RObject{FunctionSxp} type or
+a Symbol which refers to a function in the R environment.
+"""
 rcall(f,args...;kwargs...) = RObject(rcall_p(f,args...;kwargs...))
 
 @compat (f::RObject{S}){S<:Union{SymSxp,LangSxp,PromSxp,FunctionSxp}}(args...;kwargs...) = rcall(f,args...;kwargs...)

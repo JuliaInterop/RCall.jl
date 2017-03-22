@@ -3,16 +3,21 @@ hd = homedir()
 pd = Pkg.dir()
 
 using RCall
+using Compat
 
 # https://github.com/JuliaStats/RCall.jl/issues/68
 @test hd == homedir()
 @test pd == Pkg.dir()
 
 tests = ["basic",
-         "conversion",
-         "dataframe",
-         "rstr",
+         "convert/base",
+         "convert/dataframe",
+         "convert/datatable",
+         "convert/datetime",
+         "convert/axisarray",
+         "convert/namedarray",
          "library",
+         "render",
          "repl",
          ]
 

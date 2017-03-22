@@ -26,10 +26,10 @@ length(r::RObject) = length(r.p)
 for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isFrame,:isFree,:isFunction,:isInteger,:isLanguage,:isList,
             :isLogical,:isSymbol,:isMatrix,:isNewList,:isNull,:isNumeric,
-            :isNumber,:isObject,:isOrdered,:isPairListSxp,:isPrimitiveSxp,
+            :isNumber,:isObject,:isOrdered,:isPairList,:isPrimitive,
             :isReal,:isS4,:isString,:isTs,:isUnordered,:isUnsorted,
             :isUserBinop,:isValidString,:isValidStringF,:isVector,
-            :isVectorAtomicSxp,:isVectorizable,:isVectorListSxp)
+            :isVectorAtomic,:isVectorizable,:isVectorList)
     @eval begin
         $sym{S<:Sxp}(s::Ptr{S}) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{SxpPtrInfo},),s)
         $sym(r::RObject) = $sym(r.p)
@@ -74,13 +74,13 @@ Indexing into `VectorSxp` types uses Julia indexing into the `vec` result,
 except for `StrSxp` and the `VectorListSxp` types, which must apply `sexp`
 to the `Ptr{Void}` obtained by indexing into the `vec` result.
 """
-getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real) = getindex(unsafe_vec(s),I)
+getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Integer) = getindex(unsafe_vec(s),I)
+getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Integer...) = getindex(unsafe_array(s),I...)
 getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::AbstractVector) = getindex(unsafe_vec(s),I)
-getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Real...) = getindex(unsafe_array(s),I...)
 
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real) = sexp(getindex(unsafe_vec(s),I))
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = sexp(getindex(unsafe_vec(s),I))
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::Real...) = sexp(getindex(unsafe_array(s),I...))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::Integer) = sexp(getindex(unsafe_vec(s),I))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::Integer...) = sexp(getindex(unsafe_array(s),I...))
+getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = map(sexp, getindex(unsafe_vec(s),I))
 
 """
 String indexing finds the first element with the matching name
@@ -103,10 +103,10 @@ getindex{S<:VectorListSxp}(r::RObject{S}, I...) = RObject(getindex(sexp(r), I...
 getindex{S<:VectorListSxp}(r::RObject{S}, I::AbstractArray) = map(RObject,getindex(sexp(r),I))
 
 
-function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I...)
+function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer...)
     setindex!(unsafe_array(s), value, I...)
 end
-function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I)
+function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer)
     setindex!(unsafe_vec(s), value, I)
 end
 function setindex!(s::Ptr{StrSxp}, value::CharSxpPtr, key::Integer)
@@ -120,7 +120,6 @@ function setindex!(s::Ptr{StrSxp}, value::AbstractString, key::Integer)
     setindex!(s,sexp(CharSxp,value),key)
 end
 
-
 function setindex!{S<:Union{VecSxp,ExprSxp},T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_VECTOR_ELT,libR), Ptr{T},
@@ -130,8 +129,23 @@ end
 function setindex!{S<:Union{VecSxp,ExprSxp}}(s::Ptr{S}, value, key::Integer)
     setindex!(s,sexp(value),key)
 end
+"""
+Set element of a VectorSxp by a label.
+"""
+function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
+    ls = unsafe_vec(getnames(s))
+    for (i,l) in enumerate(ls)
+        if rcopy(l) == label
+            s[i] = value
+            return
+        end
+    end
+    throw(BoundsError())
+end
+setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Symbol) = setindex!(s, value, string(label))
+setindex!{S<:VectorSxp}(s::Ptr{S}, value, label) = setindex!(s, sexp(value), label)
 
-setindex!(r::RObject, value, keys...) = setindex!(sexp(r), value, keys...)
+setindex!{S<:VectorSxp}(r::RObject{S}, value, keys...) = setindex!(sexp(r), value, keys...)
 
 
 
@@ -178,7 +192,8 @@ function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
 end
 done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == sexp(Const.NilValue)
 
-"extract the i-th element of LangSxp l"
+
+"extract the i-th element of a PairListSxp"
 function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
@@ -186,10 +201,23 @@ function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
     end
     car(l)
 end
-
 getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I))
 
-"assign value v to the i-th element of LangSxp l"
+"extract an element from a PairListSxp by label"
+function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
+    ls = unsafe_vec(getnames(s))
+    for (i,l) in enumerate(ls)
+        if rcopy(l) == label
+            return s[i]
+        end
+    end
+    throw(BoundsError())
+end
+getindex{S<:PairListSxp}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
+getindex{S<:PairListSxp}(s::RObject{S}, label) = RObject(getindex(s.p,label))
+
+
+"assign value v to the i-th element of a PairListSxp"
 function setindex!{S<:PairListSxp,T<:Sxp}(l::Ptr{S},v::Ptr{T},I::Integer)
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
@@ -200,6 +228,24 @@ end
 function setindex!{S<:PairListSxp}(s::Ptr{S}, value, key::Integer)
     setindex!(s,sexp(value),key)
 end
+
+"""
+Set element of a PairListSxp by a label.
+"""
+function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
+    ls = unsafe_vec(getnames(s))
+    for (i,l) in enumerate(ls)
+        if rcopy(l) == label
+            s[i] = value
+            return
+        end
+    end
+    throw(BoundsError())
+end
+setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Symbol) = setindex!(s, value, string(label))
+setindex!{S<:PairListSxp}(s::Ptr{S}, value, label) = setindex!(s, sexp(value), label)
+
+setindex!{S<:PairListSxp}(r::RObject{S}, value, label) = setindex!(sexp(r), value, label)
 
 
 "Return a particular attribute of an RObject"
@@ -227,6 +273,7 @@ setattrib!(r::RObject, sym, t) = setattrib!(r.p, sym, t)
 attributes(s::SxpHead) = sexp(s.attrib)
 attributes(s::Sxp) = attributes(s.head)
 attributes{S<:Sxp}(s::Ptr{S}) = attributes(unsafe_load(s))
+attributes{S<:Sxp}(s::RObject{S}) = RObject(attributes(s.p))
 
 
 function size{S<:Sxp}(s::Ptr{S})
@@ -246,7 +293,7 @@ getnames(r::RObject) = RObject(getnames(sexp(r)))
 """
 Returns the names of an R vector, the result is converted to a Julia symbol array.
 """
-names(r::RObject) = rcopy(Array{Symbol}, getnames(sexp(r)))
+names(r::RObject) = rcopy(Vector{Symbol}, getnames(sexp(r)))
 
 """
 Set the names of an R vector.
@@ -299,11 +346,7 @@ naeltype(::Type{RealSxp}) = Const.NaReal
 naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 naeltype(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
-naeltype{S<:Integer}(::Type{S}) = Const.NaInt
-naeltype{S<:Real}(::Type{S}) = Const.NaReal
-naeltype(::Type{Complex}) = complex(Const.NaReal,Const.NaReal)
-naeltype{S<:String}(::Type{S}) = sexp(Const.NaString)
-naeltype(::Type{Union{}}) = Const.NaInt
+naeltype{S<:Sxp}(::Type{S}) = Const.NaInt
 
 """
 Check if values correspond to R's sentinel NA values.
