@@ -5,7 +5,7 @@ symbols. See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
 """
 function bound{S<:Sxp}(s::Ptr{S})
-    u = unsafe_load(convert(UnknownSxpPtr,s))
+    u = unsafe_load(convert(Ptr{UnknownSxp},s))
     (u.info >>> 6) & 0x03
 end
 
@@ -109,10 +109,10 @@ end
 function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer)
     setindex!(unsafe_vec(s), value, I)
 end
-function setindex!(s::Ptr{StrSxp}, value::CharSxpPtr, key::Integer)
+function setindex!(s::Ptr{StrSxp}, value::Ptr{CharSxp}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_STRING_ELT,libR), Void,
-          (Ptr{StrSxp},Cptrdiff_t, CharSxpPtr),
+          (Ptr{StrSxp},Cptrdiff_t, Ptr{CharSxp}),
           s, key-1, value)
     value
 end
@@ -160,9 +160,9 @@ done{S<:VectorSxp}(s::RObject{S},state) = done(s.p, state)
 
 # PairListSxps
 
-cdr{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CDR,libR),UnknownSxpPtr,(Ptr{S},),s))
-car{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CAR,libR),UnknownSxpPtr,(Ptr{S},),s))
-tag{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:TAG,libR),UnknownSxpPtr,(Ptr{S},),s))
+cdr{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CDR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
+car{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CAR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
+tag{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:TAG,libR),Ptr{UnknownSxp},(Ptr{S},),s))
 
 function setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
     ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
@@ -250,7 +250,7 @@ setindex!{S<:PairListSxp}(r::RObject{S}, value, label) = setindex!(sexp(r), valu
 
 "Return a particular attribute of an RObject"
 function getattrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
-    sexp(ccall((:Rf_getAttrib,libR),UnknownSxpPtr,(Ptr{S},Ptr{SymSxp}),s,sym))
+    sexp(ccall((:Rf_getAttrib,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{SymSxp}),s,sym))
 end
 getattrib{S<:Sxp}(s::Ptr{S}, sym::RObject{SymSxp}) = getattrib(s,sexp(sym))
 getattrib{S<:Sxp}(s::Ptr{S}, sym::Symbol) = getattrib(s,sexp(SymSxp,sym))
@@ -355,7 +355,7 @@ isna(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
 isna(x::Float64) = x === Const.NaReal
 isna(x::Int32) = x == Const.NaInt
 isna(a::AbstractArray) = reshape(bitpack([isna(aa) for aa in a]),size(a))
-isna(s::CharSxpPtr) = s === sexp(Const.NaString)
+isna(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
 
 # this doesn't allow us to check VecSxp s
 function isna{S<:VectorSxp}(s::Ptr{S})
@@ -402,10 +402,10 @@ function isascii(s::CharSxp)
         error("Unsupported string type.")
     end
 end
-isascii(s::CharSxpPtr) = isascii(unsafe_load(s))
+isascii(s::Ptr{CharSxp}) = isascii(unsafe_load(s))
 isascii(r::RObject{CharSxp}) = isascii(sexp(r))
 
-function isascii(s::StrSxpPtr)
+function isascii(s::Ptr{StrSxp})
     ind = true
     for c in s
         ind &= isna(c) || isascii(c)
@@ -418,7 +418,7 @@ isascii(r::RObject{StrSxp}) = isascii(sexp(r))
 
 "extract the value of symbol s in the environment e"
 function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
-    v = ccall((:Rf_findVarInFrame,libR),UnknownSxpPtr,(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
+    v = ccall((:Rf_findVarInFrame,libR),Ptr{UnknownSxp},(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
     v == sexp(Const.UnboundValue) && error("$s is not defined in the environment")
     sexp(v)
 end
@@ -472,6 +472,6 @@ getNamespace(str::String) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespac
 
 "Set the variable .Last.value to a given value"
 function set_last_value{S<:Sxp}(s::Ptr{S})
-    ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},UnknownSxpPtr),sexp(Const.LastvalueSymbol),s)
+    ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
     nothing
 end

@@ -222,8 +222,8 @@ function __init__()
     Const.load()
 
     # set up function callbacks
-    juliaCallback.p = makeNativeSymbolRef(cfunction(julia_extptr_callback,UnknownSxpPtr,(ListSxpPtr,)))
-    juliaDecref[] = cfunction(decref_extptr,Void,(ExtPtrSxpPtr,))
+    juliaCallback.p = makeNativeSymbolRef(cfunction(julia_extptr_callback,Ptr{UnknownSxp},(Ptr{ListSxp},)))
+    juliaDecref[] = cfunction(decref_extptr,Void,(Ptr{ExtPtrSxp},))
 
     if !Rinited
         # print warnings as they arise

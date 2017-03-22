@@ -28,9 +28,9 @@ rcopy{T<:AbstractArray}(::Type{T}, ::Ptr{NilSxp}) = T()
 rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) = rcopy(T, sexp(unsafe_load(s).name))
 
 # CharSxp
-rcopy{T<:AbstractString}(::Type{T},s::CharSxpPtr) = convert(T, String(unsafe_vec(s)))
-rcopy(::Type{Symbol},s::CharSxpPtr) = Symbol(rcopy(AbstractString,s))
-rcopy(::Type{Int}, s::CharSxpPtr) = parse(Int, rcopy(s))
+rcopy{T<:AbstractString}(::Type{T},s::Ptr{CharSxp}) = convert(T, String(unsafe_vec(s)))
+rcopy(::Type{Symbol},s::Ptr{CharSxp}) = Symbol(rcopy(AbstractString,s))
+rcopy(::Type{Int}, s::Ptr{CharSxp}) = parse(Int, rcopy(s))
 
 # IntSxp, RealSxp, CplxSxp, LglSxp, StrSxp, VecSxp to Array{T}
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :VecSxp)
@@ -128,10 +128,10 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
 end
 
 # StrSxp
-rcopy(::Type{Vector}, s::StrSxpPtr) = rcopy(Vector{String}, s)
-rcopy(::Type{Array}, s::StrSxpPtr) = rcopy(Array{String}, s)
-rcopy(::Type{Symbol}, s::StrSxpPtr) = rcopy(Symbol,s[1])
-rcopy{T<:AbstractString}(::Type{T},s::StrSxpPtr) = rcopy(T,s[1])
+rcopy(::Type{Vector}, s::Ptr{StrSxp}) = rcopy(Vector{String}, s)
+rcopy(::Type{Array}, s::Ptr{StrSxp}) = rcopy(Array{String}, s)
+rcopy(::Type{Symbol}, s::Ptr{StrSxp}) = rcopy(Symbol,s[1])
+rcopy{T<:AbstractString}(::Type{T},s::Ptr{StrSxp}) = rcopy(T,s[1])
 
 # VecSxp
 rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)
@@ -204,10 +204,10 @@ end
 # String
 sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}, (Ptr{UInt8},), s)
 sexp(::Type{CharSxp}, st::String) =
-    ccall((:Rf_mkCharLenCE, libR), CharSxpPtr,
+    ccall((:Rf_mkCharLenCE, libR), Ptr{CharSxp},
           (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
 sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, String(st))
-sexp(::Type{StrSxp}, s::CharSxpPtr) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(CharSxpPtr,),s)
+sexp(::Type{StrSxp}, s::Ptr{CharSxp}) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(Ptr{CharSxp},),s)
 sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
 function sexp{T<:AbstractString}(::Type{StrSxp}, a::AbstractArray{T})
     ra = protect(allocArray(StrSxp, size(a)...))

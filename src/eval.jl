@@ -6,7 +6,7 @@ function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv))
         status = Array{Cint}(1)
         protect(expr)
         protect(env)
-        val = ccall((:R_tryEval,libR),UnknownSxpPtr,(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,status)
+        val = ccall((:R_tryEval,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,status)
         unprotect(2)
         val, status[1]
     end
@@ -60,8 +60,8 @@ function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
     protect(sf)
     status = Array{Cint}(1)
-    val = ccall((:R_ParseVector,libR),UnknownSxpPtr,
-                (Ptr{StrSxp},Cint,Ptr{Cint},UnknownSxpPtr),
+    val = ccall((:R_ParseVector,libR),Ptr{UnknownSxp},
+                (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}),
                 st,-1,status,sf)
     unprotect(2)
     val, status[1]

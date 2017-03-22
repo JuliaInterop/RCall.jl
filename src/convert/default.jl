@@ -12,11 +12,11 @@ rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
 rcopy(::Ptr{NilSxp}) = nothing
 
 # SymSxp and CharSxp
-rcopy(s::SymSxpPtr) = rcopy(Symbol,s)
-rcopy(s::CharSxpPtr) = rcopy(String,s)
+rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
+rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
 
 # StrSxp
-function rcopy(s::StrSxpPtr)
+function rcopy(s::Ptr{StrSxp})
     if anyna(s)
         rcopy(DataArray,s)
     elseif length(s) == 1
@@ -27,7 +27,7 @@ function rcopy(s::StrSxpPtr)
 end
 
 # IntSxp, RealSxp, CplxSxp, LglSxp
-function rcopy(s::IntSxpPtr)
+function rcopy(s::Ptr{IntSxp})
     if isFactor(s)
         rcopy(PooledDataArray,s)
     elseif anyna(s)
@@ -38,7 +38,7 @@ function rcopy(s::IntSxpPtr)
         rcopy(Array,s)
     end
 end
-function rcopy(s::RealSxpPtr)
+function rcopy(s::Ptr{RealSxp})
     classes = rcopy(Vector, getclass(s))
     if "Date" in classes
         T = Date
@@ -55,7 +55,7 @@ function rcopy(s::RealSxpPtr)
         rcopy(Array{T},s)
     end
 end
-function rcopy(s::CplxSxpPtr)
+function rcopy(s::Ptr{CplxSxp})
     if anyna(s)
         rcopy(DataArray{Complex128},s)
     elseif length(s) == 1
@@ -64,7 +64,7 @@ function rcopy(s::CplxSxpPtr)
         rcopy(Array{Complex128},s)
     end
 end
-function rcopy(s::LglSxpPtr)
+function rcopy(s::Ptr{LglSxp})
     if anyna(s)
         rcopy(DataArray{Bool},s)
     elseif length(s) == 1
@@ -75,7 +75,7 @@ function rcopy(s::LglSxpPtr)
 end
 
 # VecSxp
-function rcopy(s::VecSxpPtr; kwargs...)
+function rcopy(s::Ptr{VecSxp}; kwargs...)
     if isFrame(s)
         rcopy(DataFrame,s; kwargs...)
     elseif isnull(getnames(s))
@@ -86,10 +86,10 @@ function rcopy(s::VecSxpPtr; kwargs...)
 end
 
 # FunctionSxp
-rcopy(s::FunctionSxpPtr) = rcopy(Function,s)
+rcopy{S<:FunctionSxp}(s::Ptr{S}) = rcopy(Function,s)
 
 # TODO
-# rcopy(l::LangSxpPtr) = l
+# rcopy(l::Ptr{LangSxp}) = l
 # rcopy(r::RObject{LangSxp}) = r
 
 # logic of default sexp
