@@ -3,12 +3,12 @@ A pure julia wrapper of R_tryEval.
 """
 function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv))
     disable_sigint() do
-        status = Array{Cint}(1)
+        status = Ref{Cint}()
         protect(expr)
         protect(env)
-        val = ccall((:R_tryEval,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{EnvSxp},Ptr{Cint}),expr,env,status)
+        val = ccall((:R_tryEval,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{EnvSxp},Ref{Cint}),expr,env,status)
         unprotect(2)
-        val, status[1]
+        val, status[]
     end
 end
 
@@ -59,12 +59,12 @@ reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv) = RObject(reval_p(
 function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
     protect(st)
     protect(sf)
-    status = Array{Cint}(1)
+    status = Ref{Cint}()
     val = ccall((:R_ParseVector,libR),Ptr{UnknownSxp},
                 (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}),
                 st,-1,status,sf)
     unprotect(2)
-    val, status[1]
+    val, status[]
 end
 
 "Get the R parser error msg for the previous parsing result."
