@@ -431,7 +431,7 @@ isascii(r::RObject{StrSxp}) = isascii(sexp(r))
 "extract the value of symbol s in the environment e"
 function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
     v = ccall((:Rf_findVarInFrame,libR),Ptr{UnknownSxp},(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
-    v == sexp(Const.UnboundValue) && error("$s is not defined in the environment")
+    v == sexp(Const.UnboundValue) && error("s is not defined in the environment")
     sexp(v)
 end
 getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(SymSxp,s))
@@ -479,7 +479,7 @@ function findNamespace(str::String)
 end
 
 "get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound."
-getNamespace(str::String) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespace"], str))
+getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"], str))
 
 
 "Set the variable .Last.value to a given value"
