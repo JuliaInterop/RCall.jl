@@ -1,10 +1,5 @@
 import Base: LineEdit, REPL, REPLCompletions
 
-function return_callback(s)
-    status = render(String(LineEdit.buffer(s)))[3]
-    status == 1 || status >= 3
-end
-
 function generate_inline_julia_code(symdict::OrderedDict)
     blk_ld = Expr(:block)
     for (rsym, expr) in symdict
@@ -108,22 +103,6 @@ function bracketed_paste_callback(s, o...)
     LineEdit.refresh_line(s)
 end
 
-function respond(repl, main)
-    (s, buf, ok) -> begin
-        if !ok
-            return REPL.transition(s, :abort)
-        end
-        script = String(take!(buf))
-        if !isempty(strip(script))
-            REPL.reset(repl)
-            repl_eval(script, repl.t.out_stream, repl.t.err_stream)
-        end
-        REPL.prepare_next(repl)
-        REPL.reset_state(s)
-        s.current_mode.sticky || REPL.transition(s, main)
-    end
-end
-
 type RCompletionProvider <: LineEdit.CompletionProvider
     r::REPL.LineEditREPL
 end
@@ -155,14 +134,30 @@ function create_r_repl(repl, main)
     r_mode = LineEdit.Prompt("R> ";
         prompt_prefix=Base.text_colors[:blue],
         prompt_suffix=main.prompt_suffix,
-        on_enter=return_callback,
-        on_done= respond(repl, main),
         sticky=true)
 
     hp = main.hist
     hp.mode_mapping[:r] = r_mode
     r_mode.hist = hp
     r_mode.complete = RCompletionProvider(repl)
+    r_mode.on_enter = (s) -> begin
+        status = render(String(LineEdit.buffer(s)))[3]
+        status == 1 || status >= 3
+    end
+    r_mode.on_done = (s, buf, ok) -> begin
+        if !ok
+            return REPL.transition(s, :abort)
+        end
+        script = String(take!(buf))
+        if !isempty(strip(script))
+            REPL.reset(repl)
+            repl_eval(script, repl.t.out_stream, repl.t.err_stream)
+        end
+        REPL.prepare_next(repl)
+        REPL.reset_state(s)
+        s.current_mode.sticky || REPL.transition(s, main)
+    end
+
     const bracketed_paste_mode_keymap = Dict{Any,Any}(
         "\e[200~" => bracketed_paste_callback
     )
