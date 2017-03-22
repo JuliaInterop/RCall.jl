@@ -67,6 +67,14 @@ The same as `unsafe_vec`, except returns an appropriately sized array.
 unsafe_array{S<:VectorSxp}(s::Ptr{S}) =  unsafe_wrap(Array, dataptr(s), size(s))
 unsafe_array{S<:VectorSxp}(r::RObject{S}) = unsafe_array(r.p)
 
+# used in indexing
+start(s::Ptr{NilSxp}) = 0
+next(s::Ptr{NilSxp},state) = (s, state)
+done(s::Ptr{NilSxp},state) = true
+
+start(r::RObject{NilSxp}) = 0
+next(r::RObject{NilSxp},state) = (r, state)
+done(r::RObject{NilSxp},state) = true
 
 
 """
@@ -86,7 +94,7 @@ getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = map(sexp, getindex(un
 String indexing finds the first element with the matching name
 """
 function getindex{S<:VectorSxp}(s::Ptr{S}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             return s[i]
@@ -133,7 +141,7 @@ end
 Set element of a VectorSxp by a label.
 """
 function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             s[i] = value
@@ -192,6 +200,10 @@ function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
 end
 done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == sexp(Const.NilValue)
 
+start{S<:PairListSxp}(s::RObject{S}) = start(s.p)
+next{S<:PairListSxp}(s::RObject{S},state) = next(s.p, state)
+done{S<:PairListSxp}(s::RObject{S},state) = done(s.p, state)
+
 
 "extract the i-th element of a PairListSxp"
 function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
@@ -205,7 +217,7 @@ getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I)
 
 "extract an element from a PairListSxp by label"
 function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             return s[i]
@@ -233,7 +245,7 @@ end
 Set element of a PairListSxp by a label.
 """
 function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             s[i] = value
