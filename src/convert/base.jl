@@ -254,26 +254,5 @@ function sexp(::Type{VecSxp}, a::AbstractArray)
 end
 
 # Function
-"""
-Wrap a callable Julia object `f` an a R `ClosSxpPtr`.
 
-Constructs the following R code
-
-    function(...) .External(juliaCallback, fExPtr, ...)
-
-"""
-function sexp(::Type{ClosSxp}, f)
-    fptr = protect(sexp(ExtPtrSxp,f))
-    body = protect(rlang_p(Symbol(".External"),
-                           juliaCallback,
-                           fptr,
-                           Const.DotsSymbol))
-    local clos
-    try
-        lang = rlang_p(:function, sexp_arglist_dots(), body)
-        clos = reval_p(lang)
-    finally
-        unprotect(2)
-    end
-    clos
-end
+# check src/callback.jl for `sexp(::ClosSxp, ::Function)`

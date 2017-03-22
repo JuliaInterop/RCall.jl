@@ -1,8 +1,7 @@
 """
-Register a function pointer as an R NativeSymbol.
-
-This is completely undocumented, so may break: we technically are supposed to
-use R_registerRoutines, but this is _much_ easier for just 1 function.
+Register a function pointer as an R NativeSymbol. We technically are supposed to use
+R_registerRoutines. Starting from R 3.4, `R_MakeExternalPtrFn` is a part of R API in R 3.4.
+It is probably safe to such to make the external pointer.
 """
 function makeNativeSymbolRef(fptr::Ptr{Void})
     # mirror Rf_MakeNativeSymbolRef of Rdynload.c
@@ -79,17 +78,26 @@ function decref_extptr(p::Ptr{ExtPtrSxp})
     return nothing
 end
 
-const juliaDecref = Ref{Ptr{Void}}()
 
 """
 Register finalizer to be called by the R GC.
 """
 function registerCFinalizerEx(s::Ptr{ExtPtrSxp})
     protect(s)
+    decref_extptr_ptr = cfunction(decref_extptr,Void,(Ptr{ExtPtrSxp},))
     ccall((:R_RegisterCFinalizerEx,libR),Void,
           (Ptr{ExtPtrSxp}, Ptr{Void}, Cint),
-          s,juliaDecref[],0)
+          s,decref_extptr_ptr,0)
     unprotect(1)
+end
+
+
+const juliaCallback = RObject{ExtPtrSxp}()
+
+
+function setup_callbacks()
+    julia_extptr_callback_ptr = cfunction(julia_extptr_callback,Ptr{UnknownSxp},(Ptr{ListSxp},))
+    juliaCallback.p = makeNativeSymbolRef(julia_extptr_callback_ptr)
 end
 
 
@@ -107,7 +115,30 @@ function sexp(::Type{ExtPtrSxp}, j)
     s
 end
 
-const juliaCallback = RObject{ExtPtrSxp}()
+"""
+Wrap a callable Julia object `f` an a R `ClosSxpPtr`.
+
+Constructs the following R code
+
+    function(...) .External(juliaCallback, fExPtr, ...)
+
+"""
+function sexp(::Type{ClosSxp}, f)
+    fptr = protect(sexp(ExtPtrSxp,f))
+    body = protect(rlang_p(Symbol(".External"),
+                           juliaCallback,
+                           fptr,
+                           Const.DotsSymbol))
+    local clos
+    try
+        lang = rlang_p(:function, sexp_arglist_dots(), body)
+        clos = reval_p(lang)
+    finally
+        unprotect(2)
+    end
+    clos
+end
+
 
 """
 Create an argument list for an R function call, with a varargs "dots" at the end.
