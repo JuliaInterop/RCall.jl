@@ -346,7 +346,7 @@ naeltype(::Type{RealSxp}) = Const.NaReal
 naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 naeltype(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
-naeltype{S<:Sxp}(::Type{S}) = Const.NaInt
+naeltype{S<:Sxp}(::Type{S}) = sexp(LglSxp,Const.NaInt)
 
 """
 Check if values correspond to R's sentinel NA values.
