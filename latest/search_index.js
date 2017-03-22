@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "Several Ways to use RCall",
     "category": "section",
-    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput and @rget macros\nR\"\" string macro\nA low level API: reval, rcall and rcopy etc."
+    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput and @rget macros\nR\"\" string macro\nRCall API: reval, rcall and rcopy etc."
 },
 
 {
@@ -149,7 +149,79 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "RCall API",
     "category": "section",
-    "text": "The reval function evaluates any given input string as R code in the R environment. The returned result is an RObject object.jmtcars = reval(\"mtcars\");\nnames(jmtcars)\njmtcars[:mpg]\ntypeof(jmtcars)The rcall function is used to construct function calls.rcall(:dim, jmtcars)The arguments will be implicitly converted to RObject upon evaluation.rcall(:sum, Float64[1.0, 4.0, 6.0])The rcopy function converts RObjects to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:rcopy(R\"c(1)\")\nrcopy(R\"c(1,2)\")\nrcopy(R\"list(1,'zz')\")\nrcopy(R\"list(a=1,b='zz')\")It is possible to force a specific conversion by passing the output type as the first argument:rcopy(Array{Int},R\"c(1,2)\")"
+    "text": "The reval function evaluates any given input string as R code in the R environment. The returned result is an RObject object.jmtcars = reval(\"mtcars\");\nnames(jmtcars)\njmtcars[:mpg]\ntypeof(jmtcars)The rcall function is used to construct function calls.rcall(:dim, jmtcars)The arguments will be implicitly converted to RObject upon evaluation.rcall(:sum, Float64[1.0, 4.0, 6.0])The rcopy function converts RObjects to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:rcopy(R\"c(1)\")\nrcopy(R\"c(1, 2)\")\nrcopy(R\"list(1, 'zz')\")\nrcopy(R\"list(a=1, b='zz')\")It is possible to force a specific conversion by passing the output type as the first argument:rcopy(Array{Int}, R\"c(1,2)\")Converters and Constructors could also be used specifically to yield the desired type.convert(Array{Float64}, R\"c(1,2)\")\nFloat64(R\"1+3\")"
+},
+
+{
+    "location": "conversions.html#",
+    "page": "Conversions",
+    "title": "Conversions",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "conversions.html#Conversions-1",
+    "page": "Conversions",
+    "title": "Conversions",
+    "category": "section",
+    "text": "RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., DataFrames, DataArrays, NullableArrays, CategoricalArrays NamedArrays and AxisArrays.using RCall\nusing DataFrames\nusing NamedArrays\nusing AxisArrays"
+},
+
+{
+    "location": "conversions.html#Base-Julia-Types-1",
+    "page": "Conversions",
+    "title": "Base Julia Types",
+    "category": "section",
+    "text": "# Julia -> R\na = RObject(1)# R -> Julia\nrcopy(a)# Julia -> R\na = RObject([1.0, 2.0])# R -> Julia\nrcopy(a)"
+},
+
+{
+    "location": "conversions.html#Dictionaries-1",
+    "page": "Conversions",
+    "title": "Dictionaries",
+    "category": "section",
+    "text": "# Julia -> R\nd = Dict(:a => 1, :b => [4, 5, 3])\nr = RObject(d)# R -> Julia\nrcopy(r)"
+},
+
+{
+    "location": "conversions.html#Date-1",
+    "page": "Conversions",
+    "title": "Date",
+    "category": "section",
+    "text": "# Julia -> R\nd = Date(2012, 12, 12)\nr = RObject(d)# R -> Julia\nrcopy(r)"
+},
+
+{
+    "location": "conversions.html#DateTime-1",
+    "page": "Conversions",
+    "title": "DateTime",
+    "category": "section",
+    "text": "# julia -> R\nd = DateTime(2012, 12, 12, 12, 12, 12)\nr = RObject(d)# R -> Julia\nrcopy(r)"
+},
+
+{
+    "location": "conversions.html#DataFrames-and-DataArrays-1",
+    "page": "Conversions",
+    "title": "DataFrames and DataArrays",
+    "category": "section",
+    "text": "d = DataFrame([[1.0, 4.5, 7.0]], [:x])\n# Julia -> R\nr = RObject(d)# R -> Julia\nrcopy(r)In default, the column names of R data frames are sanitized such that foo.bar would be replaced by foo_bar.rcopy(R\"data.frame(a.b = 1:3)\")To avoid the sanitization, use sanitize option.rcopy(R\"data.frame(a.b = 1:10)\"; sanitize = false)"
+},
+
+{
+    "location": "conversions.html#NamedArrays-1",
+    "page": "Conversions",
+    "title": "NamedArrays",
+    "category": "section",
+    "text": "# Julia -> R\naa = NamedArray([1,2,3], [[\"a\", \"b\", \"c\"]], [:id])\nr = RObject(aa)# R -> Julia\nrcopy(r)"
+},
+
+{
+    "location": "conversions.html#AxisArrays-1",
+    "page": "Conversions",
+    "title": "AxisArrays",
+    "category": "section",
+    "text": "# Julia -> R\naa = AxisArray([1,2,3], Axis{:id}([\"a\", \"b\", \"c\"]))\nr = RObject(aa)# R -> Julia\nrcopy(r)"
 },
 
 {
@@ -246,6 +318,14 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.RObject",
     "category": "Type",
     "text": "An RObject is a Julia wrapper for an R object (known as an \"S-expression\" or \"SEXP\"). It is stored as a pointer which is protected from the R garbage collector, until the RObject itself is finalized by Julia. The parameter is the type of the S-expression.\n\nWhen called with a Julia object as an argument, a corresponding R object is constructed.\n\njulia> RObject(1)\nRObject{IntSxp}\n[1] 1\n\njulia> RObject(1:3)\nRObject{IntSxp}\n[1] 1 2 3\n\njulia> RObject(1.0:3.0)\nRObject{RealSxp}\n[1] 1 2 3\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.RObject-Tuple{Any}",
+    "page": "Internal",
+    "title": "RCall.RObject",
+    "category": "Method",
+    "text": "sexp(x) converts a Julia object x to a pointer to a corresponding Sxp Object.\n\n\n\n"
 },
 
 {
@@ -433,27 +513,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rcopy-Tuple{AbstractString}",
+    "location": "internal.html#RCall.rcall-Tuple{Any,Vararg{Any,N}}",
     "page": "Internal",
-    "title": "RCall.rcopy",
+    "title": "RCall.rcall",
     "category": "Method",
-    "text": "Evaluate and convert the result of a string as an R expression.\n\n\n\n"
+    "text": "Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a RObject{FunctionSxp} type or a Symbol which refers to a function in the R environment.\n\n\n\n"
 },
 
 {
-    "location": "internal.html#RCall.rcopy-Tuple{Ptr{RCall.SymSxp}}",
+    "location": "internal.html#RCall.rcopy-Tuple{RCall.RObject}",
     "page": "Internal",
     "title": "RCall.rcopy",
     "category": "Method",
-    "text": "rcopy copies the contents of an R object into a corresponding canonical Julia type.\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.rcopy-Tuple{Type{Any},Ptr{S<:RCall.Sxp}}",
-    "page": "Internal",
-    "title": "RCall.rcopy",
-    "category": "Method",
-    "text": "rcopy(T,p) converts a pointer p to a Sxp object to a native Julia object of type T.\n\nrcopy(p) performs a default conversion.\n\n\n\n"
+    "text": "rcopy(r) copies the contents of an R object into a corresponding canonical Julia type.\n\n\n\n"
 },
 
 {
@@ -537,15 +609,23 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#Base.getindex-Tuple{Ptr{S<:RCall.PairListSxp},AbstractString}",
+    "page": "Internal",
+    "title": "Base.getindex",
+    "category": "Method",
+    "text": "extract an element from a PairListSxp by label\n\n\n\n"
+},
+
+{
     "location": "internal.html#Base.getindex-Tuple{Ptr{S<:RCall.PairListSxp},Integer}",
     "page": "Internal",
     "title": "Base.getindex",
     "category": "Method",
-    "text": "extract the i-th element of LangSxp l\n\n\n\n"
+    "text": "extract the i-th element of a PairListSxp\n\n\n\n"
 },
 
 {
-    "location": "internal.html#Base.getindex-Tuple{Ptr{S<:RCall.VectorAtomicSxp},Real}",
+    "location": "internal.html#Base.getindex-Tuple{Ptr{S<:RCall.VectorAtomicSxp},Integer}",
     "page": "Internal",
     "title": "Base.getindex",
     "category": "Method",
@@ -601,11 +681,27 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#Base.setindex!-Tuple{Ptr{S<:RCall.PairListSxp},Ptr{T<:RCall.Sxp},AbstractString}",
+    "page": "Internal",
+    "title": "Base.setindex!",
+    "category": "Method",
+    "text": "Set element of a PairListSxp by a label.\n\n\n\n"
+},
+
+{
     "location": "internal.html#Base.setindex!-Tuple{Ptr{S<:RCall.PairListSxp},Ptr{T<:RCall.Sxp},Integer}",
     "page": "Internal",
     "title": "Base.setindex!",
     "category": "Method",
-    "text": "assign value v to the i-th element of LangSxp l\n\n\n\n"
+    "text": "assign value v to the i-th element of a PairListSxp\n\n\n\n"
+},
+
+{
+    "location": "internal.html#Base.setindex!-Tuple{Ptr{S<:RCall.VectorSxp},Ptr{T<:RCall.Sxp},AbstractString}",
+    "page": "Internal",
+    "title": "Base.setindex!",
+    "category": "Method",
+    "text": "Set element of a VectorSxp by a label.\n\n\n\n"
 },
 
 {
@@ -833,35 +929,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.sexp-Tuple{AbstractArray{S<:AbstractString,N}}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "Method",
-    "text": "Create a StrSxp from an Abstract String Array\n\n\n\n"
-},
-
-{
     "location": "internal.html#RCall.sexp-Tuple{Ptr{RCall.SxpHead}}",
     "page": "Internal",
     "title": "RCall.sexp",
     "category": "Method",
     "text": "Convert a UnknownSxpPtr to an approptiate SxpPtr.\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Type{Int32},Any}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "Method",
-    "text": "sexp(S,x) converts a Julia object x to a pointer to a Sxp object of type S.\n\nsexp(x) performs a default conversion.\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.CharSxp},String}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "Method",
-    "text": "Create a CharSxp from a String.\n\n\n\n"
 },
 
 {
@@ -878,30 +950,6 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.sexp",
     "category": "Method",
     "text": "Wrap a Julia object an a R ExtPtrSxpPtr.\n\nWe store the pointer and the object in a const Dict to prevent it being removed by the Julia GC.\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.StrSxp},AbstractString}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "Method",
-    "text": "Create a StrSxp from an AbstractString\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.StrSxp},Symbol}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "Method",
-    "text": "Create a StrSxp from an Symbol\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.SymSxp},AbstractString}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "Method",
-    "text": "Create a SymSxp from a Symbol\n\n\n\n"
 },
 
 {
@@ -973,7 +1021,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "Macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#34)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#92)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
 },
 
 {
