@@ -5,7 +5,7 @@ using Compat
 using DataFrames
 # using DataTables
 using NullableArrays, CategoricalArrays
-using AxisArrays
+using AxisArrays, NamedArrays
 
 import DataStructures: OrderedDict
 
@@ -31,6 +31,7 @@ include("convert/dataframe.jl")
 include("convert/datatable.jl")
 include("convert/datetime.jl")
 include("convert/axisarray.jl")
+include("convert/namedarray.jl")
 include("convert/default.jl")
 include("eventloop.jl")
 include("eval.jl")

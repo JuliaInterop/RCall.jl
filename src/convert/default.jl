@@ -152,13 +152,14 @@ for typ in [:NullableCategoricalArray, :CategoricalArray]
     @eval sexp(v::$typ) = sexp(IntSxp, v)
 end
 
-# AxisArray
+# AxisArray and NamedArray
 for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
     @eval sexp{T<:$J}(aa::AxisArray{T}) = sexp($S, aa)
+    @eval sexp{T<:$J}(aa::NamedArray{T}) = sexp($S, aa)
 end
 
 # DataTime

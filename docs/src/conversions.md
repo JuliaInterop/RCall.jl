@@ -1,10 +1,11 @@
 # Conversions
 
-RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., `DataFrames`, `DataArrays`, `NullableArrays`, `CategoricalArrays` and `AxisArrays`.
+RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., `DataFrames`, `DataArrays`, `NullableArrays`, `CategoricalArrays` `NamedArrays` and `AxisArrays`.
 
 ```@setup 1
 using RCall
 using DataFrames
+using NamedArrays
 using AxisArrays
 ```
 
@@ -94,11 +95,25 @@ To avoid the sanitization, use `sanitize` option.
 rcopy(R"data.frame(a.b = 1:10)"; sanitize = false)
 ```
 
+## NamedArrays
+
+```@example 1
+# Julia -> R
+aa = NamedArray([1,2,3], [["a", "b", "c"]], [:id])
+r = RObject(aa)
+```
+
+```@example 1
+# R -> Julia
+rcopy(r)
+```
+
+
 ## AxisArrays
 
 ```@example 1
 # Julia -> R
-aa = AxisArray([1,2,3], Axis{:name}(["a", "b", "c"]))
+aa = AxisArray([1,2,3], Axis{:id}(["a", "b", "c"]))
 r = RObject(aa)
 ```
 

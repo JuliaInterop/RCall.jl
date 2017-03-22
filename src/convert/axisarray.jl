@@ -5,7 +5,6 @@ function rcopy{S<:VectorSxp}(::Type{AxisArray}, r::Ptr{S})
     AxisArray(rcopy(Array, r), [Axis{dsym[i]}(rcopy(n)) for (i,n) in enumerate(dnames)]...)
 end
 
-
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
     @eval begin
         function sexp(::Type{$S}, aa::AxisArray)
@@ -13,7 +12,6 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
             try
                 d = OrderedDict(
                     k => v.val for (k, v) in zip(axisnames(aa), axes(aa)))
-                setattrib!(rv, Const.ClassSymbol, "array")
                 setattrib!(rv, Const.DimSymbol, collect(size(aa)))
                 setattrib!(rv, Const.DimNamesSymbol, d)
             finally
