@@ -125,6 +125,7 @@ end
 end
 
 const Rembedded = Ref{Bool}(false)
+const voffset = Ref{UInt}()
 
 
 """

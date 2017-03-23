@@ -36,8 +36,6 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
     end
 end
 
-const voffset = Ref{UInt}()
-
 """
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
 """
