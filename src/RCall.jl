@@ -24,7 +24,7 @@ export RObject,
 
 include("setup.jl")
 include("types.jl")
-include("constants.jl")
+include("Const.jl")
 include("methods.jl")
 include("convert/base.jl")
 include("convert/dataframe.jl")
@@ -40,10 +40,10 @@ include("functions.jl")
 include("callback.jl")
 include("operators.jl")
 include("library.jl")
-include("IJulia.jl")
 include("render.jl")
 include("macros.jl")
 include("repl.jl")
+include("IJuliaHooks.jl")
 include("deprecated.jl")
 
 end # module
