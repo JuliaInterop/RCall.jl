@@ -1,11 +1,10 @@
 """
 RCall.jl's type `Sxp` mirrors the R symbolic expression record `SEXPREC` in R API.
-These are represented by a pointer `SxpPtr` (which is called `SEXP` in R API).
+These are represented by a pointer `Ptr{S<:Sxp}` (which is called `SEXP` in R API).
 """
 @compat abstract type Sxp end # SEXPREC
-@compat SxpPtr{S<:Sxp} = Ptr{S} # SEXP
+# @compat SxpPtr{S<:Sxp} = Ptr{S} # SEXP
 const SxpPtrInfo = UInt32 # sxpinfo_struct
-
 
 "R Sxp header: a pointer to this is used for unknown types."
 immutable SxpHead <: Sxp # SEXPREC_HEADER
@@ -14,7 +13,7 @@ immutable SxpHead <: Sxp # SEXPREC_HEADER
     gc_next::Ptr{SxpHead}
     gc_prev::Ptr{SxpHead}
 end
-const UnknownSxpPtr = Ptr{SxpHead}
+const UnknownSxp = SxpHead
 
 @compat abstract type VectorSxp <: Sxp end
 @compat abstract type VectorAtomicSxp <: VectorSxp end
@@ -28,64 +27,64 @@ const UnknownSxpPtr = Ptr{SxpHead}
 immutable NilSxp <: PairListSxp   # type tag 0
     head::SxpHead
 end
-const NilSxpPtr = Ptr{NilSxp}
+# const Ptr{NilSxp} = Ptr{NilSxp}
 
 "R pairs (cons) list cell"
 immutable ListSxp <: PairListSxp  # type tag 2
     head::SxpHead
-    car::UnknownSxpPtr
-    cdr::UnknownSxpPtr
-    tag::UnknownSxpPtr
+    car::Ptr{UnknownSxp}
+    cdr::Ptr{UnknownSxp}
+    tag::Ptr{UnknownSxp}
 end
-const ListSxpPtr = Ptr{ListSxp}
+# const ListSxpPtr = Ptr{ListSxp}
 
 "R function closure"
 immutable ClosSxp <: FunctionSxp  # type tag 3
     head::SxpHead
-    formals::ListSxpPtr
-    body::UnknownSxpPtr
-    env::UnknownSxpPtr
+    formals::Ptr{ListSxp}
+    body::Ptr{UnknownSxp}
+    env::Ptr{UnknownSxp}
 end
-const ClosSxpPtr = Ptr{ClosSxp}
+# const ClosSxpPtr = Ptr{ClosSxp}
 
 "R environment"
 immutable EnvSxp <: Sxp  # type tag 4
     head::SxpHead
-    frame::UnknownSxpPtr
-    enclos::UnknownSxpPtr
-    hashtab::UnknownSxpPtr
+    frame::Ptr{UnknownSxp}
+    enclos::Ptr{UnknownSxp}
+    hashtab::Ptr{UnknownSxp}
 end
-const EnvSxpPtr = Ptr{EnvSxp}
+# const EnvSxpPtr = Ptr{EnvSxp}
 
 "R promise"
 immutable PromSxp <: Sxp  # type tag 5
     head::SxpHead
-    value::UnknownSxpPtr
-    expr::UnknownSxpPtr
-    env::UnknownSxpPtr
+    value::Ptr{UnknownSxp}
+    expr::Ptr{UnknownSxp}
+    env::Ptr{UnknownSxp}
 end
-const PromSxpPtr = Ptr{PromSxp}
+# const PromSxpPtr = Ptr{PromSxp}
 
 "R function call"
 immutable LangSxp <: PairListSxp  # type tag 6
     head::SxpHead
-    car::UnknownSxpPtr
-    cdr::UnknownSxpPtr
-    tag::UnknownSxpPtr
+    car::Ptr{UnknownSxp}
+    cdr::Ptr{UnknownSxp}
+    tag::Ptr{UnknownSxp}
 end
-const LangSxpPtr = Ptr{LangSxp}
+# const LangSxpPtr = Ptr{LangSxp}
 
 "R special function"
 immutable SpecialSxp <: FunctionSxp  # type tag 7
     head::SxpHead
 end
-const SpecialSxpPtr = Ptr{SpecialSxp}
+# const SpecialSxpPtr = Ptr{SpecialSxp}
 
 "R built-in function"
 immutable BuiltinSxp <: FunctionSxp  # type tag 8
     head::SxpHead
 end
-const BuiltinSxpPtr = Ptr{BuiltinSxp}
+# const BuiltinSxpPtr = Ptr{BuiltinSxp}
 
 "R character string"
 immutable CharSxp <: VectorAtomicSxp     # type tag 9
@@ -93,16 +92,16 @@ immutable CharSxp <: VectorAtomicSxp     # type tag 9
     length::Cint
     truelength::Cint
 end
-const CharSxpPtr = Ptr{CharSxp}
+# const CharSxpPtr = Ptr{CharSxp}
 
 "R symbol"
 immutable SymSxp <: Sxp   # type tag 1
     head::SxpHead
-    name::CharSxpPtr
-    value::UnknownSxpPtr
-    internal::UnknownSxpPtr
+    name::Ptr{CharSxp}
+    value::Ptr{UnknownSxp}
+    internal::Ptr{UnknownSxp}
 end
-const SymSxpPtr = Ptr{SymSxp}
+# const SymSxpPtr = Ptr{SymSxp}
 
 "R logical vector"
 immutable LglSxp <: VectorNumericSxp     # type tag 10
@@ -110,7 +109,7 @@ immutable LglSxp <: VectorNumericSxp     # type tag 10
     length::Cint
     truelength::Cint
 end
-const LglSxpPtr = Ptr{LglSxp}
+# const LglSxpPtr = Ptr{LglSxp}
 
 "R integer vector"
 immutable IntSxp <: VectorNumericSxp     # type tag 13
@@ -118,7 +117,7 @@ immutable IntSxp <: VectorNumericSxp     # type tag 13
     length::Cint
     truelength::Cint
 end
-const IntSxpPtr = Ptr{IntSxp}
+# const IntSxpPtr = Ptr{IntSxp}
 
 "R real vector"
 immutable RealSxp <: VectorNumericSxp    # type tag 14
@@ -126,7 +125,7 @@ immutable RealSxp <: VectorNumericSxp    # type tag 14
     length::Cint
     truelength::Cint
 end
-const RealSxpPtr = Ptr{RealSxp}
+# const RealSxpPtr = Ptr{RealSxp}
 
 "R complex vector"
 immutable CplxSxp <: VectorNumericSxp    # type tag 15
@@ -134,7 +133,7 @@ immutable CplxSxp <: VectorNumericSxp    # type tag 15
     length::Cint
     truelength::Cint
 end
-const CplxSxpPtr = Ptr{CplxSxp}
+# const CplxSxpPtr = Ptr{CplxSxp}
 
 "R vector of character strings"
 immutable StrSxp <: VectorListSxp     # type tag 16
@@ -142,19 +141,19 @@ immutable StrSxp <: VectorListSxp     # type tag 16
     length::Cint
     truelength::Cint
 end
-const StrSxpPtr = Ptr{StrSxp}
+# const PtStrSxpPtr = Ptr{StrSxp}
 
 "R dot-dot-dot object"
 immutable DotSxp <: Sxp     # type tag 17
     head::SxpHead
 end
-const DotSxpPtr = Ptr{DotSxp}
+# const DotSxpPtr = Ptr{DotSxp}
 
 "R \"any\" object"
 immutable AnySxp <: Sxp     # type tag 18
     head::SxpHead
 end
-const AnySxpPtr = Ptr{AnySxp}
+# const AnySxpPtr = Ptr{AnySxp}
 
 "R list (i.e. Array{Any,1})"
 immutable VecSxp <: VectorListSxp     # type tag 19
@@ -162,7 +161,7 @@ immutable VecSxp <: VectorListSxp     # type tag 19
     length::Cint
     truelength::Cint
 end
-const VecSxpPtr = Ptr{VecSxp}
+# const VecSxpPtr = Ptr{VecSxp}
 
 "R expression vector"
 immutable ExprSxp <: VectorListSxp    # type tag 20
@@ -170,28 +169,28 @@ immutable ExprSxp <: VectorListSxp    # type tag 20
     length::Cint
     truelength::Cint
 end
-const ExprSxpPtr = Ptr{ExprSxp}
+# const ExprSxpPtr = Ptr{ExprSxp}
 
 "R byte code"
 immutable BcodeSxp <: Sxp   # type tag 21
     head::SxpHead
 end
-const BcodeSxpPtr = Ptr{BcodeSxp}
+# const BcodeSxpPtr = Ptr{BcodeSxp}
 
 "R external pointer"
 immutable ExtPtrSxp <: Sxp  # type tag 22
     head::SxpHead
     ptr::Ptr{Void}
     prot::Ptr{Void}
-    tag::UnknownSxpPtr
+    tag::Ptr{UnknownSxp}
 end
-const ExtPtrSxpPtr = Ptr{ExtPtrSxp}
+# const ExtPtrSxpPtr = Ptr{ExtPtrSxp}
 
 "R weak reference"
 immutable WeakRefSxp <: Sxp  # type tag 23
     head::SxpHead
 end
-const WeakRefSxpPtr = Ptr{WeakRefSxp}
+# const WeakRefSxpPtr = Ptr{WeakRefSxp}
 
 "R byte vector"
 immutable RawSxp <: VectorAtomicSxp      # type tag 24
@@ -199,21 +198,21 @@ immutable RawSxp <: VectorAtomicSxp      # type tag 24
     length::Cint
     truelength::Cint
 end
-const RawSxpPtr = Ptr{RawSxp}
+# const RawSxpPtr = Ptr{RawSxp}
 
 "R S4 object"
 immutable S4Sxp <: Sxp      # type tag 25
     head::SxpHead
 end
-const S4SxpPtr = Ptr{S4Sxp}
+# const S4SxpPtr = Ptr{S4Sxp}
 
 
-@compat const VectorSxpPtr{S<:VectorSxp} = Ptr{S}
-@compat const VectorAtomicSxpPtr{S<:VectorAtomicSxp} = Ptr{S}
-@compat const VectorNumericSxpPtr{S<:VectorNumericSxp} = Ptr{S}
-@compat const VectorListSxpPtr{S<:VectorListSxp} = Ptr{S}
-@compat const PairListSxpPtr{S<:PairListSxp} = Ptr{S}
-@compat const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
+# @compat const VectorSxpPtr{S<:VectorSxp} = Ptr{S}
+# @compat const VectorAtomicSxpPtr{S<:VectorAtomicSxp} = Ptr{S}
+# @compat const VectorNumericSxpPtr{S<:VectorNumericSxp} = Ptr{S}
+# @compat const VectorPtr{ListSxp}{S<:VectorListSxp} = Ptr{S}
+# @compat const PairPtr{ListSxp}{S<:PairListSxp} = Ptr{S}
+# @compat const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
 
 
 RObjectDocs =
@@ -299,8 +298,8 @@ eltype(::Type{CharSxp}) = UInt8
 eltype(::Type{RawSxp}) = UInt8
 
 eltype(::Type{StrSxp}) = Ptr{CharSxp}
-eltype(::Type{VecSxp}) = UnknownSxpPtr
-eltype(::Type{ExprSxp}) = UnknownSxpPtr
+eltype(::Type{VecSxp}) = Ptr{UnknownSxp}
+eltype(::Type{ExprSxp}) = Ptr{UnknownSxp}
 
 eltype{S<:Sxp}(s::Ptr{S}) = eltype(S)
 eltype{S<:Sxp}(s::RObject{S}) = eltype(S)
@@ -341,7 +340,7 @@ Determined from the trailing 5 bits of the first 32-bit word. Is
 a 0-based index into the `info` field of a `SxpHead`.
 """
 sexpnum(h::SxpHead) = h.info & 0x1f
-sexpnum(p::SxpPtr) = sexpnum(unsafe_load(p))
+sexpnum{S<:Sxp}(p::Ptr{S}) = sexpnum(unsafe_load(p))
 
 "vector of R Sxp types"
 const typs = [NilSxp,SymSxp,ListSxp,ClosSxp,EnvSxp,
@@ -359,15 +358,15 @@ end
 
 
 """
-Convert a `UnknownSxpPtr` to an approptiate `SxpPtr`.
+Convert a `Ptr{UnknownSxp}` to an approptiate `Ptr{S<:Sxp}`.
 """
-function sexp(p::UnknownSxpPtr)
+function sexp(p::Ptr{UnknownSxp})
     typ = sexpnum(p)
     0 ≤ typ ≤ 10 || 13 ≤ typ ≤ 25 || error("Unknown SEXPTYPE $typ")
     styp = typs[typ+1]
     Ptr{styp}(p)
 end
-sexp(s::SxpPtr) = s
+sexp{S<:Sxp}(s::Ptr{S}) = s
 sexp(r::RObject) = r.p
 
 sexp{S<:Sxp}(::Type{S},s::Ptr{S}) = s

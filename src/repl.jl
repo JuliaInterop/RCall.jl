@@ -1,21 +1,24 @@
 import Base: LineEdit, REPL, REPLCompletions
 
-function return_callback(s)
-    status = render(String(LineEdit.buffer(s)))[3]
-    status == 1 || status >= 3
-end
-
-function generate_inline_julia_code(symdict::OrderedDict)
-    blk_ld = Expr(:block)
-    for (rsym, expr) in symdict
-        push!(blk_ld.args,:(env[$rsym] = $(expr)))
-    end
-    quote
-        let env = RCall.reval_p(RCall.rparse_p("`#JL` <- new.env()"))
-            $blk_ld
-            nothing
+"""
+Evaluate inline julia code in R REPL mode.
+"""
+function evaluate_inline_julia_code(symdict::OrderedDict)
+    if length(symdict) > 0
+        blk_ld = Expr(:block)
+        for (rsym, expr) in symdict
+            push!(blk_ld.args,:(env[$rsym] = $(expr)))
         end
+        eval(Main,
+            quote
+                let env = RCall.reval_p(RCall.rparse_p("`#JL` <- new.env()"))
+                    $blk_ld
+                    nothing
+                end
+            end
+        )
     end
+    nothing
 end
 
 function repl_eval(script::String, stdout::IO, stderr::IO)
@@ -27,24 +30,23 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         return nothing
     end
     try
-        if length(symdict) > 0
-            eval(Main, generate_inline_julia_code(symdict))
-        end
+        evaluate_inline_julia_code(symdict)
         expr = protect(sexp(parseVector(sexp(script))[1]))
         for e in expr
             val, status = tryEval(e)
-            flush_print_buffer(stdout)
-            flush_error_buffer(stderr)
-            status != 0 && return nothing
+            console_write_output(stdout)
+            console_write_error(stderr)
+            status != 0 && break
         end
         unprotect(1)
+        status != 0 && return nothing
         # set .Last.value
         set_last_value(val)
         # print if the last expression is visible
         if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
              rprint(stdout, sexp(val))
         end
-        flush_error_buffer(stderr)
+        console_write_error(stderr)
     catch e
         display_error(stderr, e)
     finally
@@ -108,22 +110,6 @@ function bracketed_paste_callback(s, o...)
     LineEdit.refresh_line(s)
 end
 
-function respond(repl, main)
-    (s, buf, ok) -> begin
-        if !ok
-            return REPL.transition(s, :abort)
-        end
-        script = String(take!(buf))
-        if !isempty(strip(script))
-            REPL.reset(repl)
-            repl_eval(script, repl.t.out_stream, repl.t.err_stream)
-        end
-        REPL.prepare_next(repl)
-        REPL.reset_state(s)
-        s.current_mode.sticky || REPL.transition(s, main)
-    end
-end
-
 type RCompletionProvider <: LineEdit.CompletionProvider
     r::REPL.LineEditREPL
 end
@@ -155,14 +141,30 @@ function create_r_repl(repl, main)
     r_mode = LineEdit.Prompt("R> ";
         prompt_prefix=Base.text_colors[:blue],
         prompt_suffix=main.prompt_suffix,
-        on_enter=return_callback,
-        on_done= respond(repl, main),
         sticky=true)
 
     hp = main.hist
     hp.mode_mapping[:r] = r_mode
     r_mode.hist = hp
     r_mode.complete = RCompletionProvider(repl)
+    r_mode.on_enter = (s) -> begin
+        status = render(String(LineEdit.buffer(s)))[3]
+        status == 1 || status >= 3
+    end
+    r_mode.on_done = (s, buf, ok) -> begin
+        if !ok
+            return REPL.transition(s, :abort)
+        end
+        script = String(take!(buf))
+        if !isempty(strip(script))
+            REPL.reset(repl)
+            repl_eval(script, repl.t.out_stream, repl.t.err_stream)
+        end
+        REPL.prepare_next(repl)
+        REPL.reset_state(s)
+        s.current_mode.sticky || REPL.transition(s, main)
+    end
+
     const bracketed_paste_mode_keymap = Dict{Any,Any}(
         "\e[200~" => bracketed_paste_callback
     )

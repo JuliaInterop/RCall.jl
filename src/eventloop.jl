@@ -10,7 +10,7 @@ end
 For example, writing output to STDOUT while running an expensive R command."
 function event_callback()
     # dump printBuffer to STDOUT when available
-    flush_print_buffer(STDOUT)
+    console_write_output(STDOUT)
     nothing
 end
 
@@ -80,4 +80,18 @@ function rgui_init()
     set_hook("persp", f)
     set_hook("grid.newpage", f)
     set_hook(rlang(:packageEvent, "rgl", "onLoad"), f)
+
+    # inject rgui_start(TRUE) to utils::help
+    if rcopy(rcall(:options, "help_type")[1]) == "html"
+        # need to hack both as.environment('package:utils') and  getNamespace("utils")
+        # to make ?foo and help("foo") to work
+        l = rparse("help <- function(...) { foo(); bar(...) }")
+        l[1][3][3][2] = f
+        l[1][3][3][3][1] = reval("utils:::help")
+        for env in (reval("as.environment('package:utils')"), getNamespace("utils"))
+            rcall(:unlockBinding, "help", env)
+            reval(l, env)
+            rcall(:lockBinding, "help", env)
+        end
+    end
 end

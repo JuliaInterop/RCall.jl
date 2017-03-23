@@ -125,6 +125,7 @@ end
 end
 
 const Rembedded = Ref{Bool}(false)
+const voffset = Ref{UInt}()
 
 
 """
@@ -222,8 +223,7 @@ function __init__()
     Const.load()
 
     # set up function callbacks
-    juliaCallback.p = makeNativeSymbolRef(cfunction(julia_extptr_callback,UnknownSxpPtr,(ListSxpPtr,)))
-    juliaDecref[] = cfunction(decref_extptr,Void,(ExtPtrSxpPtr,))
+    setup_callbacks()
 
     if !Rinited
         # print warnings as they arise
@@ -233,9 +233,11 @@ function __init__()
         # R gui eventloop
         isinteractive() && rgui_init()
         # R REPL mode
-        isdefined(Base, :active_repl) && isinteractive() && typeof(Base.active_repl) != Base.REPL.BasicREPL && repl_init(Base.active_repl)
+        isdefined(Base, :active_repl) &&
+            isinteractive() && typeof(Base.active_repl) != Base.REPL.BasicREPL &&
+                repl_init(Base.active_repl)
     end
 
     # # IJulia hooks
-    isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_init()
+    isdefined(Main, :IJulia) && Main.IJulia.inited && IJuliaHooks.ijulia_init()
 end

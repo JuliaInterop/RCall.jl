@@ -1,7 +1,7 @@
 # Date and DateTime
 
-rcopy(::Type{Date}, s::RealSxpPtr) = rcopy(Date, s[1])
-rcopy(::Type{DateTime}, s::RealSxpPtr) = rcopy(DateTime, s[1])
+rcopy(::Type{Date}, s::Ptr{RealSxp}) = rcopy(Date, s[1])
+rcopy(::Type{DateTime}, s::Ptr{RealSxp}) = rcopy(DateTime, s[1])
 
 rcopy(::Type{Date}, x::Float64) = Date(Dates.UTInstant(Dates.Day((isnan(x)? 0: x) + 719163)))
 rcopy(::Type{DateTime}, x::Float64) =

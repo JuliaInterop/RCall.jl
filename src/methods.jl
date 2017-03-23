@@ -5,7 +5,7 @@ symbols. See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
 """
 function bound{S<:Sxp}(s::Ptr{S})
-    u = unsafe_load(convert(UnknownSxpPtr,s))
+    u = unsafe_load(convert(Ptr{UnknownSxp},s))
     (u.info >>> 6) & 0x03
 end
 
@@ -36,8 +36,6 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
     end
 end
 
-const voffset = Ref{UInt}()
-
 """
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
 """
@@ -67,6 +65,14 @@ The same as `unsafe_vec`, except returns an appropriately sized array.
 unsafe_array{S<:VectorSxp}(s::Ptr{S}) =  unsafe_wrap(Array, dataptr(s), size(s))
 unsafe_array{S<:VectorSxp}(r::RObject{S}) = unsafe_array(r.p)
 
+# used in indexing
+start(s::Ptr{NilSxp}) = 0
+next(s::Ptr{NilSxp},state) = (s, state)
+done(s::Ptr{NilSxp},state) = true
+
+start(r::RObject{NilSxp}) = 0
+next(r::RObject{NilSxp},state) = (r, state)
+done(r::RObject{NilSxp},state) = true
 
 
 """
@@ -86,7 +92,7 @@ getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = map(sexp, getindex(un
 String indexing finds the first element with the matching name
 """
 function getindex{S<:VectorSxp}(s::Ptr{S}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             return s[i]
@@ -109,10 +115,10 @@ end
 function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer)
     setindex!(unsafe_vec(s), value, I)
 end
-function setindex!(s::Ptr{StrSxp}, value::CharSxpPtr, key::Integer)
+function setindex!(s::Ptr{StrSxp}, value::Ptr{CharSxp}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_STRING_ELT,libR), Void,
-          (Ptr{StrSxp},Cptrdiff_t, CharSxpPtr),
+          (Ptr{StrSxp},Cptrdiff_t, Ptr{CharSxp}),
           s, key-1, value)
     value
 end
@@ -133,7 +139,7 @@ end
 Set element of a VectorSxp by a label.
 """
 function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             s[i] = value
@@ -160,9 +166,9 @@ done{S<:VectorSxp}(s::RObject{S},state) = done(s.p, state)
 
 # PairListSxps
 
-cdr{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CDR,libR),UnknownSxpPtr,(Ptr{S},),s))
-car{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CAR,libR),UnknownSxpPtr,(Ptr{S},),s))
-tag{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:TAG,libR),UnknownSxpPtr,(Ptr{S},),s))
+cdr{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CDR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
+car{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CAR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
+tag{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:TAG,libR),Ptr{UnknownSxp},(Ptr{S},),s))
 
 function setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
     ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
@@ -192,6 +198,10 @@ function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
 end
 done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == sexp(Const.NilValue)
 
+start{S<:PairListSxp}(s::RObject{S}) = start(s.p)
+next{S<:PairListSxp}(s::RObject{S},state) = next(s.p, state)
+done{S<:PairListSxp}(s::RObject{S},state) = done(s.p, state)
+
 
 "extract the i-th element of a PairListSxp"
 function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
@@ -205,7 +215,7 @@ getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I)
 
 "extract an element from a PairListSxp by label"
 function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             return s[i]
@@ -233,7 +243,7 @@ end
 Set element of a PairListSxp by a label.
 """
 function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
-    ls = unsafe_vec(getnames(s))
+    ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(l) == label
             s[i] = value
@@ -250,7 +260,7 @@ setindex!{S<:PairListSxp}(r::RObject{S}, value, label) = setindex!(sexp(r), valu
 
 "Return a particular attribute of an RObject"
 function getattrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
-    sexp(ccall((:Rf_getAttrib,libR),UnknownSxpPtr,(Ptr{S},Ptr{SymSxp}),s,sym))
+    sexp(ccall((:Rf_getAttrib,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{SymSxp}),s,sym))
 end
 getattrib{S<:Sxp}(s::Ptr{S}, sym::RObject{SymSxp}) = getattrib(s,sexp(sym))
 getattrib{S<:Sxp}(s::Ptr{S}, sym::Symbol) = getattrib(s,sexp(SymSxp,sym))
@@ -346,7 +356,7 @@ naeltype(::Type{RealSxp}) = Const.NaReal
 naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 naeltype(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
-naeltype{S<:Sxp}(::Type{S}) = Const.NaInt
+naeltype{S<:Sxp}(::Type{S}) = sexp(LglSxp,Const.NaInt)
 
 """
 Check if values correspond to R's sentinel NA values.
@@ -355,7 +365,7 @@ isna(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
 isna(x::Float64) = x === Const.NaReal
 isna(x::Int32) = x == Const.NaInt
 isna(a::AbstractArray) = reshape(bitpack([isna(aa) for aa in a]),size(a))
-isna(s::CharSxpPtr) = s === sexp(Const.NaString)
+isna(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
 
 # this doesn't allow us to check VecSxp s
 function isna{S<:VectorSxp}(s::Ptr{S})
@@ -402,10 +412,10 @@ function isascii(s::CharSxp)
         error("Unsupported string type.")
     end
 end
-isascii(s::CharSxpPtr) = isascii(unsafe_load(s))
+isascii(s::Ptr{CharSxp}) = isascii(unsafe_load(s))
 isascii(r::RObject{CharSxp}) = isascii(sexp(r))
 
-function isascii(s::StrSxpPtr)
+function isascii(s::Ptr{StrSxp})
     ind = true
     for c in s
         ind &= isna(c) || isascii(c)
@@ -418,8 +428,8 @@ isascii(r::RObject{StrSxp}) = isascii(sexp(r))
 
 "extract the value of symbol s in the environment e"
 function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
-    v = ccall((:Rf_findVarInFrame,libR),UnknownSxpPtr,(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
-    v == sexp(Const.UnboundValue) && error("$s is not defined in the environment")
+    v = ccall((:Rf_findVarInFrame,libR),Ptr{UnknownSxp},(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
+    v == sexp(Const.UnboundValue) && error("s is not defined in the environment")
     sexp(v)
 end
 getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(SymSxp,s))
@@ -467,11 +477,11 @@ function findNamespace(str::String)
 end
 
 "get namespace by name of the namespace. It is safer to be used than findNamespace as it checks bound."
-getNamespace(str::String) = reval(rlang_p(RCall.Const.BaseNamespace["getNamespace"], str))
+getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"], str))
 
 
 "Set the variable .Last.value to a given value"
 function set_last_value{S<:Sxp}(s::Ptr{S})
-    ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},UnknownSxpPtr),sexp(Const.LastvalueSymbol),s)
+    ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
     nothing
 end
