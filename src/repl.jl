@@ -1,16 +1,24 @@
 import Base: LineEdit, REPL, REPLCompletions
 
-function generate_inline_julia_code(symdict::OrderedDict)
-    blk_ld = Expr(:block)
-    for (rsym, expr) in symdict
-        push!(blk_ld.args,:(env[$rsym] = $(expr)))
-    end
-    quote
-        let env = RCall.reval_p(RCall.rparse_p("`#JL` <- new.env()"))
-            $blk_ld
-            nothing
+"""
+Evaluate inline julia code in R REPL mode.
+"""
+function evaluate_inline_julia_code(symdict::OrderedDict)
+    if length(symdict) > 0
+        blk_ld = Expr(:block)
+        for (rsym, expr) in symdict
+            push!(blk_ld.args,:(env[$rsym] = $(expr)))
         end
+        eval(Main,
+            quote
+                let env = RCall.reval_p(RCall.rparse_p("`#JL` <- new.env()"))
+                    $blk_ld
+                    nothing
+                end
+            end
+        )
     end
+    nothing
 end
 
 function repl_eval(script::String, stdout::IO, stderr::IO)
@@ -22,24 +30,23 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         return nothing
     end
     try
-        if length(symdict) > 0
-            eval(Main, generate_inline_julia_code(symdict))
-        end
+        evaluate_inline_julia_code(symdict)
         expr = protect(sexp(parseVector(sexp(script))[1]))
         for e in expr
             val, status = tryEval(e)
-            flush_print_buffer(stdout)
-            flush_error_buffer(stderr)
-            status != 0 && return nothing
+            console_write_output(stdout)
+            console_write_error(stderr)
+            status != 0 && break
         end
         unprotect(1)
+        status != 0 && return nothing
         # set .Last.value
         set_last_value(val)
         # print if the last expression is visible
         if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
              rprint(stdout, sexp(val))
         end
-        flush_error_buffer(stderr)
+        console_write_error(stderr)
     catch e
         display_error(stderr, e)
     finally

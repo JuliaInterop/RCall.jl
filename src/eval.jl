@@ -18,12 +18,8 @@ try/catch block, returning a Sxp pointer.
 """
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp})
     val, status = tryEval(expr, env)
-    flush_print_buffer(STDOUT)
-    if status !=0
-        error("RCall.jl: ", String(take!(errorBuffer)))
-    elseif nb_available(errorBuffer) != 0
-        warn("RCall.jl: ", String(take!(errorBuffer)))
-    end
+    console_write_output(STDOUT)
+    console_throw_error(status!=0)
     sexp(val)
 end
 
