@@ -357,7 +357,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.Sxp",
     "category": "Type",
-    "text": "RCall.jl's type Sxp mirrors the R symbolic expression record SEXPREC in R API. These are represented by a pointer SxpPtr (which is called SEXP in R API).\n\n\n\n"
+    "text": "RCall.jl's type Sxp mirrors the R symbolic expression record SEXPREC in R API. These are represented by a pointer Ptr{S<:Sxp} (which is called SEXP in R API).\n\n\n\n"
 },
 
 {
@@ -561,14 +561,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rprint-Tuple{IO,String}",
-    "page": "Internal",
-    "title": "RCall.rprint",
-    "category": "Method",
-    "text": "Parse, evaluate and print the result of a string as an R expression.\n\n\n\n"
-},
-
-{
     "location": "internal.html#RCall.setattrib!-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp},Ptr{T<:RCall.Sxp}}",
     "page": "Internal",
     "title": "RCall.setattrib!",
@@ -737,6 +729,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.evaluate_inline_julia_code-Tuple{DataStructures.OrderedDict}",
+    "page": "Internal",
+    "title": "RCall.evaluate_inline_julia_code",
+    "category": "Method",
+    "text": "Evaluate inline julia code in R REPL mode.\n\n\n\n"
+},
+
+{
     "location": "internal.html#RCall.event_callback-Tuple{}",
     "page": "Internal",
     "title": "RCall.event_callback",
@@ -769,22 +769,6 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.ijulia_displayplots-Tuple{}",
-    "page": "Internal",
-    "title": "RCall.ijulia_displayplots",
-    "category": "Method",
-    "text": "Called after cell evaluation. Closes graphics device and displays files in notebook.\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.ijulia_setdevice-Tuple{MIME}",
-    "page": "Internal",
-    "title": "RCall.ijulia_setdevice",
-    "category": "Method",
-    "text": "Set options for R plotting with IJulia.\n\nThe first argument should be a MIME object: currently supported are\n\nMIME(\"image/png\") [default]\nMIME(\"image/svg+xml\")\n\nThe remaining arguments (keyword only) are passed to the appropriate R graphics device: see the relevant R help for details.\n\n\n\n"
-},
-
-{
     "location": "internal.html#RCall.initEmbeddedR-Tuple{}",
     "page": "Internal",
     "title": "RCall.initEmbeddedR",
@@ -797,7 +781,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.julia_extptr_callback",
     "category": "Method",
-    "text": "The function called by R .External for Julia callbacks.\n\nIt receives a ListSxpPtr containing\n\na pointer to the function itself (ExtPtrSxpPtr)\na pointer to the Julia function (ExtPtrSxpPtr)\nany arguments (as SxpPtr)\n\n\n\n"
+    "text": "The function called by R .External for Julia callbacks.\n\nIt receives a Ptr{ListSxp} containing\n\na pointer to the function itself (Ptr{ExtPtrSxp})\na pointer to the Julia function (Ptr{ExtPtrSxp})\nany arguments (as Ptr{S<:Sxp})\n\n\n\n"
 },
 
 {
@@ -805,7 +789,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.makeExternalPtr",
     "category": "Function",
-    "text": "Create an ExtPtrSxpPtr object\n\n\n\n"
+    "text": "Create an Ptr{ExtPtrSxp} object\n\n\n\n"
 },
 
 {
@@ -813,7 +797,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.makeNativeSymbolRef",
     "category": "Method",
-    "text": "Register a function pointer as an R NativeSymbol.\n\nThis is completely undocumented, so may break: we technically are supposed to use R_registerRoutines, but this is _much_ easier for just 1 function.\n\n\n\n"
+    "text": "Register a function pointer as an R NativeSymbol. We technically are supposed to use R_registerRoutines. Starting from R 3.4, R_MakeExternalPtrFn is a part of R API in R 3.4. It is probably safe to such to make the external pointer.\n\n\n\n"
 },
 
 {
@@ -933,7 +917,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.sexp",
     "category": "Method",
-    "text": "Convert a UnknownSxpPtr to an approptiate SxpPtr.\n\n\n\n"
+    "text": "Convert a Ptr{UnknownSxp} to an approptiate Ptr{S<:Sxp}.\n\n\n\n"
 },
 
 {
@@ -949,7 +933,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.sexp",
     "category": "Method",
-    "text": "Wrap a Julia object an a R ExtPtrSxpPtr.\n\nWe store the pointer and the object in a const Dict to prevent it being removed by the Julia GC.\n\n\n\n"
+    "text": "Wrap a Julia object an a R Ptr{ExtPtrSxp}.\n\nWe store the pointer and the object in a const Dict to prevent it being removed by the Julia GC.\n\n\n\n"
 },
 
 {
@@ -1021,7 +1005,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "Macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#92)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#89)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
 },
 
 {
@@ -1085,7 +1069,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.jtypExtPtrs",
     "category": "Constant",
-    "text": "Julia types (typically functions) which are wrapped in ExtPtrSxpPtr are stored here to prevent garbage collection by Julia.\n\n\n\n"
+    "text": "Julia types (typically functions) which are wrapped in Ptr{ExtPtrSxp} are stored here to prevent garbage collection by Julia.\n\n\n\n"
 },
 
 {
