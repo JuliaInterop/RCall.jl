@@ -281,6 +281,8 @@ b = RObject(true)
 @test rcopy(Array{Cint}, b.p) == [1]
 @test rcopy(Vector{Bool}, b.p) == [true]
 @test rcopy(BitVector, b.p) == [true]
+@test isa(convert(Any, R"list(a=1,b=2)"), RObject)
+@test isa(convert(RObject{}, R"list(a=1,b=2)"), RObject)
 
 #RCall.rlang_formula(parse("a+b"))
 @test RCall.rlang_formula(:a) == :a

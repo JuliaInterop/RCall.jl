@@ -1,9 +1,12 @@
 # conversion to Base Julia types
 
-# allow `Int(R"1+1")`
 rcopy{T}(::Type{T},r::RObject; kwargs...) = rcopy(T, r.p; kwargs...)
-convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T, r.p)
+# make sure convert doesn't invoke rcopy in the following situations
+convert{S<:Sxp}(::Type{Any}, r::RObject{S}) = r
+convert{S<:Sxp}(::Type{RObject}, r::RObject{S}) = r
 convert{S<:Sxp}(::Type{RObject{S}}, r::RObject{S}) = r
+# allow `Int(R"1+1")`
+convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T, r.p)
 
 # conversion between numbers which understands different NAs
 function rcopy{T<:Number, R<:Number}(::Type{T}, x::R)

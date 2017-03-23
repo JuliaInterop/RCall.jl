@@ -51,8 +51,8 @@ Called after cell evaluation.
 Closes graphics device and displays files in notebook.
 """
 function ijulia_displayplots()
-    if rcopy(Int,"dev.cur()") != 1
-        rcopy(Int,"dev.off()")
+    if rcopy(Int,rcall(Symbol("dev.cur"))) != 1
+        rcall(Symbol("dev.off"))
         for fn in sort(readdir(ijulia_file_dir))
             ffn = joinpath(ijulia_file_dir,fn)
             ijulia_displayfile(ijulia_mime,ffn)
@@ -63,8 +63,8 @@ end
 
 # cleanup after error
 function ijulia_cleanup()
-    if rcopy(Int,"dev.cur()") != 1
-        rcopy(Int,"dev.off()")
+    if rcopy(Int,rcall(Symbol("dev.cur"))) != 1
+        rcall(Symbol("dev.off"))
     end
     for fn in readdir(ijulia_file_dir)
         ffn = joinpath(ijulia_file_dir,fn)

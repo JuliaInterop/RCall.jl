@@ -5,7 +5,9 @@
 """
 rcopy(r::RObject; kwargs...) = rcopy(r.p; kwargs...)
 
-# Fallback
+# Fallbacks
+# convert Ptr{S} to Any would use the default conversions to allow
+# automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
 rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
 
 # NilSxp
