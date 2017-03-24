@@ -10,7 +10,7 @@ using AxisArrays, NamedArrays
 import DataStructures: OrderedDict
 
 import Base: eltype, show, convert, isascii, isnull,
-    length, size, getindex, setindex!, start, next, done, names
+    length, size, getindex, setindex!, start, next, done, names, showerror
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
@@ -36,13 +36,14 @@ include("convert/default.jl")
 include("eventloop.jl")
 include("eval.jl")
 include("io.jl")
+include("Console.jl")
 include("functions.jl")
 include("callback.jl")
 include("operators.jl")
 include("library.jl")
 include("render.jl")
 include("macros.jl")
-include("repl.jl")
+include("RPrompt.jl")
 include("IJuliaHooks.jl")
 include("deprecated.jl")
 

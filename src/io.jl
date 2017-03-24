@@ -1,6 +1,6 @@
 "Print the value of an Sxp using R's printing mechanism"
 function rprint{S<:Sxp}(io::IO, s::Ptr{S})
-    lock_output()
+    Console.lock_output()
     protect(s)
     # Rf_PrintValue can cause segfault if a S3/S4 object has custom
     # print function as it doesn't use R_tryEval
@@ -19,9 +19,9 @@ function rprint{S<:Sxp}(io::IO, s::Ptr{S})
         tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
     end
     env[:x] = Const.NilValue
-    console_write_output(io, force=true)
+    Console.write_output(io, force=true)
     unprotect(2)
-    unlock_output()
+    Console.unlock_output()
     # ggplot2's plot is displayed after `print` function is invoked,
     # so we have to clear any displayed plots.
     isdefined(Main, :IJulia) && Main.IJulia.inited && IJuliaHooks.ijulia_displayplots()
@@ -35,10 +35,10 @@ function show(io::IO,r::RObject)
     rprint(io,r.p)
     # print error messages or warnings
     # in general, only S3/S4 custom print will fail
-    console_write_error(io)
+    Console.write_error(Console.error_device)
 end
 
-function display_error(io::IO, er)
+function simple_showerror(io::IO, er)
     Base.with_output_color(:red, io) do io
         print(io, "ERROR: ")
         Base.showerror(io, er)
@@ -46,51 +46,10 @@ function display_error(io::IO, er)
     end
 end
 
-let
-    local const output_buffer_ = PipeBuffer()
-    local const error_buffer = PipeBuffer()
-    # mainly use to prevent console_write_output stealing rprint output
-    local output_is_locked = false
-
-    global function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
-        if otype == 0
-            unsafe_write(output_buffer_, buf, buflen)
-        else
-            unsafe_write(error_buffer, buf, buflen)
-        end
-        return nothing
-    end
-
-    global function console_write_output(io::IO; force::Bool=false)
-        # dump output_buffer_'s content when it is not locked
-        if (!output_is_locked || force) && nb_available(output_buffer_) != 0
-            write(io, String(take!(output_buffer_)))
-        end
-        nothing
-    end
-
-    global function console_write_error(io::IO)
-        if nb_available(error_buffer) != 0
-            write(io, String(take!(error_buffer)))
-        end
-        nothing
-    end
-
-    global function console_throw_error(as_error::Bool=true)
-        if nb_available(error_buffer) != 0
-            if as_error
-                error("RCall.jl: ", String(take!(error_buffer)))
-            else
-                warn("RCall.jl: ", String(take!(error_buffer)))
-            end
-        end
-    end
-
-    global function lock_output()
-        output_is_locked = true
-    end
-
-    global function unlock_output()
-        output_is_locked = false
-    end
+type REvalutionError <: Exception
+    msg::AbstractString
+    REvalutionError() = new("")
+    REvalutionError(msg::AbstractString) = new(msg)
 end
+
+Base.showerror(io::IO, e::REvalutionError, bt; backtrace=false) = print(io, e.msg)

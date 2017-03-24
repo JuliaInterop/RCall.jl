@@ -1,4 +1,21 @@
+module RPrompt
+
 import Base: LineEdit, REPL, REPLCompletions
+import DataStructures: OrderedDict
+import ..Console
+import ..REvalutionError
+import ..Const
+import ..RCall:
+    libR,
+    rparse_p,
+    reval_p,
+    rlang_p,
+    rcall_p,
+    rprint,
+    rcopy,
+    render,
+    simple_showerror
+
 
 """
 Evaluate inline julia code in R REPL mode.
@@ -31,24 +48,14 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
     end
     try
         evaluate_inline_julia_code(symdict)
-        expr = protect(sexp(parseVector(sexp(script))[1]))
-        for e in expr
-            val, status = tryEval(e)
-            console_write_output(stdout)
-            console_write_error(stderr)
-            status != 0 && break
-        end
-        unprotect(1)
-        status != 0 && return nothing
-        # set .Last.value
-        set_last_value(val)
+        val = reval_p(rparse_p(script), Const.GlobalEnv.p, stdout, stderr, stderr)
         # print if the last expression is visible
-        if status == 0 && unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
-             rprint(stdout, sexp(val))
+        if unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
+             rprint(stdout, val)
         end
-        console_write_error(stderr)
+        Console.write_error(stderr)
     catch e
-        display_error(stderr, e)
+        isa(e, REvalutionError) || simple_showerror(stderr, e)
     finally
         return nothing
     end
@@ -125,11 +132,11 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     end
 
     # complete r
-    rcall(rlang(Symbol(":::"), :utils, Symbol(".assignLinebuffer")), partial)
-    rcall(rlang(Symbol(":::"), :utils, Symbol(".assignEnd")), length(partial))
-    token = rcopy(rcall(rlang(Symbol(":::"), :utils, Symbol(".guessTokenFromLine"))))
-    rcall(rlang(Symbol(":::"), :utils, Symbol(".completeToken")))
-    ret = rcopy(Array, rcall(rlang(Symbol(":::"), :utils, Symbol(".retrieveCompletions"))))
+    rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".assignLinebuffer")), partial)
+    rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".assignEnd")), length(partial))
+    token = rcopy(rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".guessTokenFromLine"))))
+    rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".completeToken")))
+    ret = rcopy(Array, rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".retrieveCompletions"))))
     if length(ret) > 0
         return ret, token, true
     end
@@ -208,3 +215,5 @@ function repl_init(repl)
     main_mode.keymap_dict = LineEdit.keymap_merge(main_mode.keymap_dict, r_prompt_keymap);
     nothing
 end
+
+end # module

@@ -47,7 +47,7 @@ check_repl_stderr(x) = check_repl(stderr_read, x)
 # waiting for the repl
 send_repl("using RCall")
 
-RCall.repl_init(repl)
+RCall.RPrompt.repl_init(repl)
 
 send_repl("\$", false)
 check_repl_stdout("R> ")

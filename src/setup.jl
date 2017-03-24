@@ -162,7 +162,7 @@ function initEmbeddedR()
         rs.YesNoCancel    = cfunction(ask_yes_no_cancel,Cint,(Ptr{Cchar},))
         rs.Busy           = cglobal((:R_Busy,libR),Void)
         rs.WriteConsole   = C_NULL
-        rs.WriteConsoleEx = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
+        rs.WriteConsoleEx = cfunction(Console.write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
 
         ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
     end
@@ -181,7 +181,7 @@ function initEmbeddedR()
             error("Could not start embedded R session.")
         end
 
-        ptr_write_console_ex = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
+        ptr_write_console_ex = cfunction(Console.write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
         unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), ptr_write_console_ex)
         unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
@@ -235,7 +235,7 @@ function __init__()
         # R REPL mode
         isdefined(Base, :active_repl) &&
             isinteractive() && typeof(Base.active_repl) != Base.REPL.BasicREPL &&
-                repl_init(Base.active_repl)
+                RPrompt.repl_init(Base.active_repl)
     end
 
     # # IJulia hooks
