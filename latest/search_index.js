@@ -881,7 +881,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.reval_p-Tuple{Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp},IO,IO,IO}",
+    "location": "internal.html#RCall.reval_p-Tuple{Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp},Tuple{IO,IO,IO}}",
     "page": "Internal",
     "title": "RCall.reval_p",
     "category": "Method",
@@ -889,7 +889,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.reval_p-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp},IO,IO,IO}",
+    "location": "internal.html#RCall.reval_p-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp},Tuple{IO,IO,IO}}",
     "page": "Internal",
     "title": "RCall.reval_p",
     "category": "Method",
