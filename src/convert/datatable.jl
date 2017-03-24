@@ -33,7 +33,7 @@ function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
 end
 function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
     isFactor(s) || error("s is not an R factor")
-    refs = UInt32[isna(x) ? zero(UInt32) : UInt32(x) for x in s]
+    refs = UInt32[isNA(x) ? zero(UInt32) : UInt32(x) for x in s]
     levels = rcopy(Array, getattrib(s,Const.LevelsSymbol))
     pool = CategoricalPool(levels, isOrdered(s))
     NullableCategoricalArray(refs, pool)

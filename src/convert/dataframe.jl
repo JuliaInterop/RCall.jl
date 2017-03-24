@@ -13,7 +13,7 @@ function rcopy(::Type{DataArray}, s::Ptr{IntSxp})
 end
 function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
     isFactor(s) || error("s is not an R factor")
-    refs = DataArrays.RefArray([isna(x) ? zero(Int32) : x for x in s])
+    refs = DataArrays.RefArray([isNA(x) ? zero(Int32) : x for x in s])
     DataArrays.compact(PooledDataArray(refs,rcopy(getattrib(s,Const.LevelsSymbol))))
 end
 

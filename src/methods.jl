@@ -341,10 +341,10 @@ function allocArray{S<:Sxp}(::Type{S}, dims::Integer...)
 end
 
 
+isnull{S<:Sxp}(s::Ptr{S}) = isNull(s)
 """
 Check if values correspond to R's NULL object.
 """
-isnull{S<:Sxp}(s::Ptr{S}) = isNull(s)
 isnull{S<:Sxp}(r::RObject{S}) = isnull(r.p)
 
 """
@@ -359,37 +359,39 @@ naeltype(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
 naeltype{S<:Sxp}(::Type{S}) = sexp(LglSxp,Const.NaInt)
 
 """
-Check if values correspond to R's sentinel NA values.
+Check if a value corresponds to R's sentinel NA values.
+These function should not be exported.
 """
-isna(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
-isna(x::Float64) = x === Const.NaReal
-isna(x::Int32) = x == Const.NaInt
-isna(a::AbstractArray) = reshape(bitpack([isna(aa) for aa in a]),size(a))
-isna(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
+isNA(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
+isNA(x::Float64) = x === Const.NaReal
+isNA(x::Int32) = x == Const.NaInt
+isNA(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
+isNA{S<:VectorSxp}(s::Ptr{S}) = length(s) == 1 ? isNA(s[1]) : false
+# all other values are consided as non-NA.
+isNA(s::Any) = false
 
-# this doesn't allow us to check VecSxp s
-function isna{S<:VectorSxp}(s::Ptr{S})
-    b = Array{Bool}(size(s)...)
-    for (i,e) in enumerate(s)
-        b[i] = isna(e)
-    end
-    b
-end
-
+isna{S<:VectorSxp}(s::Ptr{S}, i::Integer) = isNA(s[i])
+isna{S<:VectorSxp}(s::Ptr{S}) = reshape(BitArray([isNA(a) for a in s]), size(s))
+"""
+Check if the ith member of s coorespond to R's NA values.
+"""
+isna(r::RObject, i::Integer) = isna(r.p, i)
+"""
+Check if the members of a vector are NA values. Always return a BitArray.
+"""
 isna(r::RObject) = isna(r.p)
 
-
-"""
-Check if there are any NA values in the vector.
-"""
 function anyna{S<:VectorSxp}(s::Ptr{S})
-    for i in s
-        if isna(i)
+    for a in s
+        if isNA(a)
             return true
         end
     end
     return false
 end
+"""
+Check if there are any NA values in the vector.
+"""
 anyna{S<:VectorSxp}(r::RObject{S}) = anyna(r.p)
 
 
@@ -418,7 +420,7 @@ isascii(r::RObject{CharSxp}) = isascii(sexp(r))
 function isascii(s::Ptr{StrSxp})
     ind = true
     for c in s
-        ind &= isna(c) || isascii(c)
+        ind &= isNA(c) || isascii(c)
     end
     return ind
 end

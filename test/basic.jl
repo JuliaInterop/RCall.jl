@@ -37,6 +37,9 @@ y = "foo"
 @test rcopy(rcall(:besselI, 1.0, 2.0)) ≈ besseli(2.0,1.0)
 @test rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) ≈ besselix(2.0,1.0)
 
+@test isna(R"list(a=1, b=NA)") == [false, true]
+@test isna(R"list(a=1, b=NA)", 1) == false
+@test isna(R"list(a=1, b=NA)", 2) == true
 
 # callbacks
 function testfn(x,y;a=3,b=4)

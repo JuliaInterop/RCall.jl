@@ -10,7 +10,7 @@ convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T, r.p)
 
 # conversion between numbers which understands different NAs
 function rcopy{T<:Number, R<:Number}(::Type{T}, x::R)
-    if (R <: AbstractFloat && !isnan(x)) || (R == Int32 && !isna(x))
+    if (R <: AbstractFloat && !isnan(x)) || (R == Int32 && !isNA(x))
         return T(x)
     elseif R == Int32 && T <: AbstractFloat
         return T(NaN)
