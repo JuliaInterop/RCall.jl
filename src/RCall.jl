@@ -12,6 +12,9 @@ import DataStructures: OrderedDict
 import Base: eltype, show, convert, isascii, isnull,
     length, size, getindex, setindex!, start, next, done, names, showerror
 
+# issues/179
+import DataFrames: isna
+
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
    ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
