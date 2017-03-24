@@ -473,15 +473,23 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#DataArrays.isna-Tuple{Complex{Float64}}",
+    "location": "internal.html#DataArrays.isna-Tuple{RCall.RObject,Integer}",
     "page": "Internal",
     "title": "DataArrays.isna",
     "category": "Method",
-    "text": "Check if values correspond to R's sentinel NA values.\n\n\n\n"
+    "text": "Check if the ith member of s coorespond to R's NA values.\n\n\n\n"
 },
 
 {
-    "location": "internal.html#RCall.anyna-Tuple{Ptr{S<:RCall.VectorSxp}}",
+    "location": "internal.html#DataArrays.isna-Tuple{RCall.RObject}",
+    "page": "Internal",
+    "title": "DataArrays.isna",
+    "category": "Method",
+    "text": "Check if the members of a vector are NA values. Always return a BitArray.\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.anyna-Tuple{RCall.RObject{S<:RCall.VectorSxp}}",
     "page": "Internal",
     "title": "RCall.anyna",
     "category": "Method",
@@ -641,7 +649,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#Base.isnull-Tuple{Ptr{S<:RCall.Sxp}}",
+    "location": "internal.html#Base.isnull-Tuple{RCall.RObject{S<:RCall.Sxp}}",
     "page": "Internal",
     "title": "Base.isnull",
     "category": "Method",
@@ -766,6 +774,14 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.initEmbeddedR",
     "category": "Method",
     "text": "initEmbeddedR()\n\nThis initializes an embedded R session. It should only be called when R is not already running (e.g. if Julia is running inside an R session)\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.isNA-Tuple{Complex{Float64}}",
+    "page": "Internal",
+    "title": "RCall.isNA",
+    "category": "Method",
+    "text": "Check if a value corresponds to R's sentinel NA values. These function should not be exported.\n\n\n\n"
 },
 
 {
