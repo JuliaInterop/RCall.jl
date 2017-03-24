@@ -9,8 +9,9 @@ using AxisArrays, NamedArrays
 
 import DataStructures: OrderedDict
 
-import Base: eltype, show, convert, isascii, isnull,
-    length, size, getindex, setindex!, start, next, done, names, showerror
+import Base: eltype, convert, isascii, isnull,
+    names, length, size, getindex, setindex!, start, next, done,
+    show, showerror, write
 
 # issues/179
 import DataFrames: isna

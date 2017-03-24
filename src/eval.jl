@@ -50,8 +50,9 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
-function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}, stdio::IO, warningio::IO, errorio::IO)
+function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}, devices::Tuple{IO,IO,IO})
     val, status = tryEval(expr, env)
+    stdio, warningio, errorio = devices
     Console.write_output(stdio)
     if status != 0
         Console.write_error(errorio)
@@ -64,18 +65,18 @@ function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}, stdio::IO, warningio::I
     sexp(val)
 end
 reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) =
-    reval_p(expr, env, STDOUT, Console.warning_device, Console.error_device)
+    reval_p(expr, env, Console.default_devices)
 
 """
 Evaluate an R expression array iteratively.
 """
-function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}, stdio::IO, warningio::IO, errorio::IO)
+function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}, devices::Tuple{IO,IO,IO})
     local val
     protect(expr)
     protect(env)
     try
         for e in expr
-            val = reval_p(e, env, stdio::IO, warningio::IO, errorio::IO)
+            val = reval_p(e, env, devices)
         end
     finally
         unprotect(2)
@@ -87,7 +88,7 @@ function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}, stdio::IO, warningio::IO,
     val
 end
 reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) =
-    reval_p(expr, env, STDOUT, Console.warning_device, Console.error_device)
+    reval_p(expr, env, Console.default_devices)
 
 """
 Evaluate an R symbol or language object (i.e. a function call) in an R

@@ -41,7 +41,7 @@ end
 function simple_showerror(io::IO, er)
     Base.with_output_color(:red, io) do io
         print(io, "ERROR: ")
-        Base.showerror(io, er)
+        showerror(io, er)
         println(io)
     end
 end
@@ -49,7 +49,17 @@ end
 type REvalutionError <: Exception
     msg::AbstractString
     REvalutionError() = new("")
-    REvalutionError(msg::AbstractString) = new(msg)
+    # R error messages may have trailing "\n"
+    REvalutionError(msg::AbstractString) = new(rstrip(msg))
 end
 
-Base.showerror(io::IO, e::REvalutionError, bt; backtrace=false) = print(io, e.msg)
+showerror(io::IO, e::REvalutionError) = print(io, e.msg)
+showerror(io::IO, e::REvalutionError, bt; backtrace=false) = showerror(io ,e)
+
+
+# used in write_output and write_error
+type WarningIO <: IO end
+type ErrorIO <: IO end
+
+write(io::WarningIO, s::String) = warn("RCall.jl: ", s)
+write(io::ErrorIO, s::String) = throw(REvalutionError("RCall.jl: " * s))

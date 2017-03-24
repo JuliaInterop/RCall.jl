@@ -1,24 +1,21 @@
 module Console
 
-import Base.write
-import ..REvalutionError
+import ..WarningIO, ..ErrorIO
 
-# used in write_output and write_error
-type WarningIO <: IO end
-type ErrorIO <: IO end
-
-const error_device = ErrorIO()
 const warning_device = WarningIO()
+const error_device = ErrorIO()
+
+const default_devices = (STDOUT, warning_device, error_device)
 
 # mainly use to prevent write_output stealing rprint output
 output_is_locked = false
 
-write(io::WarningIO, s::String) = warn("RCall.jl: ", s)
-write(io::ErrorIO, s::String) = throw(REvalutionError("RCall.jl: " * s))
-
 const output_buffer_ = PipeBuffer()
 const error_buffer = PipeBuffer()
 
+"""
+R API callback to write console output.
+"""
 function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     if otype == 0
         unsafe_write(output_buffer_, buf, buflen)

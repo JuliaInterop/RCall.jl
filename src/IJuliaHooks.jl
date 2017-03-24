@@ -1,6 +1,6 @@
 # IJulia hooks for displaying plots with RCall
 module IJuliaHooks
-import ..rcall, ..reval, ..rcopy
+import ..rcall_p, ..reval_p, ..rcopy
 
 # TODO: create a special graphics device. This would allow us to not accidently close devices opened by users, and display plots immediately as they appear.
 
@@ -18,7 +18,7 @@ device: see the relevant R help for details.
 """
 function ijulia_setdevice(m::MIME;kwargs...)
     global ijulia_mime
-    rcall(:options,rcalljl_device=rdevicename(m))
+    rcall_p(:options,rcalljl_device=rdevicename(m))
     ijulia_mime = m
     nothing
 end
@@ -53,7 +53,7 @@ Called after cell evaluation.
 Closes graphics device and displays files in notebook.
 """
 function ijulia_displayplots()
-    if rcopy(Int,rcall(Symbol("dev.cur"))) != 1
+    if rcopy(Int,rcall_p(Symbol("dev.cur"))) != 1
         rcall(Symbol("dev.off"))
         for fn in sort(readdir(ijulia_file_dir))
             ffn = joinpath(ijulia_file_dir,fn)
@@ -65,8 +65,8 @@ end
 
 # cleanup after error
 function ijulia_cleanup()
-    if rcopy(Int,rcall(Symbol("dev.cur"))) != 1
-        rcall(Symbol("dev.off"))
+    if rcopy(Int,rcall_p(Symbol("dev.cur"))) != 1
+        rcall_p(Symbol("dev.off"))
     end
     for fn in readdir(ijulia_file_dir)
         ffn = joinpath(ijulia_file_dir,fn)
@@ -77,9 +77,9 @@ end
 function ijulia_init()
     global const ijulia_file_dir = mktempdir()
     ijulia_file_fmt = joinpath(ijulia_file_dir,"rij_%03d")
-    rcall(:options,rcalljl_filename=ijulia_file_fmt)
+    rcall_p(:options,rcalljl_filename=ijulia_file_fmt)
 
-    reval("options(device = function(filename=getOption('rcalljl_filename'),...) getOption('rcalljl_device')(filename,...))")
+    reval_p("options(device = function(filename=getOption('rcalljl_filename'),...) getOption('rcalljl_device')(filename,...))")
 
     Main.IJulia.push_postexecute_hook(ijulia_displayplots)
     Main.IJulia.push_posterror_hook(ijulia_cleanup)

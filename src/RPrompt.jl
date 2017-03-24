@@ -48,7 +48,7 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
     end
     try
         evaluate_inline_julia_code(symdict)
-        val = reval_p(rparse_p(script), Const.GlobalEnv.p, stdout, stderr, stderr)
+        val = reval_p(rparse_p(script), Const.GlobalEnv.p, (stdout, stderr, stderr))
         # print if the last expression is visible
         if unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
              rprint(stdout, val)
