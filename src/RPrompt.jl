@@ -14,29 +14,9 @@ import ..RCall:
     rprint,
     rcopy,
     render,
+    prepare_inline_julia_code,
     simple_showerror
 
-
-"""
-Evaluate inline julia code in R REPL mode.
-"""
-function evaluate_inline_julia_code(symdict::OrderedDict)
-    if length(symdict) > 0
-        blk_ld = Expr(:block)
-        for (rsym, expr) in symdict
-            push!(blk_ld.args,:(env[$rsym] = $(expr)))
-        end
-        eval(Main,
-            quote
-                let env = RCall.reval_p(RCall.rparse_p("`#JL` <- new.env()"))
-                    $blk_ld
-                    nothing
-                end
-            end
-        )
-    end
-    nothing
-end
 
 function repl_eval(script::String, stdout::IO, stderr::IO)
     local status
@@ -47,7 +27,9 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         return nothing
     end
     try
-        evaluate_inline_julia_code(symdict)
+        if length(symdict) > 0
+            eval(Main, prepare_inline_julia_code(symdict))
+        end
         val = reval_p(rparse_p(script), Const.GlobalEnv.p, (stdout, stderr, stderr))
         # print if the last expression is visible
         if unsafe_load(cglobal((:R_Visible, libR),Int)) == 1

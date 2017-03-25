@@ -63,15 +63,8 @@ macro R_str(script)
     status != 1 && error("RCall.jl: $msg")
 
     if length(symdict) > 0
-        blk_ld = Expr(:block)
-        for (rsym, expr) in symdict
-            push!(blk_ld.args,:(env[$rsym] = $(esc(expr))))
-        end
         return quote
-            let env = reval_p(rparse_p("`#JL` <- new.env()"))
-                $blk_ld
-                nothing
-            end
+            $(prepare_inline_julia_code(symdict, true))
             reval($script, globalEnv)
         end
     else

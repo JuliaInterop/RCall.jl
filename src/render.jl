@@ -93,3 +93,16 @@ function render(script::String)
 
     return script, symdict, status, msg
 end
+
+"""
+Prepare code for evaluating the julia expressions. When the code is execulated,
+the results are stored in the R environment `#JL`.
+"""
+function prepare_inline_julia_code(symdict, escape::Bool=false)
+    new_env = Expr(:(=), :env, Expr(:call, reval_p, Expr(:call, rparse_p, "`#JL` <- new.env()")))
+    blk = Expr(:block)
+    for (rsym, expr) in symdict
+        push!(blk.args, Expr(:(=), Expr(:ref, :env, rsym), escape? esc(expr) : expr))
+    end
+    Expr(:let, blk, new_env)
+end
