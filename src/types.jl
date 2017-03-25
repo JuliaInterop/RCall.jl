@@ -243,7 +243,7 @@ RObject{RealSxp}
 # Compat.jl not yet provide support for the new syntax for inner consturctor
 # https://github.com/JuliaLang/Compat.jl/issues/332
 # and the new syntax cannot be parse in julie v0.5, therefore using string.
-if VERSION < v"0.6.0-"
+if VERSION < v"0.6.0-dev.2643"
     RObjectQuote =
     """
     type RObject{S<:Sxp}
