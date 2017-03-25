@@ -833,6 +833,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.prepare_inline_julia_code",
+    "page": "Internal",
+    "title": "RCall.prepare_inline_julia_code",
+    "category": "Function",
+    "text": "Prepare code for evaluating the julia expressions. When the code is execulated, the results are stored in the R environment #JL.\n\n\n\n"
+},
+
+{
     "location": "internal.html#RCall.preserve-Tuple{Ptr{S<:RCall.Sxp}}",
     "page": "Internal",
     "title": "RCall.preserve",
