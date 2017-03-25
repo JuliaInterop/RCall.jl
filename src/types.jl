@@ -215,9 +215,7 @@ end
 # @compat const FunctionSxpPtr{S<:FunctionSxp} = Ptr{S}
 
 
-RObjectDocs =
 """
-\"\"\"
 An `RObject` is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the `RObject` itself is finalized by Julia. The parameter is the type of the S-expression.
 
 When called with a Julia object as an argument, a corresponding R object is constructed.
@@ -235,54 +233,24 @@ julia> RObject(1.0:3.0)
 RObject{RealSxp}
 [1] 1 2 3
 ```
-
-\"\"\"
-
 """
 
-# Compat.jl not yet provide support for the new syntax for inner consturctor
-# https://github.com/JuliaLang/Compat.jl/issues/332
-# and the new syntax cannot be parse in julie v0.5, therefore using string.
-if VERSION < v"0.6.0-dev.2643"
-    RObjectQuote =
-    """
-    type RObject{S<:Sxp}
-        p::Ptr{S}
-        # used for pre-defined constants
-        function RObject()
-            new(C_NULL)
-        end
-        function RObject(p::Ptr{S})
-            preserve(p)
-            r = new(p)
-            finalizer(r, release)
-            r
-        end
-        # SymSxps are not garbage collected, so preserve not necessary.
-        RObject(p::Ptr{SymSxp}) = new(p)
+type RObject{S<:Sxp}
+    p::Ptr{S}
+    # used for pre-defined constants
+    function (::Type{RObject{S}}){S}()
+        new{S}(C_NULL)
     end
-    """
-else
-    RObjectQuote =
-    """
-    type RObject{S<:Sxp}
-        p::Ptr{S}
-        # used for pre-defined constants
-        function RObject{S}() where S
-            new(C_NULL)
-        end
-        function RObject{S}(p::Ptr{S}) where S
-            preserve(p)
-            r = new(p)
-            finalizer(r, release)
-            r
-        end
-        # SymSxps are not garbage collected, so preserve not necessary.
-        RObject{S}(p::Ptr{SymSxp}) where S = new(p)
+    function (::Type{RObject{S}}){S}(p::Ptr{S})
+        preserve(p)
+        r = new{S}(p)
+        finalizer(r, release)
+        r
     end
-    """
+    # SymSxps are not garbage collected, so preserve not necessary.
+    (::Type{RObject{S}}){S}(p::Ptr{SymSxp}) = new{S}(p)
 end
-eval(parse(RObjectDocs * RObjectQuote))
+
 
 RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
 RObject(x::RObject) = x
