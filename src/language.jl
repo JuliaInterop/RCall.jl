@@ -36,8 +36,4 @@ a Symbol.
 """
 rcall(f,args...;kwargs...) = RObject(rcall_p(f,args...;kwargs...))
 
-
-"""
-Evaluate a FunctionSxp `f` using the conventional syntax `f(args...; kwargs...)`.
-"""
 (f::RObject{S}){S<:FunctionSxp}(args...;kwargs...) = rcall(f,args...;kwargs...)
