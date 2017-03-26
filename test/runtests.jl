@@ -16,8 +16,8 @@ tests = ["basic",
          "convert/datetime",
          "convert/axisarray",
          "convert/namedarray",
-         "library",
          "render",
+         "namespaces",
          "repl",
          ]
 

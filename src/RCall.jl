@@ -23,7 +23,7 @@ export RObject,
    globalEnv,
    isna, anyna,
    rcopy, rparse, rprint, reval, rcall, rlang,
-   @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
+   rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
 
 include("setup.jl")
@@ -44,7 +44,7 @@ include("Console.jl")
 include("functions.jl")
 include("callback.jl")
 include("operators.jl")
-include("library.jl")
+include("namespaces.jl")
 include("render.jl")
 include("macros.jl")
 include("RPrompt.jl")
