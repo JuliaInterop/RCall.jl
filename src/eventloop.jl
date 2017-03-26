@@ -15,13 +15,17 @@ function event_callback()
 end
 
 # there is no use now, maybe useful for the future.
-function interrupts_pending(s::Bool=true)
+function set_interrupts_pending(s::Bool=true)
     if is_windows()
-        unsafe_store!(cglobal((:UserBreak,libR),Cint), s?1:0)
+        unsafe_store!(cglobal((:UserBreak,libR),Cint), Int32(s))
     else
-        unsafe_store!(cglobal((:R_interrupts_pending,libR),Cint), s?1:0)
+        unsafe_store!(cglobal((:R_interrupts_pending,libR),Cint), Int32(s))
     end
     nothing
+end
+
+function try_delivering_interrupt()
+    set_interrupts_pending(true)
 end
 
 # this shouldn't exist if we could hook into Julia eventloop.

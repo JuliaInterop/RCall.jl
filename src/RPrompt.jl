@@ -15,7 +15,8 @@ import ..RCall:
     rcopy,
     render,
     prepare_inline_julia_code,
-    simple_showerror
+    simple_showerror,
+    try_delivering_interrupt
 
 
 function repl_eval(script::String, stdout::IO, stderr::IO)
@@ -163,7 +164,12 @@ function create_r_repl(repl, main)
 
     mk = REPL.mode_keymap(main)
     # ^C should not exit prompt
-    delete!(mk, "^C")
+    # delete!(mk, "^C")
+    mk["^C"] = (s, o...) -> begin
+        println(s.current_mode.prompt)
+        try_delivering_interrupt()
+        main.keymap_dict['\x03'](s, o...)
+    end
 
     b = Dict{Any,Any}[
         bracketed_paste_mode_keymap,
@@ -194,7 +200,7 @@ function repl_init(repl)
         end
     )
 
-    main_mode.keymap_dict = LineEdit.keymap_merge(main_mode.keymap_dict, r_prompt_keymap);
+    main_mode.keymap_dict = LineEdit.keymap_merge(main_mode.keymap_dict, r_prompt_keymap)
     nothing
 end
 

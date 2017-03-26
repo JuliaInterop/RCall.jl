@@ -36,14 +36,13 @@ rparse(st::AbstractString) = RObject(rparse_p(st))
 A pure julia wrapper of R_tryEval.
 """
 function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv))
-    disable_sigint() do
-        status = Ref{Cint}()
-        protect(expr)
-        protect(env)
-        val = ccall((:R_tryEval,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{EnvSxp},Ref{Cint}),expr,env,status)
-        unprotect(2)
-        val, status[]
-    end
+    status = Ref{Cint}()
+    protect(expr)
+    protect(env)
+    set_interrupts_pending(false)
+    val = ccall((:R_tryEval,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{EnvSxp},Ref{Cint}),expr,env,status)
+    unprotect(2)
+    val, status[]
 end
 
 """
