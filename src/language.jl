@@ -22,6 +22,7 @@ end
 "Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaulated"
 rlang(f, args...; kwargs...) = RObject(rlang_p(f,args...; kwargs...))
 
+
 """
 Evaluate a function in the global environment. The first argument corresponds
 to the function to be called. It can be either a FunctionSxp type, a SymSxp or
@@ -30,9 +31,13 @@ rcall_p(f,args...;kwargs...) = reval_p(rlang_p(f,args...;kwargs...))
 
 """
 Evaluate a function in the global environment. The first argument corresponds
-to the function to be called. It can be either a RObject{FunctionSxp} type or
-a Symbol which refers to a function in the R environment.
+to the function to be called. It can be either a FunctionSxp type, a SymSxp or
+a Symbol.
 """
 rcall(f,args...;kwargs...) = RObject(rcall_p(f,args...;kwargs...))
 
-@compat (f::RObject{S}){S<:Union{SymSxp,LangSxp,PromSxp,FunctionSxp}}(args...;kwargs...) = rcall(f,args...;kwargs...)
+
+"""
+Evaluate a FunctionSxp `f` using the conventional syntax `f(args...; kwargs...)`.
+"""
+(f::RObject{S}){S<:FunctionSxp}(args...;kwargs...) = rcall(f,args...;kwargs...)
