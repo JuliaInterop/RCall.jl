@@ -525,7 +525,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.rcall",
     "category": "Method",
-    "text": "Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a RObject{FunctionSxp} type or a Symbol which refers to a function in the R environment.\n\n\n\n"
+    "text": "Evaluate a function in the global environment. The first argument corresponds to the function to be called. It can be either a FunctionSxp type, a SymSxp or a Symbol.\n\n\n\n"
 },
 
 {
@@ -545,6 +545,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.rimport",
+    "page": "Internal",
+    "title": "RCall.rimport",
+    "category": "Function",
+    "text": "Import an R package as a julia module.\n\ngg = rimport(\"ggplot2\")\n\n\n\n"
+},
+
+{
     "location": "internal.html#RCall.rlang-Tuple{Any,Vararg{Any,N}}",
     "page": "Internal",
     "title": "RCall.rlang",
@@ -561,7 +569,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rprint-Tuple{IO,Ptr{S<:RCall.Sxp}}",
+    "location": "internal.html#RCall.rprint-Tuple{Tuple{IO,IO,IO},Ptr{S<:RCall.Sxp}}",
     "page": "Internal",
     "title": "RCall.rprint",
     "category": "Method",
@@ -889,7 +897,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.reval_p-Tuple{Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp},Tuple{IO,IO,IO}}",
+    "location": "internal.html#RCall.reval_p-Tuple{Tuple{IO,IO,IO},Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp}}",
     "page": "Internal",
     "title": "RCall.reval_p",
     "category": "Method",
@@ -897,7 +905,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.reval_p-Tuple{Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp},Tuple{IO,IO,IO}}",
+    "location": "internal.html#RCall.reval_p-Tuple{Tuple{IO,IO,IO},Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp}}",
     "page": "Internal",
     "title": "RCall.reval_p",
     "category": "Method",
@@ -1037,7 +1045,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@rimport",
     "category": "Macro",
-    "text": "Import an R Package as a Julia module. You can also use classic Python syntax to make an alias: @rimport *module-name* as *shorthand*\n\n\n\n"
+    "text": "Import an R Package as a Julia module. For example,\n\n@rimport ggplot2\n\nis equivalent to ggplot2 = rimport(\"ggplot2\") with error checking.\n\nYou can also use classic Python syntax to make an alias: @rimport *package-name* as *shorthand*\n\n@rimport ggplot2 as gg\n\nwhich is equivalent to gg = rimport(\"ggplot2\").\n\n\n\n"
 },
 
 {
@@ -1045,7 +1053,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@rlibrary",
     "category": "Macro",
-    "text": "Load all exported functions/objects of a R package to the current module.\n\n\n\n"
+    "text": "Load all exported functions/objects of an R package to the current module. Almost equivalent to\n\n__temp__ = rimport(\"ggplot2\")\nusing .__temp__\n\n\n\n"
 },
 
 {
