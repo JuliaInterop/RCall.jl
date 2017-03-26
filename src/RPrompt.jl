@@ -30,12 +30,11 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         if length(symdict) > 0
             eval(Main, prepare_inline_julia_code(symdict))
         end
-        val = reval_p(rparse_p(script), Const.GlobalEnv.p, (stdout, stderr, stderr))
+        val = reval_p((stdout, stderr, stderr), rparse_p(script), Const.GlobalEnv.p)
         # print if the last expression is visible
         if unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
-             rprint(stdout, val)
+             rprint((stdout, stderr, stderr), val)
         end
-        Console.write_error(stderr)
     catch e
         isa(e, REvalutionError) || simple_showerror(stderr, e)
     finally
