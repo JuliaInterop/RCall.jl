@@ -1,6 +1,6 @@
 # IJulia hooks for displaying plots with RCall
 module IJuliaHooks
-import ..rcall_p, ..reval_p, ..rcopy
+import ..rcall_p, ..reval_p, ..rparse_p, ..rcopy
 
 # TODO: create a special graphics device. This would allow us to not accidently close devices opened by users, and display plots immediately as they appear.
 
@@ -79,7 +79,7 @@ function ijulia_init()
     ijulia_file_fmt = joinpath(ijulia_file_dir,"rij_%03d")
     rcall_p(:options,rcalljl_filename=ijulia_file_fmt)
 
-    reval_p("options(device = function(filename=getOption('rcalljl_filename'),...) getOption('rcalljl_device')(filename,...))")
+    reval_p(rparse_p("options(device = function(filename=getOption('rcalljl_filename'),...) getOption('rcalljl_device')(filename,...))"))
 
     Main.IJulia.push_postexecute_hook(ijulia_displayplots)
     Main.IJulia.push_posterror_hook(ijulia_cleanup)
