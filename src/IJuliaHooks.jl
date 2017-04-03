@@ -54,7 +54,7 @@ Closes graphics device and displays files in notebook.
 """
 function ijulia_displayplots()
     if rcopy(Int,rcall_p(Symbol("dev.cur"))) != 1
-        rcall(Symbol("dev.off"))
+        rcall_p(Symbol("dev.off"))
         for fn in sort(readdir(ijulia_file_dir))
             ffn = joinpath(ijulia_file_dir,fn)
             ijulia_displayfile(ijulia_mime,ffn)
