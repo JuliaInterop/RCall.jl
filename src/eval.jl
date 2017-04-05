@@ -50,33 +50,28 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
-function reval_p{S<:Sxp}(devices::Tuple{IO,IO,IO}, expr::Ptr{S}, env::Ptr{EnvSxp})
+function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv); stdout::IO=STDOUT, stderr::IO=STDERR)
     val, status = tryEval(expr, env)
-    stdio, warningio, errorio = devices
-    Console.write_output(stdio)
-    if status != 0
-        Console.write_error(errorio)
-        # in repl mode, error buffer is dumped to STDERR, so need to throw an error
-        # to stop the evaluation
-        throw(REvalutionError())
-    else
-        Console.write_error(warningio)
-    end
+    Console.flush_output(stdout)
+    Console.flush_error(stderr, is_warning = status == 0)
+    # in repl mode, error buffer is dumped to STDERR, so need to throw an error
+    # to stop the evaluation
+    status != 0 && throw(REvalutionError())
+
     sexp(val)
 end
-reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) =
-    reval_p(Console.default_devices, expr, env)
 
 """
-Evaluate an R expression array iteratively.
+Evaluate an R expression array iteratively. If `throw_error` is `false`,
+the error message and warning will be thrown to STDERR.
 """
-function reval_p(devices::Tuple{IO,IO,IO}, expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
+function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}; stdout::IO=STDOUT, stderr::IO=STDERR)
     local val
     protect(expr)
     protect(env)
     try
         for e in expr
-            val = reval_p(devices, e, env)
+            val = reval_p(e, env; stdout=stdout, stderr=stderr)
         end
     finally
         unprotect(2)
@@ -87,12 +82,10 @@ function reval_p(devices::Tuple{IO,IO,IO}, expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     end
     val
 end
-reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) =
-    reval_p(Console.default_devices, expr, env)
 
 """
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """
-reval(r::RObject, env=Const.GlobalEnv) = RObject(reval_p(sexp(r), sexp(env)))
-reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv) = RObject(reval_p(rparse_p(str), sexp(env)))
+reval(r::RObject, env=Const.GlobalEnv) = RObject(reval_p(sexp(r), sexp(env), stderr=error_device))
+reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv) = RObject(reval_p(rparse_p(str), sexp(env), stderr=error_device))

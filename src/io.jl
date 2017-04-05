@@ -1,6 +1,5 @@
 "Print the value of an Sxp using R's printing mechanism"
-function rprint{S<:Sxp}(devices::Tuple{IO,IO,IO}, s::Ptr{S})
-    stdio, warningio, errorio = devices
+function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=STDERR)
     protect(s)
     # Rf_PrintValue can cause segfault if a S3/S4 object has custom
     # print function as it doesn't use R_tryEval
@@ -21,12 +20,8 @@ function rprint{S<:Sxp}(devices::Tuple{IO,IO,IO}, s::Ptr{S})
     end
     env[:x] = Const.NilValue
     try
-        if status != 0
-            Console.write_error(errorio)
-        else
-            Console.write_output(stdio, force=true)
-            Console.write_error(warningio)
-        end
+        Console.flush_output(stdout, force=true)
+        Console.flush_error(stderr, is_warning = status == 0)
     finally
         Console.unlock_output()
         unprotect(2)
@@ -36,13 +31,11 @@ function rprint{S<:Sxp}(devices::Tuple{IO,IO,IO}, s::Ptr{S})
     isdefined(Main, :IJulia) && Main.IJulia.inited && IJuliaHooks.ijulia_displayplots()
     nothing
 end
-rprint{S<:Sxp}(io::IO, s::Ptr{S}) = rprint((io, Console.warning_device, Console.error_device), s)
-rprint(io::IO, r::RObject) = rprint(io ,r.p)
-rprint(s) = rprint(STDOUT,s)
+rprint(r::RObject; stdout::IO=STDOUT, stderr::IO=STDERR) = rprint(r.p, stdout=stdout, stderr=stderr)
 
 function show(io::IO,r::RObject)
     println(io, typeof(r))
-    rprint(io, r)
+    rprint(r, stdout=io, stderr=error_device)
 end
 
 function simple_showerror(io::IO, er)
@@ -62,11 +55,3 @@ end
 
 showerror(io::IO, e::REvalutionError) = print(io, e.msg)
 showerror(io::IO, e::REvalutionError, bt; backtrace=false) = showerror(io ,e)
-
-
-# used in write_output and write_error
-type WarningIO <: IO end
-type ErrorIO <: IO end
-
-write(io::WarningIO, s::String) = warn("RCall.jl: ", s)
-write(io::ErrorIO, s::String) = throw(REvalutionError("RCall.jl: " * s))

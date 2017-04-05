@@ -1,13 +1,13 @@
 module Console
 
-import ..WarningIO, ..ErrorIO
+import ..REvalutionError
 
-const warning_device = WarningIO()
-const error_device = ErrorIO()
 
-const default_devices = (STDOUT, warning_device, error_device)
+# used in flush_output and flush_error
+type ErrorIO <: IO end
 
-# mainly use to prevent write_output stealing rprint output
+
+# mainly use to prevent flush_output stealing rprint output
 output_is_locked = false
 
 const output_buffer_ = PipeBuffer()
@@ -25,7 +25,7 @@ function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
-function write_output(io::IO; force::Bool=false)
+function flush_output(io::IO; force::Bool=false)
     # dump output_buffer_'s content when it is not locked
     if (!output_is_locked || force) && nb_available(output_buffer_) != 0
         write(io, String(take!(output_buffer_)))
@@ -33,9 +33,21 @@ function write_output(io::IO; force::Bool=false)
     nothing
 end
 
-function write_error(io::IO)
+function flush_error(io::IO; is_warning::Bool=false)
     if nb_available(error_buffer) != 0
         write(io, String(take!(error_buffer)))
+    end
+    nothing
+end
+
+function flush_error(io::ErrorIO; is_warning::Bool=false)
+    if nb_available(error_buffer) != 0
+        s = String(take!(error_buffer))
+        if is_warning
+            warn("RCall.jl: ", s)
+        else
+            throw(REvalutionError("RCall.jl: " * s))
+        end
     end
     nothing
 end
@@ -51,3 +63,5 @@ function unlock_output()
 end
 
 end # Console
+
+const error_device = Console.ErrorIO()

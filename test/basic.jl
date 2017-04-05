@@ -32,7 +32,7 @@ y = "foo"
 @test isa(y,Vector{String})
 @test y[1] == "foo"
 
-@test sprint(io -> rprint(io,RObject([1,2,3]))) == "[1] 1 2 3\n"
+@test sprint(io -> rprint(RObject([1,2,3]), stdout=io)) == "[1] 1 2 3\n"
 
 @test rcopy(rcall(:besselI, 1.0, 2.0)) ≈ besseli(2.0,1.0)
 @test rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) ≈ besselix(2.0,1.0)
@@ -75,19 +75,19 @@ rcall(Symbol("dev.off"))
 
 # S4 rprint
 @test contains(sprint(io ->
-rprint(io, reval("""
+rprint(reval("""
    setClass("Foo", representation(x = "numeric"))
    foo <- new("Foo", x = 20)
-"""))), "An object of class")
+"""), stdout=io)), "An object of class")
 
 # S3 rprint
 @test contains(sprint(io ->
-rprint(io, reval("""
+rprint(reval("""
    print.Bar <- function(x) print("hello")
    bar <- 1
    class(bar) <- "Bar"
    bar
-"""))), "hello")
+"""), stdout=io)), "hello")
 
 # operators
 a = reval("a=c(1,2,3)")
