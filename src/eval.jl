@@ -53,7 +53,9 @@ try/catch block, returning a Sxp pointer.
 function reval_p{S<:Sxp}(devices::Tuple{IO,IO,IO}, expr::Ptr{S}, env::Ptr{EnvSxp})
     val, status = tryEval(expr, env)
     stdio, warningio, errorio = devices
-    Console.write_output(stdio)
+    # the eventloop will write the output to console, is not needed here,
+    # or a segfault may be thrown, see #182
+    # Console.write_output(stdio)
     if status != 0
         Console.write_error(errorio)
         # in repl mode, error buffer is dumped to STDERR, so need to throw an error
