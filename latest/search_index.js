@@ -569,7 +569,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rprint-Tuple{Tuple{IO,IO,IO},Ptr{S<:RCall.Sxp}}",
+    "location": "internal.html#RCall.rprint-Tuple{Ptr{S<:RCall.Sxp}}",
     "page": "Internal",
     "title": "RCall.rprint",
     "category": "Method",
@@ -897,19 +897,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.reval_p-Tuple{Tuple{IO,IO,IO},Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp}}",
+    "location": "internal.html#RCall.reval_p",
     "page": "Internal",
     "title": "RCall.reval_p",
-    "category": "Method",
-    "text": "Evaluate an R expression array iteratively.\n\n\n\n"
+    "category": "Function",
+    "text": "Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning a Sxp pointer.\n\n\n\n"
 },
 
 {
-    "location": "internal.html#RCall.reval_p-Tuple{Tuple{IO,IO,IO},Ptr{S<:RCall.Sxp},Ptr{RCall.EnvSxp}}",
+    "location": "internal.html#RCall.reval_p-Tuple{Ptr{RCall.ExprSxp},Ptr{RCall.EnvSxp}}",
     "page": "Internal",
     "title": "RCall.reval_p",
     "category": "Method",
-    "text": "Evaluate an R symbol or language object (i.e. a function call) in an R try/catch block, returning a Sxp pointer.\n\n\n\n"
+    "text": "Evaluate an R expression array iteratively. If throw_error is false, the error message and warning will be thrown to STDERR.\n\n\n\n"
 },
 
 {
@@ -1029,7 +1029,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "Macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#88)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#92)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
 },
 
 {
