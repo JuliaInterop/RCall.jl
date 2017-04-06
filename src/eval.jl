@@ -87,5 +87,7 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """
-reval(r::RObject, env=Const.GlobalEnv) = RObject(reval_p(sexp(r), sexp(env), stderr=error_device))
-reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv) = RObject(reval_p(rparse_p(str), sexp(env), stderr=error_device))
+reval(r::RObject, env=Const.GlobalEnv; stdout=STDOUT, stderr=error_device) =
+    RObject(reval_p(sexp(r), sexp(env), stdout=stdout, stderr=stderr))
+reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv; stdout=STDOUT, stderr=error_device) =
+    RObject(reval_p(rparse_p(str), sexp(env), stdout=stdout, stderr=stderr))
