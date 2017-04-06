@@ -33,6 +33,20 @@ y = "foo"
 @test y[1] == "foo"
 
 @test sprint(io -> rprint(RObject([1,2,3]), stdout=io)) == "[1] 1 2 3\n"
+@test contains(sprint(io -> try reval("warning('hello')", stderr=io); end), "hello")
+@test contains(sprint(io -> try reval("stop('hello')", stderr=io); end), "hello")
+let filename = tempname()
+    origin_stderr = STDERR
+    open(filename, "w") do io
+        redirect_stderr(io)
+        reval("warning('hello')")
+    end
+    open(filename, "r") do io
+        @test contains(String(read(io)), "Warning")
+    end
+    redirect_stderr(origin_stderr)
+end
+
 
 @test rcopy(rcall(:besselI, 1.0, 2.0)) ≈ besseli(2.0,1.0)
 @test rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) ≈ besselix(2.0,1.0)
@@ -88,6 +102,22 @@ rprint(reval("""
    class(bar) <- "Bar"
    bar
 """), stdout=io)), "hello")
+
+@test contains(sprint(io ->
+rprint(reval("""
+   print.Bar <- function(x) warning("hello")
+   bar <- 1
+   class(bar) <- "Bar"
+   bar
+"""), stderr=io)), "hello")
+
+@test contains(sprint(io ->
+rprint(reval("""
+   print.Bar <- function(x) stop("hello")
+   bar <- 1
+   class(bar) <- "Bar"
+   bar
+"""), stderr=io)), "hello")
 
 # operators
 a = reval("a=c(1,2,3)")
