@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Getting Started · RCall.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/default.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Ubuntu+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="assets/documenter.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="../versions.js"></script></head><body><nav class="toc"><h1>RCall.jl</h1><form class="search" action="search.html"><select id="version-selector" onChange="window.location.href=this.value"><option value="#" selected="selected" disabled="disabled">Version</option></select><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Introduction</a></li><li><a class="toctext" href="installation.html">Installation</a></li><li class="current"><a class="toctext" href="gettingstarted.html">Getting Started</a><ul class="internal"><li><a class="toctext" href="#Several-Ways-to-use-RCall-1">Several Ways to use RCall</a></li><li><a class="toctext" href="#R-REPL-mode-1">R REPL mode</a></li><li><a class="toctext" href="#@rput-and-@rget-macros-1">@rput and @rget macros</a></li><li><a class="toctext" href="#@R_str-string-macro-1">@R_str string macro</a></li><li><a class="toctext" href="#RCall-API-1">RCall API</a></li></ul></li><li><a class="toctext" href="conversions.html">Conversions</a></li><li><a class="toctext" href="internal.html">Internal</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href="gettingstarted.html">Getting Started</a></li></ul><a class="edit-page" href="https://github.com/JuliaInterop/RCall.jl/tree/ab05d71714c7d90c9103fbe1ae70c057118d8a43/docs/src/gettingstarted.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/></header><h1><a class="nav-anchor" id="Getting-started-1" href="#Getting-started-1">Getting started</a></h1><p>The RCall package is loaded via</p><pre><code class="language-julia">julia&gt; using RCall</code></pre><p>This will initialize the R process in the background.</p><h2><a class="nav-anchor" id="Several-Ways-to-use-RCall-1" href="#Several-Ways-to-use-RCall-1">Several Ways to use RCall</a></h2><p>RCall provides multiple ways to allow R interacting with Julia. </p><ul><li><p>R REPL mode</p></li><li><p><a href="internal.html#RCall.@rput-Tuple{Vararg{Any,N}}"><code>@rput</code></a> and <a href="internal.html#RCall.@rget-Tuple{Vararg{Any,N}}"><code>@rget</code></a> macros</p></li><li><p><code>R&quot;&quot;</code> string macro</p></li><li><p>RCall API: <a href="internal.html#RCall.reval"><code>reval</code></a>, <a href="internal.html#RCall.rcall-Tuple{Any,Vararg{Any,N}}"><code>rcall</code></a> and <a href="internal.html#RCall.rcopy-Tuple{RCall.RObject}"><code>rcopy</code></a> etc.</p></li></ul><h2><a class="nav-anchor" id="R-REPL-mode-1" href="#R-REPL-mode-1">R REPL mode</a></h2><p>The R REPL mode allows real time switching between the Julia prompt and R prompt. Press <code>$</code> to activate the R REPL mode and the R prompt will be shown. (Press <code>backspace</code> to leave R REPL mode in case you did not know.)</p><pre><code class="language-r">julia&gt; foo = 1
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Getting Started · RCall.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.5.0/styles/default.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Ubuntu+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="assets/documenter.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="../versions.js"></script></head><body><nav class="toc"><h1>RCall.jl</h1><form class="search" action="search.html"><select id="version-selector" onChange="window.location.href=this.value"><option value="#" selected="selected" disabled="disabled">Version</option></select><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Introduction</a></li><li><a class="toctext" href="installation.html">Installation</a></li><li class="current"><a class="toctext" href="gettingstarted.html">Getting Started</a><ul class="internal"><li><a class="toctext" href="#Several-Ways-to-use-RCall-1">Several Ways to use RCall</a></li><li><a class="toctext" href="#R-REPL-mode-1">R REPL mode</a></li><li><a class="toctext" href="#@rput-and-@rget-macros-1">@rput and @rget macros</a></li><li><a class="toctext" href="#@R_str-string-macro-1">@R_str string macro</a></li><li><a class="toctext" href="#RCall-API-1">RCall API</a></li></ul></li><li><a class="toctext" href="conversions.html">Conversions</a></li><li><a class="toctext" href="internal.html">Internal</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href="gettingstarted.html">Getting Started</a></li></ul><a class="edit-page" href="https://github.com/JuliaInterop/RCall.jl/tree/8152909226519f204e33b1cd9bff0c135c139212/docs/src/gettingstarted.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/></header><h1><a class="nav-anchor" id="Getting-started-1" href="#Getting-started-1">Getting started</a></h1><p>The RCall package is loaded via</p><pre><code class="language-julia">julia&gt; using RCall</code></pre><p>This will initialize the R process in the background.</p><h2><a class="nav-anchor" id="Several-Ways-to-use-RCall-1" href="#Several-Ways-to-use-RCall-1">Several Ways to use RCall</a></h2><p>RCall provides multiple ways to allow R interacting with Julia. </p><ul><li><p>R REPL mode</p></li><li><p><a href="internal.html#RCall.@rput-Tuple{Vararg{Any,N}}"><code>@rput</code></a> and <a href="internal.html#RCall.@rget-Tuple{Vararg{Any,N}}"><code>@rget</code></a> macros</p></li><li><p><code>R&quot;&quot;</code> string macro</p></li><li><p>RCall API: <a href="internal.html#RCall.reval"><code>reval</code></a>, <a href="internal.html#RCall.rcall-Tuple{Any,Vararg{Any,N}}"><code>rcall</code></a> and <a href="internal.html#RCall.rcopy-Tuple{RCall.RObject}"><code>rcopy</code></a> etc.</p></li></ul><h2><a class="nav-anchor" id="R-REPL-mode-1" href="#R-REPL-mode-1">R REPL mode</a></h2><p>The R REPL mode allows real time switching between the Julia prompt and R prompt. Press <code>$</code> to activate the R REPL mode and the R prompt will be shown. (Press <code>backspace</code> to leave R REPL mode in case you did not know.)</p><pre><code class="language-r">julia&gt; foo = 1
 1
 
 R&gt; x &lt;- $foo
@@ -35,19 +35,19 @@ julia&gt; @rput foo bar
 R&gt; foo + bar
 [1] 6</code></pre><h2><a class="nav-anchor" id="@R_str-string-macro-1" href="#@R_str-string-macro-1">@R_str string macro</a></h2><p>Another way to use RCall is the <a href="internal.html#RCall.@R_str-Tuple{Any}"><code>R&quot;&quot;</code></a> string macro, it is especially useful in script files.</p><pre><code class="language-julia">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  0.61765288 -0.44965723  0.82580135  0.04313019 -0.48656372  0.18507898
- [7]  0.01729597 -1.37756202  1.39449697 -1.06187505</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="internal.html#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia">julia&gt; x = randn(10)
+ [1] -0.62920774  0.26423045 -1.44487831 -0.37031206 -0.44068565  1.76599167
+ [7] -0.04543902 -0.44543734 -0.57627625  0.76848743</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="internal.html#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
- -1.09791
-  0.434162
- -0.414321
-  1.4948
-  1.61079
-  0.126351
- -0.890181
-  1.20689
-  1.87817
- -0.241554
+ -1.08614
+  1.12197
+ -0.456357
+  0.276856
+ -0.303138
+ -0.0537887
+ -0.453901
+ -1.91508
+ -2.22364
+ -1.69917
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
@@ -55,13 +55,13 @@ RCall.RObject{RCall.VecSxp}
 	One Sample t-test
 
 data:  `#JL`$x
-t = 1.1991, df = 9, p-value = 0.2611
+t = -2.047, df = 9, p-value = 0.07096
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.3641061  1.1855443
+ -1.4298835  0.0714076
 sample estimates:
-mean of x
-0.4107191</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
+ mean of x
+-0.6792379</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
 RCall.RObject{RCall.VecSxp}
 $par
 [1] -1.56343
