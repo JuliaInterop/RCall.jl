@@ -45,6 +45,7 @@ let filename = tempname()
         @test contains(String(read(io)), "Warning")
     end
     redirect_stderr(origin_stderr)
+    rm(filename)
 end
 
 
@@ -78,14 +79,16 @@ nullfn() = nothing
 
 # graphics
 RCall.rgui_init()
-f = tempname()
-rcall(:png,f)
-rcall(:plot,1:10)
-rcall(Symbol("dev.off"))
-@test isfile(f)
-@test !RCall.rgui_start(true)
-@test_throws ErrorException RCall.rgui_start()
-@test RCall.rgui_stop()
+let f = tempname()
+  rcall(:png,f)
+  rcall(:plot,1:10)
+  rcall(Symbol("dev.off"))
+  @test isfile(f)
+  rm(f)
+  @test !RCall.rgui_start(true)
+  @test_throws ErrorException RCall.rgui_start()
+  @test RCall.rgui_stop()
+end
 
 # S4 rprint
 @test contains(sprint(io ->
