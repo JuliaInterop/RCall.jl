@@ -77,6 +77,16 @@ r = rcall(:optimize,sin,[0,2],maximum=true)
 nullfn() = nothing
 @test isa(rcall(nullfn), RObject{NilSxp})
 
+# S4 slots
+t1 = R"""
+track <- setClass("track", slots = c(x="numeric", y="numeric"))
+track(x = 1:10, y = 1:10 + rnorm(10))
+"""
+@test rcopy(t1[:x]) == collect(1:10)
+t1[:x] = 2:11
+@test rcopy(t1[:x]) == collect(2:11)
+@test_throws Exception t1[:x] = "a"
+
 # graphics
 RCall.rgui_init()
 let f = tempname()
