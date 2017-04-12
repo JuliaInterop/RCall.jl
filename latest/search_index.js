@@ -617,6 +617,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#Base.getindex-Tuple{Ptr{RCall.S4Sxp},Ptr{RCall.SymSxp}}",
+    "page": "Internal",
+    "title": "Base.getindex",
+    "category": "Method",
+    "text": "extract an element from a S4Sxp by label\n\n\n\n"
+},
+
+{
     "location": "internal.html#Base.getindex-Tuple{Ptr{S<:RCall.PairListSxp},AbstractString}",
     "page": "Internal",
     "title": "Base.getindex",
@@ -686,6 +694,14 @@ var documenterSearchIndex = {"docs": [
     "title": "Base.setindex!",
     "category": "Method",
     "text": "assign value v to symbol s in the environment e\n\n\n\n"
+},
+
+{
+    "location": "internal.html#Base.setindex!-Tuple{Ptr{RCall.S4Sxp},Ptr{T<:RCall.Sxp},Ptr{RCall.SymSxp}}",
+    "page": "Internal",
+    "title": "Base.setindex!",
+    "category": "Method",
+    "text": "extract an element from a S4Sxp by label\n\n\n\n"
 },
 
 {
