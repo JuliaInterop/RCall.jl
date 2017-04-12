@@ -50,7 +50,7 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
-function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv); stdout::IO=STDOUT, stderr::IO=STDERR)
+function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv); stdout::IO=STDOUT, stderr::IO=error_device)
     val, status = tryEval(expr, env)
     Console.flush_output(stdout)
     Console.flush_error(stderr, is_warning = status == 0)
@@ -65,7 +65,7 @@ end
 Evaluate an R expression array iteratively. If `throw_error` is `false`,
 the error message and warning will be thrown to STDERR.
 """
-function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}; stdout::IO=STDOUT, stderr::IO=STDERR)
+function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}; stdout::IO=STDOUT, stderr::IO=error_device)
     local val
     protect(expr)
     protect(env)
