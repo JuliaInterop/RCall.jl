@@ -20,7 +20,7 @@ rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
 # StrSxp
 function rcopy(s::Ptr{StrSxp})
     if anyna(s)
-        rcopy(DataArray,s)
+        rcopy(DataArray{String},s)
     elseif length(s) == 1
         rcopy(String,s)
     else

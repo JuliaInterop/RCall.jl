@@ -258,6 +258,36 @@ setindex!{S<:PairListSxp}(s::Ptr{S}, value, label) = setindex!(s, sexp(value), l
 setindex!{S<:PairListSxp}(r::RObject{S}, value, label) = setindex!(sexp(r), value, label)
 
 
+# S4Sxp
+"extract an element from a S4Sxp by label"
+function getindex(s::Ptr{S4Sxp}, sym::Ptr{SymSxp})
+    if ccall((:R_has_slot, libR), Int, (Ptr{S4Sxp}, Ptr{SymSxp}), s, sym) == 1
+        return sexp(ccall((:R_do_slot, libR), Ptr{UnknownSxp}, (Ptr{S4Sxp}, Ptr{SymSxp}), s, sym))
+    else
+        throw(BoundsError())
+    end
+end
+getindex(s::Ptr{S4Sxp}, sym::RObject{SymSxp}) = getindex(s,sexp(sym))
+getindex(s::Ptr{S4Sxp}, sym::Symbol) = getindex(s,sexp(SymSxp, sym))
+getindex(s::Ptr{S4Sxp}, sym::AbstractString) = getindex(s,sexp(SymSxp, sym))
+getindex(s::RObject{S4Sxp}, sym) = RObject(getindex(s.p,sym))
+
+"extract an element from a S4Sxp by label"
+function setindex!{T<:Sxp}(s::Ptr{S4Sxp}, value::Ptr{T}, sym::Ptr{SymSxp})
+    protect(value)
+    try
+        t = rcall_p(rlang_p(Symbol("::"), "methods", "checkSlotAssignment"), s, rcopy(String, sym), value)
+        sexp(ccall((:R_do_slot_assign, libR), Ptr{UnknownSxp}, (Ptr{S4Sxp}, Ptr{SymSxp}, Ptr{T}), s, sym, t))
+    finally
+        unprotect(1)
+    end
+end
+setindex!(s::Ptr{S4Sxp}, value, sym::RObject{SymSxp}) = setindex!(s, sexp(value), sexp(SymSxp, sym))
+setindex!(s::Ptr{S4Sxp}, value, sym::Symbol) = setindex!(s, sexp(value), sexp(SymSxp, sym))
+setindex!(s::Ptr{S4Sxp}, value, sym::AbstractString) = setindex!(s, sexp(value), sexp(SymSxp, sym))
+setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(s.p, value, sym)
+
+
 "Return a particular attribute of an RObject"
 function getattrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
     sexp(ccall((:Rf_getAttrib,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{SymSxp}),s,sym))

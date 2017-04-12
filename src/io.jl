@@ -1,5 +1,5 @@
 "Print the value of an Sxp using R's printing mechanism"
-function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=STDERR)
+function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device)
     protect(s)
     # Rf_PrintValue can cause segfault if a S3/S4 object has custom
     # print function as it doesn't use R_tryEval
@@ -31,11 +31,11 @@ function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=STDERR)
     isdefined(Main, :IJulia) && Main.IJulia.inited && IJuliaHooks.ijulia_displayplots()
     nothing
 end
-rprint(r::RObject; stdout::IO=STDOUT, stderr::IO=STDERR) = rprint(r.p, stdout=stdout, stderr=stderr)
+rprint(r::RObject; stdout::IO=STDOUT, stderr::IO=error_device) = rprint(r.p, stdout=stdout, stderr=stderr)
 
 function show(io::IO,r::RObject)
     println(io, typeof(r))
-    rprint(r, stdout=io, stderr=error_device)
+    rprint(r, stdout=io)
 end
 
 function simple_showerror(io::IO, er)
