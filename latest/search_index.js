@@ -713,6 +713,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall._eltype-Tuple{Ptr{RCall.RealSxp}}",
+    "page": "Internal",
+    "title": "RCall._eltype",
+    "category": "Method",
+    "text": "It returns the corresponding element type when a RealSxp is converting to a julia object.\n\n\n\n"
+},
+
+{
     "location": "internal.html#RCall.bound-Tuple{Ptr{S<:RCall.Sxp}}",
     "page": "Internal",
     "title": "RCall.bound",
