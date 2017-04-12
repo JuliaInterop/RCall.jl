@@ -74,3 +74,7 @@ v = PooledDataArray(repeat(["a", "b"], inner = 5), repeat([true, false], outer =
 
 #RCall.rlang_formula(parse("a+b"))
 @test RCall.rlang_formula(:a) == :a
+
+# issue #186
+df = R"""data.frame(dates = as.Date(c("2017-04-14", "2014-04-17")))"""
+@test eltype(rcopy(df)[:dates]) == Date

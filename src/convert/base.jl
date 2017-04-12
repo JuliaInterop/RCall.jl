@@ -76,8 +76,6 @@ for (J,S) in ((:Integer,:IntSxp),
             copy!(a,unsafe_vec(s))
             a
         end
-        rcopy(::Type{Vector},s::Ptr{$S}) = rcopy(Vector{eltype($S)},s)
-        rcopy(::Type{Array},s::Ptr{$S}) = rcopy(Array{eltype($S)},s)
     end
 end
 
@@ -119,8 +117,6 @@ function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
     end
     a
 end
-rcopy(::Type{Array},s::Ptr{LglSxp}) = rcopy(Array{Bool},s)
-rcopy(::Type{Vector},s::Ptr{LglSxp}) = rcopy(Vector{Bool},s)
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a = BitArray(size(s)...)
     v = unsafe_vec(s)
@@ -131,8 +127,6 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
 end
 
 # StrSxp
-rcopy(::Type{Vector}, s::Ptr{StrSxp}) = rcopy(Vector{String}, s)
-rcopy(::Type{Array}, s::Ptr{StrSxp}) = rcopy(Array{String}, s)
 rcopy(::Type{Symbol}, s::Ptr{StrSxp}) = rcopy(Symbol,s[1])
 rcopy{T<:AbstractString}(::Type{T},s::Ptr{StrSxp}) = rcopy(T,s[1])
 

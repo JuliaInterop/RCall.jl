@@ -29,6 +29,21 @@ function rcopy(s::Ptr{StrSxp})
 end
 
 # IntSxp, RealSxp, CplxSxp, LglSxp
+"""
+It returns the corresponding element type when a RealSxp is converting to a julia object.
+"""
+function _eltype(s::Ptr{RealSxp})
+    classes = rcopy(Vector, getclass(s))
+    if "Date" in classes
+        T = Date::DataType
+    elseif "POSIXct" in classes && "POSIXt" in classes
+        T = DateTime::DataType
+    else
+        T = Float64::DataType
+    end
+    return T
+end
+
 function rcopy(s::Ptr{IntSxp})
     if isFactor(s)
         rcopy(PooledDataArray,s)
@@ -40,15 +55,9 @@ function rcopy(s::Ptr{IntSxp})
         rcopy(Array,s)
     end
 end
+
 function rcopy(s::Ptr{RealSxp})
-    classes = rcopy(Vector, getclass(s))
-    if "Date" in classes
-        T = Date
-    elseif "POSIXct" in classes && "POSIXt" in classes
-        T = DateTime
-    else
-        T = Float64
-    end
+    T = _eltype(s)
     if anyna(s)
         rcopy(DataArray{T},s)
     elseif length(s) == 1
@@ -75,6 +84,24 @@ function rcopy(s::Ptr{LglSxp})
         rcopy(BitArray,s)
     end
 end
+
+# Default behaviors of copying R vectors to arrays
+rcopy(::Type{Vector},s::Ptr{IntSxp}) = rcopy(Vector{Cint},s)
+rcopy(::Type{Array},s::Ptr{IntSxp}) = rcopy(Array{Cint},s)
+function rcopy(::Type{Vector},s::Ptr{RealSxp})
+    T = _eltype(s)
+    rcopy(Vector{T},s)
+end
+function rcopy(::Type{Array},s::Ptr{RealSxp})
+    T = _eltype(s)
+    rcopy(Array{T},s)
+end
+rcopy(::Type{Vector},s::Ptr{CplxSxp}) = rcopy(Vector{Complex128},s)
+rcopy(::Type{Array},s::Ptr{CplxSxp}) = rcopy(Array{Complex128},s)
+rcopy(::Type{Array},s::Ptr{LglSxp}) = rcopy(Array{Bool},s)
+rcopy(::Type{Vector},s::Ptr{LglSxp}) = rcopy(Vector{Bool},s)
+rcopy(::Type{Vector}, s::Ptr{StrSxp}) = rcopy(Vector{String}, s)
+rcopy(::Type{Array}, s::Ptr{StrSxp}) = rcopy(Array{String}, s)
 
 # VecSxp
 function rcopy(s::Ptr{VecSxp}; kwargs...)
