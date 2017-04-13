@@ -480,9 +480,9 @@ getindex(e::RObject{EnvSxp},s) = RObject(getindex(sexp(e),s))
 
 "assign value v to symbol s in the environment e"
 function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{StrSxp})
-    # defineVar(s, v, e)
-    # Rf_defineVar is unsafe to use if the binding is locked.
-    # base::assign is a safer alternative.
+    # `Rf_defineVar` is unsafe to use if the binding is locked.
+    # However, `setVarInFrame` is not exported. `base::assign` is
+    # an avaliable alternative.
     rcall_p(Const.BaseNamespace["assign"], s, v, envir = e)
 end
 function setindex!(e::Ptr{EnvSxp},v,s)
