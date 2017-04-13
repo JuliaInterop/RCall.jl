@@ -458,30 +458,39 @@ isascii(r::RObject{StrSxp}) = isascii(sexp(r))
 
 # EnvSxp
 
+function findVarInFrame(e::Ptr{EnvSxp}, s::Ptr{SymSxp})
+    ccall((:Rf_findVarInFrame,libR),Ptr{UnknownSxp},(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
+end
+findVarInFrame(e, s) = findVarInFrame(sexp(e), sexp(SymSxp, s))
+
+function defineVar{S<:Sxp}(s::Ptr{SymSxp}, v::Ptr{S}, e::Ptr{EnvSxp})
+    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
+    nothing
+end
+defineVar(s, v, p) = defineVar(sexp(SymSxp, s), sexp(v), sexp(p))
+
 "extract the value of symbol s in the environment e"
 function getindex(e::Ptr{EnvSxp},s::Ptr{SymSxp})
-    v = ccall((:Rf_findVarInFrame,libR),Ptr{UnknownSxp},(Ptr{EnvSxp},Ptr{SymSxp}),e,s)
-    v == sexp(Const.UnboundValue) && error("s is not defined in the environment")
+    v = findVarInFrame(e, s)
+    v == sexp(Const.UnboundValue) && throw(BoundsError())
     sexp(v)
 end
 getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(SymSxp,s))
 getindex(e::RObject{EnvSxp},s) = RObject(getindex(sexp(e),s))
 
-
 "assign value v to symbol s in the environment e"
-function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{SymSxp})
-    # This should be done more carefully.  First check for the symbol in the
-    # frame.  If it is defined call Rf_setVar, otherwise call Rf_defineVar.
-    # As it stands this segfaults if the symbol is bound in, say, the base
-    # environment.
-    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
+function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{StrSxp})
+    # defineVar(s, v, e)
+    # Rf_defineVar is unsafe to use if the binding is locked.
+    # base::assign is a safer alternative.
+    rcall_p(Const.BaseNamespace["assign"], s, v, envir = e)
 end
 function setindex!(e::Ptr{EnvSxp},v,s)
     nprotect = 0
     try
         sv = protect(sexp(v))
         nprotect += 1
-        ss = protect(sexp(SymSxp,s))
+        ss = protect(sexp(StrSxp,s))
         nprotect += 1
         setindex!(e,sv,ss)
     finally

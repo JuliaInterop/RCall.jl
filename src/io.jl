@@ -5,7 +5,7 @@ function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device)
     # print function as it doesn't use R_tryEval
     # below mirrors Rf_PrintValue
     env = protect(newEnvironment(Const.GlobalEnv))
-    env[:x] = s
+    defineVar(:x, s, env)
     Console.lock_output()
     if isObject(s) || isFunction(s)
         if isS4(s)
@@ -18,7 +18,7 @@ function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device)
         # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
         _, status = tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
     end
-    env[:x] = Const.NilValue
+    defineVar(:x, Const.NilValue, env)
     try
         Console.flush_output(stdout, force=true)
         Console.flush_error(stderr, is_warning = status == 0)
