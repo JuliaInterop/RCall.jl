@@ -276,7 +276,7 @@ getindex(s::RObject{S4Sxp}, sym) = RObject(getindex(s.p,sym))
 function setindex!{T<:Sxp}(s::Ptr{S4Sxp}, value::Ptr{T}, sym::Ptr{SymSxp})
     protect(value)
     try
-        t = rcall_p(rlang_p(Symbol("::"), "methods", "checkSlotAssignment"), s, rcopy(String, sym), value)
+        t = rcall_p(findNamespace("methods")[:checkSlotAssignment], s, rcopy(String, sym), value)
         sexp(ccall((:R_do_slot_assign, libR), Ptr{UnknownSxp}, (Ptr{S4Sxp}, Ptr{SymSxp}, Ptr{T}), s, sym, t))
     finally
         unprotect(1)
