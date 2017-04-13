@@ -148,13 +148,10 @@ function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Abstra
     end
     throw(BoundsError())
 end
-setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Symbol) = setindex!(s, value, string(label))
-setindex!{S<:VectorSxp}(s::Ptr{S}, value, label) = setindex!(s, sexp(value), label)
-
+setindex!{S<:VectorSxp}(s::Ptr{S}, value, label::Symbol) = setindex!(s, value, string(label))
+# for RObjects
+setindex!{S<:VectorSxp}(s::Ptr{S}, value, key) = setindex!(s, sexp(value), key)
 setindex!{S<:VectorSxp}(r::RObject{S}, value, keys...) = setindex!(sexp(r), value, keys...)
-
-
-
 
 start{S<:VectorSxp}(s::Ptr{S}) = 0
 next{S<:VectorSxp}(s::Ptr{S},state) = (state += 1;(s[state],state))
@@ -163,6 +160,7 @@ done{S<:VectorSxp}(s::Ptr{S},state) = state ≥ length(s)
 start{S<:VectorSxp}(s::RObject{S}) = start(s.p)
 next{S<:VectorSxp}(s::RObject{S},state) = next(s.p, state)
 done{S<:VectorSxp}(s::RObject{S},state) = done(s.p, state)
+
 
 # PairListSxps
 
@@ -188,8 +186,6 @@ function setcdr!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
 end
 setcdr!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::RObject{T}) = setcdr!(s,sexp(c))
 
-
-
 start{S<:PairListSxp}(s::Ptr{S}) = s
 function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
     t = tag(state)
@@ -201,7 +197,6 @@ done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == sexp(Con
 start{S<:PairListSxp}(s::RObject{S}) = start(s.p)
 next{S<:PairListSxp}(s::RObject{S},state) = next(s.p, state)
 done{S<:PairListSxp}(s::RObject{S},state) = done(s.p, state)
-
 
 "extract the i-th element of a PairListSxp"
 function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
@@ -225,7 +220,6 @@ function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
 end
 getindex{S<:PairListSxp}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
 getindex{S<:PairListSxp}(s::RObject{S}, label) = RObject(getindex(s.p,label))
-
 
 "assign value v to the i-th element of a PairListSxp"
 function setindex!{S<:PairListSxp,T<:Sxp}(l::Ptr{S},v::Ptr{T},I::Integer)
@@ -252,10 +246,10 @@ function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Abst
     end
     throw(BoundsError())
 end
-setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Symbol) = setindex!(s, value, string(label))
-setindex!{S<:PairListSxp}(s::Ptr{S}, value, label) = setindex!(s, sexp(value), label)
-
-setindex!{S<:PairListSxp}(r::RObject{S}, value, label) = setindex!(sexp(r), value, label)
+setindex!{S<:PairListSxp}(s::Ptr{S}, value, label::Symbol) = setindex!(s, value, string(label))
+# for RObjects
+setindex!{S<:PairListSxp}(s::Ptr{S}, value, key) = setindex!(s, sexp(value), key)
+setindex!{S<:PairListSxp}(r::RObject{S}, value, key) = setindex!(r.p, value, key)
 
 
 # S4Sxp
@@ -267,9 +261,7 @@ function getindex(s::Ptr{S4Sxp}, sym::Ptr{SymSxp})
         throw(BoundsError())
     end
 end
-getindex(s::Ptr{S4Sxp}, sym::RObject{SymSxp}) = getindex(s,sexp(sym))
-getindex(s::Ptr{S4Sxp}, sym::Symbol) = getindex(s,sexp(SymSxp, sym))
-getindex(s::Ptr{S4Sxp}, sym::AbstractString) = getindex(s,sexp(SymSxp, sym))
+getindex(s::Ptr{S4Sxp}, sym) = getindex(s,sexp(SymSxp, sym))
 getindex(s::RObject{S4Sxp}, sym) = RObject(getindex(s.p,sym))
 
 "extract an element from a S4Sxp by label"
@@ -282,9 +274,7 @@ function setindex!{T<:Sxp}(s::Ptr{S4Sxp}, value::Ptr{T}, sym::Ptr{SymSxp})
         unprotect(1)
     end
 end
-setindex!(s::Ptr{S4Sxp}, value, sym::RObject{SymSxp}) = setindex!(s, sexp(value), sexp(SymSxp, sym))
-setindex!(s::Ptr{S4Sxp}, value, sym::Symbol) = setindex!(s, sexp(value), sexp(SymSxp, sym))
-setindex!(s::Ptr{S4Sxp}, value, sym::AbstractString) = setindex!(s, sexp(value), sexp(SymSxp, sym))
+setindex!(s::Ptr{S4Sxp}, value, sym) = setindex!(s, sexp(value), sexp(SymSxp, sym))
 setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(s.p, value, sym)
 
 
@@ -292,10 +282,7 @@ setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(s.p, value, sym)
 function getattrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
     sexp(ccall((:Rf_getAttrib,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{SymSxp}),s,sym))
 end
-getattrib{S<:Sxp}(s::Ptr{S}, sym::RObject{SymSxp}) = getattrib(s,sexp(sym))
-getattrib{S<:Sxp}(s::Ptr{S}, sym::Symbol) = getattrib(s,sexp(SymSxp,sym))
-getattrib{S<:Sxp}(s::Ptr{S}, sym::AbstractString) = getattrib(s,sexp(SymSxp,sym))
-
+getattrib{S<:Sxp}(s::Ptr{S}, sym) = getattrib(s,sexp(SymSxp,sym))
 getattrib(r::RObject, sym) = RObject(getattrib(r.p,sym))
 
 "Set a particular attribute of an RObject"
@@ -303,11 +290,7 @@ function setattrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T})
     ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
 end
-setattrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::RObject{SymSxp},t::Ptr{T}) = setattrib!(s,sexp(sym),t)
-setattrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Symbol,t::Ptr{T}) = setattrib!(s,sexp(SymSxp,sym),t)
-setattrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::AbstractString,t::Ptr{T}) = setattrib!(s,sexp(SymSxp,sym),t)
-setattrib!{S<:Sxp}(s::Ptr{S},sym,t) = setattrib!(s,sym,sexp(t))
-
+setattrib!{S<:Sxp}(s::Ptr{S}, sym, t) = setattrib!(s, sexp(SymSxp,sym), sexp(t))
 setattrib!(r::RObject, sym, t) = setattrib!(r.p, sym, t)
 
 attributes(s::SxpHead) = sexp(s.attrib)
