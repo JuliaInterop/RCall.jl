@@ -689,7 +689,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#Base.setindex!-Tuple{Ptr{RCall.EnvSxp},Ptr{S<:RCall.Sxp},Ptr{RCall.SymSxp}}",
+    "location": "internal.html#Base.setindex!-Tuple{Ptr{RCall.EnvSxp},Ptr{S<:RCall.Sxp},Ptr{RCall.StrSxp}}",
     "page": "Internal",
     "title": "Base.setindex!",
     "category": "Method",
