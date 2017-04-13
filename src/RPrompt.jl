@@ -9,7 +9,7 @@ import ..RCall:
     libR,
     rparse_p,
     reval_p,
-    rlang_p,
+    findNamespace,
     rcall_p,
     rprint,
     rcopy,
@@ -113,11 +113,12 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     end
 
     # complete r
-    rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".assignLinebuffer")), partial)
-    rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".assignEnd")), length(partial))
-    token = rcopy(rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".guessTokenFromLine"))))
-    rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".completeToken")))
-    ret = rcopy(Array, rcall_p(rlang_p(Symbol(":::"), :utils, Symbol(".retrieveCompletions"))))
+    utils = findNamespace("utils")
+    rcall_p(utils[".assignLinebuffer"], partial)
+    rcall_p(utils[".assignEnd"], length(partial))
+    token = rcopy(rcall_p(utils[".guessTokenFromLine"]))
+    rcall_p(utils[".completeToken"])
+    ret = rcopy(Array, rcall_p(utils[".retrieveCompletions"]))
     if length(ret) > 0
         return ret, token, true
     end
