@@ -14,7 +14,7 @@ end
 function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
     isFactor(s) || error("s is not an R factor")
     refs = DataArrays.RefArray([isNA(x) ? zero(Int32) : x for x in s])
-    DataArrays.compact(PooledDataArray(refs,rcopy(getattrib(s,Const.LevelsSymbol))))
+    DataArrays.compact(PooledDataArray(refs, rcopy(Array, getattrib(s,Const.LevelsSymbol))))
 end
 
 function rcopy{T<:AbstractDataFrame}(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true)
