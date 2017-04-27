@@ -146,3 +146,4 @@ iris = rcopy(reval(:iris))
 model =  R"lm(Sepal_Length ~ Sepal_Width,data=$iris)"
 @test rcopy(RCall.getclass(model)) == "lm"
 @test isapprox(rcopy(R"sum($iris$Sepal_Length)"), sum(iris[:Sepal_Length]), rtol=4*eps())
+@test rcopy(R"factor(rep(1,10))") == fill("1",10)
