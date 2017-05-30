@@ -4,7 +4,13 @@ os:
   - osx
 julia:
   - 0.5
+  - 0.6
   - nightly
+
+matrix:
+  allow_failures:
+    - julia: nightly
+
 notifications:
   email: false
 
@@ -18,7 +24,7 @@ before_install:
   # osx
   # faster than using homebrew/science tap
   # but no permalink to release download
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget https://cran.rstudio.com/bin/macosx/ -r --level=1 --accept-regex "R-[0-9.]*.pkg" -nd; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget "https://cran.rstudio.com/bin/macosx/$(wget -qO- https://cran.rstudio.com/bin/macosx/ | sed -n 's/.*href="\(R-[^"]*.pkg\)".*/\1/p' | head -n 1)"; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo installer -pkg R-*.pkg -target /; fi
 
 script:
