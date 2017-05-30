@@ -117,9 +117,10 @@ end
 # FunctionSxp
 rcopy{S<:FunctionSxp}(s::Ptr{S}) = rcopy(Function,s)
 
-# TODO
-# rcopy(l::Ptr{LangSxp}) = l
-# rcopy(r::RObject{LangSxp}) = r
+# TODO: LangSxp
+rcopy(l::Ptr{LangSxp}) = RObject(l)
+rcopy(r::RObject{LangSxp}) = r
+
 
 # logic of default sexp
 

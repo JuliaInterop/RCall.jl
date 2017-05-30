@@ -148,3 +148,11 @@ model =  R"lm(Sepal_Length ~ Sepal_Width,data=$iris)"
 @test isapprox(rcopy(R"sum($iris$Sepal_Length)"), sum(iris[:Sepal_Length]), rtol=4*eps())
 @test rcopy(R"factor(rep(1,10))") == fill("1",10)
 @test rcopy(R"data.frame(a=rep('test',10), stringsAsFactors = TRUE)")[:a] == fill("test",10)
+
+
+R"""
+data(iris)
+model <- lm(Sepal.Width ~ Petal.Length, iris)
+"""
+model = rcopy(R"model")
+@test typeof(model[:call]) <: RObject
