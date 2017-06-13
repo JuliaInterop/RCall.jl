@@ -9,29 +9,29 @@ rcopy(::Type{Date}, x::Float64) = Date(Dates.UTInstant(Dates.Day((isnan(x)? 0: x
 rcopy(::Type{DateTime}, x::Float64) =
     DateTime(Dates.UTInstant(Dates.Millisecond(((isnan(x)? 0: x) + 62135683200) * 1000)))
 
-# implicity Array conversion `rcopy(Array, d)`.
+# implicit conversion `rcopy(d)`.
+function rcopytype(::Type{RClass{:Date}}, s::Ptr{RealSxp})
+    if anyna(s)
+        return DataArray{Date}
+    elseif length(s) == 1
+        return Date
+    else
+        return Array{Date}
+    end
+end
+function rcopytype(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp})
+    if anyna(s)
+        return DataArray{DateTime}
+    elseif length(s) == 1
+        return DateTime
+    else
+        return Array{DateTime}
+    end
+end
+
+# implicit Array conversion `rcopy(Array, d)`.
 eltype(::Type{RClass{:Date}}, s::Ptr{RealSxp}) = Date
 eltype(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp}) = DateTime
-
-# implicity conversion `rcopy(d)`.
-function rcopy(::Type{RClass{:Date}}, s::Ptr{RealSxp})
-    if anyna(s)
-        rcopy(DataArray{Date},s)
-    elseif length(s) == 1
-        rcopy(Date,s)
-    else
-        rcopy(Array{Date},s)
-    end
-end
-function rcopy(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp})
-    if anyna(s)
-        rcopy(DataArray{DateTime},s)
-    elseif length(s) == 1
-        rcopy(DateTime,s)
-    else
-        rcopy(Array{DateTime},s)
-    end
-end
 
 # Julia -> R
 

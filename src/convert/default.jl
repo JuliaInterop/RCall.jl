@@ -11,8 +11,10 @@ function rcopy{S<:Sxp}(s::Ptr{S}; kwargs...)
         class = rcopy(Symbol, getclass(s, true))
         if method_exists(rcopy, Tuple{Type{RClass{class}}, Ptr{S}})
             return rcopy(RClass{class}, s; kwargs...)
+        elseif method_exists(rcopytype, Tuple{Type{RClass{class}}, Ptr{S}})
+            return rcopy(rcopytype(RClass{class}, s), s; kwargs...)
         else
-            return rcopy(RClass{:default}, s; kwargs...)
+            return rcopy(rcopytype(s), s; kwargs...)
         end
     finally
         unprotect(1)
@@ -27,55 +29,55 @@ rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
 rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
 
 # StrSxp
-function rcopy(::Type{RClass{:default}}, s::Ptr{StrSxp})
+function rcopytype(s::Ptr{StrSxp})
     if anyna(s)
-        rcopy(DataArray{String},s)
+        DataArray{String}
     elseif length(s) == 1
-        rcopy(String,s)
+        String
     else
-        rcopy(Array{String},s)
+        Array{String}
     end
 end
 
-function rcopy(::Type{RClass{:default}}, s::Ptr{IntSxp})
+function rcopytype(s::Ptr{IntSxp})
     if isFactor(s)
-        rcopy(PooledDataArray,s)
+        PooledDataArray
     elseif anyna(s)
-        rcopy(DataArray{Float64},s)
+        DataArray{Float64}
     elseif length(s) == 1
-        rcopy(Cint,s)
+        Cint
     else
-        rcopy(Array,s)
+        Array
     end
 end
 
-function rcopy(::Type{RClass{:default}}, s::Ptr{RealSxp})
+function rcopytype(s::Ptr{RealSxp})
     if anyna(s)
-        rcopy(DataArray{Float64},s)
+        DataArray{Float64}
     elseif length(s) == 1
-        rcopy(Float64,s)
+        Float64
     else
-        rcopy(Array{Float64},s)
+        Array{Float64}
     end
 end
 
-function rcopy(::Type{RClass{:default}}, s::Ptr{CplxSxp})
+function rcopytype(s::Ptr{CplxSxp})
     if anyna(s)
-        rcopy(DataArray{Complex128},s)
+        DataArray{Complex128}
     elseif length(s) == 1
-        rcopy(Complex128,s)
+        Complex128
     else
-        rcopy(Array{Complex128},s)
+        Array{Complex128}
     end
 end
 
-function rcopy(::Type{RClass{:default}}, s::Ptr{LglSxp})
+function rcopytype(s::Ptr{LglSxp})
     if anyna(s)
-        rcopy(DataArray{Bool},s)
+        DataArray{Bool}
     elseif length(s) == 1
-        rcopy(Bool,s)
+        Bool
     else
-        rcopy(BitArray,s)
+        BitArray
     end
 end
 
@@ -116,13 +118,13 @@ for (J,S) in ((:Cint,:IntSxp),
 end
 
 # VecSxp
-function rcopy(::Type{RClass{:default}}, s::Ptr{VecSxp}; kwargs...)
+function rcopytype(s::Ptr{VecSxp}; kwargs...)
     if isFrame(s)
-        rcopy(DataFrame,s; kwargs...)
+        DataFrame
     elseif isnull(getnames(s))
-        rcopy(Array{Any},s)
+        Array{Any}
     else
-        rcopy(Dict{Symbol,Any},s)
+        Dict{Symbol,Any}
     end
 end
 
