@@ -9,9 +9,7 @@ function rcopy{S<:Sxp}(s::Ptr{S}; kwargs...)
     protect(s)
     try
         class = rcopy(Symbol, getclass(s, true))
-        if method_exists(rcopy, Tuple{Type{RClass{class}}, Ptr{S}})
-            return rcopy(RClass{class}, s; kwargs...)
-        elseif method_exists(rcopytype, Tuple{Type{RClass{class}}, Ptr{S}})
+        if method_exists(rcopytype, Tuple{Type{RClass{class}}, Ptr{S}})
             return rcopy(rcopytype(RClass{class}, s), s; kwargs...)
         else
             return rcopy(rcopytype(s), s; kwargs...)
