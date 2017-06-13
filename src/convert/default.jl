@@ -3,12 +3,21 @@
 """
 `rcopy(r)` copies the contents of an R object into a corresponding canonical Julia type.
 """
-rcopy(r::RObject; kwargs...) = rcopy(r.p; kwargs...)
+rcopy{S<:Sxp}(r::RObject{S}; kwargs...) = rcopy(r.p; kwargs...)
 
-# Fallbacks
-# convert Ptr{S} to Any would use the default conversions to allow
-# automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
-rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
+function rcopy{S<:Sxp}(s::Ptr{S}; kwargs...)
+    protect(s)
+    try
+        class = rcopy(Symbol, getclass(s, true))
+        if method_exists(rcopy, Tuple{Type{RClass{class}}, Ptr{S}})
+            return rcopy(RClass{class}, s; kwargs...)
+        else
+            return rcopy(RClass{:default}, s; kwargs...)
+        end
+    finally
+        unprotect(1)
+    end
+end
 
 # NilSxp
 rcopy(::Ptr{NilSxp}) = nothing
@@ -18,7 +27,7 @@ rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
 rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
 
 # StrSxp
-function rcopy(s::Ptr{StrSxp})
+function rcopy(::Type{RClass{:default}}, s::Ptr{StrSxp})
     if anyna(s)
         rcopy(DataArray{String},s)
     elseif length(s) == 1
@@ -28,23 +37,7 @@ function rcopy(s::Ptr{StrSxp})
     end
 end
 
-# IntSxp, RealSxp, CplxSxp, LglSxp
-"""
-It returns the corresponding element type when a RealSxp is converting to a julia object.
-"""
-function _eltype(s::Ptr{RealSxp})
-    classes = rcopy(Vector, getclass(s))
-    if "Date" in classes
-        T = Date::DataType
-    elseif "POSIXct" in classes && "POSIXt" in classes
-        T = DateTime::DataType
-    else
-        T = Float64::DataType
-    end
-    return T
-end
-
-function rcopy(s::Ptr{IntSxp})
+function rcopy(::Type{RClass{:default}}, s::Ptr{IntSxp})
     if isFactor(s)
         rcopy(PooledDataArray,s)
     elseif anyna(s)
@@ -56,17 +49,17 @@ function rcopy(s::Ptr{IntSxp})
     end
 end
 
-function rcopy(s::Ptr{RealSxp})
-    T = _eltype(s)
+function rcopy(::Type{RClass{:default}}, s::Ptr{RealSxp})
     if anyna(s)
-        rcopy(DataArray{T},s)
+        rcopy(DataArray{Float64},s)
     elseif length(s) == 1
-        rcopy(T,s)
+        rcopy(Float64,s)
     else
-        rcopy(Array{T},s)
+        rcopy(Array{Float64},s)
     end
 end
-function rcopy(s::Ptr{CplxSxp})
+
+function rcopy(::Type{RClass{:default}}, s::Ptr{CplxSxp})
     if anyna(s)
         rcopy(DataArray{Complex128},s)
     elseif length(s) == 1
@@ -75,7 +68,8 @@ function rcopy(s::Ptr{CplxSxp})
         rcopy(Array{Complex128},s)
     end
 end
-function rcopy(s::Ptr{LglSxp})
+
+function rcopy(::Type{RClass{:default}}, s::Ptr{LglSxp})
     if anyna(s)
         rcopy(DataArray{Bool},s)
     elseif length(s) == 1
@@ -86,25 +80,43 @@ function rcopy(s::Ptr{LglSxp})
 end
 
 # Default behaviors of copying R vectors to arrays
-rcopy(::Type{Vector},s::Ptr{IntSxp}) = rcopy(Vector{Cint},s)
-rcopy(::Type{Array},s::Ptr{IntSxp}) = rcopy(Array{Cint},s)
-function rcopy(::Type{Vector},s::Ptr{RealSxp})
-    T = _eltype(s)
-    rcopy(Vector{T},s)
+for (J,S) in ((:Cint,:IntSxp),
+                 (:Float64, :RealSxp),
+                 (:Complex128, :CplxSxp),
+                 (:Bool, :LglSxp),
+                 (:String, :StrSxp))
+    @eval begin
+        function rcopy(::Type{Vector},s::Ptr{$S})
+            protect(s)
+            try
+                class = rcopy(Symbol, getclass(s, true))
+                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
+                    return rcopy(Vector{eltype(RClass{class}, s)}, s)
+                else
+                    return rcopy(Vector{$J},s)
+                end
+            finally
+                unprotect(1)
+            end
+        end
+        function rcopy(::Type{Array},s::Ptr{$S})
+            protect(s)
+            try
+                class = rcopy(Symbol, getclass(s, true))
+                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
+                    return rcopy(Array{eltype(RClass{class}, s)}, s)
+                else
+                    return rcopy(Array{$J},s)
+                end
+            finally
+                unprotect(1)
+            end
+        end
+    end
 end
-function rcopy(::Type{Array},s::Ptr{RealSxp})
-    T = _eltype(s)
-    rcopy(Array{T},s)
-end
-rcopy(::Type{Vector},s::Ptr{CplxSxp}) = rcopy(Vector{Complex128},s)
-rcopy(::Type{Array},s::Ptr{CplxSxp}) = rcopy(Array{Complex128},s)
-rcopy(::Type{Array},s::Ptr{LglSxp}) = rcopy(Array{Bool},s)
-rcopy(::Type{Vector},s::Ptr{LglSxp}) = rcopy(Vector{Bool},s)
-rcopy(::Type{Vector}, s::Ptr{StrSxp}) = rcopy(Vector{String}, s)
-rcopy(::Type{Array}, s::Ptr{StrSxp}) = rcopy(Array{String}, s)
 
 # VecSxp
-function rcopy(s::Ptr{VecSxp}; kwargs...)
+function rcopy(::Type{RClass{:default}}, s::Ptr{VecSxp}; kwargs...)
     if isFrame(s)
         rcopy(DataFrame,s; kwargs...)
     elseif isnull(getnames(s))
