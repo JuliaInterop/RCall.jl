@@ -23,7 +23,7 @@ function render(script::String)
             n = length(parsedata[1])
             line = parsedata[1][n]
             col = parsedata[2][n]
-            c = rcopy(parsedata[:text][n])[1]
+            c = rcopy(String, parsedata[:text][n])[1]
             unprotect(2)
         end
 
