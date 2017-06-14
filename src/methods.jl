@@ -94,7 +94,7 @@ String indexing finds the first element with the matching name
 function getindex{S<:VectorSxp}(s::Ptr{S}, label::AbstractString)
     ls = getnames(s)
     for (i,l) in enumerate(ls)
-        if rcopy(l) == label
+        if rcopy(String, l) == label
             return s[i]
         end
     end
@@ -141,7 +141,7 @@ Set element of a VectorSxp by a label.
 function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
     ls = getnames(s)
     for (i,l) in enumerate(ls)
-        if rcopy(l) == label
+        if rcopy(String, l) == label
             s[i] = value
             return
         end
@@ -212,7 +212,7 @@ getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I)
 function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
     ls = getnames(s)
     for (i,l) in enumerate(ls)
-        if rcopy(l) == label
+        if rcopy(String, l) == label
             return s[i]
         end
     end
@@ -239,7 +239,7 @@ Set element of a PairListSxp by a label.
 function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
     ls = getnames(s)
     for (i,l) in enumerate(ls)
-        if rcopy(l) == label
+        if rcopy(String, l) == label
             s[i] = value
             return
         end
@@ -327,8 +327,11 @@ setnames!(r::RObject,n) = RObject(setnames!(sexp(r),sexp(StrSxp,n)))
 """
 Returns the class of an R object.
 """
-getclass{S<:Sxp}(s::Ptr{S}) = getattrib(s,Const.ClassSymbol)
-getclass(r::RObject) = RObject(getclass(sexp(r)))
+function getclass{S<:Sxp}(s::Ptr{S}, singleString::Bool=false)
+    ccall((:R_data_class,libR),Ptr{StrSxp},(Ptr{S},Cint),s,singleString)
+end
+getclass(s::Ptr{CharSxp}, singleString::Bool=false) = Const.NilValue
+getclass(r::RObject, singleString::Bool=false) = RObject(getclass(sexp(r), singleString))
 
 
 """

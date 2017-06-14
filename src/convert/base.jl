@@ -1,3 +1,5 @@
+immutable RClass{Symbol} end
+
 # conversion to Base Julia types
 
 rcopy{T}(::Type{T},r::RObject; kwargs...) = rcopy(T, r.p; kwargs...)
@@ -22,6 +24,11 @@ function rcopy{T<:Number, R<:Number}(::Type{T}, x::R)
         return T(x)
     end
 end
+
+# Fallbacks
+# convert Ptr{S} to Any would use the default conversions to allow
+# automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
+rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
 
 # NilSxp
 rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = nothing
