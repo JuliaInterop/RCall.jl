@@ -16,8 +16,8 @@ end
 ```
 
 ```@example 2
-foo = Foo(1.0, "hello")
-nothing
+foo = Foo(1.0, "hello") 
+nothing # hide
 ```
 
 ## Julia to R direction
@@ -36,18 +36,18 @@ function sexp(f::Foo)
 end
 
 roo = RObject(foo)
+nothing # hide
 ```
 
 Remark: [`RCall.protect`](@ref) and [`RCall.unprotect`](@ref) should be used to protect SEXP from being garbage collected.
 
 ## R to Julia direction
 
-The function `rcopy` and `rcopytype` are responsible for conversions of this direction.
+The function `rcopy` and `rcopytype` are responsible for conversions of this
+direction. First we define an explicit converter for VecSxp (SEXP for list)
 
 
 ```@example 2
-# first we define a explicit convertor for VecSxp (SEXP for list)
-
 import RCall.rcopy
 
 function rcopy(::Type{Foo}, s::Ptr{VecSxp})
@@ -59,8 +59,9 @@ The `convert` function will dispatch the corresponding `rcopy` function when it 
 
 ```@example 2
 rcopy(Foo, roo)
-convert(Foo, roo)
-nothing
+convert(Foo, roo) # calls `rcopy`
+Foo(roo)
+nothing # hide
 ```
 
 To allow the automatic conversion via `rcopy(roo)`, the R class `Bar` has to be registered.
@@ -69,8 +70,34 @@ To allow the automatic conversion via `rcopy(roo)`, the R class `Bar` has to be 
 import RCall: RClass, rcopytype
 
 rcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo
-
 boo = rcopy(roo)
-nothing
+nothing # hide
 ```
 
+## Using @rput and @rget is seamless
+
+```@example 2
+boo.x = 2.0
+@rput boo
+R"""
+boo["x"]
+"""
+```
+
+```@example 2
+R"""
+boo["x"] = 3.0
+"""
+@rget boo
+boo.x
+```
+
+## Nested conversion
+
+```@example 2
+l = R"list(boo = boo, roo = $roo)"
+```
+
+```@example 2
+rcopy(l)
+```
