@@ -245,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Julia to R direction",
     "category": "section",
-    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).import RCall.sexp\n\nfunction sexp(f::Foo)\n    r = sexp(Dict(:x => f.x, :y => f.y))\n    setclass!(r, sexp(\"Bar\"))\n    r\nend\n\nroo = RObject(foo)"
+    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).import RCall.sexp\n\nfunction sexp(f::Foo)\n    r = sexp(Dict(:x => f.x, :y => f.y))\n    setclass!(r, sexp(\"Bar\"))\n    r\nend\n\nroo = RObject(foo)Remark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected."
 },
 
 {
