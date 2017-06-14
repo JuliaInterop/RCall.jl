@@ -8,7 +8,8 @@ makedocs(
         "Introduction" => "index.md",
         "Installation" => "installation.md",
         "Getting Started" => "gettingstarted.md",
-        "Conversions" => "conversions.md",
+        "Supported Conversions" => "conversions.md",
+        "Custom Conversion" => "custom.md",
         "Internal" => "internal.md"
     ]
 )
