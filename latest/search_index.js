@@ -213,7 +213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Supported Conversions",
     "title": "NamedArrays",
     "category": "section",
-    "text": "# Julia -> R\naa = NamedArray([1,2,3], [[\"a\", \"b\", \"c\"]], [:id])\nr = RObject(aa)# R -> Julia\nrcopy(r)"
+    "text": "# Julia -> R\naa = NamedArray([1,2,3], [[\"a\", \"b\", \"c\"]], [:id])\nr = RObject(aa)# R -> Julia\nrcopy(NamedArray, r)"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Supported Conversions",
     "title": "AxisArrays",
     "category": "section",
-    "text": "# Julia -> R\naa = AxisArray([1,2,3], Axis{:id}([\"a\", \"b\", \"c\"]))\nr = RObject(aa)# R -> Julia\nrcopy(r)"
+    "text": "# Julia -> R\naa = AxisArray([1,2,3], Axis{:id}([\"a\", \"b\", \"c\"]))\nr = RObject(aa)# R -> Julia\nrcopy(AxisArray, r)"
 },
 
 {
