@@ -505,10 +505,10 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.getclass-Tuple{Ptr{S<:RCall.Sxp}}",
+    "location": "internal.html#RCall.getclass",
     "page": "Internal",
     "title": "RCall.getclass",
-    "category": "Method",
+    "category": "Function",
     "text": "Returns the class of an R object.\n\n\n\n"
 },
 
@@ -529,7 +529,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.rcopy-Tuple{RCall.RObject}",
+    "location": "internal.html#RCall.rcopy-Tuple{RCall.RObject{S<:RCall.Sxp}}",
     "page": "Internal",
     "title": "RCall.rcopy",
     "category": "Method",
@@ -726,14 +726,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Base.setindex!",
     "category": "Method",
     "text": "Set element of a VectorSxp by a label.\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall._eltype-Tuple{Ptr{RCall.RealSxp}}",
-    "page": "Internal",
-    "title": "RCall._eltype",
-    "category": "Method",
-    "text": "It returns the corresponding element type when a RealSxp is converting to a julia object.\n\n\n\n"
 },
 
 {
@@ -1053,7 +1045,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "Macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#94)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#95)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
 },
 
 {
