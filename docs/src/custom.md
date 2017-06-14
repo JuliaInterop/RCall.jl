@@ -38,6 +38,7 @@ end
 roo = RObject(foo)
 ```
 
+Remark: [`RCall.protect`](@ref) and [`RCall.unprotect`](@ref) should be used to protect SEXP from being garbage collected.
 
 ## R to Julia direction
 
