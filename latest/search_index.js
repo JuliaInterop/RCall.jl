@@ -154,23 +154,23 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "conversions.html#",
-    "page": "Conversions",
-    "title": "Conversions",
+    "page": "Supported Conversions",
+    "title": "Supported Conversions",
     "category": "page",
     "text": ""
 },
 
 {
-    "location": "conversions.html#Conversions-1",
-    "page": "Conversions",
-    "title": "Conversions",
+    "location": "conversions.html#Suppoted-Conversions-1",
+    "page": "Supported Conversions",
+    "title": "Suppoted Conversions",
     "category": "section",
     "text": "RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., DataFrames, DataArrays, NullableArrays, CategoricalArrays NamedArrays and AxisArrays.using RCall\nusing DataFrames\nusing NamedArrays\nusing AxisArrays"
 },
 
 {
     "location": "conversions.html#Base-Julia-Types-1",
-    "page": "Conversions",
+    "page": "Supported Conversions",
     "title": "Base Julia Types",
     "category": "section",
     "text": "# Julia -> R\na = RObject(1)# R -> Julia\nrcopy(a)# Julia -> R\na = RObject([1.0, 2.0])# R -> Julia\nrcopy(a)"
@@ -178,7 +178,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "conversions.html#Dictionaries-1",
-    "page": "Conversions",
+    "page": "Supported Conversions",
     "title": "Dictionaries",
     "category": "section",
     "text": "# Julia -> R\nd = Dict(:a => 1, :b => [4, 5, 3])\nr = RObject(d)# R -> Julia\nrcopy(r)"
@@ -186,7 +186,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "conversions.html#Date-1",
-    "page": "Conversions",
+    "page": "Supported Conversions",
     "title": "Date",
     "category": "section",
     "text": "# Julia -> R\nd = Date(2012, 12, 12)\nr = RObject(d)# R -> Julia\nrcopy(r)"
@@ -194,7 +194,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "conversions.html#DateTime-1",
-    "page": "Conversions",
+    "page": "Supported Conversions",
     "title": "DateTime",
     "category": "section",
     "text": "# julia -> R\nd = DateTime(2012, 12, 12, 12, 12, 12)\nr = RObject(d)# R -> Julia\nrcopy(r)"
@@ -202,7 +202,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "conversions.html#DataFrames-and-DataArrays-1",
-    "page": "Conversions",
+    "page": "Supported Conversions",
     "title": "DataFrames and DataArrays",
     "category": "section",
     "text": "d = DataFrame([[1.0, 4.5, 7.0]], [:x])\n# Julia -> R\nr = RObject(d)# R -> Julia\nrcopy(r)In default, the column names of R data frames are sanitized such that foo.bar would be replaced by foo_bar.rcopy(R\"data.frame(a.b = 1:3)\")To avoid the sanitization, use sanitize option.rcopy(R\"data.frame(a.b = 1:10)\"; sanitize = false)"
@@ -210,7 +210,7 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "conversions.html#NamedArrays-1",
-    "page": "Conversions",
+    "page": "Supported Conversions",
     "title": "NamedArrays",
     "category": "section",
     "text": "# Julia -> R\naa = NamedArray([1,2,3], [[\"a\", \"b\", \"c\"]], [:id])\nr = RObject(aa)# R -> Julia\nrcopy(r)"
@@ -218,10 +218,42 @@ var documenterSearchIndex = {"docs": [
 
 {
     "location": "conversions.html#AxisArrays-1",
-    "page": "Conversions",
+    "page": "Supported Conversions",
     "title": "AxisArrays",
     "category": "section",
     "text": "# Julia -> R\naa = AxisArray([1,2,3], Axis{:id}([\"a\", \"b\", \"c\"]))\nr = RObject(aa)# R -> Julia\nrcopy(r)"
+},
+
+{
+    "location": "custom.html#",
+    "page": "Custom Conversion",
+    "title": "Custom Conversion",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "custom.html#Custom-Conversion-1",
+    "page": "Custom Conversion",
+    "title": "Custom Conversion",
+    "category": "section",
+    "text": "RCall supports an API for implicitly converting between R and Julia objects by means of rcopy and RObject.To illustrate the idea, we consider the following Julia typeusing RCalltype Foo\n    x::Float64\n    y::String\nendfoo = Foo(1.0, \"hello\")\nnothing"
+},
+
+{
+    "location": "custom.html#Julia-to-R-direction-1",
+    "page": "Custom Conversion",
+    "title": "Julia to R direction",
+    "category": "section",
+    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).import RCall.sexp\n\nfunction sexp(f::Foo)\n    r = sexp(Dict(:x => f.x, :y => f.y))\n    setclass!(r, sexp(\"Bar\"))\n    r\nend\n\nroo = RObject(foo)"
+},
+
+{
+    "location": "custom.html#R-to-Julia-direction-1",
+    "page": "Custom Conversion",
+    "title": "R to Julia direction",
+    "category": "section",
+    "text": "The function rcopy and rcopytype are responsible for conversions of this direction.# first we define a explicit convertor for VecSxp (SEXP for list)\n\nimport RCall.rcopy\n\nfunction rcopy(::Type{Foo}, s::Ptr{VecSxp})\n    Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))\nendThe convert function will dispatch the corresponding rcopy function when it is found.rcopy(Foo, roo)\nconvert(Foo, roo)\nnothingTo allow the automatic conversion via rcopy(roo), the R class Bar has to be registered.import RCall: RClass, rcopytype\n\nrcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo\n\nboo = rcopy(roo)\nnothing"
 },
 
 {
