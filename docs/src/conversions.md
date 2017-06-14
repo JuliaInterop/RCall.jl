@@ -105,7 +105,7 @@ r = RObject(aa)
 
 ```@example 1
 # R -> Julia
-rcopy(r)
+rcopy(NamedArray, r)
 ```
 
 
@@ -119,5 +119,5 @@ r = RObject(aa)
 
 ```@example 1
 # R -> Julia
-rcopy(r)
+rcopy(AxisArray, r)
 ```
