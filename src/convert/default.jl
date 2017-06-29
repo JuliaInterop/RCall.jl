@@ -144,6 +144,9 @@ rcopy{S<:FunctionSxp}(s::Ptr{S}) = rcopy(Function,s)
 rcopy(l::Ptr{LangSxp}) = RObject(l)
 rcopy(r::RObject{LangSxp}) = r
 
+# Fallback
+rcopy(l) = RObject(l)
+
 
 # logic of default sexp
 
