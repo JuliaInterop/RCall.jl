@@ -133,6 +133,22 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a
 end
 
+# RawSxp
+rcopy(::Type{UInt8},s::Ptr{RawSxp}) = s[1]
+
+function rcopy(::Type{Vector{UInt8}},s::Ptr{RawSxp})
+    a = Array{UInt8}(length(s))
+    copy!(a,unsafe_vec(s))
+    a
+end
+
+function rcopy(::Type{Array{UInt8}},s::Ptr{RawSxp})
+    a = Array{UInt8}(size(s)...)
+    copy!(a,unsafe_vec(s))
+    a
+end
+
+
 # StrSxp
 rcopy(::Type{Symbol}, s::Ptr{StrSxp}) = rcopy(Symbol,s[1])
 rcopy{T<:AbstractString}(::Type{T},s::Ptr{StrSxp}) = rcopy(T,s[1])
@@ -201,6 +217,18 @@ sexp(::Type{LglSxp},v::Union{Bool,Cint}) =
     ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
 function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
     ra = allocArray(LglSxp, size(a)...)
+    copy!(unsafe_vec(ra),a)
+    ra
+end
+
+# UInt8 to Raw vector
+function sexp(::Type{RawSxp},v::UInt8)
+    ra = allocArray(RawSxp,1)
+    unsafe_store!(dataptr(ra),v)
+    ra
+end
+function sexp(::Type{RawSxp}, a::AbstractArray{UInt8})
+    ra = allocArray(RawSxp, size(a)...)
     copy!(unsafe_vec(ra),a)
     ra
 end

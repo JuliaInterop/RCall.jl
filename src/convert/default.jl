@@ -79,12 +79,23 @@ function rcopytype(s::Ptr{LglSxp})
     end
 end
 
+function rcopytype(s::Ptr{RawSxp})
+    if anyna(s)
+        DataArray{UInt8}
+    elseif length(s) == 1
+        UInt8
+    else
+        Array{UInt8}
+    end
+end
+
 # Default behaviors of copying R vectors to arrays
 for (J,S) in ((:Cint,:IntSxp),
                  (:Float64, :RealSxp),
                  (:Complex128, :CplxSxp),
                  (:Bool, :LglSxp),
-                 (:String, :StrSxp))
+                 (:String, :StrSxp),
+                 (:UInt8, :RawSxp))
     @eval begin
         function rcopy(::Type{Vector},s::Ptr{$S})
             protect(s)
@@ -190,6 +201,12 @@ for (J,S) in ((:Integer,:IntSxp),
         sexp{T<:$J}(v::NullableArray{T}) = sexp($S, v)
     end
 end
+
+# RawSxp
+sexp(a::AbstractArray{UInt8}) = sexp(RawSxp, a)
+sexp(a::DataArray{UInt8}) = sexp(RawSxp, a)
+sexp(x::UInt8) = sexp(RawSxp, x)
+
 for typ in [:NullableCategoricalArray, :CategoricalArray]
     @eval sexp(v::$typ) = sexp(IntSxp, v)
 end

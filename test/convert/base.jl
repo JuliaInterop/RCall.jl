@@ -258,6 +258,13 @@ r = RObject(a)
 @test isa(rcopy(Array, r), Array{Any})
 
 
+# raw
+a = UInt8[0x01, 0x0c, 0xff]
+r = RObject(a)
+@test a == rcopy(r)
+@test rcopy(UInt8, r) == 0x01
+@test rcopy(Array, r) == a
+
 # function
 function funk(x,y)
     x+y
