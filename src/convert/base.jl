@@ -31,6 +31,7 @@ end
 rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
 
 # NilSxp
+rcopy(::Type{Any}, ::Ptr{NilSxp}) = nothing
 rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = nothing
 rcopy{T<:AbstractArray}(::Type{T}, ::Ptr{NilSxp}) = T()
 

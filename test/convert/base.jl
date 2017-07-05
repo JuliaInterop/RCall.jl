@@ -293,3 +293,7 @@ b = RObject(true)
 
 #RCall.rlang_formula(parse("a+b"))
 @test RCall.rlang_formula(:a) == :a
+
+
+# issue 195
+test rcopy(Array{Any}, R"list(a=NULL)")[:a] == nothing
