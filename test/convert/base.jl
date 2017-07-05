@@ -296,4 +296,4 @@ b = RObject(true)
 
 
 # issue 195
-test rcopy(Array{Any}, R"list(a=NULL)")[:a] == nothing
+@test rcopy(Array{Any}, R"list(a=NULL)")[:a] == nothing
