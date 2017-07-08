@@ -9,9 +9,9 @@ const SxpPtrInfo = UInt32 # sxpinfo_struct
 "R Sxp header: a pointer to this is used for unknown types."
 immutable SxpHead <: Sxp # SEXPREC_HEADER
     info::SxpPtrInfo
-    attrib::Ptr{SxpHead}
-    gc_next::Ptr{SxpHead}
-    gc_prev::Ptr{SxpHead}
+    attrib::Ptr{Void}
+    gc_next::Ptr{Void}
+    gc_prev::Ptr{Void}
 end
 const UnknownSxp = SxpHead
 
