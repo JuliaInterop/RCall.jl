@@ -293,7 +293,7 @@ end
 setattrib!{S<:Sxp}(s::Ptr{S}, sym, t) = setattrib!(s, sexp(SymSxp,sym), sexp(t))
 setattrib!(r::RObject, sym, t) = setattrib!(r.p, sym, t)
 
-attributes(s::SxpHead) = sexp(s.attrib)
+attributes(s::SxpHead) = sexp(convert(Ptr{SxpHead}, s.attrib))
 attributes(s::Sxp) = attributes(s.head)
 attributes{S<:Sxp}(s::Ptr{S}) = attributes(unsafe_load(s))
 attributes{S<:Sxp}(s::RObject{S}) = RObject(attributes(s.p))
