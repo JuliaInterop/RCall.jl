@@ -213,7 +213,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Supported Conversions",
     "title": "NamedArrays",
     "category": "section",
-    "text": "# Julia -> R\naa = NamedArray([1,2,3], [[\"a\", \"b\", \"c\"]], [:id])\nr = RObject(aa)# R -> Julia\nrcopy(r)"
+    "text": "# Julia -> R\naa = NamedArray([1,2,3], [[\"a\", \"b\", \"c\"]], [:id])\nr = RObject(aa)# R -> Julia\nrcopy(NamedArray, r)"
 },
 
 {
@@ -221,7 +221,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Supported Conversions",
     "title": "AxisArrays",
     "category": "section",
-    "text": "# Julia -> R\naa = AxisArray([1,2,3], Axis{:id}([\"a\", \"b\", \"c\"]))\nr = RObject(aa)# R -> Julia\nrcopy(r)"
+    "text": "# Julia -> R\naa = AxisArray([1,2,3], Axis{:id}([\"a\", \"b\", \"c\"]))\nr = RObject(aa)# R -> Julia\nrcopy(AxisArray, r)"
 },
 
 {
@@ -237,7 +237,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Custom Conversion",
     "category": "section",
-    "text": "RCall supports an API for implicitly converting between R and Julia objects by means of rcopy and RObject.To illustrate the idea, we consider the following Julia typeusing RCalltype Foo\n    x::Float64\n    y::String\nendfoo = Foo(1.0, \"hello\")\nnothing"
+    "text": "RCall supports an API for implicitly converting between R and Julia objects by means of rcopy and RObject.To illustrate the idea, we consider the following Julia typeusing RCalltype Foo\n    x::Float64\n    y::String\nendfoo = Foo(1.0, \"hello\") \nnothing # hide"
 },
 
 {
@@ -245,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Julia to R direction",
     "category": "section",
-    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).import RCall.sexp\n\nfunction sexp(f::Foo)\n    r = sexp(Dict(:x => f.x, :y => f.y))\n    setclass!(r, sexp(\"Bar\"))\n    r\nend\n\nroo = RObject(foo)Remark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected."
+    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).import RCall.sexp\n\nfunction sexp(f::Foo)\n    r = sexp(Dict(:x => f.x, :y => f.y))\n    setclass!(r, sexp(\"Bar\"))\n    r\nend\n\nroo = RObject(foo)\nnothing # hideRemark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected."
 },
 
 {
@@ -253,7 +253,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "R to Julia direction",
     "category": "section",
-    "text": "The function rcopy and rcopytype are responsible for conversions of this direction.# first we define a explicit convertor for VecSxp (SEXP for list)\n\nimport RCall.rcopy\n\nfunction rcopy(::Type{Foo}, s::Ptr{VecSxp})\n    Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))\nendThe convert function will dispatch the corresponding rcopy function when it is found.rcopy(Foo, roo)\nconvert(Foo, roo)\nnothingTo allow the automatic conversion via rcopy(roo), the R class Bar has to be registered.import RCall: RClass, rcopytype\n\nrcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo\n\nboo = rcopy(roo)\nnothing"
+    "text": "The function rcopy and rcopytype are responsible for conversions of this direction. First we define an explicit converter for VecSxp (SEXP for list)import RCall.rcopy\n\nfunction rcopy(::Type{Foo}, s::Ptr{VecSxp})\n    Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))\nendThe convert function will dispatch the corresponding rcopy function when it is found.rcopy(Foo, roo)\nconvert(Foo, roo) # calls `rcopy`\nFoo(roo)\nnothing # hideTo allow the automatic conversion via rcopy(roo), the R class Bar has to be registered.import RCall: RClass, rcopytype\n\nrcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo\nboo = rcopy(roo)\nnothing # hide"
+},
+
+{
+    "location": "custom.html#Using-@rput-and-@rget-is-seamless-1",
+    "page": "Custom Conversion",
+    "title": "Using @rput and @rget is seamless",
+    "category": "section",
+    "text": "boo.x = 2.0\n@rput boo\nR\"\"\"\nboo[\"x\"]\n\"\"\"R\"\"\"\nboo[\"x\"] = 3.0\n\"\"\"\n@rget boo\nboo.x"
+},
+
+{
+    "location": "custom.html#Nested-conversion-1",
+    "page": "Custom Conversion",
+    "title": "Nested conversion",
+    "category": "section",
+    "text": "l = R\"list(boo = boo, roo = $roo)\"rcopy(l)"
 },
 
 {
@@ -1065,11 +1081,35 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.Console.write_console_ex-Tuple{Ptr{UInt8},Int32,Int32}",
+    "page": "Internal",
+    "title": "RCall.Console.write_console_ex",
+    "category": "Method",
+    "text": "R API callback to write console output.\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.IJuliaHooks.ijulia_displayplots-Tuple{}",
+    "page": "Internal",
+    "title": "RCall.IJuliaHooks.ijulia_displayplots",
+    "category": "Method",
+    "text": "Called after cell evaluation. Closes graphics device and displays files in notebook.\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.IJuliaHooks.ijulia_setdevice-Tuple{MIME}",
+    "page": "Internal",
+    "title": "RCall.IJuliaHooks.ijulia_setdevice",
+    "category": "Method",
+    "text": "Set options for R plotting with IJulia.\n\nThe first argument should be a MIME object: currently supported are\n\nMIME(\"image/png\") [default]\nMIME(\"image/svg+xml\")\n\nThe remaining arguments (keyword only) are passed to the appropriate R graphics device: see the relevant R help for details.\n\n\n\n"
+},
+
+{
     "location": "internal.html#Methods-1",
     "page": "Internal",
     "title": "Methods",
     "category": "section",
-    "text": "Modules = [RCall]\nOrder   = [:function]"
+    "text": "Modules = [RCall, RCall.Console, RCall.IJuliaHooks]\nOrder   = [:function]"
 },
 
 {
