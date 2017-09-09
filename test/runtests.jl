@@ -12,7 +12,7 @@ using Compat
 tests = ["basic",
          "convert/base",
          "convert/dataframe",
-         "convert/datatable",
+         # "convert/datatable",
          "convert/datetime",
          "convert/axisarray",
          "convert/namedarray",

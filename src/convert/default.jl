@@ -201,7 +201,7 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractString, :StrSxp))
     @eval begin
         sexp{T<:$J}(x::Nullable{T}) = sexp($S, x)
-        sexp{T<:$J}(v::NullableArray{T}) = sexp($S, v)
+        # sexp{T<:$J}(v::NullableArray{T}) = sexp($S, v)
     end
 end
 
@@ -210,9 +210,9 @@ sexp(a::AbstractArray{UInt8}) = sexp(RawSxp, a)
 sexp(a::DataArray{UInt8}) = sexp(RawSxp, a)
 sexp(x::UInt8) = sexp(RawSxp, x)
 
-for typ in [:NullableCategoricalArray, :CategoricalArray]
-    @eval sexp(v::$typ) = sexp(IntSxp, v)
-end
+# for typ in [:NullableCategoricalArray, :CategoricalArray]
+#     @eval sexp(v::$typ) = sexp(IntSxp, v)
+# end
 
 # AxisArray and NamedArray
 for (J,S) in ((:Integer,:IntSxp),
@@ -227,10 +227,10 @@ end
 # DataTime
 sexp(d::Date) = sexp(RealSxp, d)
 sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
-sexp(d::NullableArray{Date}) = sexp(RealSxp, d)
+# sexp(d::NullableArray{Date}) = sexp(RealSxp, d)
 sexp(d::DateTime) = sexp(RealSxp, d)
 sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
-sexp(d::NullableArray{DateTime}) = sexp(RealSxp, d)
+# sexp(d::NullableArray{DateTime}) = sexp(RealSxp, d)
 
 # Function
 sexp(f::Function) = sexp(ClosSxp, f)
