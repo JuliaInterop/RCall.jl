@@ -237,7 +237,7 @@ function __init__()
     # R REPL mode
     isdefined(Base, :active_repl) &&
         isinteractive() && typeof(Base.active_repl) != Base.REPL.BasicREPL &&
-            RPrompt.repl_inited(Base.active_repl) && RPrompt.repl_init(Base.active_repl)
+            !RPrompt.repl_inited(Base.active_repl) && RPrompt.repl_init(Base.active_repl)
 
     # # IJulia hooks
     isdefined(Main, :IJulia) && Main.IJulia.inited && IJuliaHooks.ijulia_init()
