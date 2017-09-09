@@ -198,4 +198,11 @@ function repl_init(repl)
     nothing
 end
 
+function repl_inited(repl)
+    mirepl = isdefined(repl,:mi) ? repl.mi : repl
+    main_mode = mirepl.interface.modes[1]
+    r_mode = create_r_repl(mirepl, main_mode)
+    in(r_mode,mirepl.interface.modes)
+end
+
 end # module
