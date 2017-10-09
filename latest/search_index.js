@@ -161,9 +161,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "conversions.html#Suppoted-Conversions-1",
+    "location": "conversions.html#Supported-Conversions-1",
     "page": "Supported Conversions",
-    "title": "Suppoted Conversions",
+    "title": "Supported Conversions",
     "category": "section",
     "text": "RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., DataFrames, DataArrays, NullableArrays, CategoricalArrays NamedArrays and AxisArrays.using RCall\nusing DataFrames\nusing NamedArrays\nusing AxisArrays"
 },
