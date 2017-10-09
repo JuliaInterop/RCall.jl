@@ -1,4 +1,4 @@
-# Suppoted Conversions
+# Supported Conversions
 
 RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., `DataFrames`, `DataArrays`, `NullableArrays`, `CategoricalArrays` `NamedArrays` and `AxisArrays`.
 
