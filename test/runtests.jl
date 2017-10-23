@@ -6,11 +6,8 @@ if is_windows()
     Rhome = if haskey(ENV,"R_HOME")
         ENV["R_HOME"]
     else
-        try
-            WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
-        catch e
-            ""
-        end
+        using WinReg
+        WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
     end
     Rscript = joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386","Rscript")
 else
