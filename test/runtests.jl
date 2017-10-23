@@ -3,8 +3,14 @@ hd = homedir()
 pd = Pkg.dir()
 
 if is_windows()
-    Rhome = get(ENV,"R_HOME") do
-        WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
+    Rhome = if haskey(ENV,"R_HOME")
+        ENV["R_HOME"]
+    else
+        try
+            WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
+        catch e
+            ""
+        end
     end
     Rscript = joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386","Rscript")
 else
