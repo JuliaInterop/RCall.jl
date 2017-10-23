@@ -140,7 +140,8 @@ function initEmbeddedR()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
 
-        Ruser = ccall((:getRUser,libR),Ptr{Cchar},())
+        Ruser_ptr = ccall((:getRUser,libR),Ptr{Cchar},())
+        Ruser = unsafe_string(Ruser_ptr)
 
         ccall(:_wputenv,Cint,(Cwstring,),"PATH="*ENV["PATH"]*";"*dirname(libR))
         ccall(:_wputenv,Cint,(Cwstring,),"R_USER="*Ruser)
@@ -159,7 +160,7 @@ function initEmbeddedR()
         ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
 
         rs.rhome          = ccall((:get_R_HOME,libR),Ptr{Cchar},())
-        rs.home           = Ruser
+        rs.home           = Ruser_ptr
         rs.ReadConsole    = cglobal((:R_ReadConsole,libR), Void)
         rs.CallBack       = cfunction(event_callback,Void,())
         rs.ShowMessage    = cglobal((:R_ShowMessage,libR),Void)
