@@ -2,7 +2,16 @@ using Base.Test
 hd = homedir()
 pd = Pkg.dir()
 
-libpaths = readlines(`Rscript -e "writeLines(.libPaths())"`)
+if is_windows()
+    Rhome = get(ENV,"R_HOME") do
+        WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
+    end
+    Rscript = joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386","Rscript")
+else
+    Rscript = "Rscript"
+end
+
+libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 
 using RCall
 using Compat
