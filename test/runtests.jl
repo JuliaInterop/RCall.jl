@@ -15,6 +15,10 @@ else
 end
 
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
+if VERSION < v"0.6.0"
+    libpaths = map(chomp, libpaths)
+end
+
 
 using RCall
 using Compat
