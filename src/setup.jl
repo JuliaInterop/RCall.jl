@@ -146,8 +146,9 @@ function initEmbeddedR()
         ccall(:_wputenv,Cint,(Cwstring,),"PATH="*ENV["PATH"]*";"*dirname(libR))
         ccall(:_wputenv,Cint,(Cwstring,),"R_USER="*Ruser)
 
+        # otherwise R will set it itself, which can be wrong on Windows
         if !("HOME" in keys(ENV))
-            ccall(:_wputenv,Cint,(Cwstring,),"HOME="*Ruser)
+            ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
         end
 
         argv = ["REmbeddedJulia","--silent","--no-save"]
