@@ -49,8 +49,6 @@ end
     end
 
     const Rhome, libR = locate_Rhome_libR()
-    const Ruser = homedir()
-
 
     function ask_yes_no_cancel(prompt::Ptr{Cchar})
         println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
@@ -142,8 +140,16 @@ function initEmbeddedR()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
 
+        Ruser_ptr = ccall((:getRUser,libR),Ptr{Cchar},())
+        Ruser = unsafe_string(Ruser_ptr)
+
         ccall(:_wputenv,Cint,(Cwstring,),"PATH="*ENV["PATH"]*";"*dirname(libR))
-        ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
+        ccall(:_wputenv,Cint,(Cwstring,),"R_USER="*Ruser)
+
+        # otherwise R will set it itself, which can be wrong on Windows
+        if !("HOME" in keys(ENV))
+            ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
+        end
 
         argv = ["REmbeddedJulia","--silent","--no-save"]
         i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
@@ -155,7 +161,7 @@ function initEmbeddedR()
         ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
 
         rs.rhome          = ccall((:get_R_HOME,libR),Ptr{Cchar},())
-        rs.home           = ccall((:getRUser,libR),Ptr{Cchar},())
+        rs.home           = Ruser_ptr
         rs.ReadConsole    = cglobal((:R_ReadConsole,libR), Void)
         rs.CallBack       = cfunction(event_callback,Void,())
         rs.ShowMessage    = cglobal((:R_ShowMessage,libR),Void)
