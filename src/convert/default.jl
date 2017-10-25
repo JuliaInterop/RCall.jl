@@ -43,9 +43,9 @@ function rcopytype(s::Ptr{IntSxp})
     elseif anyna(s)
         DataArray{Float64}
     elseif length(s) == 1
-        Cint
+        Int
     else
-        Array
+        Array{Int}
     end
 end
 
