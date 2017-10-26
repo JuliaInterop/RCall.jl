@@ -6,4 +6,11 @@ module IJuliaHooks
         """, :ijulia_init)
         RCall.ijulia_init()
     end
+
+    function ijulia_setdevice(args...; kwargs...)
+        Base.depwarn("""
+            `Use RCall.ijulia_setdevice(...) instead.`.
+        """, :ijulia_init)
+        RCall.ijulia_setdevice(args...; kwargs...)
+    end
 end
