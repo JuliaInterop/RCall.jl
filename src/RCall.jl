@@ -47,7 +47,7 @@ include("render.jl")
 include("macros.jl")
 include("operators.jl")
 include("console.jl")
-include("rprompt.jl")
+include("RPrompt.jl")
 include("ijulia.jl")
 include("deprecated.jl")
 
