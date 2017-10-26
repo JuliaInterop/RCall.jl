@@ -24,19 +24,34 @@ function rcopy(::Type{NullableArray}, s::Ptr{IntSxp})
     isFactor(s) && error("s is an R factor")
     NullableArray(rcopy(Array,s), isna(s))
 end
-function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
-    isFactor(s) || error("s is not an R factor")
-    refs = UInt32[x for x in s]
-    levels = rcopy(Array, getattrib(s,Const.LevelsSymbol))
-    pool = CategoricalPool(levels, isOrdered(s))
-    CategoricalArray(refs, pool)
-end
-function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
-    isFactor(s) || error("s is not an R factor")
-    refs = UInt32[isNA(x) ? zero(UInt32) : UInt32(x) for x in s]
-    levels = rcopy(Array, getattrib(s,Const.LevelsSymbol))
-    pool = CategoricalPool(levels, isOrdered(s))
-    NullableCategoricalArray(refs, pool)
+
+if Pkg.installed("CategoricalArrays") < v"0.2.0"
+    function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
+        isFactor(s) || error("s is not an R factor")
+        refs = UInt32[x for x in s]
+        levels = rcopy(Array, getattrib(s,Const.LevelsSymbol))
+        pool = CategoricalPool(levels, isOrdered(s))
+        CategoricalArray(refs, pool)
+    end
+    function rcopy(::Type{NullableCategoricalArray}, s::Ptr{IntSxp})
+        isFactor(s) || error("s is not an R factor")
+        refs = UInt32[isNA(x) ? zero(UInt32) : UInt32(x) for x in s]
+        levels = rcopy(Array, getattrib(s,Const.LevelsSymbol))
+        pool = CategoricalPool(levels, isOrdered(s))
+        NullableCategoricalArray(refs, pool)
+    end
+else
+    function rcopy(::Type{CategoricalArray}, s::Ptr{IntSxp})
+        isFactor(s) || error("s is not an R factor")
+        refs = UInt32[isNA(x) ? zero(UInt32) : UInt32(x) for x in s]
+        levels = rcopy(Array{String}, getattrib(s,Const.LevelsSymbol))
+        pool = CategoricalPool(levels, isOrdered(s))
+        if anyna(s)
+            CategoricalArray{Union{String, Null}, 1, UInt32}(refs, pool)
+        else
+            CategoricalArray{String, 1, UInt32}(refs, pool)
+        end
+    end
 end
 
 # DataTable
@@ -78,10 +93,16 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
 end
 
 ## CategoricalArray to sexp conversion.
-for typ in [:NullableCategoricalArray, :CategoricalArray]
+if Pkg.installed("CategoricalArrays") < v"0.2.0"
+    CAtypes = [:NullableCategoricalArray, :CategoricalArray]
+else
+    CAtypes = [:CategoricalArray]
+end
+
+for typ in CAtypes
     @eval begin
-        function sexp{T<:String,N,R<:Integer}(::Type{IntSxp}, v::$typ{T,N,R})
-            rv = protect(sexp(v.refs))
+        function sexp(::Type{IntSxp}, v::$typ)
+            rv = protect(sexp(IntSxp, v.refs))
             try
                 for (i,ref) = enumerate(v.refs)
                     if ref == 0

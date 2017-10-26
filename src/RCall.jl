@@ -2,6 +2,7 @@ __precompile__()
 module RCall
 using Compat
 
+using Nulls
 using DataFrames
 # using DataTables
 using NullableArrays, CategoricalArrays

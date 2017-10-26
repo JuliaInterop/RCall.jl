@@ -210,7 +210,14 @@ sexp(a::AbstractArray{UInt8}) = sexp(RawSxp, a)
 sexp(a::DataArray{UInt8}) = sexp(RawSxp, a)
 sexp(x::UInt8) = sexp(RawSxp, x)
 
-for typ in [:NullableCategoricalArray, :CategoricalArray]
+
+if Pkg.installed("CategoricalArrays") < v"0.2.0"
+    CAtypes = [:NullableCategoricalArray, :CategoricalArray]
+else
+    CAtypes = [:CategoricalArray]
+end
+
+for typ in CAtypes
     @eval sexp(v::$typ) = sexp(IntSxp, v)
 end
 
