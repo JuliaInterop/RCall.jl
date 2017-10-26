@@ -1,3 +1,5 @@
+using Nulls
+
 # strings
 x = "ppzz!#"
 r = RObject(x)
@@ -274,6 +276,8 @@ f1 = RObject(funk)
 @test rcopy(Function, f1.p)(1,2) == 3
 
 # misc
+@test rcopy(Int32(1)) == 1
+@test rcopy(Cint, Int32(1)) == 1
 a = RObject(rand(10))
 @test length(rcopy(Any, a)) == 10
 # @test typeof(RCall.sexp(Cint, 1)) == Cint
@@ -281,8 +285,6 @@ a = RObject(rand(10))
 # @test typeof(RCall.sexp(Complex128, 1)) == Complex128
 @test typeof(rcopy(Vector{Float64}, a.p)) == Vector{Float64}
 b = RObject(true)
-# @test rcopy(Int32(1)) == 1
-# @test rcopy(Cint, Int32(1)) == 1
 @test rcopy(Cint, b.p) == 1
 @test rcopy(Vector{Cint}, b.p) == [1]
 @test rcopy(Array{Cint}, b.p) == [1]
@@ -295,4 +297,4 @@ b = RObject(true)
 @test RCall.rlang_formula(:a) == :a
 
 # issue 195
-@test rcopy(R"list(a=NULL)")[:a] == nothing
+@test isnull(rcopy(R"list(a=NULL)")[:a])

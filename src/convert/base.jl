@@ -31,8 +31,8 @@ end
 rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
 
 # NilSxp
-rcopy(::Type{Any}, ::Ptr{NilSxp}) = nothing
-rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = nothing
+rcopy(::Type{Any}, ::Ptr{NilSxp}) = null
+rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = null
 rcopy{T<:AbstractArray}(::Type{T}, ::Ptr{NilSxp}) = T()
 
 # SymSxp
@@ -186,7 +186,7 @@ end
 # conversion from Base Julia types
 
 # nothing
-sexp{S<:Sxp}(::Type{S}, ::Void) = sexp(Const.NilValue)
+sexp{S<:Sxp}(::Type{S}, ::Null) = sexp(Const.NilValue)
 
 # symbol
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))

@@ -20,7 +20,7 @@ function rcopy{S<:Sxp}(s::Ptr{S}; kwargs...)
 end
 
 # NilSxp
-rcopy(::Ptr{NilSxp}) = nothing
+rcopy(::Ptr{NilSxp}) = null
 
 # SymSxp and CharSxp
 rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
@@ -144,8 +144,8 @@ rcopy{S<:FunctionSxp}(s::Ptr{S}) = rcopy(Function,s)
 rcopy(l::Ptr{LangSxp}) = RObject(l)
 rcopy(r::RObject{LangSxp}) = r
 
-# Fallback
-rcopy(l) = RObject(l)
+# Fallback for non SEXP
+rcopy(r) = r
 
 
 # logic of default sexp
@@ -190,6 +190,9 @@ sexp(a::AbstractArray) = sexp(VecSxp,a)
 
 # Associative
 sexp(d::Associative) = sexp(VecSxp,d)
+
+# Null
+sexp(x::Null) = sexp(Const.NilValue)
 
 # Nullable
 sexp(x::Nullable{Union{}}) = sexp(NaInt)
