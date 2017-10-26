@@ -97,7 +97,7 @@ function bracketed_paste_callback(s, o...)
     LineEdit.refresh_line(s)
 end
 
-type RCompletionProvider <: LineEdit.CompletionProvider
+mutable struct RCompletionProvider <: LineEdit.CompletionProvider
     r::REPL.LineEditREPL
 end
 
@@ -199,7 +199,7 @@ end
 
 function repl_inited(repl)
     mirepl = isdefined(repl,:mi) ? repl.mi : repl
-    any(:prompt in fieldnames(m) && m.prompt == "R> " for m in mirepl.interface.modes)
+    any(:prompt in fieldnames(typeof(m)) && m.prompt == "R> " for m in mirepl.interface.modes)
 end
 
 end # module

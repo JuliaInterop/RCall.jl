@@ -1,4 +1,4 @@
-immutable RClass{Symbol} end
+struct RClass{Symbol} end
 
 # conversion to Base Julia types
 

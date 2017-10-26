@@ -1,4 +1,4 @@
-if is_unix()
+if Compat.Sys.isunix()
     "R eventloop hook on Unix system"
     function polled_events()
         event_callback()
@@ -16,10 +16,10 @@ end
 
 # there is no use now, maybe useful for the future.
 function interrupts_pending(s::Bool=true)
-    if is_windows()
-        unsafe_store!(cglobal((:UserBreak,libR),Cint), s?1:0)
+    if Compat.Sys.iswindows()
+        unsafe_store!(cglobal((:UserBreak,libR),Cint), s ? 1 : 0)
     else
-        unsafe_store!(cglobal((:R_interrupts_pending,libR),Cint), s?1:0)
+        unsafe_store!(cglobal((:R_interrupts_pending,libR),Cint), s ? 1 : 0)
     end
     nothing
 end
@@ -28,10 +28,10 @@ end
 function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0
-        if is_windows() || is_apple()
+        if Compat.Sys.iswindows() || Compat.Sys.isapple()
             ccall((:R_ProcessEvents, libR), Void, ())
         end
-        if is_unix()
+        if Compat.Sys.isunix()
             what = ccall((:R_checkActivity,libR),Ptr{Void},(Cint,Cint),0,1)
             if what != C_NULL
                 R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Void}))

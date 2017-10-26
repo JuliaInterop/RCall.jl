@@ -1,7 +1,7 @@
 import Base: REPL, LineEdit, Terminals
 using RCall
 
-type FakeTerminal <: Base.Terminals.UnixTerminal
+mutable struct FakeTerminal <: Base.Terminals.UnixTerminal
     in_stream::Base.IO
     out_stream::Base.IO
     err_stream::Base.IO
@@ -30,7 +30,7 @@ repltask = @async begin
     Base.REPL.run_repl(repl)
 end
 
-send_repl(x, enter=true) = write(stdin_write, enter? "$x\n" : x)
+send_repl(x, enter=true) = write(stdin_write, enter ? "$x\n" : x)
 
 function check_repl(io::IO, x)
     read_task = @task readuntil(io, x)

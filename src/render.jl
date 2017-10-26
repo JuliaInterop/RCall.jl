@@ -39,7 +39,7 @@ function render(script::String)
                 index = search(script, '\n', index+1)
             end
             b = index + col
-        elseif is_windows()
+        elseif Compat.Sys.iswindows()
             # the trick of R_ParseContextLast does not work on Windows
             msg = "Subsitution in unicode expression is not supported on Windows."
             break
@@ -102,7 +102,7 @@ function prepare_inline_julia_code(symdict, escape::Bool=false)
     new_env = Expr(:(=), :env, Expr(:call, reval_p, Expr(:call, rparse_p, "`#JL` <- new.env()")))
     blk = Expr(:block)
     for (rsym, expr) in symdict
-        push!(blk.args, Expr(:(=), Expr(:ref, :env, rsym), escape? esc(expr) : expr))
+        push!(blk.args, Expr(:(=), Expr(:ref, :env, rsym), escape ? esc(expr) : expr))
     end
     Expr(:let, blk, new_env)
 end

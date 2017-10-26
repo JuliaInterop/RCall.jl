@@ -1,5 +1,5 @@
 # used in flush_output and flush_error
-type ErrorIO <: IO end
+struct ErrorIO <: IO end
 const error_device = ErrorIO()
 
 

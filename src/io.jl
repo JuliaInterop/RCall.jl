@@ -46,7 +46,7 @@ function simple_showerror(io::IO, er)
     end
 end
 
-type REvalutionError <: Exception
+mutable struct REvalutionError <: Exception
     msg::AbstractString
     REvalutionError() = new("")
     # R error messages may have trailing "\n"

@@ -24,7 +24,7 @@ function rcopy{T<:AbstractDataFrame}(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=t
         vnames = [Symbol(replace(string(v), '.', '_')) for v in vnames]
     end
     DataFrame(
-        Any[isFactor(c)? rcopy(PooledDataArray, c) : rcopy(DataArray, c) for c in s],
+        Any[isFactor(c) ? rcopy(PooledDataArray, c) : rcopy(DataArray, c) for c in s],
         vnames)
 end
 

@@ -7,7 +7,7 @@ These are represented by a pointer `Ptr{S<:Sxp}` (which is called `SEXP` in R AP
 const SxpPtrInfo = UInt32 # sxpinfo_struct
 
 "R Sxp header: a pointer to this is used for unknown types."
-immutable SxpHead <: Sxp # SEXPREC_HEADER
+struct SxpHead <: Sxp # SEXPREC_HEADER
     info::SxpPtrInfo
     attrib::Ptr{Void}
     gc_next::Ptr{Void}
@@ -24,13 +24,13 @@ const UnknownSxp = SxpHead
 
 
 "R NULL value"
-immutable NilSxp <: PairListSxp   # type tag 0
+struct NilSxp <: PairListSxp   # type tag 0
     head::SxpHead
 end
 # const Ptr{NilSxp} = Ptr{NilSxp}
 
 "R pairs (cons) list cell"
-immutable ListSxp <: PairListSxp  # type tag 2
+struct ListSxp <: PairListSxp  # type tag 2
     head::SxpHead
     car::Ptr{UnknownSxp}
     cdr::Ptr{UnknownSxp}
@@ -39,7 +39,7 @@ end
 # const ListSxpPtr = Ptr{ListSxp}
 
 "R function closure"
-immutable ClosSxp <: FunctionSxp  # type tag 3
+struct ClosSxp <: FunctionSxp  # type tag 3
     head::SxpHead
     formals::Ptr{ListSxp}
     body::Ptr{UnknownSxp}
@@ -48,7 +48,7 @@ end
 # const ClosSxpPtr = Ptr{ClosSxp}
 
 "R environment"
-immutable EnvSxp <: Sxp  # type tag 4
+struct EnvSxp <: Sxp  # type tag 4
     head::SxpHead
     frame::Ptr{UnknownSxp}
     enclos::Ptr{UnknownSxp}
@@ -57,7 +57,7 @@ end
 # const EnvSxpPtr = Ptr{EnvSxp}
 
 "R promise"
-immutable PromSxp <: Sxp  # type tag 5
+struct PromSxp <: Sxp  # type tag 5
     head::SxpHead
     value::Ptr{UnknownSxp}
     expr::Ptr{UnknownSxp}
@@ -66,7 +66,7 @@ end
 # const PromSxpPtr = Ptr{PromSxp}
 
 "R function call"
-immutable LangSxp <: PairListSxp  # type tag 6
+struct LangSxp <: PairListSxp  # type tag 6
     head::SxpHead
     car::Ptr{UnknownSxp}
     cdr::Ptr{UnknownSxp}
@@ -75,19 +75,19 @@ end
 # const LangSxpPtr = Ptr{LangSxp}
 
 "R special function"
-immutable SpecialSxp <: FunctionSxp  # type tag 7
+struct SpecialSxp <: FunctionSxp  # type tag 7
     head::SxpHead
 end
 # const SpecialSxpPtr = Ptr{SpecialSxp}
 
 "R built-in function"
-immutable BuiltinSxp <: FunctionSxp  # type tag 8
+struct BuiltinSxp <: FunctionSxp  # type tag 8
     head::SxpHead
 end
 # const BuiltinSxpPtr = Ptr{BuiltinSxp}
 
 "R character string"
-immutable CharSxp <: VectorAtomicSxp     # type tag 9
+struct CharSxp <: VectorAtomicSxp     # type tag 9
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -95,7 +95,7 @@ end
 # const CharSxpPtr = Ptr{CharSxp}
 
 "R symbol"
-immutable SymSxp <: Sxp   # type tag 1
+struct SymSxp <: Sxp   # type tag 1
     head::SxpHead
     name::Ptr{CharSxp}
     value::Ptr{UnknownSxp}
@@ -104,7 +104,7 @@ end
 # const SymSxpPtr = Ptr{SymSxp}
 
 "R logical vector"
-immutable LglSxp <: VectorNumericSxp     # type tag 10
+struct LglSxp <: VectorNumericSxp     # type tag 10
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -112,7 +112,7 @@ end
 # const LglSxpPtr = Ptr{LglSxp}
 
 "R integer vector"
-immutable IntSxp <: VectorNumericSxp     # type tag 13
+struct IntSxp <: VectorNumericSxp     # type tag 13
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -120,7 +120,7 @@ end
 # const IntSxpPtr = Ptr{IntSxp}
 
 "R real vector"
-immutable RealSxp <: VectorNumericSxp    # type tag 14
+struct RealSxp <: VectorNumericSxp    # type tag 14
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -128,7 +128,7 @@ end
 # const RealSxpPtr = Ptr{RealSxp}
 
 "R complex vector"
-immutable CplxSxp <: VectorNumericSxp    # type tag 15
+struct CplxSxp <: VectorNumericSxp    # type tag 15
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -136,7 +136,7 @@ end
 # const CplxSxpPtr = Ptr{CplxSxp}
 
 "R vector of character strings"
-immutable StrSxp <: VectorListSxp     # type tag 16
+struct StrSxp <: VectorListSxp     # type tag 16
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -144,19 +144,19 @@ end
 # const PtStrSxpPtr = Ptr{StrSxp}
 
 "R dot-dot-dot object"
-immutable DotSxp <: Sxp     # type tag 17
+struct DotSxp <: Sxp     # type tag 17
     head::SxpHead
 end
 # const DotSxpPtr = Ptr{DotSxp}
 
 "R \"any\" object"
-immutable AnySxp <: Sxp     # type tag 18
+struct AnySxp <: Sxp     # type tag 18
     head::SxpHead
 end
 # const AnySxpPtr = Ptr{AnySxp}
 
 "R list (i.e. Array{Any,1})"
-immutable VecSxp <: VectorListSxp     # type tag 19
+struct VecSxp <: VectorListSxp     # type tag 19
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -164,7 +164,7 @@ end
 # const VecSxpPtr = Ptr{VecSxp}
 
 "R expression vector"
-immutable ExprSxp <: VectorListSxp    # type tag 20
+struct ExprSxp <: VectorListSxp    # type tag 20
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -172,13 +172,13 @@ end
 # const ExprSxpPtr = Ptr{ExprSxp}
 
 "R byte code"
-immutable BcodeSxp <: Sxp   # type tag 21
+struct BcodeSxp <: Sxp   # type tag 21
     head::SxpHead
 end
 # const BcodeSxpPtr = Ptr{BcodeSxp}
 
 "R external pointer"
-immutable ExtPtrSxp <: Sxp  # type tag 22
+struct ExtPtrSxp <: Sxp  # type tag 22
     head::SxpHead
     ptr::Ptr{Void}
     prot::Ptr{Void}
@@ -187,13 +187,13 @@ end
 # const ExtPtrSxpPtr = Ptr{ExtPtrSxp}
 
 "R weak reference"
-immutable WeakRefSxp <: Sxp  # type tag 23
+struct WeakRefSxp <: Sxp  # type tag 23
     head::SxpHead
 end
 # const WeakRefSxpPtr = Ptr{WeakRefSxp}
 
 "R byte vector"
-immutable RawSxp <: VectorAtomicSxp      # type tag 24
+struct RawSxp <: VectorAtomicSxp      # type tag 24
     head::SxpHead
     length::Cint
     truelength::Cint
@@ -201,7 +201,7 @@ end
 # const RawSxpPtr = Ptr{RawSxp}
 
 "R S4 object"
-immutable S4Sxp <: Sxp      # type tag 25
+struct S4Sxp <: Sxp      # type tag 25
     head::SxpHead
 end
 # const S4SxpPtr = Ptr{S4Sxp}
@@ -235,7 +235,7 @@ RObject{RealSxp}
 ```
 """
 
-type RObject{S<:Sxp}
+mutable struct RObject{S<:Sxp}
     p::Ptr{S}
     # used for pre-defined constants
     function (::Type{RObject{S}}){S}()
