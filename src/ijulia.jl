@@ -16,12 +16,13 @@ device: see the relevant R help for details.
 """
 function ijulia_setdevice(m::MIME;kwargs...)
     global ijulia_mime
-    rcall_p(:options,rcalljl_device=rdevicename(m))
+    rcall_p(:options, rcalljl_device=rdevicename(m))
+    rcall_p(:options, rcalljl_options=Dict(kwargs))
     ijulia_mime = m
     nothing
 end
-ijulia_setdevice(m::MIME"image/png") = ijulia_setdevice(m,width=6*72,height=5*72)
-ijulia_setdevice(m::MIME"image/svg+xml") = ijulia_setdevice(m,width=6,height=5)
+ijulia_setdevice(m::MIME"image/png") = ijulia_setdevice(m, width=6*72, height=5*72)
+ijulia_setdevice(m::MIME"image/svg+xml") = ijulia_setdevice(m, width=6, height=5)
 
 rdevicename(m::MIME"image/png") = :png
 rdevicename(m::MIME"image/svg+xml") = :svg
@@ -77,7 +78,12 @@ function ijulia_init()
     ijulia_file_fmt = joinpath(ijulia_file_dir,"rij_%03d")
     rcall_p(:options,rcalljl_filename=ijulia_file_fmt)
 
-    reval_p(rparse_p("options(device = function(filename=getOption('rcalljl_filename'),...) getOption('rcalljl_device')(filename,...))"))
+    reval_p(rparse_p("""
+        options(device = function(filename=getOption('rcalljl_filename'), ...) {
+            args <- c(filename = filename, getOption('rcalljl_options'))
+            do.call(getOption('rcalljl_device'), modifyList(args, list(...)))
+        })
+        """))
 
     Main.IJulia.push_postexecute_hook(ijulia_displayplots)
     Main.IJulia.push_posterror_hook(ijulia_cleanup)
