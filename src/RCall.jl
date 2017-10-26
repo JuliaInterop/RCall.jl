@@ -14,8 +14,12 @@ import Base: eltype, convert, isascii, isnull,
     names, length, size, getindex, setindex!, start, next, done,
     show, showerror, write
 
-# issues/179
-import DataFrames: isna
+
+if isdefined(DataFrames, :isna)
+    import DataFrames: isna
+elseif isdefined(DataArrays, :isna)
+    import DataArrays: isna
+end
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
