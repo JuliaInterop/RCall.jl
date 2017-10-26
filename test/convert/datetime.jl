@@ -58,30 +58,30 @@ r = RObject(d)
 @test rcopy(R"identical(as.character(NA), $s)")
 
 
-# # nullable date
-# s = NullableArray(["0001-01-01", "2012-12-12"], [true, false])
-# d = NullableArray(Date.(s.values), s.isnull)
-# r = RObject(d)
-# @test isa(r,RObject{RealSxp})
-# @test rcopy(getclass(r)) == "Date"
-# @test length(r) == length(d)
-# @test size(r) == size(d)
-# @test rcopy(NullableArray{Date}, r).isnull == d.isnull
-# @test rcopy(NullableArray{Date}, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
-# @test rcopy(NullableArray, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
-# @test rcopy(R"identical(as.Date($s), $d)")
-# @test rcopy(R"identical(as.character($d), $s)")
+# nullable date
+s = NullableArray(["0001-01-01", "2012-12-12"], [true, false])
+d = NullableArray(Date.(s.values), s.isnull)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == "Date"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(NullableArray{Date}, r).isnull == d.isnull
+@test rcopy(NullableArray{Date}, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
+@test rcopy(NullableArray, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
+@test rcopy(R"identical(as.Date($s), $d)")
+@test rcopy(R"identical(as.character($d), $s)")
 
-# s = NullableArray(["0001-01-01"], [true])
-# d = NullableArray(Date.(s.values), s.isnull)
-# r = RObject(d)
-# @test isa(r,RObject{RealSxp})
-# @test rcopy(getclass(r)) == "Date"
-# @test length(r) == length(d)
-# @test size(r) == size(d)
-# @test all(rcopy(NullableArray{Date}, r).isnull)
-# @test rcopy(R"identical(as.Date(NA), $d)")
-# @test rcopy(R"identical(as.character(NA), $s)")
+s = NullableArray(["0001-01-01"], [true])
+d = NullableArray(Date.(s.values), s.isnull)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == "Date"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test all(rcopy(NullableArray{Date}, r).isnull)
+@test rcopy(R"identical(as.Date(NA), $d)")
+@test rcopy(R"identical(as.character(NA), $s)")
 
 
 # dateTime
@@ -150,29 +150,29 @@ r = RObject(d)
 @test rcopy(R"identical(as.character(NA), $s)")
 
 
-# # nullable dateTime
-# s = NullableArray(["0001-01-01", "2012-12-12T12:12:12"], [true, false])
-# d = NullableArray(DateTime.(s.values), s.isnull)
-# r = RObject(d)
-# @test isa(r,RObject{RealSxp})
-# @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
-# @test rcopy(getattrib(r, "tzone")) == "UTC"
-# @test length(r) == length(d)
-# @test size(r) == size(d)
-# @test rcopy(NullableArray{DateTime}, r).isnull == d.isnull
-# @test rcopy(NullableArray{DateTime}, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
-# @test rcopy(NullableArray, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
-# @test rcopy(R"identical(as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S'), $d)")
-# @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
+# nullable dateTime
+s = NullableArray(["0001-01-01", "2012-12-12T12:12:12"], [true, false])
+d = NullableArray(DateTime.(s.values), s.isnull)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
+@test rcopy(getattrib(r, "tzone")) == "UTC"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(NullableArray{DateTime}, r).isnull == d.isnull
+@test rcopy(NullableArray{DateTime}, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
+@test rcopy(NullableArray, r).values[map(!,d.isnull)] == d.values[map(!,d.isnull)]
+@test rcopy(R"identical(as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S'), $d)")
+@test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
-# s = NullableArray(["0001-01-01"], [true])
-# d = NullableArray(DateTime.(s.values), s.isnull)
-# r = RObject(d)
-# @test isa(r,RObject{RealSxp})
-# @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
-# @test rcopy(getattrib(r, "tzone")) == "UTC"
-# @test length(r) == length(d)
-# @test size(r) == size(d)
-# @test all(rcopy(NullableArray{DateTime}, r).isnull)
-# @test rcopy(R"identical(as.POSIXct(NA_character_, 'UTC'), $d)")
-# @test rcopy(R"identical(as.character(NA), $s)")
+s = NullableArray(["0001-01-01"], [true])
+d = NullableArray(DateTime.(s.values), s.isnull)
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
+@test rcopy(getattrib(r, "tzone")) == "UTC"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test all(rcopy(NullableArray{DateTime}, r).isnull)
+@test rcopy(R"identical(as.POSIXct(NA_character_, 'UTC'), $d)")
+@test rcopy(R"identical(as.character(NA), $s)")
