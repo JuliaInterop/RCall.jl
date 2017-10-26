@@ -28,7 +28,7 @@ function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device)
     end
     # ggplot2's plot is displayed after `print` function is invoked,
     # so we have to clear any displayed plots.
-    isdefined(Main, :IJulia) && Main.IJulia.inited && IJuliaHooks.ijulia_displayplots()
+    isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
     nothing
 end
 rprint(r::RObject; stdout::IO=STDOUT, stderr::IO=error_device) = rprint(r.p, stdout=stdout, stderr=stderr)

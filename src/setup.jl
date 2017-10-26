@@ -246,5 +246,5 @@ function __init__()
             !RPrompt.repl_inited(Base.active_repl) && RPrompt.repl_init(Base.active_repl)
 
     # # IJulia hooks
-    isdefined(Main, :IJulia) && Main.IJulia.inited && IJuliaHooks.ijulia_init()
+    isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_init()
 end
