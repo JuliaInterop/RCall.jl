@@ -41,7 +41,7 @@ function rcopytype(s::Ptr{IntSxp})
     if isFactor(s)
         PooledDataArray
     elseif anyna(s)
-        DataArray{Float64}
+        DataArray{Int}
     elseif length(s) == 1
         Int
     else
