@@ -1,10 +1,6 @@
-module Console
-
-import ..REvalutionError
-
-
 # used in flush_output and flush_error
 type ErrorIO <: IO end
+const error_device = ErrorIO()
 
 
 # mainly use to prevent flush_output stealing rprint output
@@ -61,7 +57,3 @@ function unlock_output()
     global output_is_locked
     output_is_locked = false
 end
-
-end # Console
-
-const error_device = Console.ErrorIO()

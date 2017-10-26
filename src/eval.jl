@@ -52,8 +52,8 @@ try/catch block, returning a Sxp pointer.
 """
 function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv); stdout::IO=STDOUT, stderr::IO=error_device)
     val, status = tryEval(expr, env)
-    Console.flush_output(stdout)
-    Console.flush_error(stderr, is_warning = status == 0)
+    flush_output(stdout)
+    flush_error(stderr, is_warning = status == 0)
     # in repl mode, error buffer is dumped to STDERR, so need to throw an error
     # to stop the evaluation
     status != 0 && throw(REvalutionError())

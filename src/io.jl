@@ -6,7 +6,7 @@ function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device)
     # below mirrors Rf_PrintValue
     env = protect(newEnvironment(Const.GlobalEnv))
     defineVar(:x, s, env)
-    Console.lock_output()
+    lock_output()
     if isObject(s) || isFunction(s)
         if isS4(s)
             _, status = tryEval(rlang_p(findNamespace("methods")[:show], :x), env)
@@ -20,10 +20,10 @@ function rprint{S<:Sxp}(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device)
     end
     defineVar(:x, Const.NilValue, env)
     try
-        Console.flush_output(stdout, force=true)
-        Console.flush_error(stderr, is_warning = status == 0)
+        flush_output(stdout, force=true)
+        flush_error(stderr, is_warning = status == 0)
     finally
-        Console.unlock_output()
+        unlock_output()
         unprotect(2)
     end
     # ggplot2's plot is displayed after `print` function is invoked,

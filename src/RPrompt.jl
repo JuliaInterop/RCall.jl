@@ -2,7 +2,6 @@ module RPrompt
 
 import Base: LineEdit, REPL, REPLCompletions
 import DataStructures: OrderedDict
-import ..Console
 import ..REvalutionError
 import ..Const
 import ..RCall:
