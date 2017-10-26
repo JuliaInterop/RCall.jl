@@ -289,3 +289,17 @@ end
 # Function
 
 # check src/callback.jl for `sexp(::ClosSxp, ::Function)`
+
+
+# R formula objects
+# TODO: never used
+function sexp(::Type{ExprSxp}, f::Formula)
+    s = protect(rlang_p(:~,rlang_formula(f.lhs),rlang_formula(f.rhs)))
+    try
+        setattrib!(s,Const.ClassSymbol,sexp("formula"))
+        setattrib!(s,".Environment",Const.GlobalEnv)
+    finally
+        unprotect(1)
+    end
+    s
+end

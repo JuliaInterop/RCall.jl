@@ -32,9 +32,11 @@ using RCall
 
 tests = ["basic",
          "convert/base",
-         "convert/dataframe",
-         "convert/datatable",
          "convert/datetime",
+         "convert/dataframe",
+         # "convert/datatable",
+         "convert/categorical",
+         "convert/nullable",
          "convert/axisarray",
          "convert/namedarray",
          "render",

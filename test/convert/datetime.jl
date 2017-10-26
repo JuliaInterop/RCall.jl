@@ -1,3 +1,6 @@
+using DataArrays
+using NullableArrays
+
 # date
 s = "2012-12-12"
 d = Date(s)
