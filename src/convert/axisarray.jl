@@ -2,7 +2,7 @@ function rcopy(::Type{AxisArray}, r::Ptr{S}) where S<:VectorSxp
     dnames = getattrib(r, Const.DimNamesSymbol)
     isnull(dnames) && error("r has no dimnames")
     dsym = rcopy(Array{Symbol}, getnames(dnames))
-    AxisArray(rcopy(Array, r), [Axis{dsym[i]}(rcopy(n)) for (i,n) in enumerate(dnames)]...)
+    AxisArray(rcopy(DataArray, r), [Axis{dsym[i]}(rcopy(n)) for (i,n) in enumerate(dnames)]...)
 end
 
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
