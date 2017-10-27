@@ -238,21 +238,21 @@ RObject{RealSxp}
 mutable struct RObject{S<:Sxp}
     p::Ptr{S}
     # used for pre-defined constants
-    function (::Type{RObject{S}}){S}()
+    function RObject{S}() where S
         new{S}(C_NULL)
     end
-    function (::Type{RObject{S}}){S}(p::Ptr{S})
+    function RObject{S}(p::Ptr{S}) where S
         preserve(p)
         r = new{S}(p)
         finalizer(r, release)
         r
     end
     # SymSxps are not garbage collected, so preserve not necessary.
-    (::Type{RObject{S}}){S}(p::Ptr{SymSxp}) = new{S}(p)
+    RObject{S}(p::Ptr{SymSxp}) where S = new{S}(p)
 end
 
 
-RObject{S<:Sxp}(p::Ptr{S}) = RObject{S}(p)
+RObject(p::Ptr{S}) where S<:Sxp = RObject{S}(p)
 RObject(x::RObject) = x
 
 """
@@ -269,8 +269,8 @@ eltype(::Type{StrSxp}) = Ptr{CharSxp}
 eltype(::Type{VecSxp}) = Ptr{UnknownSxp}
 eltype(::Type{ExprSxp}) = Ptr{UnknownSxp}
 
-eltype{S<:Sxp}(s::Ptr{S}) = eltype(S)
-eltype{S<:Sxp}(s::RObject{S}) = eltype(S)
+eltype(s::Ptr{S}) where S<:Sxp = eltype(S)
+eltype(s::RObject{S}) where S<:Sxp = eltype(S)
 
 
 """
@@ -279,13 +279,13 @@ Prevent garbage collection of an R object. Object can be released via `release`.
 This is slower than `protect`, as it requires searching an internal list, but
 more flexible.
 """
-preserve{S<:Sxp}(p::Ptr{S}) = ccall((:R_PreserveObject,libR), Void, (Ptr{S},), p)
+preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject,libR), Void, (Ptr{S},), p)
 
 """
 Release object that has been gc protected by `preserve`.
 """
-release{S<:Sxp}(p::Ptr{S}) = ccall((:R_ReleaseObject,libR),Void,(Ptr{S},),p)
-release{S<:Sxp}(r::RObject{S}) = release(r.p)
+release(p::Ptr{S}) where S<:Sxp = ccall((:R_ReleaseObject,libR),Void,(Ptr{S},),p)
+release(r::RObject{S}) where S<:Sxp = release(r.p)
 
 """
 Stack-based protection of garbage collection of R objects. Objects are
@@ -294,7 +294,7 @@ released via `unprotect`. Returns the same pointer, allowing inline use.
 This is faster than `preserve`, but more restrictive. Really only useful
 inside functions.
 """
-protect{S<:Sxp}(p::Ptr{S}) = ccall((:Rf_protect,libR), Ptr{S}, (Ptr{S},), p)
+protect(p::Ptr{S}) where S<:Sxp = ccall((:Rf_protect,libR), Ptr{S}, (Ptr{S},), p)
 
 """
 Release last `n` objects gc-protected by `protect`.
@@ -334,8 +334,8 @@ function sexp(p::Ptr{UnknownSxp})
     styp = typs[typ+1]
     Ptr{styp}(p)
 end
-sexp{S<:Sxp}(s::Ptr{S}) = s
+sexp(s::Ptr{S}) where S<:Sxp = s
 sexp(r::RObject) = r.p
 
-sexp{S<:Sxp}(::Type{S},s::Ptr{S}) = s
-sexp{S<:Sxp}(::Type{S},r::RObject{S}) = r.p
+sexp(::Type{S},s::Ptr{S}) where S<:Sxp = s
+sexp(::Type{S},r::RObject{S}) where S<:Sxp = r.p

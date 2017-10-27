@@ -4,7 +4,7 @@ values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more
 symbols. See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
 """
-function bound{S<:Sxp}(s::Ptr{S})
+function bound(s::Ptr{S}) where S<:Sxp
     u = unsafe_load(convert(Ptr{UnknownSxp},s))
     (u.info >>> 6) & 0x03
 end
@@ -16,8 +16,7 @@ Sxp methods for `length` return the R length.
 `Rf_xlength` handles Sxps that are not vector-like and R's
 "long vectors", which have a negative value for the `length` member.
 """
-length{S<:Sxp}(s::Ptr{S}) =
-    Int(ccall((:Rf_xlength,libR),Cptrdiff_t,(Ptr{S},),s))
+length(s::Ptr{S}) where S<:Sxp = Int(ccall((:Rf_xlength,libR),Cptrdiff_t,(Ptr{S},),s))
 length(r::RObject) = length(r.p)
 
 ## Predicates applied to an Sxp
@@ -31,7 +30,7 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isUserBinop,:isValidString,:isValidStringF,:isVector,
             :isVectorAtomic,:isVectorizable,:isVectorList)
     @eval begin
-        $sym{S<:Sxp}(s::Ptr{S}) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{SxpPtrInfo},),s)
+        $sym(s::Ptr{S}) where S<:Sxp = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{SxpPtrInfo},),s)
         $sym(r::RObject) = $sym(r.p)
     end
 end
@@ -56,14 +55,14 @@ as `-2147483648`, the minimum 32-bit integer value.  Internally a `LglSxp` is
 represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 `-2147483648` is `NA` and all other values represent `true`.
 """
-unsafe_vec{S<:VectorSxp}(s::Ptr{S}) = unsafe_wrap(Array, dataptr(s), length(s))
-unsafe_vec{S<:VectorSxp}(r::RObject{S}) = unsafe_vec(r.p)
+unsafe_vec(s::Ptr{S}) where S<:VectorSxp = unsafe_wrap(Array, dataptr(s), length(s))
+unsafe_vec(r::RObject{S}) where S<:VectorSxp = unsafe_vec(r.p)
 
 """
 The same as `unsafe_vec`, except returns an appropriately sized array.
 """
-unsafe_array{S<:VectorSxp}(s::Ptr{S}) =  unsafe_wrap(Array, dataptr(s), size(s))
-unsafe_array{S<:VectorSxp}(r::RObject{S}) = unsafe_array(r.p)
+unsafe_array(s::Ptr{S}) where S<:VectorSxp =  unsafe_wrap(Array, dataptr(s), size(s))
+unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
 
 # used in indexing
 start(s::Ptr{NilSxp}) = 0
@@ -80,13 +79,13 @@ Indexing into `VectorSxp` types uses Julia indexing into the `vec` result,
 except for `StrSxp` and the `VectorListSxp` types, which must apply `sexp`
 to the `Ptr{Void}` obtained by indexing into the `vec` result.
 """
-getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Integer) = getindex(unsafe_vec(s),I)
-getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::Integer...) = getindex(unsafe_array(s),I...)
-getindex{S<:VectorAtomicSxp}(s::Ptr{S}, I::AbstractVector) = getindex(unsafe_vec(s),I)
+getindex(s::Ptr{S}, I::Integer) where S<:VectorAtomicSxp = getindex(unsafe_vec(s),I)
+getindex(s::Ptr{S}, I::Integer...) where S<:VectorAtomicSxp = getindex(unsafe_array(s),I...)
+getindex(s::Ptr{S}, I::AbstractVector) where S<:VectorAtomicSxp = getindex(unsafe_vec(s),I)
 
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::Integer) = sexp(getindex(unsafe_vec(s),I))
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::Integer...) = sexp(getindex(unsafe_array(s),I...))
-getindex{S<:VectorListSxp}(s::Ptr{S}, I::AbstractVector) = map(sexp, getindex(unsafe_vec(s),I))
+getindex(s::Ptr{S}, I::Integer) where S<:VectorListSxp = sexp(getindex(unsafe_vec(s),I))
+getindex(s::Ptr{S}, I::Integer...) where S<:VectorListSxp = sexp(getindex(unsafe_array(s),I...))
+getindex(s::Ptr{S}, I::AbstractVector) where S<:VectorListSxp = map(sexp, getindex(unsafe_vec(s),I))
 
 """
 String indexing finds the first element with the matching name
@@ -100,19 +99,19 @@ function getindex{S<:VectorSxp}(s::Ptr{S}, label::AbstractString)
     end
     throw(BoundsError())
 end
-getindex{S<:VectorSxp}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
+getindex(s::Ptr{S}, label::Symbol) where S<:VectorSxp = getindex(s,string(label))
 
-getindex{S<:VectorAtomicSxp}(r::RObject{S}, I...) = getindex(sexp(r), I...)
-getindex{S<:VectorAtomicSxp}(r::RObject{S}, I::AbstractArray) = getindex(sexp(r), I)
+getindex(r::RObject{S}, I...) where S<:VectorAtomicSxp = getindex(sexp(r), I...)
+getindex(r::RObject{S}, I::AbstractArray) where S<:VectorAtomicSxp = getindex(sexp(r), I)
 
-getindex{S<:VectorListSxp}(r::RObject{S}, I...) = RObject(getindex(sexp(r), I...))
-getindex{S<:VectorListSxp}(r::RObject{S}, I::AbstractArray) = map(RObject,getindex(sexp(r),I))
+getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
+getindex(r::RObject{S}, I::AbstractArray) where S<:VectorListSxp = map(RObject,getindex(sexp(r),I))
 
 
-function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer...)
+function setindex!(s::Ptr{S}, value, I::Integer...) where S<:VectorAtomicSxp
     setindex!(unsafe_array(s), value, I...)
 end
-function setindex!{S<:VectorAtomicSxp}(s::Ptr{S}, value, I::Integer)
+function setindex!(s::Ptr{S}, value, I::Integer) where S<:VectorAtomicSxp
     setindex!(unsafe_vec(s), value, I)
 end
 function setindex!(s::Ptr{StrSxp}, value::Ptr{CharSxp}, key::Integer)
@@ -126,7 +125,7 @@ function setindex!(s::Ptr{StrSxp}, value::AbstractString, key::Integer)
     setindex!(s,sexp(CharSxp,value),key)
 end
 
-function setindex!{S<:Union{VecSxp,ExprSxp},T<:Sxp}(s::Ptr{S}, value::Ptr{T}, key::Integer)
+function setindex!(s::Ptr{S}, value::Ptr{T}, key::Integer) where {S<:Union{VecSxp,ExprSxp}, T<:Sxp}
     1 <= key <= length(s) || throw(BoundsError())
     ccall((:SET_VECTOR_ELT,libR), Ptr{T},
           (Ptr{S},Cptrdiff_t, Ptr{T}),
@@ -138,7 +137,7 @@ end
 """
 Set element of a VectorSxp by a label.
 """
-function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
+function setindex!(s::Ptr{S}, value::Ptr{T}, label::AbstractString) where {S<:VectorSxp, T<:Sxp}
     ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(String, l) == label
@@ -148,68 +147,68 @@ function setindex!{S<:VectorSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Abstra
     end
     throw(BoundsError())
 end
-setindex!{S<:VectorSxp}(s::Ptr{S}, value, label::Symbol) = setindex!(s, value, string(label))
+setindex!(s::Ptr{S}, value, label::Symbol) where S<:VectorSxp = setindex!(s, value, string(label))
 # for RObjects
-setindex!{S<:VectorSxp}(s::Ptr{S}, value, key) = setindex!(s, sexp(value), key)
-setindex!{S<:VectorSxp}(r::RObject{S}, value, keys...) = setindex!(sexp(r), value, keys...)
+setindex!(s::Ptr{S}, value, key) where S<:VectorSxp = setindex!(s, sexp(value), key)
+setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
 
-start{S<:VectorSxp}(s::Ptr{S}) = 0
-next{S<:VectorSxp}(s::Ptr{S},state) = (state += 1;(s[state],state))
-done{S<:VectorSxp}(s::Ptr{S},state) = state ≥ length(s)
+start(s::Ptr{S}) where S<:VectorSxp = 0
+next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
+done(s::Ptr{S},state) where S<:VectorSxp = state ≥ length(s)
 
-start{S<:VectorSxp}(s::RObject{S}) = start(s.p)
-next{S<:VectorSxp}(s::RObject{S},state) = next(s.p, state)
-done{S<:VectorSxp}(s::RObject{S},state) = done(s.p, state)
+start(s::RObject{S}) where S<:VectorSxp = start(s.p)
+next(s::RObject{S},state) where S<:VectorSxp = next(s.p, state)
+done(s::RObject{S},state) where S<:VectorSxp = done(s.p, state)
 
 
 # PairListSxps
 
-cdr{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CDR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
-car{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:CAR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
-tag{S<:PairListSxp}(s::Ptr{S}) = sexp(ccall((:TAG,libR),Ptr{UnknownSxp},(Ptr{S},),s))
+cdr(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:CDR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
+car(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:CAR,libR),Ptr{UnknownSxp},(Ptr{S},),s))
+tag(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:TAG,libR),Ptr{UnknownSxp},(Ptr{S},),s))
 
-function setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
+function setcar!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
     ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
-setcar!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::RObject{T}) = setcar!(s,sexp(c))
+setcar!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcar!(s,sexp(c))
 
-function settag!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
+function settag!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
     ccall((:SET_TAG,libR),Void,(Ptr{S},Ptr{T}),s,c)
     nothing
 end
-settag!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::RObject{T}) = settag!(s,sexp(c))
+settag!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = settag!(s,sexp(c))
 
-function setcdr!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::Ptr{T})
+function setcdr!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
     ccall((:SETCDR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
-setcdr!{S<:PairListSxp,T<:Sxp}(s::Ptr{S}, c::RObject{T}) = setcdr!(s,sexp(c))
+setcdr!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcdr!(s,sexp(c))
 
-start{S<:PairListSxp}(s::Ptr{S}) = s
-function next{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T})
+start(s::Ptr{S}) where S<:PairListSxp = s
+function next(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
     t = tag(state)
     c = car(state)
     (t,c), cdr(state)
 end
-done{S<:PairListSxp,T<:PairListSxp}(s::Ptr{S},state::Ptr{T}) = state == sexp(Const.NilValue)
+done(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
-start{S<:PairListSxp}(s::RObject{S}) = start(s.p)
-next{S<:PairListSxp}(s::RObject{S},state) = next(s.p, state)
-done{S<:PairListSxp}(s::RObject{S},state) = done(s.p, state)
+start(s::RObject{S}) where S<:PairListSxp = start(s.p)
+next(s::RObject{S},state) where S<:PairListSxp = next(s.p, state)
+done(s::RObject{S},state) where S<:PairListSxp = done(s.p, state)
 
 "extract the i-th element of a PairListSxp"
-function getindex{S<:PairListSxp}(l::Ptr{S},I::Integer)
+function getindex(l::Ptr{S},I::Integer) where S<:PairListSxp
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
         l = cdr(l)
     end
     car(l)
 end
-getindex{S<:PairListSxp}(r::RObject{S},I::Integer) = RObject(getindex(sexp(r),I))
+getindex(r::RObject{S},I::Integer) where S<:PairListSxp = RObject(getindex(sexp(r),I))
 
 "extract an element from a PairListSxp by label"
-function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
+function getindex(s::Ptr{S}, label::AbstractString) where S<:PairListSxp
     ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(String, l) == label
@@ -218,25 +217,25 @@ function getindex{S<:PairListSxp}(s::Ptr{S}, label::AbstractString)
     end
     throw(BoundsError())
 end
-getindex{S<:PairListSxp}(s::Ptr{S}, label::Symbol) = getindex(s,string(label))
-getindex{S<:PairListSxp}(s::RObject{S}, label) = RObject(getindex(s.p,label))
+getindex(s::Ptr{S}, label::Symbol) where S<:PairListSxp = getindex(s,string(label))
+getindex(s::RObject{S}, label) where S<:PairListSxp = RObject(getindex(s.p,label))
 
 "assign value v to the i-th element of a PairListSxp"
-function setindex!{S<:PairListSxp,T<:Sxp}(l::Ptr{S},v::Ptr{T},I::Integer)
+function setindex!(l::Ptr{S},v::Ptr{T},I::Integer) where {S<:PairListSxp, T<:Sxp}
     1 ≤ I ≤ length(l) || throw(BoundsError())
     for i in 2:I
         l = cdr(l)
     end
     setcar!(l,v)
 end
-function setindex!{S<:PairListSxp}(s::Ptr{S}, value, key::Integer)
+function setindex!(s::Ptr{S}, value, key::Integer) where S<:PairListSxp
     setindex!(s,sexp(value),key)
 end
 
 """
 Set element of a PairListSxp by a label.
 """
-function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::AbstractString)
+function setindex!(s::Ptr{S}, value::Ptr{T}, label::AbstractString) where {S<:PairListSxp, T<:Sxp}
     ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(String, l) == label
@@ -246,10 +245,10 @@ function setindex!{S<:PairListSxp, T<:Sxp}(s::Ptr{S}, value::Ptr{T}, label::Abst
     end
     throw(BoundsError())
 end
-setindex!{S<:PairListSxp}(s::Ptr{S}, value, label::Symbol) = setindex!(s, value, string(label))
+setindex!(s::Ptr{S}, value, label::Symbol) where S<:PairListSxp = setindex!(s, value, string(label))
 # for RObjects
-setindex!{S<:PairListSxp}(s::Ptr{S}, value, key) = setindex!(s, sexp(value), key)
-setindex!{S<:PairListSxp}(r::RObject{S}, value, key) = setindex!(r.p, value, key)
+setindex!(s::Ptr{S}, value, key) where S<:PairListSxp = setindex!(s, sexp(value), key)
+setindex!(r::RObject{S}, value, key) where S<:PairListSxp = setindex!(r.p, value, key)
 
 
 # S4Sxp
@@ -282,7 +281,7 @@ setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(s.p, value, sym)
 function getattrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
     sexp(ccall((:Rf_getAttrib,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{SymSxp}),s,sym))
 end
-getattrib{S<:Sxp}(s::Ptr{S}, sym) = getattrib(s,sexp(SymSxp,sym))
+getattrib(s::Ptr{S}, sym) where S<:Sxp = getattrib(s,sexp(SymSxp,sym))
 getattrib(r::RObject, sym) = RObject(getattrib(r.p,sym))
 
 "Set a particular attribute of an RObject"
@@ -290,16 +289,16 @@ function setattrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T})
     ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
 end
-setattrib!{S<:Sxp}(s::Ptr{S}, sym, t) = setattrib!(s, sexp(SymSxp,sym), sexp(t))
+setattrib!(s::Ptr{S}, sym, t) where S<:Sxp = setattrib!(s, sexp(SymSxp,sym), sexp(t))
 setattrib!(r::RObject, sym, t) = setattrib!(r.p, sym, t)
 
 attributes(s::SxpHead) = sexp(convert(Ptr{SxpHead}, s.attrib))
 attributes(s::Sxp) = attributes(s.head)
-attributes{S<:Sxp}(s::Ptr{S}) = attributes(unsafe_load(s))
-attributes{S<:Sxp}(s::RObject{S}) = RObject(attributes(s.p))
+attributes(s::Ptr{S}) where S<:Sxp = attributes(unsafe_load(s))
+attributes(s::RObject) = RObject(attributes(s.p))
 
 
-function size{S<:Sxp}(s::Ptr{S})
+function size(s::Ptr{S}) where S<:Sxp
     isArray(s) || return (length(s),)
     tuple(convert(Array{Int},unsafe_vec(getattrib(s,Const.DimSymbol)))...)
 end
@@ -309,7 +308,7 @@ size(r::RObject) = size(sexp(r))
 """
 Returns the names of an R vector.
 """
-getnames{S<:Sxp}(s::Ptr{S}) = getattrib(s,Const.NamesSymbol)
+getnames(s::Ptr{S}) where S<:Sxp = getattrib(s,Const.NamesSymbol)
 getnames(r::RObject) = RObject(getnames(sexp(r)))
 
 
@@ -321,13 +320,13 @@ names(r::RObject) = rcopy(Vector{Symbol}, getnames(sexp(r)))
 """
 Set the names of an R vector.
 """
-setnames!{S<:Sxp}(s::Ptr{S}, n::Ptr{StrSxp}) = setattrib!(s,Const.NamesSymbol,n)
-setnames!(r::RObject,n) = RObject(setnames!(sexp(r),sexp(StrSxp,n)))
+setnames!(s::Ptr{S}, n::Ptr{StrSxp}) where S<:Sxp = setattrib!(s,Const.NamesSymbol,n)
+setnames!(r::RObject, n) = RObject(setnames!(sexp(r),sexp(StrSxp,n)))
 
 """
 Returns the class of an R object.
 """
-function getclass{S<:Sxp}(s::Ptr{S}, singleString::Bool=false)
+function getclass(s::Ptr{S}, singleString::Bool=false) where S<:Sxp
     ccall((:R_data_class,libR),Ptr{StrSxp},(Ptr{S},Cint),s,singleString)
 end
 getclass(s::Ptr{CharSxp}, singleString::Bool=false) = Const.NilValue
@@ -337,31 +336,31 @@ getclass(r::RObject, singleString::Bool=false) = RObject(getclass(sexp(r), singl
 """
 Set the class of an R object.
 """
-setclass!{S<:Sxp}(s::Ptr{S},c::Ptr{StrSxp}) = setattrib!(s,Const.ClassSymbol,c)
+setclass!(s::Ptr{S},c::Ptr{StrSxp}) where S<:Sxp = setattrib!(s,Const.ClassSymbol,c)
 setclass!(r::RObject,c) = RObject(setclass!(sexp(r)),sexp(StrSxp,c))
 
 
 allocList(n::Int) = ccall((:Rf_allocList,libR),Ptr{ListSxp},(Cint,),n)
-allocArray{S<:Sxp}(::Type{S}, n::Integer) =
+allocArray(::Type{S}, n::Integer) where S<:Sxp =
     ccall((:Rf_allocVector,libR),Ptr{S},(Cint,Cptrdiff_t),sexpnum(S),n)
 
-allocArray{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer) =
+allocArray(::Type{S}, n1::Integer, n2::Integer) where S<:Sxp =
     ccall((:Rf_allocMatrix,libR),Ptr{S},(Cint,Cint,Cint),sexpnum(S),n1,n2)
 
-allocArray{S<:Sxp}(::Type{S}, n1::Integer, n2::Integer, n3::Integer) =
+allocArray(::Type{S}, n1::Integer, n2::Integer, n3::Integer) where S<:Sxp =
     ccall((:Rf_alloc3DArray,libR),Ptr{S},(Cint,Cint,Cint,Cint),sexpnum(S),n1,n2,n3)
 
-function allocArray{S<:Sxp}(::Type{S}, dims::Integer...)
+function allocArray(::Type{S}, dims::Integer...) where S<:Sxp
     sdims = sexp(IntSxp,[dims...])
     ccall((:Rf_allocArray,libR),Ptr{S},(Cint,Ptr{IntSxp}),sexpnum(S),sdims)
 end
 
 
-isnull{S<:Sxp}(s::Ptr{S}) = isNull(s)
+isnull(s::Ptr{S}) where S<:Sxp = isNull(s)
 """
 Check if values correspond to R's NULL object.
 """
-isnull{S<:Sxp}(r::RObject{S}) = isnull(r.p)
+isnull(r::RObject) = isnull(r.p)
 
 """
 NA element for each type
@@ -372,7 +371,7 @@ naeltype(::Type{RealSxp}) = Const.NaReal
 naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 naeltype(::Type{VecSxp}) = sexp(LglSxp,Const.NaInt) # used for setting
-naeltype{S<:Sxp}(::Type{S}) = sexp(LglSxp,Const.NaInt)
+naeltype(::Type{S}) where S<:Sxp = sexp(LglSxp,Const.NaInt)
 
 """
 Check if a value corresponds to R's sentinel NA values.
@@ -382,12 +381,12 @@ isNA(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
 isNA(x::Float64) = x === Const.NaReal
 isNA(x::Int32) = x == Const.NaInt
 isNA(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
-isNA{S<:VectorSxp}(s::Ptr{S}) = length(s) == 1 ? isNA(s[1]) : false
+isNA(s::Ptr{S}) where S<:VectorSxp = length(s) == 1 ? isNA(s[1]) : false
 # all other values are consided as non-NA.
 isNA(s::Any) = false
 
-isna{S<:VectorSxp}(s::Ptr{S}, i::Integer) = isNA(s[i])
-isna{S<:VectorSxp}(s::Ptr{S}) = reshape(BitArray([isNA(a) for a in s]), size(s))
+isna(s::Ptr{S}, i::Integer) where S<:VectorSxp = isNA(s[i])
+isna(s::Ptr{S}) where S<:VectorSxp = reshape(BitArray([isNA(a) for a in s]), size(s))
 """
 Check if the ith member of s coorespond to R's NA values.
 """
@@ -397,7 +396,7 @@ Check if the members of a vector are NA values. Always return a BitArray.
 """
 isna(r::RObject) = isna(r.p)
 
-function anyna{S<:VectorSxp}(s::Ptr{S})
+function anyna(s::Ptr{S}) where S<:VectorSxp
     for a in s
         if isNA(a)
             return true
@@ -408,7 +407,7 @@ end
 """
 Check if there are any NA values in the vector.
 """
-anyna{S<:VectorSxp}(r::RObject{S}) = anyna(r.p)
+anyna(r::RObject{S}) where S<:VectorSxp = anyna(r.p)
 
 
 # StrSxp
@@ -508,7 +507,7 @@ getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"
 
 
 "Set the variable .Last.value to a given value"
-function set_last_value{S<:Sxp}(s::Ptr{S})
+function set_last_value(s::Ptr{S}) where S<:Sxp
     ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
     nothing
 end

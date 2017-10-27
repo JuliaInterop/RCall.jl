@@ -55,4 +55,4 @@ a Symbol.
 """
 rcall(f,args...;kwargs...) = RObject(rcall_p(f,args...;kwargs...))
 
-(f::RObject{S}){S<:FunctionSxp}(args...;kwargs...) = rcall(f,args...;kwargs...)
+(f::RObject{S})(args...;kwargs...) where S<:FunctionSxp = rcall(f,args...;kwargs...)
