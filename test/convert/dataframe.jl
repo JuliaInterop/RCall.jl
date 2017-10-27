@@ -1,4 +1,5 @@
 using DataFrames
+using CategoricalArrays
 
 # DataFrame
 attenu = rcopy(DataFrame,reval(:attenu))
@@ -8,9 +9,13 @@ attenu = rcopy(DataFrame,reval(:attenu))
 @test rcopy(rcall(:dim, RObject(attenu[1:2, :]))) == [2, 5]
 @test rcopy(rcall(:dim, RObject(view(attenu, 1:2)))) == [2, 5]
 dist = attenu[:dist]
-@test isa(dist,DataArray{Float64})
+@test isa(dist,Array{Float64})
 station = attenu[:station]
-@test isa(station,PooledDataArray)
+if Pkg.installed("CategoricalArrays") < v"0.2.0"
+    @test isa(station, NullableCategoricalArray)
+else
+    @test isa(station, CategoricalArray)
+end
 
 # issue #186
 df = R"""data.frame(dates = as.Date(c("2017-04-14", "2014-04-17")))"""

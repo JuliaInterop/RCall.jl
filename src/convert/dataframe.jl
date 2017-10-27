@@ -6,9 +6,7 @@ function rcopy(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true) where T<:Abstract
     if sanitize
         vnames = [Symbol(replace(string(v), '.', '_')) for v in vnames]
     end
-    DataFrame(
-        Any[isFactor(c) ? rcopy(PooledDataArray, c) : rcopy(DataArray, c) for c in s],
-        vnames)
+    DataFrame([rcopy(c) for c in s], vnames)
 end
 
 ## DataFrame to sexp conversion.
