@@ -9,7 +9,7 @@ using NullableArrays
 # NullableArrays
 v110 = rcopy(NullableArray,reval("c(1L, NA)"))
 @test isa(v110,NullableVector)
-@test eltype(v110) == Nullable{Int32}
+@test eltype(v110) == Nullable{Int}
 @test isnull(rcopy(NullableArray, RObject(v110[2]))[1])
 
 # bool

@@ -108,7 +108,7 @@ function rcopytype(s::Ptr{RawSxp})
 end
 
 # Default behaviors of copying R vectors to arrays
-for (J,S) in ((:Cint,:IntSxp),
+for (J,S) in ((:Int,:IntSxp),
                  (:Float64, :RealSxp),
                  (:Complex128, :CplxSxp),
                  (:Bool, :LglSxp),
