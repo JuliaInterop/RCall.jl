@@ -38,7 +38,7 @@ end
 
 
 ## PooledDataArray to sexp conversion.
-function sexp{T<:AbstractString,R<:Integer}(::Type{IntSxp}, v::PooledDataArray{T,R})
+function sexp(::Type{IntSxp}, v::PooledDataArray{T,R}) where {T<:AbstractString,R<:Integer}
     rv = protect(sexp(IntSxp, v.refs))
     try
         for (i,r) = enumerate(v.refs)

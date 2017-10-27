@@ -1,4 +1,4 @@
-function rcopy{S<:VectorSxp}(::Type{AxisArray}, r::Ptr{S})
+function rcopy(::Type{AxisArray}, r::Ptr{S}) where S<:VectorSxp
     dnames = getattrib(r, Const.DimNamesSymbol)
     isnull(dnames) && error("r has no dimnames")
     dsym = rcopy(Array{Symbol}, getnames(dnames))

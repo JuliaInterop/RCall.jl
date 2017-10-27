@@ -1,7 +1,7 @@
 # conversion methods for NullableArrays, CategoricalArrays and DataTables
 
 # DataTable
-function rcopy{T<:AbstractDataTable}(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true)
+function rcopy(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true) where T<:AbstractDataTable
     isFrame(s) || error("s is not an R data frame")
     vnames = rcopy(Vector{Symbol},getnames(s))
     if sanitize

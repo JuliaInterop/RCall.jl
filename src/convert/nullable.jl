@@ -1,22 +1,22 @@
 # conversion methods for NullableArrays
 
-function rcopy{T,S<:Sxp}(::Type{Nullable{T}}, s::Ptr{S})
+function rcopy(::Type{Nullable{T}}, s::Ptr{S}) where {T,S<:Sxp}
     length(s) == 1 || error("length of s must be 1.")
     rcopy(NullableArray{T}, s)[1]
 end
 
-function rcopy{S<:VectorSxp}(::Type{Nullable}, s::Ptr{S})
+function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:VectorSxp
     rcopy(Nullable{eltype(S)}, s)
 end
 
-function rcopy{S<:StrSxp}(::Type{Nullable}, s::Ptr{S})
+function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:StrSxp
     rcopy(Nullable{String}, s)
 end
 
-function rcopy{T,S<:VectorSxp}(::Type{NullableArray{T}}, s::Ptr{S})
+function rcopy(::Type{NullableArray{T}}, s::Ptr{S}) where {T,S<:VectorSxp}
     NullableArray(rcopy(Array{T},s), isna(s))
 end
-function rcopy{S<:VectorSxp}(::Type{NullableArray}, s::Ptr{S})
+function rcopy(::Type{NullableArray}, s::Ptr{S}) where S<:VectorSxp
     NullableArray(rcopy(Array,s), isna(s))
 end
 

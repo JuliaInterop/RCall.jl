@@ -1,6 +1,6 @@
 # conversion methods for DataFrames
 
-function rcopy{T<:AbstractDataFrame}(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true)
+function rcopy(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true) where T<:AbstractDataFrame
     isFrame(s) || error("s is not an R data frame")
     vnames = rcopy(Array{Symbol},getnames(s))
     if sanitize

@@ -3,9 +3,9 @@
 """
 `rcopy(r)` copies the contents of an R object into a corresponding canonical Julia type.
 """
-rcopy{S<:Sxp}(r::RObject{S}; kwargs...) = rcopy(r.p; kwargs...)
+rcopy(r::RObject{S}; kwargs...) where S<:Sxp = rcopy(r.p; kwargs...)
 
-function rcopy{S<:Sxp}(s::Ptr{S}; kwargs...)
+function rcopy(s::Ptr{S}; kwargs...) where S<:Sxp
     protect(s)
     try
         class = rcopy(Symbol, getclass(s, true))
@@ -156,7 +156,7 @@ function rcopytype(s::Ptr{VecSxp}; kwargs...)
 end
 
 # FunctionSxp
-rcopy{S<:FunctionSxp}(s::Ptr{S}) = rcopy(Function,s)
+rcopy(s::Ptr{S}) where S<:FunctionSxp = rcopy(Function,s)
 
 # TODO: LangSxp
 rcopy(l::Ptr{LangSxp}) = RObject(l)
@@ -188,7 +188,7 @@ sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
 
 # PooledDataArray
 sexp(a::PooledDataArray) = sexp(IntSxp,a)
-sexp{S<:AbstractString}(a::PooledDataArray{S}) = sexp(IntSxp,a)
+sexp(a::PooledDataArray{S}) where S<:AbstractString = sexp(IntSxp,a)
 
 # Number, Array and DataArray
 for (J,S) in ((:Integer,:IntSxp),
@@ -221,14 +221,15 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
     @eval begin
-        sexp{T<:$J}(x::Nullable{T}) = sexp($S, x)
-        sexp{T<:$J}(v::NullableArray{T}) = sexp($S, v)
+        sexp(x::Nullable{T}) where T<:$J = sexp($S, x)
+        sexp(v::NullableArray{T}) where T<:$J = sexp($S, v)
     end
 end
 
 # RawSxp
-sexp(a::AbstractArray{UInt8, N}) where N = sexp(RawSxp, a)
-sexp(a::AbstractDataArray{UInt8, N}) where N = sexp(RawSxp, a)
+sexp(a::AbstractArray{UInt8}) = sexp(RawSxp, a)
+sexp(a::AbstractDataArray{UInt8}) = sexp(RawSxp, a)
+sexp(a::NullableArray{UInt8}) = sexp(RawSxp, a)
 sexp(x::UInt8) = sexp(RawSxp, x)
 
 
