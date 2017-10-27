@@ -179,8 +179,8 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
     @eval begin
-        sexp{T<:$J}(a::AbstractArray{T}) = sexp($S,a)
-        sexp{T<:$J}(a::DataArray{T}) = sexp($S,a)
+        sexp(a::AbstractArray{T}) where T<:$J = sexp($S,a)
+        sexp(a::AbstractDataArray{T}) where T<:$J = sexp($S,a)
         sexp(v::$J) = sexp($S,v)
     end
 end
@@ -209,8 +209,8 @@ for (J,S) in ((:Integer,:IntSxp),
 end
 
 # RawSxp
-sexp(a::AbstractArray{UInt8}) = sexp(RawSxp, a)
-sexp(a::DataArray{UInt8}) = sexp(RawSxp, a)
+sexp(a::AbstractArray{UInt8, N}) where N = sexp(RawSxp, a)
+sexp(a::AbstractDataArray{UInt8, N}) where N = sexp(RawSxp, a)
 sexp(x::UInt8) = sexp(RawSxp, x)
 
 
@@ -230,16 +230,18 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:Complex, :CplxSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
-    @eval sexp{T<:$J}(aa::AxisArray{T}) = sexp($S, aa)
-    @eval sexp{T<:$J}(aa::NamedArray{T}) = sexp($S, aa)
+    @eval sexp(aa::AxisArray{T}) where T<:$J = sexp($S, aa)
+    @eval sexp(aa::NamedArray{T}) where T<:$J = sexp($S, aa)
 end
 
 # DataTime
 sexp(d::Date) = sexp(RealSxp, d)
 sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
+sexp(d::AbstractDataArray{Date}) = sexp(RealSxp, d)
 sexp(d::NullableArray{Date}) = sexp(RealSxp, d)
 sexp(d::DateTime) = sexp(RealSxp, d)
 sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
+sexp(d::AbstractDataArray{DateTime}) = sexp(RealSxp, d)
 sexp(d::NullableArray{DateTime}) = sexp(RealSxp, d)
 
 # Function

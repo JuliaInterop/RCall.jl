@@ -2,6 +2,7 @@ julia 0.6
 Nulls 0.1.0
 DataStructures 0.5.0
 DataFrames 0.10
+DataArrays 0.5.0
 CategoricalArrays 0.1.0
 NullableArrays 0.1.0
 AxisArrays 0.0.6

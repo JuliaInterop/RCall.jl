@@ -40,7 +40,7 @@ function sexp(RealSxp, d::Date)
     setclass!(res, sexp("Date"))
     res
 end
-function sexp(RealSxp, a::AbstractArray{Date})
+function sexp(RealSxp, a::AbstractArray{Date, N}) where N
     res = sexp(RealSxp, map((x) -> Float64(Dates.value(x)) - 719163, a))
     setclass!(res, sexp("Date"))
     res
@@ -51,7 +51,7 @@ function sexp(RealSxp, d::DateTime)
     setattrib!(res, "tzone", sexp("UTC"))
     res
 end
-function sexp(RealSxp, a::AbstractArray{DateTime})
+function sexp(RealSxp, a::AbstractArray{DateTime, N}) where N
     res = sexp(RealSxp, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", sexp("UTC"))

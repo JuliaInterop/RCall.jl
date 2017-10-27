@@ -14,4 +14,8 @@ station = attenu[:station]
 
 # issue #186
 df = R"""data.frame(dates = as.Date(c("2017-04-14", "2014-04-17")))"""
-@test eltype(rcopy(df)[:dates]) == Date
+if Pkg.installed("DataArrays") < v"0.7"
+    @test eltype(rcopy(df)[:dates]) == Date
+else
+    @test eltype(rcopy(df)[:dates]) == Union{Date, Null}
+end
