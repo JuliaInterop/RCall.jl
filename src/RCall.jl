@@ -22,6 +22,12 @@ elseif isdefined(DataArrays, :isna)
     import DataArrays: isna
 end
 
+if isdefined(DataFrames, :anyna)
+    import DataFrames: anyna
+elseif isdefined(DataArrays, :anyna)
+    import DataArrays: anyna
+end
+
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
    ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
