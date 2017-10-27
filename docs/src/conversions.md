@@ -70,7 +70,7 @@ r = RObject(d)
 rcopy(r)
 ```
 
-## DataFrames and DataArrays
+## DataFrames
 
 ```@example 1
 d = DataFrame([[1.0, 4.5, 7.0]], [:x])
@@ -95,17 +95,17 @@ To avoid the sanitization, use `sanitize` option.
 rcopy(R"data.frame(a.b = 1:10)"; sanitize = false)
 ```
 
-## NamedArrays
+## DataArrays
 
 ```@example 1
 # Julia -> R
-aa = NamedArray([1,2,3], [["a", "b", "c"]], [:id])
+aa = DataArray([1,2,3], [true, true, false])
 r = RObject(aa)
 ```
 
 ```@example 1
 # R -> Julia
-rcopy(NamedArray, r)
+rcopy(DataArray, r)
 ```
 
 
