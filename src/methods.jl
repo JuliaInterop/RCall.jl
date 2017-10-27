@@ -38,7 +38,7 @@ end
 """
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
 """
-dataptr{S<:VectorSxp}(s::Ptr{S}) = convert(Ptr{eltype(S)}, s+voffset[])
+dataptr(s::Ptr{S}) where S<:VectorSxp = convert(Ptr{eltype(S)}, s+voffset[])
 
 """
 Represent the contents of a VectorSxp type as a `Vector`.
@@ -90,7 +90,7 @@ getindex(s::Ptr{S}, I::AbstractVector) where S<:VectorListSxp = map(sexp, getind
 """
 String indexing finds the first element with the matching name
 """
-function getindex{S<:VectorSxp}(s::Ptr{S}, label::AbstractString)
+function getindex(s::Ptr{S}, label::AbstractString) where S<:VectorSxp
     ls = getnames(s)
     for (i,l) in enumerate(ls)
         if rcopy(String, l) == label
@@ -131,7 +131,7 @@ function setindex!(s::Ptr{S}, value::Ptr{T}, key::Integer) where {S<:Union{VecSx
           (Ptr{S},Cptrdiff_t, Ptr{T}),
           s, key-1, value)
 end
-function setindex!{S<:Union{VecSxp,ExprSxp}}(s::Ptr{S}, value, key::Integer)
+function setindex!(s::Ptr{S}, value, key::Integer) where {S<:Union{VecSxp,ExprSxp}}
     setindex!(s,sexp(value),key)
 end
 """
@@ -264,7 +264,7 @@ getindex(s::Ptr{S4Sxp}, sym) = getindex(s,sexp(SymSxp, sym))
 getindex(s::RObject{S4Sxp}, sym) = RObject(getindex(s.p,sym))
 
 "extract an element from a S4Sxp by label"
-function setindex!{T<:Sxp}(s::Ptr{S4Sxp}, value::Ptr{T}, sym::Ptr{SymSxp})
+function setindex!(s::Ptr{S4Sxp}, value::Ptr{T}, sym::Ptr{SymSxp}) where T<:Sxp
     protect(value)
     try
         t = rcall_p(findNamespace("methods")[:checkSlotAssignment], s, rcopy(String, sym), value)
@@ -278,14 +278,14 @@ setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(s.p, value, sym)
 
 
 "Return a particular attribute of an RObject"
-function getattrib{S<:Sxp}(s::Ptr{S}, sym::Ptr{SymSxp})
+function getattrib(s::Ptr{S}, sym::Ptr{SymSxp}) where S<:Sxp
     sexp(ccall((:Rf_getAttrib,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{SymSxp}),s,sym))
 end
 getattrib(s::Ptr{S}, sym) where S<:Sxp = getattrib(s,sexp(SymSxp,sym))
 getattrib(r::RObject, sym) = RObject(getattrib(r.p,sym))
 
 "Set a particular attribute of an RObject"
-function setattrib!{S<:Sxp,T<:Sxp}(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T})
+function setattrib!(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T}) where {S<:Sxp, T<:Sxp}
     ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
 end
@@ -448,7 +448,7 @@ function findVarInFrame(e::Ptr{EnvSxp}, s::Ptr{SymSxp})
 end
 findVarInFrame(e, s) = findVarInFrame(sexp(e), sexp(SymSxp, s))
 
-function defineVar{S<:Sxp}(s::Ptr{SymSxp}, v::Ptr{S}, e::Ptr{EnvSxp})
+function defineVar(s::Ptr{SymSxp}, v::Ptr{S}, e::Ptr{EnvSxp}) where S<:Sxp
     ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
     nothing
 end
@@ -464,7 +464,7 @@ getindex(e::Ptr{EnvSxp},s) = getindex(e,sexp(SymSxp,s))
 getindex(e::RObject{EnvSxp},s) = RObject(getindex(sexp(e),s))
 
 "assign value v to symbol s in the environment e"
-function setindex!{S<:Sxp}(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{StrSxp})
+function setindex!(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{StrSxp}) where S<:Sxp
     # `Rf_defineVar` is unsafe to use if the binding is locked.
     # However, `setVarInFrame` is not exported. `base::assign` is
     # an avaliable alternative.

@@ -1,9 +1,9 @@
 # conversion methods for DataArrays, PooledDataArrays
 
-function rcopy{T,S<:VectorSxp}(::Type{DataArray{T}}, s::Ptr{S})
+function rcopy(::Type{DataArray{T}}, s::Ptr{S}) where {T, S<:VectorSxp}
     DataArray(rcopy(Array{T},s), isna(s))
 end
-function rcopy{S<:VectorSxp}(::Type{DataArray}, s::Ptr{S})
+function rcopy(::Type{DataArray}, s::Ptr{S}) where S<:VectorSxp
     DataArray(rcopy(Array,s), isna(s))
 end
 

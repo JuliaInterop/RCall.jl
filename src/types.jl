@@ -308,7 +308,7 @@ Determined from the trailing 5 bits of the first 32-bit word. Is
 a 0-based index into the `info` field of a `SxpHead`.
 """
 sexpnum(h::SxpHead) = h.info & 0x1f
-sexpnum{S<:Sxp}(p::Ptr{S}) = sexpnum(unsafe_load(p))
+sexpnum(p::Ptr{S}) where S<:Sxp = sexpnum(unsafe_load(p))
 
 "vector of R Sxp types"
 const typs = [NilSxp,SymSxp,ListSxp,ClosSxp,EnvSxp,
