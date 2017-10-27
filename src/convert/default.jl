@@ -37,15 +37,33 @@ function rcopytype(s::Ptr{StrSxp})
     end
 end
 
-function rcopytype(s::Ptr{IntSxp})
-    if isFactor(s)
-        PooledDataArray
-    elseif anyna(s)
-        DataArray{Int}
-    elseif length(s) == 1
-        Int
-    else
-        Array{Int}
+if Pkg.installed("CategoricalArrays") < v"0.2.0"
+    function rcopytype(s::Ptr{IntSxp})
+        if isFactor(s)
+            if anyna(s)
+                NullableCategoricalArray
+            else
+                CategoricalArray
+            end
+        elseif anyna(s)
+            DataArray{Int}
+        elseif length(s) == 1
+            Int
+        else
+            Array{Int}
+        end
+    end
+else
+    function rcopytype(s::Ptr{IntSxp})
+        if isFactor(s)
+            CategoricalArray
+        elseif anyna(s)
+            DataArray{Int}
+        elseif length(s) == 1
+            Int
+        else
+            Array{Int}
+        end
     end
 end
 
