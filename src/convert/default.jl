@@ -28,10 +28,10 @@ rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
 
 # StrSxp
 function rcopytype(s::Ptr{StrSxp})
-    if anyna(s)
-        DataArray{String}
-    elseif length(s) == 1
+    if length(s) == 1
         String
+    elseif anyna(s)
+        DataArray{String}
     else
         Array{String}
     end
@@ -39,7 +39,9 @@ end
 
 if Pkg.installed("CategoricalArrays") < v"0.2.0"
     function rcopytype(s::Ptr{IntSxp})
-        if isFactor(s)
+        if length(s) == 1
+            Int
+        elseif isFactor(s)
             if anyna(s)
                 NullableCategoricalArray
             else
@@ -47,20 +49,18 @@ if Pkg.installed("CategoricalArrays") < v"0.2.0"
             end
         elseif anyna(s)
             DataArray{Int}
-        elseif length(s) == 1
-            Int
         else
             Array{Int}
         end
     end
 else
     function rcopytype(s::Ptr{IntSxp})
-        if isFactor(s)
+        if length(s) == 1
+            Int
+        elseif isFactor(s)
             CategoricalArray
         elseif anyna(s)
             DataArray{Int}
-        elseif length(s) == 1
-            Int
         else
             Array{Int}
         end
@@ -68,46 +68,50 @@ else
 end
 
 function rcopytype(s::Ptr{RealSxp})
-    if anyna(s)
-        DataArray{Float64}
-    elseif length(s) == 1
+    if length(s) == 1
         Float64
+    elseif anyna(s)
+        DataArray{Float64}
     else
         Array{Float64}
     end
 end
 
 function rcopytype(s::Ptr{CplxSxp})
-    if anyna(s)
-        DataArray{Complex128}
-    elseif length(s) == 1
+    if length(s) == 1
         Complex128
+    elseif anyna(s)
+        DataArray{Complex128}
     else
         Array{Complex128}
     end
 end
 
 function rcopytype(s::Ptr{LglSxp})
-    if anyna(s)
-        DataArray{Bool}
-    elseif length(s) == 1
+    if length(s) == 1
         Bool
+    elseif anyna(s)
+        DataArray{Bool}
     else
         BitArray
     end
 end
 
 function rcopytype(s::Ptr{RawSxp})
-    if anyna(s)
-        DataArray{UInt8}
-    elseif length(s) == 1
+    if length(s) == 1
         UInt8
+    elseif anyna(s)
+        DataArray{UInt8}
     else
         Array{UInt8}
     end
 end
 
-# Default behaviors of copying R vectors to arrays and dataarrays
+# Default behaviors of copying R vectors to
+#   - arrays
+#   - dataarrays
+#   - nullable
+
 for (J,S) in ((:Int,:IntSxp),
                  (:Float64, :RealSxp),
                  (:Complex128, :CplxSxp),
@@ -167,6 +171,19 @@ for (J,S) in ((:Int,:IntSxp),
                 unprotect(1)
             end
         end
+        function rcopy(::Type{Nullable}, s::Ptr{$S})
+            protect(s)
+            try
+                class = rcopy(Symbol, getclass(s, true))
+                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
+                    return rcopy(Nullable{eltype(RClass{class}, s)}, s)
+                else
+                    return rcopy(Nullable{$J}, s)
+                end
+            finally
+                unprotect(1)
+            end
+        end
     end
 end
 
@@ -191,7 +208,6 @@ rcopy(r::RObject{LangSxp}) = r
 # Fallback for non SEXP
 rcopy(r) = r
 
-
 # logic of default sexp
 
 """
@@ -202,6 +218,12 @@ RObject(s) = RObject(sexp(s))
 
 # nothing
 sexp(::Void) = sexp(Const.NilValue)
+
+# Null
+sexp(x::Null) = sexp(LglSxp, Const.NaInt)
+
+# Nullable
+sexp(x::Nullable{Union{}}) = sexp(LglSxp, Const.NaInt)
 
 # Symbol
 sexp(s::Symbol) = sexp(SymSxp,s)
@@ -232,11 +254,6 @@ sexp(a::AbstractArray) = sexp(VecSxp,a)
 # Associative
 sexp(d::Associative) = sexp(VecSxp,d)
 
-# Null
-sexp(x::Null) = sexp(Const.NilValue)
-
-# Nullable
-sexp(x::Nullable{Union{}}) = sexp(NaInt)
 
 for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
@@ -277,10 +294,12 @@ end
 
 # DataTime
 sexp(d::Date) = sexp(RealSxp, d)
+sexp(d::Nullable{Date}) = sexp(RealSxp, d)
 sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
 sexp(d::AbstractDataArray{Date}) = sexp(RealSxp, d)
 sexp(d::NullableArray{Date}) = sexp(RealSxp, d)
 sexp(d::DateTime) = sexp(RealSxp, d)
+sexp(d::Nullable{DateTime}) = sexp(RealSxp, d)
 sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
 sexp(d::AbstractDataArray{DateTime}) = sexp(RealSxp, d)
 sexp(d::NullableArray{DateTime}) = sexp(RealSxp, d)

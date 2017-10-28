@@ -204,7 +204,19 @@ end
 # conversion from Base Julia types
 
 # nothing
-sexp(::Type{S}, ::Null) where S<:Sxp = sexp(Const.NilValue)
+sexp(::Type{S}, ::Void) where S<:Sxp = sexp(Const.NilValue)
+
+# null
+sexp(::Type{S}, ::Null) where S<:Sxp = naeltype($S)
+
+# nullable
+function sexp(::Type{S}, s::Nullable) where S<:Sxp
+    if isnull(s)
+        naeltype(S)
+    else
+        sexp(S, s.value)
+    end
+end
 
 # symbol
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))

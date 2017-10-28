@@ -2,19 +2,11 @@
 
 function rcopy(::Type{Nullable{T}}, s::Ptr{S}) where {T,S<:Sxp}
     length(s) == 1 || error("length of s must be 1.")
-    rcopy(NullableArray{T}, s)[1]
-end
-
-function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:VectorSxp
-    rcopy(Nullable{eltype(S)}, s)
-end
-
-function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:IntSxp
-    rcopy(Nullable{Int}, s)
-end
-
-function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:StrSxp
-    rcopy(Nullable{String}, s)
+    if isNA(s[1])
+        Nullable{T}()
+    else
+        Nullable{T}(rcopy(T, s))
+    end
 end
 
 function rcopy(::Type{NullableArray{T}}, s::Ptr{S}) where {T,S<:VectorSxp}
