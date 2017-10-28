@@ -12,14 +12,10 @@ convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, r.p)
 
 # conversion between numbers which understands different NAs
 function rcopy(::Type{T}, x::R) where {T<:Number, R<:Number}
-    if (R <: AbstractFloat && !isnan(x)) || (R == Int32 && !isNA(x))
+    if (R == Float64 && !isnan(x)) || (R == Int32 && !isNA(x))
         return T(x)
-    elseif R == Int32 && T <: AbstractFloat
+    elseif T <: AbstractFloat && R == Int32
         return T(NaN)
-    elseif R <: AbstractFloat && T == Int32
-        return T(Const.NaInt)
-    elseif R <: AbstractFloat && T <: Integer
-        error("Cannot convert $R(NaN) to type $T.")
     else
         return T(x)
     end
