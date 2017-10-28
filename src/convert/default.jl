@@ -243,14 +243,13 @@ for typ in CAtypes
     @eval sexp(v::$typ) = sexp(IntSxp, v)
 end
 
-# AxisArray and NamedArray
+# AxisArray
 for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
     @eval sexp(aa::AxisArray{T}) where T<:$J = sexp($S, aa)
-    @eval sexp(aa::NamedArray{T}) where T<:$J = sexp($S, aa)
 end
 
 # DataTime
