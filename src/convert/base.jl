@@ -93,11 +93,11 @@ end
 # LglSxp
 function rcopy(::Type{Cint},s::Ptr{LglSxp})
     length(s) == 1 || error("length of s must be 1.")
-    convert(Cint,s[1])
+    convert(Cint, s[1])
 end
 function rcopy(::Type{Bool},s::Ptr{LglSxp})
     length(s) == 1 || error("length of s must be 1.")
-    s[1]!=0
+    s[1] == 1
 end
 
 function rcopy(::Type{Vector{Cint}},s::Ptr{LglSxp})
