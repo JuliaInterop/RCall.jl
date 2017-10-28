@@ -44,6 +44,8 @@ r = RObject(d)
 @test size(r) == size(d)
 @test rcopy(r).na == d.na
 @test rcopy(r).data[map(!,d.na)] == d.data[map(!,d.na)]
+@test rcopy(DataVector, r).data[map(!,d.na)] == d.data[map(!,d.na)]
+@test rcopy(DataVector{Date}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataArray, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataArray{Date}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(R"identical(as.Date($s), $d)")
@@ -56,6 +58,9 @@ r = RObject(d)
 @test rcopy(getclass(r)) == "Date"
 @test length(r) == length(d)
 @test size(r) == size(d)
+@test all(rcopy(DataVector, r).na)
+@test all(rcopy(DataVector{Date}, r).na)
+@test all(rcopy(DataArray, r).na)
 @test all(rcopy(DataArray{Date}, r).na)
 @test rcopy(R"identical(as.Date(NA), $d)")
 @test rcopy(R"identical(as.character(NA), $s)")
@@ -135,6 +140,8 @@ r = RObject(d)
 @test size(r) == size(d)
 @test rcopy(r).na == d.na
 @test rcopy(r).data[map(!,d.na)] == d.data[map(!,d.na)]
+@test rcopy(DataVector, r).data[map(!,d.na)] == d.data[map(!,d.na)]
+@test rcopy(DataVector{DateTime}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataArray, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataArray{DateTime}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(R"identical(as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S'), $d)")
@@ -148,6 +155,9 @@ r = RObject(d)
 @test rcopy(getattrib(r, "tzone")) == "UTC"
 @test length(r) == length(d)
 @test size(r) == size(d)
+@test all(rcopy(DataVector, r).na)
+@test all(rcopy(DataVector{DateTime}, r).na)
+@test all(rcopy(DataArray, r).na)
 @test all(rcopy(DataArray{DateTime}, r).na)
 @test rcopy(R"identical(as.POSIXct(NA_character_, 'UTC'), $d)")
 @test rcopy(R"identical(as.character(NA), $s)")

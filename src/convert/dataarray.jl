@@ -1,15 +1,21 @@
-# conversion methods for DataArrays, PooledDataArrays
+# conversion methods for DataArrays
 
 function rcopy(::Type{DataArray{T}}, s::Ptr{S}) where {T, S<:VectorSxp}
     DataArray(rcopy(Array{T},s), isna(s))
 end
-function rcopy(::Type{DataArray}, s::Ptr{S}) where S<:VectorSxp
-    DataArray(rcopy(Array,s), isna(s))
+
+function rcopy(::Type{DataArray{T}}, s::Ptr{IntSxp}) where T
+    isFactor(s) && error("s is an R factor")
+    DataArray(rcopy(Array{T},s), isna(s))
 end
 
-function rcopy(::Type{DataArray}, s::Ptr{IntSxp})
+function rcopy(::Type{DataVector{T}}, s::Ptr{S}) where {T, S<:VectorSxp}
+    DataArray(rcopy(Vector{T},s), isna(s))
+end
+
+function rcopy(::Type{DataVector{T}}, s::Ptr{IntSxp}) where T
     isFactor(s) && error("s is an R factor")
-    DataArray(rcopy(Array,s), isna(s))
+    DataArray(rcopy(Vector{T},s), isna(s))
 end
 
 
