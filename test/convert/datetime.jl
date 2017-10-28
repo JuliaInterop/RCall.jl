@@ -36,6 +36,7 @@ d = Date[]
 r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == "Date"
+@test isa(rcopy(Array, r), Array{Date})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(r) == d
@@ -47,6 +48,7 @@ d = DataArray(Date.(s.data), s.na)
 r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == "Date"
+@test isa(rcopy(DataArray, r), DataArray{Date})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(r).na == d.na
@@ -63,6 +65,7 @@ d = DataArray(Date.(s.data), s.na)
 r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == "Date"
+@test isa(rcopy(DataArray, r), DataArray{Date})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test all(rcopy(DataVector, r).na)
@@ -79,6 +82,7 @@ d = NullableArray(Date.(s.values), s.isnull)
 r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == "Date"
+@test isa(rcopy(NullableArray, r), NullableArray{Date})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(NullableArray{Date}, r).isnull == d.isnull
@@ -92,8 +96,10 @@ d = NullableArray(Date.(s.values), s.isnull)
 r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == "Date"
+@test isa(rcopy(NullableArray, r), NullableArray{Date})
 @test length(r) == length(d)
 @test size(r) == size(d)
+@test all(rcopy(NullableArray, r).isnull)
 @test all(rcopy(NullableArray{Date}, r).isnull)
 @test rcopy(R"identical(as.Date(NA), $d)")
 @test rcopy(R"identical(as.character(NA), $s)")
@@ -106,6 +112,7 @@ r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
 @test rcopy(getattrib(r, "tzone")) == "UTC"
+@test isa(rcopy(DataArray, r), DataArray{DateTime})
 @test length(r) == 1
 @test size(r) == (1,)
 @test rcopy(r) === d
@@ -125,6 +132,7 @@ r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
 @test rcopy(getattrib(r, "tzone")) == "UTC"
+@test isa(rcopy(Array, r), Array{DateTime})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(r) == d
@@ -137,6 +145,7 @@ r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
 @test rcopy(getattrib(r, "tzone")) == "UTC"
+@test isa(rcopy(Array, r), Array{DateTime})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(r) == d
@@ -149,6 +158,7 @@ r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
 @test rcopy(getattrib(r, "tzone")) == "UTC"
+@test isa(rcopy(DataArray, r), DataArray{DateTime})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(r).na == d.na
@@ -166,6 +176,7 @@ r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
 @test rcopy(getattrib(r, "tzone")) == "UTC"
+@test isa(rcopy(DataArray, r), DataArray{DateTime})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test all(rcopy(DataVector, r).na)
@@ -183,6 +194,7 @@ r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
 @test rcopy(getattrib(r, "tzone")) == "UTC"
+@test isa(rcopy(NullableArray, r), NullableArray{DateTime})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test rcopy(NullableArray{DateTime}, r).isnull == d.isnull
@@ -197,6 +209,7 @@ r = RObject(d)
 @test isa(r,RObject{RealSxp})
 @test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
 @test rcopy(getattrib(r, "tzone")) == "UTC"
+@test isa(rcopy(NullableArray, r), NullableArray{DateTime})
 @test length(r) == length(d)
 @test size(r) == size(d)
 @test all(rcopy(NullableArray{DateTime}, r).isnull)
