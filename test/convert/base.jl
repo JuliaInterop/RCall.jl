@@ -261,10 +261,14 @@ r = RObject(a)
 
 
 # raw
-a = UInt8[0x01, 0x0c, 0xff]
+a = 0x01
 r = RObject(a)
 @test a == rcopy(r)
 @test rcopy(UInt8, r) == 0x01
+
+a = UInt8[0x01, 0x0c, 0xff]
+r = RObject(a)
+@test a == rcopy(r)
 @test rcopy(Array, r) == a
 
 # function

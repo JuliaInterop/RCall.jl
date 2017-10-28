@@ -65,7 +65,10 @@ end
 # IntSxp, RealSxp, CplxSxp, LglSxp scalar conversion
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp)
     @eval begin
-        rcopy(::Type{T},s::Ptr{$S}) where T<:Number = rcopy(T,s[1])
+        function rcopy(::Type{T},s::Ptr{$S}) where T<:Number
+            length(s) == 1 || error("length of s must be 1.")
+            rcopy(T,s[1])
+        end
     end
 end
 
@@ -88,8 +91,14 @@ for (J,S) in ((:Integer,:IntSxp),
 end
 
 # LglSxp
-rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(Cint,s[1])
-rcopy(::Type{Bool},s::Ptr{LglSxp}) = s[1]!=0
+function rcopy(::Type{Cint},s::Ptr{LglSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    convert(Cint,s[1])
+end
+function rcopy(::Type{Bool},s::Ptr{LglSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    s[1]!=0
+end
 
 function rcopy(::Type{Vector{Cint}},s::Ptr{LglSxp})
     a = Array{Cint}(length(s))
@@ -135,7 +144,10 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
 end
 
 # RawSxp
-rcopy(::Type{UInt8},s::Ptr{RawSxp}) = s[1]
+function rcopy(::Type{UInt8},s::Ptr{RawSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    s[1]
+end
 
 function rcopy(::Type{Vector{UInt8}},s::Ptr{RawSxp})
     a = Array{UInt8}(length(s))
@@ -151,8 +163,14 @@ end
 
 
 # StrSxp
-rcopy(::Type{Symbol}, s::Ptr{StrSxp}) = rcopy(Symbol,s[1])
-rcopy(::Type{T},s::Ptr{StrSxp}) where T<:AbstractString = rcopy(T,s[1])
+function rcopy(::Type{Symbol}, s::Ptr{StrSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    rcopy(Symbol,s[1])
+end
+function rcopy(::Type{T},s::Ptr{StrSxp}) where T<:AbstractString
+    length(s) == 1 || error("length of s must be 1.")
+    rcopy(T,s[1])
+end
 
 # VecSxp
 rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)

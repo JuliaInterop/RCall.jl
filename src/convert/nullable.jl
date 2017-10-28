@@ -9,6 +9,10 @@ function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:VectorSxp
     rcopy(Nullable{eltype(S)}, s)
 end
 
+function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:IntSxp
+    rcopy(Nullable{Int}, s)
+end
+
 function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:StrSxp
     rcopy(Nullable{String}, s)
 end
