@@ -48,3 +48,34 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractString, :StrSxp))
     @eval sexp(aa::NamedArray{T}) where T<:$J = sexp($S, aa)
 end
+
+
+function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
+    Base.depwarn("Support for `PooledDataArray` is deprecated. Use `CategoricalArray` instead.", :rcopy)
+    isFactor(s) || error("s is not an R factor")
+    refs = DataArrays.RefArray([isNA(x) ? zero(Int32) : x for x in s])
+    DataArrays.compact(PooledDataArray(refs, rcopy(Array, getattrib(s,Const.LevelsSymbol))))
+end
+
+
+## PooledDataArray to sexp conversion.
+function sexp(::Type{IntSxp}, v::PooledDataArray{T,R}) where {T<:AbstractString,R<:Integer}
+    Base.depwarn("Support for `PooledDataArray` is deprecated. Use `CategoricalArray` instead.", :sexp)
+    rv = protect(sexp(IntSxp, v.refs))
+    try
+        for (i,r) = enumerate(v.refs)
+            if r == 0
+                rv[i] = naeltype(IntSxp)
+            end
+        end
+    finally
+        unprotect(1)
+    end
+    setattrib!(rv, Const.LevelsSymbol, sexp(v.pool))
+    setattrib!(rv, Const.ClassSymbol, sexp("factor"))
+    rv
+end
+
+# PooledDataArray
+sexp(a::PooledDataArray) = sexp(IntSxp,a)
+sexp(a::PooledDataArray{S}) where S<:AbstractString = sexp(IntSxp,a)

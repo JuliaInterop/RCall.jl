@@ -11,11 +11,7 @@ function rcopy(::Type{DataArray}, s::Ptr{IntSxp})
     isFactor(s) && error("s is an R factor")
     DataArray(rcopy(Array,s), isna(s))
 end
-function rcopy(::Type{PooledDataArray}, s::Ptr{IntSxp})
-    isFactor(s) || error("s is not an R factor")
-    refs = DataArrays.RefArray([isNA(x) ? zero(Int32) : x for x in s])
-    DataArrays.compact(PooledDataArray(refs, rcopy(Array, getattrib(s,Const.LevelsSymbol))))
-end
+
 
 ## DataArray to sexp conversion.
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
@@ -34,22 +30,4 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
             rv
         end
     end
-end
-
-
-## PooledDataArray to sexp conversion.
-function sexp(::Type{IntSxp}, v::PooledDataArray{T,R}) where {T<:AbstractString,R<:Integer}
-    rv = protect(sexp(IntSxp, v.refs))
-    try
-        for (i,r) = enumerate(v.refs)
-            if r == 0
-                rv[i] = naeltype(IntSxp)
-            end
-        end
-    finally
-        unprotect(1)
-    end
-    setattrib!(rv, Const.LevelsSymbol, sexp(v.pool))
-    setattrib!(rv, Const.ClassSymbol, sexp("factor"))
-    rv
 end
