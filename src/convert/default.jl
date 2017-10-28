@@ -9,11 +9,7 @@ function rcopy(s::Ptr{S}; kwargs...) where S<:Sxp
     protect(s)
     try
         class = rcopy(Symbol, getclass(s, true))
-        if method_exists(rcopytype, Tuple{Type{RClass{class}}, Ptr{S}})
-            return rcopy(rcopytype(RClass{class}, s), s; kwargs...)
-        else
-            return rcopy(rcopytype(s), s; kwargs...)
-        end
+        return rcopy(rcopytype(RClass{class}, s), s; kwargs...)
     finally
         unprotect(1)
     end
@@ -27,7 +23,7 @@ rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
 rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
 
 # StrSxp
-function rcopytype(s::Ptr{StrSxp})
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym
     if length(s) == 1
         String
     elseif anyna(s)
@@ -39,7 +35,7 @@ end
 eltype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym = String
 
 if Pkg.installed("CategoricalArrays") < v"0.2.0"
-    function rcopytype(s::Ptr{IntSxp})
+    function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
         if length(s) == 1
             Int
         elseif isFactor(s)
@@ -55,7 +51,7 @@ if Pkg.installed("CategoricalArrays") < v"0.2.0"
         end
     end
 else
-    function rcopytype(s::Ptr{IntSxp})
+    function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
         if length(s) == 1
             Int
         elseif isFactor(s)
@@ -69,7 +65,7 @@ else
 end
 eltype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym = Int
 
-function rcopytype(s::Ptr{RealSxp})
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym
     if length(s) == 1
         Float64
     elseif anyna(s)
@@ -81,7 +77,7 @@ end
 eltype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym = Float64
 
 
-function rcopytype(s::Ptr{CplxSxp})
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
     if length(s) == 1
         Complex128
     elseif anyna(s)
@@ -93,7 +89,7 @@ end
 eltype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym = Complex128
 
 
-function rcopytype(s::Ptr{LglSxp})
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym
     if length(s) == 1
         Bool
     elseif anyna(s)
@@ -105,7 +101,7 @@ end
 eltype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym = Bool
 
 
-function rcopytype(s::Ptr{RawSxp})
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym
     if length(s) == 1
         UInt8
     elseif anyna(s)
@@ -118,7 +114,7 @@ eltype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym = UInt8
 
 
 # VecSxp
-function rcopytype(s::Ptr{VecSxp}; kwargs...)
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{VecSxp}) where Sym
     if isFrame(s)
         DataFrame
     elseif isnull(getnames(s))
