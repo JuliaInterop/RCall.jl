@@ -2,22 +2,13 @@
 
 # Default behaviors of copying R vectors to dataarrays
 
-for (J,S) in ((:Int,:IntSxp),
-                 (:Float64, :RealSxp),
-                 (:Complex128, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:String, :StrSxp),
-                 (:UInt8, :RawSxp))
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
     @eval begin
         function rcopy(::Type{DataVector},s::Ptr{$S})
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(DataVector{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(DataVector{$J},s)
-                end
+                return rcopy(DataVector{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end
@@ -26,11 +17,7 @@ for (J,S) in ((:Int,:IntSxp),
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(DataArray{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(DataArray{$J},s)
-                end
+                return rcopy(DataArray{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end

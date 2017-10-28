@@ -1,19 +1,10 @@
-for (J,S) in ((:Int,:IntSxp),
-                 (:Float64, :RealSxp),
-                 (:Complex128, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:String, :StrSxp),
-                 (:UInt8, :RawSxp))
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
     @eval begin
         function rcopy(::Type{AxisArray},s::Ptr{$S})
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(AxisArray{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(AxisArray{$J},s)
-                end
+                return rcopy(AxisArray{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end

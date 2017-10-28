@@ -41,22 +41,13 @@ rcopy(::Type{Int}, s::Ptr{CharSxp}) = parse(Int, rcopy(s))
 
 # Default behaviors of copying R vectors to arrays
 
-for (J,S) in ((:Int,:IntSxp),
-                 (:Float64, :RealSxp),
-                 (:Complex128, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:String, :StrSxp),
-                 (:UInt8, :RawSxp))
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
     @eval begin
         function rcopy(::Type{Vector},s::Ptr{$S})
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(Vector{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(Vector{$J},s)
-                end
+                return rcopy(Vector{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end
@@ -65,11 +56,7 @@ for (J,S) in ((:Int,:IntSxp),
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(Array{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(Array{$J},s)
-                end
+                return rcopy(Array{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end

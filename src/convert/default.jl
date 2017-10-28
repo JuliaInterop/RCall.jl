@@ -36,6 +36,7 @@ function rcopytype(s::Ptr{StrSxp})
         Array{String}
     end
 end
+eltype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym = String
 
 if Pkg.installed("CategoricalArrays") < v"0.2.0"
     function rcopytype(s::Ptr{IntSxp})
@@ -66,6 +67,7 @@ else
         end
     end
 end
+eltype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym = Int
 
 function rcopytype(s::Ptr{RealSxp})
     if length(s) == 1
@@ -76,6 +78,8 @@ function rcopytype(s::Ptr{RealSxp})
         Array{Float64}
     end
 end
+eltype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym = Float64
+
 
 function rcopytype(s::Ptr{CplxSxp})
     if length(s) == 1
@@ -86,6 +90,8 @@ function rcopytype(s::Ptr{CplxSxp})
         Array{Complex128}
     end
 end
+eltype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym = Complex128
+
 
 function rcopytype(s::Ptr{LglSxp})
     if length(s) == 1
@@ -96,6 +102,8 @@ function rcopytype(s::Ptr{LglSxp})
         BitArray
     end
 end
+eltype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym = Bool
+
 
 function rcopytype(s::Ptr{RawSxp})
     if length(s) == 1
@@ -106,6 +114,8 @@ function rcopytype(s::Ptr{RawSxp})
         Array{UInt8}
     end
 end
+eltype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym = UInt8
+
 
 # VecSxp
 function rcopytype(s::Ptr{VecSxp}; kwargs...)

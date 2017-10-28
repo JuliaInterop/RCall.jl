@@ -12,22 +12,13 @@ end
 
 # Default behaviors of copying R vectors to nullablearrays
 
-for (J,S) in ((:Int,:IntSxp),
-                 (:Float64, :RealSxp),
-                 (:Complex128, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:String, :StrSxp),
-                 (:UInt8, :RawSxp))
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
     @eval begin
         function rcopy(::Type{Nullable}, s::Ptr{$S})
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(Nullable{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(Nullable{$J}, s)
-                end
+                return rcopy(Nullable{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end
@@ -36,11 +27,7 @@ for (J,S) in ((:Int,:IntSxp),
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(NullableVector{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(NullableVector{$J},s)
-                end
+                return rcopy(NullableVector{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end
@@ -49,11 +36,7 @@ for (J,S) in ((:Int,:IntSxp),
             protect(s)
             try
                 class = rcopy(Symbol, getclass(s, true))
-                if method_exists(eltype, Tuple{Type{RClass{class}}, Ptr{$S}})
-                    return rcopy(NullableArray{eltype(RClass{class}, s)}, s)
-                else
-                    return rcopy(NullableArray{$J},s)
-                end
+                return rcopy(NullableArray{eltype(RClass{class}, s)}, s)
             finally
                 unprotect(1)
             end
