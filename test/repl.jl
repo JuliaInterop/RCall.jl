@@ -39,6 +39,7 @@ function check_repl(io::IO, x)
     schedule(read_task)
     wait(read_task)
     close(t)
+    true
 end
 
 check_repl_stdout(x) = check_repl(stdout_read, x)
@@ -50,49 +51,49 @@ send_repl("using RCall")
 RCall.RPrompt.repl_init(repl)
 
 send_repl("\$", false)
-check_repl_stdout("R> ")
+@test check_repl_stdout("R> ")
 
 send_repl("bar = 'apple'")
-check_repl_stdout("bar = 'apple'")
+@test check_repl_stdout("bar = 'apple'")
 
 send_repl("paste0('pine', bar)")
-check_repl_stdout("pineapple")
+@test check_repl_stdout("pineapple")
 
 send_repl("mtca\t", false)
-check_repl_stdout("mtcars")
+@test check_repl_stdout("mtcars")
 
 send_repl("")
-check_repl_stdout("\n")
+@test check_repl_stdout("\n")
 
 send_repl("\\alp\t", false)
-check_repl_stdout("\\alpha")
+@test check_repl_stdout("\\alpha")
 
 send_repl("\t", false)
-check_repl_stdout("α")
+@test check_repl_stdout("α")
 
 send_repl("")
-check_repl_stdout("\n")
+@test check_repl_stdout("\n")
 
 send_repl("foo]")
-check_repl_stderr("unexpected")
+@test check_repl_stderr("unexpected")
 
 send_repl("stop('something is wrong')")
-check_repl_stderr("something is wrong")
+@test check_repl_stderr("something is wrong")
 
 send_repl("not_found")
-check_repl_stderr("not found")
+@test check_repl_stderr("not found")
 
 send_repl("\b", false)
-check_repl_stdout("julia> ")
+@test check_repl_stdout("julia> ")
 
 send_repl("x = \"orange\"")
-check_repl_stdout("x = \"orange\"")
+@test check_repl_stdout("x = \"orange\"")
 
 send_repl("\$", false)
-check_repl_stdout("R> ")
+@test check_repl_stdout("R> ")
 
 send_repl("\$x")
-check_repl_stdout("orange")
+@test check_repl_stdout("orange")
 
 send_repl("\$not_found")
-check_repl_stderr("UndefVarError")
+@test check_repl_stderr("UndefVarError")

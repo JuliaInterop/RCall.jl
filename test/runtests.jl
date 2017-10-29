@@ -47,6 +47,9 @@ println("Running tests:")
 
 for t in tests
     tfile = string(t, ".jl")
-    println(" * $(tfile) ...")
-    include(tfile)
+    @eval begin
+        @testset $t begin
+            include($tfile)
+        end
+    end
 end
