@@ -15,6 +15,35 @@ function rcopy(s::Ptr{S}; kwargs...) where S<:Sxp
     end
 end
 
+#  force vector conversion in dataframe
+if Pkg.installed("CategoricalArrays") < v"0.2.0"
+    function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
+        protect(s)
+        try
+            if isFactor(s)
+                return anyna(s) ? rcopy(NullableCategoricalArray, s) : rcopy(CategoricalArray, s)
+            else
+                return anyna(s) ? rcopy(DataArray, s) : rcopy(Array, s)
+            end
+        finally
+            unprotect(1)
+        end
+    end
+else
+    function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
+        protect(s)
+        try
+            if isFactor(s)
+                return rcopy(CategoricalArray, s)
+            else
+                return anyna(s) ? rcopy(DataArray, s) : rcopy(Array, s)
+            end
+        finally
+            unprotect(1)
+        end
+    end
+end
+
 # NilSxp
 rcopy(::Ptr{NilSxp}) = null
 
@@ -39,11 +68,7 @@ if Pkg.installed("CategoricalArrays") < v"0.2.0"
         if length(s) == 1
             Int
         elseif isFactor(s)
-            if anyna(s)
-                NullableCategoricalArray
-            else
-                CategoricalArray
-            end
+            anyna(s) ? NullableCategoricalArray : CategoricalArray
         elseif anyna(s)
             DataArray{Int}
         else

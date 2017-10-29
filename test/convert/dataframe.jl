@@ -17,6 +17,9 @@ else
     @test isa(station, CategoricalArray)
 end
 
+# single row dataframe
+@test size(rcopy(R"data.frame(a=1,b=2)")) == (1, 2)
+
 # issue #186
 df = R"""data.frame(dates = as.Date(c("2017-04-14", "2014-04-17")))"""
 if Pkg.installed("DataArrays") < v"0.7"

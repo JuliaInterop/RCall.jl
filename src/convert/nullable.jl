@@ -48,20 +48,9 @@ function rcopy(::Type{NullableArray{T}}, s::Ptr{S}) where {T,S<:VectorSxp}
     NullableArray(rcopy(Array{T},s), isna(s))
 end
 
-function rcopy(::Type{NullableArray{T}}, s::Ptr{IntSxp}) where T
-    isFactor(s) && error("s is an R factor")
-    NullableArray(rcopy(Array{T},s), isna(s))
-end
-
 function rcopy(::Type{NullableVector{T}}, s::Ptr{S}) where {T, S<:VectorSxp}
     NullableArray(rcopy(Vector{T},s), isna(s))
 end
-
-function rcopy(::Type{NullableVector{T}}, s::Ptr{IntSxp}) where T
-    isFactor(s) && error("s is an R factor")
-    NullableArray(rcopy(Vector{T},s), isna(s))
-end
-
 
 # Nullable and NullableArray to sexp conversion.
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
