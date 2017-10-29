@@ -243,17 +243,18 @@ for (J,S) in ((:Integer,:IntSxp),
     @eval sexp(aa::AxisArray{T}) where T<:$J = sexp($S, aa)
 end
 
-# DataTime
+# Date
 sexp(d::Date) = sexp(RealSxp, d)
-sexp(d::Nullable{Date}) = sexp(RealSxp, d)
 sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
-sexp(d::AbstractDataArray{Date}) = sexp(RealSxp, d)
+sexp(d::Nullable{Date}) = sexp(RealSxp, d)
 sexp(d::NullableArray{Date}) = sexp(RealSxp, d)
+
+# DateTime
 sexp(d::DateTime) = sexp(RealSxp, d)
-sexp(d::Nullable{DateTime}) = sexp(RealSxp, d)
 sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
-sexp(d::AbstractDataArray{DateTime}) = sexp(RealSxp, d)
+sexp(d::Nullable{DateTime}) = sexp(RealSxp, d)
 sexp(d::NullableArray{DateTime}) = sexp(RealSxp, d)
+
 
 # Function
 sexp(f::Function) = sexp(ClosSxp, f)

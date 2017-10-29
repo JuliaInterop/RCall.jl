@@ -21,7 +21,7 @@ function rcopytype(::Type{RClass{:Date}}, s::Ptr{RealSxp})
 end
 function rcopytype(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp})
     if length(s) == 1
-            return DateTime
+        return DateTime
     elseif anyna(s)
         return DataArray{DateTime}
     else
