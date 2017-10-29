@@ -14,3 +14,7 @@ aa = AxisArray(d, Axis{:time}(["t0", "t2", "t3"]))
 r = RObject(aa)
 @test rcopy(getclass(r)) == "Date"
 @test isa(rcopy(AxisArray, r), AxisArray{Date})
+r[2] = null
+ab = rcopy(AxisArray, r)
+@test isa(ab, AxisArray{Date})
+@test isa(ab.data, DataArray)

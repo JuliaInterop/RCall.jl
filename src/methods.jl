@@ -147,10 +147,13 @@ function setindex!(s::Ptr{S}, value::Ptr{T}, label::AbstractString) where {S<:Ve
     end
     throw(BoundsError())
 end
+setindex!(s::Ptr{S}, value, label::AbstractString) where S<:VectorSxp = setindex!(s, sexp(value), label)
 setindex!(s::Ptr{S}, value, label::Symbol) where S<:VectorSxp = setindex!(s, value, string(label))
+
 # for RObjects
-setindex!(s::Ptr{S}, value, key) where S<:VectorSxp = setindex!(s, sexp(value), key)
 setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
+setindex!(r::RObject{S}, ::Null, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
+setindex!(r::RObject{S}, ::Null, keys...) where S<:VecSxp = setindex!(sexp(r), sexp(Const.NilValue), keys...)
 
 start(s::Ptr{S}) where S<:VectorSxp = 0
 next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
@@ -245,10 +248,12 @@ function setindex!(s::Ptr{S}, value::Ptr{T}, label::AbstractString) where {S<:Pa
     end
     throw(BoundsError())
 end
+setindex!(s::Ptr{S}, value, label::AbstractString) where S<:PairListSxp = setindex!(s, sexp(value), label)
 setindex!(s::Ptr{S}, value, label::Symbol) where S<:PairListSxp = setindex!(s, value, string(label))
+
 # for RObjects
-setindex!(s::Ptr{S}, value, key) where S<:PairListSxp = setindex!(s, sexp(value), key)
-setindex!(r::RObject{S}, value, key) where S<:PairListSxp = setindex!(r.p, value, key)
+setindex!(r::RObject{S}, value, key) where S<:PairListSxp = setindex!(sexp(r), value, key)
+setindex!(r::RObject{S}, ::Null, key) where S<:PairListSxp = setindex!(sexp(r), sexp(Const.NilValue), key)
 
 
 # S4Sxp
@@ -274,7 +279,9 @@ function setindex!(s::Ptr{S4Sxp}, value::Ptr{T}, sym::Ptr{SymSxp}) where T<:Sxp
     end
 end
 setindex!(s::Ptr{S4Sxp}, value, sym) = setindex!(s, sexp(value), sexp(SymSxp, sym))
-setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(s.p, value, sym)
+# for RObjects
+setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(sexp(s), value, sym)
+setindex!(s::RObject{S4Sxp}, ::Null, sym) = setindex!(sexp(s), sexp(Const.NilValue), sym)
 
 
 "Return a particular attribute of an RObject"
@@ -482,7 +489,8 @@ function setindex!(e::Ptr{EnvSxp},v,s)
         unprotect(nprotect)
     end
 end
-setindex!(e::RObject{EnvSxp},v,s) = setindex!(sexp(e),v,s)
+setindex!(e::RObject{EnvSxp}, v, s) = setindex!(sexp(e), v, s)
+setindex!(e::RObject{EnvSxp}, ::Null, s) = setindex!(sexp(e), sexp(Const.NilValue), s)
 
 """
     newEnvironment([env])
