@@ -1,3 +1,5 @@
+using Nulls
+
 lsv = reval("ls()")
 @test length(lsv) == 0
 @test isa(lsv, RObject{StrSxp})
@@ -55,6 +57,29 @@ end
 @test isna(R"list(a=1, b=NA)") == [false, true]
 @test isna(R"list(a=1, b=NA)", 1) == false
 @test isna(R"list(a=1, b=NA)", 2) == true
+
+
+# setindex with null
+a = R"1:10"
+a[2] = null
+@test isna(a, 2)
+
+a = R"c('a', 'b', 'c')"
+a[2] = null
+@test isna(a) == [false, true, false]
+
+a = R"list(x=1, y=2)"
+a[2] = null
+@test isnull(a[2])
+a[:x] = null
+@test isnull(a[:x])
+
+env = reval("new.env()")
+env[:x] = 1
+@test rcopy(env[:x]) == 1
+env[:x] = null
+@test isnull(rcopy(env[:x]))
+
 
 # callbacks
 function testfn(x,y;a=3,b=4)

@@ -30,31 +30,16 @@ function render(script::String)
         # break if the parse error is not caused by $
         c != '\$' && break
 
-        # due to a bug in the R parser https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=16524
-        # unicode script parse error column location does not work
-
-        if isascii(script)
-            index = 0
-            for i in 1:(line-1)
-                index = search(script, '\n', index+1)
-            end
-            b = index + col
-        elseif is_windows()
-            # the trick of R_ParseContextLast does not work on Windows
-            msg = "Subsitution in unicode expression is not supported on Windows."
-            break
-        elseif sizeof(script) >= 256
-            # `R_ParseContextLast` is only good for script < 256 bytes since
-            # `R_ParseContext` uses circular buffer
-            msg = "Subsitution in unicode expression of length >= 256 bytes is not supported."
-            break
-        else
-            # the position of the error byte
-            b = Int(unsafe_load(cglobal((:R_ParseContextLast, libR), Cint)))
+        index = 0
+        for i in 1:(line-1)
+            index = search(script, '\n', index+1)
+        end
+        for j in 1:col
+            index = nextind(script, index)
         end
 
         try
-            c = script[b]
+            c = script[index]
         catch e
             c = ' '
         end
@@ -63,7 +48,7 @@ function render(script::String)
             break
         end
 
-        ast,i = parse(script,b+1,greedy=false,raise=false)
+        ast,i = parse(script,index+1,greedy=false,raise=false)
 
         if isa(ast,Symbol)
             sym = "$ast"
@@ -88,7 +73,7 @@ function render(script::String)
             break
         end
         symdict[sym] = ast
-        script = string(script[1:b-1],"`#JL`\$`",sym,'`',script[i:end])
+        script = string(script[1:index-1], "`#JL`\$`",sym,'`', script[i:end])
     end
 
     return script, symdict, status, msg
@@ -102,7 +87,7 @@ function prepare_inline_julia_code(symdict, escape::Bool=false)
     new_env = Expr(:(=), :env, Expr(:call, reval_p, Expr(:call, rparse_p, "`#JL` <- new.env()")))
     blk = Expr(:block)
     for (rsym, expr) in symdict
-        push!(blk.args, Expr(:(=), Expr(:ref, :env, rsym), escape? esc(expr) : expr))
+        push!(blk.args, Expr(:(=), Expr(:ref, :env, rsym), escape ? esc(expr) : expr))
     end
     Expr(:let, blk, new_env)
 end

@@ -2,10 +2,12 @@ __precompile__()
 module RCall
 using Compat
 
+using Nulls
+using DataArrays
+using CategoricalArrays
 using DataFrames
 # using DataTables
-using NullableArrays, CategoricalArrays
-using AxisArrays, NamedArrays
+using NullableArrays, AxisArrays, NamedArrays
 
 import DataStructures: OrderedDict
 
@@ -13,8 +15,18 @@ import Base: eltype, convert, isascii, isnull,
     names, length, size, getindex, setindex!, start, next, done,
     show, showerror, write
 
-# issues/179
-import DataFrames: isna
+
+if isdefined(DataFrames, :isna)
+    import DataFrames: isna
+elseif isdefined(DataArrays, :isna)
+    import DataArrays: isna
+end
+
+if isdefined(DataFrames, :anyna)
+    import DataFrames: anyna
+elseif isdefined(DataArrays, :anyna)
+    import DataArrays: anyna
+end
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
@@ -31,11 +43,13 @@ include("types.jl")
 include("Const.jl")
 include("methods.jl")
 include("convert/base.jl")
-include("convert/dataframe.jl")
-include("convert/datatable.jl")
+include("convert/dataarray.jl")
+include("convert/categorical.jl")
 include("convert/datetime.jl")
+include("convert/dataframe.jl")
+# include("convert/datatable.jl")
+include("convert/nullable.jl")
 include("convert/axisarray.jl")
-include("convert/namedarray.jl")
 include("convert/default.jl")
 include("eventloop.jl")
 include("eval.jl")
@@ -46,7 +60,6 @@ include("namespaces.jl")
 include("render.jl")
 include("macros.jl")
 include("operators.jl")
-include("console.jl")
 include("RPrompt.jl")
 include("ijulia.jl")
 include("deprecated.jl")

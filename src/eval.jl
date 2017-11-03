@@ -1,5 +1,5 @@
 "A pure julia wrapper of R_ParseVector"
-function parseVector{S<:Sxp}(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))
+function parseVector(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
     protect(st)
     protect(sf)
     status = Ref{Cint}()
@@ -35,7 +35,7 @@ rparse(st::AbstractString) = RObject(rparse_p(st))
 """
 A pure julia wrapper of R_tryEval.
 """
-function tryEval{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv))
+function tryEval(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) where S<:Sxp
     disable_sigint() do
         status = Ref{Cint}()
         protect(expr)
@@ -50,7 +50,7 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
-function reval_p{S<:Sxp}(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv); stdout::IO=STDOUT, stderr::IO=error_device)
+function reval_p(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv); stdout::IO=STDOUT, stderr::IO=error_device) where S<:Sxp
     val, status = tryEval(expr, env)
     flush_output(stdout)
     flush_error(stderr, is_warning = status == 0)

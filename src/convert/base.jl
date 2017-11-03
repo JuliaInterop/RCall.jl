@@ -1,25 +1,21 @@
-immutable RClass{Symbol} end
+struct RClass{Symbol} end
 
 # conversion to Base Julia types
 
-rcopy{T}(::Type{T},r::RObject; kwargs...) = rcopy(T, r.p; kwargs...)
+rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, r.p; kwargs...)
 # make sure convert doesn't invoke rcopy in the following situations
-convert{S<:Sxp}(::Type{Any}, r::RObject{S}) = r
-convert{S<:Sxp}(::Type{RObject}, r::RObject{S}) = r
-convert{S<:Sxp}(::Type{RObject{S}}, r::RObject{S}) = r
+convert(::Type{Any}, r::RObject{S}) where S<:Sxp = r
+convert(::Type{RObject}, r::RObject{S}) where S<:Sxp = r
+convert(::Type{RObject{S}}, r::RObject{S}) where S<:Sxp = r
 # allow `Int(R"1+1")`
-convert{T, S<:Sxp}(::Type{T}, r::RObject{S}) = rcopy(T, r.p)
+convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, r.p)
 
 # conversion between numbers which understands different NAs
-function rcopy{T<:Number, R<:Number}(::Type{T}, x::R)
-    if (R <: AbstractFloat && !isnan(x)) || (R == Int32 && !isNA(x))
+function rcopy(::Type{T}, x::R) where {T<:Number, R<:Number}
+    if (R == Float64 && !isnan(x)) || (R == Int32 && !isNA(x))
         return T(x)
-    elseif R == Int32 && T <: AbstractFloat
+    elseif T <: AbstractFloat && R == Int32
         return T(NaN)
-    elseif R <: AbstractFloat && T == Int32
-        return T(Const.NaInt)
-    elseif R <: AbstractFloat && T <: Integer
-        error("Cannot convert $R(NaN) to type $T.")
     else
         return T(x)
     end
@@ -28,32 +24,57 @@ end
 # Fallbacks
 # convert Ptr{S} to Any would use the default conversions to allow
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
-rcopy{S<:Sxp}(::Type{Any}, s::Ptr{S}) = rcopy(s)
+rcopy(::Type{Any}, s::Ptr{S}) where S<:Sxp = rcopy(s)
 
 # NilSxp
-rcopy(::Type{Any}, ::Ptr{NilSxp}) = nothing
-rcopy{T}(::Type{T}, ::Ptr{NilSxp}) = nothing
-rcopy{T<:AbstractArray}(::Type{T}, ::Ptr{NilSxp}) = T()
+rcopy(::Type{Any}, ::Ptr{NilSxp}) = null
+rcopy(::Type{T}, ::Ptr{NilSxp}) where T = null
+rcopy(::Type{T}, ::Ptr{NilSxp}) where T<:AbstractArray = T()
 
 # SymSxp
-rcopy{T<:Union{Symbol,AbstractString}}(::Type{T},s::Ptr{SymSxp}) = rcopy(T, sexp(unsafe_load(s).name))
+rcopy(::Type{T},s::Ptr{SymSxp}) where T<:Union{Symbol,AbstractString} = rcopy(T, sexp(unsafe_load(s).name))
 
 # CharSxp
-rcopy{T<:AbstractString}(::Type{T},s::Ptr{CharSxp}) = convert(T, String(unsafe_vec(s)))
+rcopy(::Type{T},s::Ptr{CharSxp}) where T<:AbstractString = convert(T, String(unsafe_vec(s)))
 rcopy(::Type{Symbol},s::Ptr{CharSxp}) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::Ptr{CharSxp}) = parse(Int, rcopy(s))
+
+# Default behaviors of copying R vectors to arrays
+
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
+    @eval begin
+        function rcopy(::Type{Vector},s::Ptr{$S})
+            protect(s)
+            try
+                class = rcopy(Symbol, getclass(s, true))
+                return rcopy(Vector{eltype(RClass{class}, s)}, s)
+            finally
+                unprotect(1)
+            end
+        end
+        function rcopy(::Type{Array},s::Ptr{$S})
+            protect(s)
+            try
+                class = rcopy(Symbol, getclass(s, true))
+                return rcopy(Array{eltype(RClass{class}, s)}, s)
+            finally
+                unprotect(1)
+            end
+        end
+    end
+end
 
 # IntSxp, RealSxp, CplxSxp, LglSxp, StrSxp, VecSxp to Array{T}
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :VecSxp)
     @eval begin
-        function rcopy{T}(::Type{Array{T}}, s::Ptr{$S})
+        function rcopy(::Type{Array{T}}, s::Ptr{$S}) where T
             protect(s)
             v = T[rcopy(T,e) for e in s]
             ret = reshape(v,size(s))
             unprotect(1)
             ret
         end
-        function rcopy{T}(::Type{Vector{T}}, s::Ptr{$S})
+        function rcopy(::Type{Vector{T}}, s::Ptr{$S}) where T
             protect(s)
             ret = T[rcopy(T,e) for e in s]
             unprotect(1)
@@ -65,7 +86,10 @@ end
 # IntSxp, RealSxp, CplxSxp, LglSxp scalar conversion
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp)
     @eval begin
-        rcopy{T<:Number}(::Type{T},s::Ptr{$S}) = rcopy(T,s[1])
+        function rcopy(::Type{T},s::Ptr{$S}) where T<:Number
+            length(s) == 1 || error("length of s must be 1.")
+            rcopy(T,s[1])
+        end
     end
 end
 
@@ -74,12 +98,12 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp))
     @eval begin
-        function rcopy{T<:$J}(::Type{Vector{T}},s::Ptr{$S})
+        function rcopy(::Type{Vector{T}},s::Ptr{$S}) where T<:$J
             a = Array{T}(length(s))
             copy!(a,unsafe_vec(s))
             a
         end
-        function rcopy{T<:$J}(::Type{Array{T}},s::Ptr{$S})
+        function rcopy(::Type{Array{T}},s::Ptr{$S}) where T<:$J
             a = Array{T}(size(s)...)
             copy!(a,unsafe_vec(s))
             a
@@ -88,8 +112,14 @@ for (J,S) in ((:Integer,:IntSxp),
 end
 
 # LglSxp
-rcopy(::Type{Cint},s::Ptr{LglSxp}) = convert(Cint,s[1])
-rcopy(::Type{Bool},s::Ptr{LglSxp}) = s[1]!=0
+function rcopy(::Type{Cint},s::Ptr{LglSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    convert(Cint, s[1])
+end
+function rcopy(::Type{Bool},s::Ptr{LglSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    s[1] == 1
+end
 
 function rcopy(::Type{Vector{Cint}},s::Ptr{LglSxp})
     a = Array{Cint}(length(s))
@@ -135,7 +165,10 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
 end
 
 # RawSxp
-rcopy(::Type{UInt8},s::Ptr{RawSxp}) = s[1]
+function rcopy(::Type{UInt8},s::Ptr{RawSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    s[1]
+end
 
 function rcopy(::Type{Vector{UInt8}},s::Ptr{RawSxp})
     a = Array{UInt8}(length(s))
@@ -151,13 +184,19 @@ end
 
 
 # StrSxp
-rcopy(::Type{Symbol}, s::Ptr{StrSxp}) = rcopy(Symbol,s[1])
-rcopy{T<:AbstractString}(::Type{T},s::Ptr{StrSxp}) = rcopy(T,s[1])
+function rcopy(::Type{Symbol}, s::Ptr{StrSxp})
+    length(s) == 1 || error("length of s must be 1.")
+    rcopy(Symbol,s[1])
+end
+function rcopy(::Type{T},s::Ptr{StrSxp}) where T<:AbstractString
+    length(s) == 1 || error("length of s must be 1.")
+    rcopy(T,s[1])
+end
 
 # VecSxp
 rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)
 rcopy(::Type{Vector}, s::Ptr{VecSxp}) = rcopy(Vector{Any}, s)
-function rcopy{A<:Associative}(::Type{A}, s::Ptr{VecSxp})
+function rcopy(::Type{A}, s::Ptr{VecSxp}) where A<:Associative
     protect(s)
     local a
     try
@@ -175,10 +214,10 @@ end
 
 
 # FunctionSxp
-function rcopy{S<:FunctionSxp}(::Type{Function}, s::Ptr{S})
+function rcopy(::Type{Function}, s::Ptr{S}) where S<:FunctionSxp
     (args...) -> rcopy(rcall_p(s,args...))
 end
-function rcopy{S<:FunctionSxp}(::Type{Function}, r::RObject{S})
+function rcopy(::Type{Function}, r::RObject{S}) where S<:FunctionSxp
     (args...) -> rcopy(rcall_p(r,args...))
 end
 
@@ -186,7 +225,19 @@ end
 # conversion from Base Julia types
 
 # nothing
-sexp{S<:Sxp}(::Type{S}, ::Void) = sexp(Const.NilValue)
+sexp(::Type{S}, ::Void) where S<:Sxp = sexp(Const.NilValue)
+
+# null
+sexp(::Type{S}, ::Null) where S<:Sxp = naeltype($S)
+
+# nullable
+function sexp(::Type{S}, s::Nullable) where S<:Sxp
+    if isnull(s)
+        naeltype(S)
+    else
+        sexp(S, s.value)
+    end
+end
 
 # symbol
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
@@ -205,7 +256,7 @@ for (J,S) in ((:Integer,:IntSxp),
             unsafe_store!(dataptr(ra),convert(eltype($S),v))
             ra
         end
-        function sexp{T<:$J}(::Type{$S}, a::AbstractArray{T})
+        function sexp(::Type{$S}, a::AbstractArray{T}) where T<:$J
             ra = allocArray($S, size(a)...)
             copy!(unsafe_vec(ra),a)
             ra
@@ -216,7 +267,7 @@ end
 # bool and boolean array, handle seperately
 sexp(::Type{LglSxp},v::Union{Bool,Cint}) =
     ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
-function sexp{T<:Union{Bool,Cint}}(::Type{LglSxp}, a::AbstractArray{T})
+function sexp(::Type{LglSxp}, a::AbstractArray{T}) where T<:Union{Bool,Cint}
     ra = allocArray(LglSxp, size(a)...)
     copy!(unsafe_vec(ra),a)
     ra
@@ -242,7 +293,7 @@ sexp(::Type{CharSxp}, st::String) =
 sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, String(st))
 sexp(::Type{StrSxp}, s::Ptr{CharSxp}) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(Ptr{CharSxp},),s)
 sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
-function sexp{T<:AbstractString}(::Type{StrSxp}, a::AbstractArray{T})
+function sexp(::Type{StrSxp}, a::AbstractArray{T}) where T<:AbstractString
     ra = protect(allocArray(StrSxp, size(a)...))
     try
         for i in 1:length(a)
@@ -289,3 +340,17 @@ end
 # Function
 
 # check src/callback.jl for `sexp(::ClosSxp, ::Function)`
+
+
+# R formula objects
+# TODO: never used
+# function sexp(::Type{ExprSxp}, f::Formula)
+#     s = protect(rlang_p(:~,rlang_formula(f.lhs),rlang_formula(f.rhs)))
+#     try
+#         setattrib!(s,Const.ClassSymbol,sexp("formula"))
+#         setattrib!(s,".Environment",Const.GlobalEnv)
+#     finally
+#         unprotect(1)
+#     end
+#     s
+# end

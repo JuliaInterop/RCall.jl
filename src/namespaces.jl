@@ -58,7 +58,7 @@ macro rimport(x, args...)
     end
     pkg = string(x)
     quote
-        if !isdefined($(QuoteNode(m)))
+        if !isdefined(@__MODULE__, $(QuoteNode(m)))
             const $(esc(m)) = rimport($pkg)
             nothing
         elseif typeof($(esc(m))) <: Module &&
@@ -83,6 +83,6 @@ macro rlibrary(x)
     m = gensym("RCall")
     quote
         $(esc(m)) = rimport($(QuoteNode(x)))
-        eval(current_module(), Expr(:using, :., $(QuoteNode(m))))
+        eval(@__MODULE__, Expr(:using, :., $(QuoteNode(m))))
     end
 end

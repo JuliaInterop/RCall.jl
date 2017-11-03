@@ -9,7 +9,7 @@ function validate_libR(libR)
     # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
     libptr = Libdl.dlopen_e(libR)
     if libptr == C_NULL
-        if is_windows()
+        if Compat.Sys.iswindows()
             error("Could not load library $libR. Try adding $(dirname(libR)) to the \"PATH\" environmental variable and restarting Julia.")
         else
             error("Could not load library $libR. Try adding $(dirname(libR)) to the \"LD_LIBRARY_PATH\" environmental variable and restarting Julia.")
@@ -25,7 +25,7 @@ function validate_libR(libR)
 end
 
 
-@static if is_windows()
+@static if Compat.Sys.iswindows()
     import WinReg
 
     function locate_Rhome_libR()
@@ -39,7 +39,7 @@ end
             end
         end
 
-        libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64?"x64":"i386")])
+        libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64 ? "x64" : "i386")])
 
         if isdir(Rhome) && validate_libR(libR)
             info("Using R installation at $Rhome")
@@ -64,7 +64,7 @@ end
 
     This type mirrors `structRstart` in `R_ext/RStartup.h`. It is used to initialize the R engine.
     """
-    type RStart # mirror structRstart in R_ext/RStartup.h
+    mutable struct RStart # mirror structRstart in R_ext/RStartup.h
         R_Quiet::Cint
         R_Slave::Cint
         R_Interactive::Cint
@@ -100,7 +100,7 @@ end
 
 end
 
-@static if is_unix()
+@static if Compat.Sys.isunix()
     function locate_Rhome_libR()
         Rhome = if haskey(ENV,"R_HOME")
             ENV["R_HOME"]
@@ -136,7 +136,7 @@ function initEmbeddedR()
     # disable R signal handling
     unsafe_store!(cglobal((:R_SignalHandlers,RCall.libR),Cint),0)
 
-    @static if is_windows()
+    @static if Compat.Sys.iswindows()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
 
@@ -173,7 +173,7 @@ function initEmbeddedR()
         ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
     end
 
-    @static if is_unix()
+    @static if Compat.Sys.isunix()
         # set necessary environmental variables
         ENV["R_HOME"] = Rhome
         ENV["R_DOC_DIR"] = joinpath(Rhome,"doc")
