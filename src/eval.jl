@@ -8,7 +8,8 @@ end
 
 """
 A wrapper of R_tryCatchError. It evaluates a given function with the given argument.
-It also catches possible Rf_error calls which may cause longjmp and return the handler instead.
+It also catches possible R's `stop` calls which may cause longjmp in c. The error handler is
+evaluate when such an exception is caught.
 """
 function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
     fptr = cfunction(
