@@ -43,9 +43,9 @@ function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sx
         if status == 0
             throw(RParseError())
         elseif status == 2
-            throw(RParseIncomplete(getParseErrorMsg()))
+            throw(RParseIncomplete("Error: " * getParseErrorMsg()))
         elseif status == 3
-            throw(RParseError(getParseErrorMsg()))
+            throw(RParseError("Error: " * getParseErrorMsg()))
         elseif status == 4
             throw(RParseEOF())
         end

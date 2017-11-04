@@ -60,7 +60,7 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         if isa(ex, REvalError)
             println(stderr, ex.msg)
         elseif isa(ex, RParseIncomplete) || isa(ex, RParseError)  || isa(ex, RParseEOF)
-            println(stderr, "Error: " * ex.msg)
+            println(stderr, ex.msg)
         else
             simple_showerror(stderr, ex)
         end
