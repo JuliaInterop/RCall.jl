@@ -4,7 +4,10 @@ Render an inline R script, substituting invalid "\$" signs for Julia symbols
 function render(script::String)
     symdict = OrderedDict{String,Any}()
     local k = 0
-    local lastex
+    local lastex = RParseError()
+    local line
+    local col
+    local c
 
     while true
         parse_error = false
@@ -26,12 +29,17 @@ function render(script::String)
             break
         end
 
-        parsedata = protect(rcall_p(:getParseData, sf))
-        n = length(parsedata[1])
-        line = parsedata[1][n]
-        col = parsedata[2][n]
-        c = rcopy(String, parsedata[:text][n])[1]
-        unprotect(1)
+        try
+            parsedata = protect(rcall_p(:getParseData, sf))
+            n = length(parsedata[1])
+            line = parsedata[1][n]
+            col = parsedata[2][n]
+            c = rcopy(String, parsedata[:text][n])[1]
+        catch
+            throw(lastex)
+        finally
+            unprotect(1)
+        end
 
         # break if the parse error is not caused by $
         if c != '\$'
@@ -69,7 +77,7 @@ function render(script::String)
         elseif isa(ast, Expr) && (ast.head == :incomplete || ast.head == :continue)
             throw(RParseIncomplete("incomplete julia expression"))
         else
-            throw(RParseError("unknown parse error"))
+            throw(RParseError())
         end
 
         symdict[sym] = ast
