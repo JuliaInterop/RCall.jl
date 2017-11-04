@@ -22,18 +22,6 @@ globalEnv[:x] = RObject([1,2,3])
 globalEnv[:y] = RObject([4,5,6])
 @test rcopy(rcall(Symbol("+"),:x,:y)) == [5,7,9]
 
-x = 1:10
-@rput x
-@rget x
-@test isa(x,Vector{Int})
-@test all(x .== 1:10)
-
-y = "foo"
-@rput x y::StrSxp
-@rget x y::Array{String}
-@test isa(y,Vector{String})
-@test y[1] == "foo"
-
 @test sprint(io -> rprint(io, RObject([1,2,3]))) == "[1] 1 2 3\n"
 @test_warn "hello" reval("warning('hello')")
 @test_throws RCall.REvalError reval("stop('hello')")

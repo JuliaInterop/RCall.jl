@@ -38,7 +38,7 @@ tests = ["basic",
          "convert/categorical",
          "convert/nullable",
          "convert/axisarray",
-         "render",
+         "macros",
          "namespaces",
          "repl",
          ]

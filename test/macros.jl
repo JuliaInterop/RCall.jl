@@ -1,5 +1,19 @@
 using RCall
 
+
+x = 1:10
+@rput x
+@rget x
+@test isa(x,Vector{Int})
+@test all(x .== 1:10)
+
+y = "foo"
+@rput x y::StrSxp
+@rget x y::Array{String}
+@test isa(y,Vector{String})
+@test y[1] == "foo"
+
+
 @test RCall.render("x = 1")[1] == "x = 1"
 
 @test RCall.render("x = 'β'")[1] == "x = 'β'"
@@ -23,3 +37,7 @@ using RCall
 @test RCall.render("x = 1\nβ = \$a")[1] == "x = 1\nβ = `#JL`\$`a`"
 
 @test rcopy(R"sum($[7,1,3])") == sum([7,1,3])
+
+@test_throws Exception R"""a = $(error("foo"))"""
+
+@test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0

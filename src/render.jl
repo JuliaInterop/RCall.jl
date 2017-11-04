@@ -30,11 +30,16 @@ function render(script::String)
         end
 
         try
-            parsedata = protect(rcall_p(:getParseData, sf))
-            n = length(parsedata[1])
-            line = parsedata[1][n]
-            col = parsedata[2][n]
-            c = rcopy(String, parsedata[:text][n])[1]
+            parsedata_p = rcall_p(:getParseData, sf)
+            try
+                parsedata = protect(parsedata_p)
+                n = length(parsedata[1])
+                line = parsedata[1][n]
+                col = parsedata[2][n]
+                c = rcopy(String, parsedata[:text][n])[1]
+            finally
+                unprotect(1)
+            end
         catch
             throw(lastex)
         finally
