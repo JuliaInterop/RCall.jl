@@ -28,8 +28,8 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     end
     defineVar(:x, Const.NilValue, env)
     try
-        handle_eval_stdout(status, io=io, force=true)
-        handle_eval_stderr(status)
+        handle_eval_stdout(io=io, force=true)
+        handle_eval_stderr(as_warning=(status == 0))
     finally
         _output_is_locked = false
         unprotect(2)
@@ -95,19 +95,19 @@ function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
-function handle_eval_stdout(status::Integer; io::IO=STDOUT, force::Bool=false)
+function handle_eval_stdout(;io::IO=STDOUT, force::Bool=false)
     if (!_output_is_locked || force) && nb_available(output_buffer) != 0
         write(io, String(take!(output_buffer)))
     end
 end
 
-function handle_eval_stderr(status::Integer)
+function handle_eval_stderr(;as_warning::Bool=false, errortype::Type{T}=REvalError) where T<:RException
     if nb_available(error_buffer) != 0
         s = String(take!(error_buffer))
-        if status == 0
+        if as_warning
             warn("RCall.jl: ", s)
         else
-            throw(REvalError(s))
+            throw(errortype(s))
         end
     end
 end
