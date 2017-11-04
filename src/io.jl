@@ -1,17 +1,12 @@
-# used in flush_output and flush_error
-struct ErrorIO <: IO end
-const error_device = ErrorIO()
-
-
-# mainly use to prevent flush_output stealing rprint output
+# mainly use to prevent display_eval_output stealing rprint output
 _output_is_locked = false
 
-const output_buffer_ = PipeBuffer()
+const output_buffer = PipeBuffer()
 const error_buffer = PipeBuffer()
 
 
 "Print the value of an Sxp using R's printing mechanism"
-function rprint(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device) where S<:Sxp
+function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     global _output_is_locked
     protect(s)
     # Rf_PrintValue can cause segfault if a S3/S4 object has custom
@@ -33,8 +28,8 @@ function rprint(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device) where S<:
     end
     defineVar(:x, Const.NilValue, env)
     try
-        flush_output(stdout, force=true)
-        flush_error(stderr, is_warning = status == 0)
+        handle_eval_stdout(status, io=io, force=true)
+        handle_eval_stderr(status)
     finally
         _output_is_locked = false
         unprotect(2)
@@ -44,30 +39,48 @@ function rprint(s::Ptr{S}; stdout::IO=STDOUT, stderr::IO=error_device) where S<:
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
     nothing
 end
-rprint(r::RObject; stdout::IO=STDOUT, stderr::IO=error_device) = rprint(r.p, stdout=stdout, stderr=stderr)
+rprint(io::IO, r::RObject) = rprint(io::IO, r.p)
+rprint(r::RObject) = rprint(STDOUT, r)
 
 function show(io::IO,r::RObject)
     println(io, typeof(r))
-    rprint(r, stdout=io)
+    rprint(io, r)
 end
 
-function simple_showerror(io::IO, er)
-    Base.with_output_color(:red, io) do io
-        print(io, "ERROR: ")
-        showerror(io, er)
-        println(io)
-    end
-end
 
-mutable struct REvalutionError <: Exception
+abstract type RException <: Exception end
+showerror(io::IO, e::RException, bt; backtrace=false) = showerror(io ,e)
+
+# status = 2
+struct RParseIncomplete <: RException
     msg::AbstractString
-    REvalutionError() = new("")
-    # R error messages may have trailing "\n"
-    REvalutionError(msg::AbstractString) = new(rstrip(msg))
+    RParseIncomplete(msg::AbstractString) = new(rstrip(msg))
 end
+showerror(io::IO, e::RParseIncomplete) = print(io, "RParseIncomplete: " * e.msg)
 
-showerror(io::IO, e::REvalutionError) = print(io, e.msg)
-showerror(io::IO, e::REvalutionError, bt; backtrace=false) = showerror(io ,e)
+# status = 3
+struct RParseError <: RException
+    msg::AbstractString
+    RParseError() = new("")
+    RParseError(msg::AbstractString) = new(rstrip(msg))
+end
+showerror(io::IO, e::RParseError) = print(io, "RParseError: " * e.msg)
+
+# status = 4
+struct RParseEOF <: RException
+    msg::AbstractString
+    RParseEOF() = new("read end of file")
+    RParseEOF(msg::AbstractString) = new(rstrip(msg))
+end
+showerror(io::IO, e::RParseEOF) = print(io, "RParseEOF: " * e.msg)
+
+
+struct REvalError <: RException
+    msg::AbstractString
+    REvalError() = new("")
+    REvalError(msg::AbstractString) = new(rstrip(msg))
+end
+showerror(io::IO, e::REvalError) = print(io, "REvalError: " * e.msg)
 
 
 """
@@ -75,36 +88,26 @@ R API callback to write console output.
 """
 function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     if otype == 0
-        unsafe_write(output_buffer_, buf, buflen)
+        unsafe_write(output_buffer, buf, buflen)
     else
         unsafe_write(error_buffer, buf, buflen)
     end
     return nothing
 end
 
-function flush_output(io::IO; force::Bool=false)
-    # dump output_buffer_'s content when it is not locked
-    if (!_output_is_locked || force) && nb_available(output_buffer_) != 0
-        write(io, String(take!(output_buffer_)))
+function handle_eval_stdout(status::Integer; io::IO=STDOUT, force::Bool=false)
+    if (!_output_is_locked || force) && nb_available(output_buffer) != 0
+        write(io, String(take!(output_buffer)))
     end
-    nothing
 end
 
-function flush_error(io::IO; is_warning::Bool=false)
-    if nb_available(error_buffer) != 0
-        write(io, String(take!(error_buffer)))
-    end
-    nothing
-end
-
-function flush_error(io::ErrorIO; is_warning::Bool=false)
+function handle_eval_stderr(status::Integer)
     if nb_available(error_buffer) != 0
         s = String(take!(error_buffer))
-        if is_warning
+        if status == 0
             warn("RCall.jl: ", s)
         else
-            throw(REvalutionError("RCall.jl: " * s))
+            throw(REvalError(s))
         end
     end
-    nothing
 end

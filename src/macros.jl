@@ -59,8 +59,7 @@ values from R via the return value.
 
 """
 macro R_str(script)
-    script, symdict, status, msg = render(script)
-    status != 1 && error("RCall.jl: $msg")
+    script, symdict = render(script)
 
     if length(symdict) > 0
         return quote

@@ -9,8 +9,8 @@ end
 "Event Callback: allows R to process Julia events when R is busy.
 For example, writing output to STDOUT while running an expensive R command."
 function event_callback()
-    # dump printBuffer to STDOUT when available
-    flush_output(STDOUT)
+    # dump output buffer to STDOUT when available
+    handle_eval_stdout(1)
     nothing
 end
 
