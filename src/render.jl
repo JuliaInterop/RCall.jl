@@ -68,6 +68,8 @@ function render(script::String)
             end
         elseif isa(ast, Expr) && (ast.head == :incomplete || ast.head == :continue)
             throw(RParseIncomplete("incomplete julia expression"))
+        else
+            throw(RParseError("unknown parse error"))
         end
 
         symdict[sym] = ast
