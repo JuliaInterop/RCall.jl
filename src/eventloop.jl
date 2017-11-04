@@ -10,7 +10,7 @@ end
 For example, writing output to STDOUT while running an expensive R command."
 function event_callback()
     # dump output buffer to STDOUT when available
-    handle_eval_stdout(1)
+    handle_eval_stdout()
     nothing
 end
 

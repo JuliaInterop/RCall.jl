@@ -69,6 +69,10 @@ env[:x] = null
 @test isnull(rcopy(env[:x]))
 
 
+# rparse
+@test_throws RCall.RParseError rparse(raw"'\g'")
+@test_throws RCall.RParseError rparse("``")
+
 # callbacks
 function testfn(x,y;a=3,b=4)
     [x;y;a;b]
