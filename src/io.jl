@@ -61,7 +61,7 @@ showerror(io::IO, e::RParseIncomplete) = print(io, "RParseIncomplete: " * e.msg)
 # status = 3
 struct RParseError <: RException
     msg::AbstractString
-    RParseError() = new("")
+    RParseError() = new("unknown parse error")
     RParseError(msg::AbstractString) = new(rstrip(msg))
 end
 showerror(io::IO, e::RParseError) = print(io, "RParseError: " * e.msg)
