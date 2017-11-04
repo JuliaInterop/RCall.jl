@@ -3,32 +3,40 @@ Render an inline R script, substituting invalid "\$" signs for Julia symbols
 """
 function render(script::String)
     symdict = OrderedDict{String,Any}()
-    local status
-    local msg = ""
     local k = 0
-    local c = ' '
-    while true
-        st = protect(sexp(script))
-        sf = protect(rcall_p(:srcfile,"xx"))
-        status = parseVector(st, sf)[2]
-        unprotect(1)
-        msg = status == 1 ? "" : getParseErrorMsg()
+    local lastex
 
-        # break if not parse error (status = 3)
-        if status != 3
+    while true
+        parse_error = false
+        sf = protect(rcall_p(:srcfile, "xx"))
+        try
+            rparse_p(script, sf)
+        catch ex
+            lastex = ex
+            if isa(ex, RParseError)
+                parse_error = true
+            else
+                unprotect(1)
+                throw(ex)
+            end
+        end
+        # break if parse complete
+        if !parse_error
             unprotect(1)
             break
-        else
-            parsedata = protect(rcall_p(:getParseData,sf))
-            n = length(parsedata[1])
-            line = parsedata[1][n]
-            col = parsedata[2][n]
-            c = rcopy(String, parsedata[:text][n])[1]
-            unprotect(2)
         end
 
+        parsedata = protect(rcall_p(:getParseData, sf))
+        n = length(parsedata[1])
+        line = parsedata[1][n]
+        col = parsedata[2][n]
+        c = rcopy(String, parsedata[:text][n])[1]
+        unprotect(1)
+
         # break if the parse error is not caused by $
-        c != '\$' && break
+        if c != '\$'
+            throw(lastex)
+        end
 
         index = 0
         for i in 1:(line-1)
@@ -44,11 +52,10 @@ function render(script::String)
             c = ' '
         end
         if c != '\$'
-            msg = "Error in locating julia expressions"
-            break
+            throw(RParseError("error in locating julia expression"))
         end
 
-        ast,i = parse(script,index+1,greedy=false,raise=false)
+        ast, i = parse(script, index+1, greedy=false)
 
         if isa(ast,Symbol)
             sym = "$ast"
@@ -59,24 +66,15 @@ function render(script::String)
                 sym *= "##$k"
                 k = k + 1
             end
-        elseif isa(ast, Expr) && (ast.head == :error || ast.head == :continue)
-            status = 3
-            msg = ast.args[1]
-            break
-        elseif isa(ast, Expr) && ast.head == :incomplete
-            status = 2
-            msg = ast.args[1]
-            break
-        else
-            status = 3
-            msg = "unknown render error"
-            break
+        elseif isa(ast, Expr) && (ast.head == :incomplete || ast.head == :continue)
+            throw(RParseIncomplete("incomplete julia expression"))
         end
+
         symdict[sym] = ast
         script = string(script[1:index-1], "`#JL`\$`",sym,'`', script[i:end])
     end
 
-    return script, symdict, status, msg
+    return script, symdict
 end
 
 """

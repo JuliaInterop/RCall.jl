@@ -2,7 +2,7 @@ module RPrompt
 
 import Base: LineEdit, REPL, REPLCompletions
 import DataStructures: OrderedDict
-import ..REvalutionError
+import ..REvalError
 import ..Const
 import ..RCall:
     libR,
@@ -14,28 +14,56 @@ import ..RCall:
     rcopy,
     render,
     prepare_inline_julia_code,
-    simple_showerror
+    RParseIncomplete,
+    RException,
+    RParseError,
+    REvalError,
+    RParseEOF
 
+
+function simple_showerror(io::IO, er)
+    Base.with_output_color(:red, io) do io
+        print(io, "ERROR: ")
+        showerror(io, er)
+        println(io)
+    end
+end
+
+function parse_status(script::String)
+    status = :ok
+    try
+        render(script)
+    catch ex
+        if isa(ex, RParseIncomplete)
+            status = :incomplete
+        else
+            status = :error
+        end
+    end
+    status
+end
 
 function repl_eval(script::String, stdout::IO, stderr::IO)
     local status
     local val
-    script, symdict, status, msg = render(script)
-    if status != 1
-        write(stderr, "Error: $msg\n")
-        return nothing
-    end
     try
+        script, symdict = render(script)
         if length(symdict) > 0
             eval(Main, prepare_inline_julia_code(symdict))
         end
-        val = reval_p(rparse_p(script), Const.GlobalEnv.p, stdout=stdout, stderr=stderr)
+        val = reval_p(rparse_p(script), Const.GlobalEnv.p)
         # print if the last expression is visible
         if unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
-             rprint(val, stdout=stdout, stderr=stderr)
+             rprint(stdout, val)
         end
-    catch e
-        isa(e, REvalutionError) || simple_showerror(stderr, e)
+    catch ex
+        if isa(ex, REvalError)
+            println(stderr, ex.msg)
+        elseif isa(ex, RParseIncomplete) || isa(ex, RParseError)  || isa(ex, RParseEOF)
+            println(stderr, "Error: " * ex.msg)
+        else
+            simple_showerror(stderr, ex)
+        end
     finally
         return nothing
     end
@@ -70,15 +98,15 @@ function bracketed_paste_callback(s, o...)
             nextpos = endof(input)
         end
         block = input[oldpos:nextpos]
-        status = render(block)[3]
+        status = parse_status(block)
 
-        if status >= 3  || (status == 2 && done(input, nextpos+1)) ||
+        if status == :error  || (status == :incomplete && done(input, nextpos+1)) ||
                 (done(input, nextpos+1) && !endswith(input, '\n'))
-            # error / continue but no the end / at the end but no new line
+            # error / continue but not the end / at the end but no new line
             LineEdit.replace_line(s, input[oldpos:end])
             LineEdit.refresh_line(s)
             break
-        elseif status == 2 && !done(input, nextpos+1)
+        elseif status == :incomplete && !done(input, nextpos+1)
             continue
         end
 
@@ -136,8 +164,8 @@ function create_r_repl(repl, main)
     r_mode.hist = hp
     r_mode.complete = RCompletionProvider(repl)
     r_mode.on_enter = (s) -> begin
-        status = render(String(LineEdit.buffer(s)))[3]
-        status == 1 || status >= 3
+        status = parse_status(String(LineEdit.buffer(s)))
+        status == :ok || status == :error
     end
     r_mode.on_done = (s, buf, ok) -> begin
         if !ok
@@ -146,7 +174,12 @@ function create_r_repl(repl, main)
         script = String(take!(buf))
         if !isempty(strip(script))
             REPL.reset(repl)
-            repl_eval(script, repl.t.out_stream, repl.t.err_stream)
+            try
+                repl_eval(script, repl.t.out_stream, repl.t.err_stream)
+            catch y
+                # should never reach
+                simple_showerror(stderr, y)
+            end
         end
         REPL.prepare_next(repl)
         REPL.reset_state(s)

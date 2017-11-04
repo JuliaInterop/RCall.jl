@@ -16,17 +16,21 @@ function getParseErrorMsg()
 end
 
 "Parse a string as an R expression, returning a Sxp pointer."
-function rparse_p(st::Ptr{StrSxp})
-    val, status = parseVector(st)
-    if status == 2 || status == 3
-        error("RCall.jl: ", getParseErrorMsg())
+function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sxp
+    val, status = parseVector(st, sf)
+    if status == 0
+        throw(RParseError())
+    elseif status == 2
+        throw(RParseIncomplete(getParseErrorMsg()))
+    elseif status == 3
+        throw(RParseError(getParseErrorMsg()))
     elseif status == 4
-        throw(EOFError())
+        throw(RParseEOF())
     end
     sexp(val)
 end
-rparse_p(st::AbstractString) = rparse_p(sexp(st))
-rparse_p(s::Symbol) = rparse_p(string(s))
+rparse_p(st::AbstractString, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp = rparse_p(sexp(st), sf)
+rparse_p(s::Symbol, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp = rparse_p(string(s), sf)
 
 "Parse a string as an R expression, returning an RObject."
 rparse(st::AbstractString) = RObject(rparse_p(st))
@@ -50,14 +54,10 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
-function reval_p(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv); stdout::IO=STDOUT, stderr::IO=error_device) where S<:Sxp
+function reval_p(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) where S<:Sxp
     val, status = tryEval(expr, env)
-    flush_output(stdout)
-    flush_error(stderr, is_warning = status == 0)
-    # in repl mode, error buffer is dumped to STDERR, so need to throw an error
-    # to stop the evaluation
-    status != 0 && throw(REvalutionError())
-
+    handle_eval_stdout(status)
+    handle_eval_stderr(status)
     sexp(val)
 end
 
@@ -65,13 +65,13 @@ end
 Evaluate an R expression array iteratively. If `throw_error` is `false`,
 the error message and warning will be thrown to STDERR.
 """
-function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp}; stdout::IO=STDOUT, stderr::IO=error_device)
+function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val
     protect(expr)
     protect(env)
     try
         for e in expr
-            val = reval_p(e, env; stdout=stdout, stderr=stderr)
+            val = reval_p(e, env)
         end
     finally
         unprotect(2)
@@ -87,7 +87,6 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """
-reval(r::RObject, env=Const.GlobalEnv; stdout=STDOUT, stderr=error_device) =
-    RObject(reval_p(sexp(r), sexp(env), stdout=stdout, stderr=stderr))
-reval(str::Union{AbstractString,Symbol}, env=Const.GlobalEnv; stdout=STDOUT, stderr=error_device) =
-    RObject(reval_p(rparse_p(str), sexp(env), stdout=stdout, stderr=stderr))
+reval(r::RObject, env=Const.GlobalEnv) = RObject(reval_p(sexp(r), sexp(env)))
+reval(str::T, env=Const.GlobalEnv) where T <: Union{AbstractString, Symbol} =
+    RObject(reval_p(rparse_p(str), sexp(env)))
