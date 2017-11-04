@@ -1,19 +1,32 @@
 """
-A wrapper of R_ToplevelExec. It evaluates a given function with argument `data` at R top level. Useful to
-catch possible Rf_error calls which may cause longjmp.
+A wrapper of R_ToplevelExec. It evaluates a given function with argument `data` at R top level.
 """
 function toplevelExec(fun::Function, data::Tuple)
-    fptr = cfunction((dptr) -> fun(unsafe_pointer_to_objref(dptr)), Void, (Ptr{Void},))
+    fptr = cfunction((dptr) -> fun(unsafe_pointer_to_objref(dptr)...), Void, (Ptr{Void},))
     ccall((:R_ToplevelExec, libR), Cint, (Ptr{Void}, Ptr{Void}), fptr, pointer_from_objref(data))
 end
 
-function toplevelExec(fun::Function, input::Tuple, ret::Ref)
-    toplevelExec((data) -> begin
-        data[2][] = fun(data[1]...)
-        nothing
-    end, (input, ret))
+"""
+A wrapper of R_tryCatchError. It evaluates a given function with the given argument.
+It also catches possible Rf_error calls which may cause longjmp and return the handler instead.
+"""
+function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
+    fptr = cfunction(
+        (a) -> convert(Ptr{UnknownSxp}, f(unsafe_pointer_to_objref(a)...)),
+        Ptr{UnknownSxp}, (Ptr{Void}, ))
+    eptr = cfunction(
+        (cond, a) -> convert(Ptr{UnknownSxp}, err(cond, unsafe_pointer_to_objref(a)...)),
+        Ptr{UnknownSxp}, (Ptr{UnknownSxp}, Ptr{Void}))
+    ret = ccall((:R_tryCatchError, libR), Ptr{UnknownSxp},
+          (Ptr{Void}, Ptr{Void}, Ptr{Void}, Ptr{Void}),
+          fptr, pointer_from_objref(fargs),
+          eptr, pointer_from_objref(eargs))
+    sexp(ret)
 end
 
+function tryCatchError(f::Function, fargs::Tuple)
+    tryCatchError(f, fargs, (c, a) -> c, (C_NULL,))
+end
 
 "A pure julia wrapper of R_ParseVector"
 function parseVector(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
@@ -27,6 +40,12 @@ function parseVector(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:
     val, status[]
 end
 
+function parseVector(ret::Ref{Tuple{Ptr{UnknownSxp}, Cint}},
+                     st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
+    ret[] = parseVector(st, sf)
+    sexp(Const.NilValue)
+end
+
 "Get the R parser error msg for the previous parsing result."
 function getParseErrorMsg()
     unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
@@ -34,12 +53,15 @@ end
 
 "Parse a string as an R expression, returning a Sxp pointer."
 function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sxp
-    ret = Ref{Tuple{Ptr{UnknownSxp}, Cint}}()
+    parse_result = Ref{Tuple{Ptr{UnknownSxp}, Cint}}()
     # use toplevelExec to evaluate parseVector as parseVector may longjmp
-    if toplevelExec(parseVector, (st, sf), ret) == 0
-        handle_eval_stderr(errortype=RParseError)
+    eval_result = tryCatchError(parseVector, (parse_result, st, sf), (c, a) -> sexp(c), (C_NULL,))
+
+    if "error" in rcopy(Array, getclass(eval_result))
+        throw(RParseError("Error: " * rcopy(eval_result["message"])))
+        # handle_eval_stderr(errortype=RParseError)
     else
-        val, status = ret[]
+        val, status = parse_result[]
         if status == 0
             throw(RParseError())
         elseif status == 2
