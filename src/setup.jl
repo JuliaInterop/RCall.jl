@@ -15,10 +15,9 @@ function validate_libR(libR)
             error("Could not load library $libR. Try adding $(dirname(libR)) to the \"LD_LIBRARY_PATH\" environmental variable and restarting Julia.")
         end
     end
-    # Issue #74
-    # R_BlankScalarString is only available on v3.2.0 or later.
-    if Libdl.dlsym_e(libptr,"R_BlankScalarString") == C_NULL
-        error("R libary $libR appears to be too old. RCall.jl requires R 3.2.0 or later")
+    # R_tryCatchError is only available on v3.4.0 or later.
+    if Libdl.dlsym_e(libptr,"R_tryCatchError") == C_NULL
+        error("R libary $libR appears to be too old. RCall.jl requires R 3.4.0 or later")
     end
     Libdl.dlclose(libptr)
     return true

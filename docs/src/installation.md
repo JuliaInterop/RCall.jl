@@ -1,6 +1,6 @@
 # Installing RCall.jl
 
-RCall.jl requires that a recent version of R, at least 3.2.0, be installed. 
+RCall.jl requires that a recent version of R, at least 3.4.0, be installed. 
 
 ## Standard installations
 
