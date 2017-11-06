@@ -10,7 +10,7 @@ Order   = [:type]
 ## Methods
 
 ```@autodocs
-Modules = [RCall, RCall.Console, RCall.IJuliaHooks]
+Modules = [RCall]
 Order   = [:function]
 ```
 
