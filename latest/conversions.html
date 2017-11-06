@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Supported Conversions · RCall.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>RCall.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Introduction</a></li><li><a class="toctext" href="installation.html">Installation</a></li><li><a class="toctext" href="gettingstarted.html">Getting Started</a></li><li class="current"><a class="toctext" href="conversions.html">Supported Conversions</a><ul class="internal"><li><a class="toctext" href="#Base-Julia-Types-1">Base Julia Types</a></li><li><a class="toctext" href="#Dictionaries-1">Dictionaries</a></li><li><a class="toctext" href="#Date-1">Date</a></li><li><a class="toctext" href="#DateTime-1">DateTime</a></li><li><a class="toctext" href="#DataFrames-and-DataArrays-1">DataFrames and DataArrays</a></li><li><a class="toctext" href="#NamedArrays-1">NamedArrays</a></li><li><a class="toctext" href="#AxisArrays-1">AxisArrays</a></li></ul></li><li><a class="toctext" href="custom.html">Custom Conversion</a></li><li><a class="toctext" href="internal.html">Internal</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href="conversions.html">Supported Conversions</a></li></ul><a class="edit-page" href="https://github.com/JuliaInterop/RCall.jl/tree/9c795a58219aa653709643f46e5cfe311fd6419f/docs/src/conversions.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Supported Conversions</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Supported-Conversions-1" href="#Supported-Conversions-1">Supported Conversions</a></h1><p>RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., <code>DataFrames</code>, <code>DataArrays</code>, <code>NullableArrays</code>, <code>CategoricalArrays</code> <code>NamedArrays</code> and <code>AxisArrays</code>.</p><div></div><h2><a class="nav-anchor" id="Base-Julia-Types-1" href="#Base-Julia-Types-1">Base Julia Types</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Supported Conversions · RCall.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>RCall.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Introduction</a></li><li><a class="toctext" href="installation.html">Installation</a></li><li><a class="toctext" href="gettingstarted.html">Getting Started</a></li><li class="current"><a class="toctext" href="conversions.html">Supported Conversions</a><ul class="internal"><li><a class="toctext" href="#Base-Julia-Types-1">Base Julia Types</a></li><li><a class="toctext" href="#Dictionaries-1">Dictionaries</a></li><li><a class="toctext" href="#Date-1">Date</a></li><li><a class="toctext" href="#DateTime-1">DateTime</a></li><li><a class="toctext" href="#DataFrames-1">DataFrames</a></li><li><a class="toctext" href="#DataArrays-1">DataArrays</a></li><li><a class="toctext" href="#AxisArrays-1">AxisArrays</a></li></ul></li><li><a class="toctext" href="custom.html">Custom Conversion</a></li><li><a class="toctext" href="internal.html">Internal</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href="conversions.html">Supported Conversions</a></li></ul><a class="edit-page" href="https://github.com/JuliaInterop/RCall.jl/blob/master/docs/src/conversions.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Supported Conversions</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Supported-Conversions-1" href="#Supported-Conversions-1">Supported Conversions</a></h1><p>RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., <code>DataFrames</code>, <code>DataArrays</code>, <code>NullableArrays</code>, <code>CategoricalArrays</code> <code>NamedArrays</code> and <code>AxisArrays</code>.</p><div></div><h2><a class="nav-anchor" id="Base-Julia-Types-1" href="#Base-Julia-Types-1">Base Julia Types</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
 a = RObject(1)</code></pre><pre><code class="language-none">RCall.RObject{RCall.IntSxp}
 [1] 1</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
 rcopy(a)</code></pre><pre><code class="language-none">1</code></pre></div><div><pre><code class="language-julia"># Julia -&gt; R
@@ -17,7 +17,7 @@ $b
 [1] 4 5 3</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
 rcopy(r)</code></pre><pre><code class="language-none">Dict{Symbol,Any} with 2 entries:
   :a =&gt; 1
-  :b =&gt; [4,5,3]</code></pre></div><h2><a class="nav-anchor" id="Date-1" href="#Date-1">Date</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
+  :b =&gt; [4, 5, 3]</code></pre></div><h2><a class="nav-anchor" id="Date-1" href="#Date-1">Date</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
 d = Date(2012, 12, 12)
 r = RObject(d)</code></pre><pre><code class="language-none">RCall.RObject{RCall.RealSxp}
 [1] &quot;2012-12-12&quot;</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
@@ -25,7 +25,7 @@ rcopy(r)</code></pre><pre><code class="language-none">2012-12-12</code></pre></d
 d = DateTime(2012, 12, 12, 12, 12, 12)
 r = RObject(d)</code></pre><pre><code class="language-none">RCall.RObject{RCall.RealSxp}
 [1] &quot;2012-12-12 12:12:12 UTC&quot;</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
-rcopy(r)</code></pre><pre><code class="language-none">2012-12-12T12:12:12</code></pre></div><h2><a class="nav-anchor" id="DataFrames-and-DataArrays-1" href="#DataFrames-and-DataArrays-1">DataFrames and DataArrays</a></h2><div><pre><code class="language-julia">d = DataFrame([[1.0, 4.5, 7.0]], [:x])
+rcopy(r)</code></pre><pre><code class="language-none">2012-12-12T12:12:12</code></pre></div><h2><a class="nav-anchor" id="DataFrames-1" href="#DataFrames-1">DataFrames</a></h2><div><pre><code class="language-julia">d = DataFrame([[1.0, 4.5, 7.0]], [:x])
 # Julia -&gt; R
 r = RObject(d)</code></pre><pre><code class="language-none">RCall.RObject{RCall.VecSxp}
     x
@@ -54,26 +54,22 @@ rcopy(r)</code></pre><pre><code class="language-none">3×1 DataFrames.DataFrame
 │ 7   │ 7   │
 │ 8   │ 8   │
 │ 9   │ 9   │
-│ 10  │ 10  │</code></pre></div><h2><a class="nav-anchor" id="NamedArrays-1" href="#NamedArrays-1">NamedArrays</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
-aa = NamedArray([1,2,3], [[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]], [:id])
+│ 10  │ 10  │</code></pre></div><h2><a class="nav-anchor" id="DataArrays-1" href="#DataArrays-1">DataArrays</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
+aa = DataArray([1,2,3], [true, true, false])
 r = RObject(aa)</code></pre><pre><code class="language-none">RCall.RObject{RCall.IntSxp}
-id
-a b c
-1 2 3</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
-rcopy(NamedArray, r)</code></pre><pre><code class="language-none">3-element Named Array{Int32,1}
-id  │
-────┼──
-a   │ 1
-b   │ 2
-c   │ 3</code></pre></div><h2><a class="nav-anchor" id="AxisArrays-1" href="#AxisArrays-1">AxisArrays</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
+[1] NA NA  3</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
+rcopy(DataArray, r)</code></pre><pre><code class="language-none">3-element DataArrays.DataArray{Int64,1}:
+  NA
+  NA
+ 3</code></pre></div><h2><a class="nav-anchor" id="AxisArrays-1" href="#AxisArrays-1">AxisArrays</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
 aa = AxisArray([1,2,3], Axis{:id}([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))
 r = RObject(aa)</code></pre><pre><code class="language-none">RCall.RObject{RCall.IntSxp}
 id
 a b c
 1 2 3</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
-rcopy(AxisArray, r)</code></pre><pre><code class="language-none">1-dimensional AxisArray{Int32,1,...} with axes:
-    :id, String[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]
-And data, a 3-element Array{Int32,1}:
+rcopy(AxisArray, r)</code></pre><pre><code class="language-none">1-dimensional AxisArray{Int64,1,...} with axes:
+    :id, String[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+And data, a 3-element Array{Int64,1}:
  1
  2
  3</code></pre></div><footer><hr/><a class="previous" href="gettingstarted.html"><span class="direction">Previous</span><span class="title">Getting Started</span></a><a class="next" href="custom.html"><span class="direction">Next</span><span class="title">Custom Conversion</span></a></footer></article></body></html>

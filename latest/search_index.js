@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Installing RCall.jl",
     "category": "section",
-    "text": "RCall.jl requires that a recent version of R, at least 3.2.0, be installed. "
+    "text": "RCall.jl requires that a recent version of R, at least 3.4.0, be installed. "
 },
 
 {
@@ -201,19 +201,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "conversions.html#DataFrames-and-DataArrays-1",
+    "location": "conversions.html#DataFrames-1",
     "page": "Supported Conversions",
-    "title": "DataFrames and DataArrays",
+    "title": "DataFrames",
     "category": "section",
     "text": "d = DataFrame([[1.0, 4.5, 7.0]], [:x])\n# Julia -> R\nr = RObject(d)# R -> Julia\nrcopy(r)In default, the column names of R data frames are sanitized such that foo.bar would be replaced by foo_bar.rcopy(R\"data.frame(a.b = 1:3)\")To avoid the sanitization, use sanitize option.rcopy(R\"data.frame(a.b = 1:10)\"; sanitize = false)"
 },
 
 {
-    "location": "conversions.html#NamedArrays-1",
+    "location": "conversions.html#DataArrays-1",
     "page": "Supported Conversions",
-    "title": "NamedArrays",
+    "title": "DataArrays",
     "category": "section",
-    "text": "# Julia -> R\naa = NamedArray([1,2,3], [[\"a\", \"b\", \"c\"]], [:id])\nr = RObject(aa)# R -> Julia\nrcopy(NamedArray, r)"
+    "text": "# Julia -> R\naa = DataArray([1,2,3], [true, true, false])\nr = RObject(aa)# R -> Julia\nrcopy(DataArray, r)"
 },
 
 {
@@ -533,11 +533,11 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "Macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#97)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#86)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
 },
 
 {
-    "location": "internal.html#RCall.@rget-Tuple{Vararg{Any,N}}",
+    "location": "internal.html#RCall.@rget-Tuple",
     "page": "Internal",
     "title": "RCall.@rget",
     "category": "Macro",
@@ -545,7 +545,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.@rimport-Tuple{Any,Vararg{Any,N}}",
+    "location": "internal.html#RCall.@rimport-Tuple{Any,Vararg{Any,N} where N}",
     "page": "Internal",
     "title": "RCall.@rimport",
     "category": "Macro",
@@ -561,7 +561,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.@rput-Tuple{Vararg{Any,N}}",
+    "location": "internal.html#RCall.@rput-Tuple",
     "page": "Internal",
     "title": "RCall.@rput",
     "category": "Macro",
