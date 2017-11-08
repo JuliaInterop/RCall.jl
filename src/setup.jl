@@ -17,7 +17,7 @@ function validate_libR(libR)
     end
     # R_tryCatchError is only available on v3.4.0 or later.
     if Libdl.dlsym_e(libptr,"R_tryCatchError") == C_NULL
-        error("R libary $libR appears to be too old. RCall.jl requires R 3.4.0 or later")
+        error("R library $libR appears to be too old. RCall.jl requires R 3.4.0 or later")
     end
     Libdl.dlclose(libptr)
     return true
