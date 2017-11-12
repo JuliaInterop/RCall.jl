@@ -104,6 +104,8 @@ function reval_p(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) where S<:
     val, status = tryEval(expr, env)
     handle_eval_stdout()
     handle_eval_stderr(as_warning=(status == 0))
+    # always throw an error if status is not zero
+    status != 0 && throw(REvalError())
     sexp(val)
 end
 
