@@ -15,21 +15,22 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     env = protect(newEnvironment(Const.GlobalEnv))
     defineVar(:x, s, env)
     _output_is_locked = true
+    status = Ref{Cint}()
     if isObject(s) || isFunction(s)
         if isS4(s)
-            _, status = tryEval(rlang_p(findNamespace("methods")[:show], :x), env)
+            tryEval(rlang_p(findNamespace("methods")[:show], :x), env, status)
         else
-            _, status = tryEval(rlang_p(Const.BaseNamespace[:print], :x) ,env)
+            tryEval(rlang_p(Const.BaseNamespace[:print], :x), env, status)
         end
     else
         # Rf_PrintValueRec not found on unix!?
         # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
-        _, status = tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env)
+        tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env, status)
     end
     defineVar(:x, Const.NilValue, env)
     try
         handle_eval_stdout(io=io, force=true)
-        handle_eval_stderr(as_warning=(status == 0))
+        handle_eval_stderr(as_warning=(status[] == 0))
     finally
         _output_is_locked = false
         unprotect(2)
@@ -101,13 +102,13 @@ function handle_eval_stdout(;io::IO=STDOUT, force::Bool=false)
     end
 end
 
-function handle_eval_stderr(;as_warning::Bool=false, errortype::Type{T}=REvalError) where T<:RException
+function handle_eval_stderr(;as_warning::Bool=false)
     if nb_available(error_buffer) != 0
         s = String(take!(error_buffer))
         if as_warning
             warn("RCall.jl: ", s)
         else
-            throw(errortype(s))
+            throw(REvalError(s))
         end
     end
 end

@@ -26,25 +26,18 @@ function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
 end
 
 function tryCatchError(f::Function, fargs::Tuple)
-    tryCatchError(f, fargs, (c, a) -> c, (C_NULL,))
+    tryCatchError(f, fargs, (c, a) -> sexp(c), (C_NULL,))
 end
 
 "A pure julia wrapper of R_ParseVector"
-function parseVector(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
+function parseVector(st::Ptr{StrSxp}, status::Ref{Cint}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
     protect(st)
     protect(sf)
-    status = Ref{Cint}()
     val = ccall((:R_ParseVector,libR),Ptr{UnknownSxp},
                 (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}),
                 st,-1,status,sf)
     unprotect(2)
-    val, status[]
-end
-
-function parseVector(ret::Ref{Tuple{Ptr{UnknownSxp}, Cint}},
-                     st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
-    ret[] = parseVector(st, sf)
-    sexp(Const.NilValue)
+    sexp(val)
 end
 
 "Get the R parser error msg for the previous parsing result."
@@ -54,25 +47,29 @@ end
 
 "Parse a string as an R expression, returning a Sxp pointer."
 function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sxp
-    parse_result = Ref{Tuple{Ptr{UnknownSxp}, Cint}}()
+    protect(st)
+    protect(sf)
+    status = Ref{Cint}()
     # use toplevelExec to evaluate parseVector as parseVector may longjmp
-    eval_result = tryCatchError(parseVector, (parse_result, st, sf), (c, a) -> sexp(c), (C_NULL,))
+    result = protect(tryCatchError(parseVector, (st, status, sf)))
 
-    if "error" in rcopy(Array, getclass(eval_result))
-        throw(RParseError("Error: " * rcopy(eval_result["message"])))
-        # handle_eval_stderr(errortype=RParseError)
-    else
-        val, status = parse_result[]
-        if status == 0
-            throw(RParseError())
-        elseif status == 2
-            throw(RParseIncomplete("Error: " * getParseErrorMsg()))
-        elseif status == 3
-            throw(RParseError("Error: " * getParseErrorMsg()))
-        elseif status == 4
-            throw(RParseEOF())
+    try
+        if "error" in rcopy(Array, getclass(result))
+            throw(RParseError("Error: " * rcopy(result["message"])))
+        else
+            if status[] == 0
+                throw(RParseError())
+            elseif status[] == 2
+                throw(RParseIncomplete("Error: " * getParseErrorMsg()))
+            elseif status[] == 3
+                throw(RParseError("Error: " * getParseErrorMsg()))
+            elseif status[] == 4
+                throw(RParseEOF())
+            end
+            sexp(result)
         end
-        sexp(val)
+    finally
+        unprotect(3)
     end
 end
 rparse_p(st::AbstractString, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp = rparse_p(sexp(st), sf)
@@ -85,14 +82,13 @@ rparse(st::AbstractString) = RObject(rparse_p(st))
 """
 A pure julia wrapper of R_tryEval.
 """
-function tryEval(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) where S<:Sxp
+function tryEval(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv), status::Ref{Cint}=Ref{Cint}()) where S<:Sxp
     disable_sigint() do
-        status = Ref{Cint}()
         protect(expr)
         protect(env)
         val = ccall((:R_tryEval,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{EnvSxp},Ref{Cint}),expr,env,status)
         unprotect(2)
-        val, status[]
+        val
     end
 end
 
@@ -101,11 +97,13 @@ Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
 function reval_p(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) where S<:Sxp
-    val, status = tryEval(expr, env)
+    status = Ref{Cint}()
+    val = tryEval(expr, env, status)
+    succeed = status[] == 0
     handle_eval_stdout()
-    handle_eval_stderr(as_warning=(status == 0))
+    handle_eval_stderr(as_warning=succeed)
     # always throw an error if status is not zero
-    status != 0 && throw(REvalError())
+    !succeed && throw(REvalError())
     sexp(val)
 end
 
