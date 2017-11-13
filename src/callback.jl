@@ -30,6 +30,7 @@ It receives a `Ptr{ListSxp}` containing
  - any arguments (as `Ptr{S<:Sxp}`)
 """
 function julia_extptr_callback(p::Ptr{ListSxp})
+    protect(p)
     try
         l = cdr(p) # skip callback pointer
 
@@ -46,9 +47,9 @@ function julia_extptr_callback(p::Ptr{ListSxp})
             # TODO: provide a mechanism for users to specify their own
             # conversion routines
             if k == sexp(Const.NilValue)
-                push!(args,rcopy(a))
+                push!(args, rcopy(a))
             else
-                push!(kwargs,(rcopy(Symbol,k),rcopy(a)))
+                push!(kwargs, (rcopy(Symbol,k), rcopy(a)))
             end
         end
 
@@ -56,10 +57,12 @@ function julia_extptr_callback(p::Ptr{ListSxp})
         y = f(args...;kwargs...)
 
         # return appropriate sexp
-        return p = convert(Ptr{UnknownSxp},sexp(y))::Ptr{UnknownSxp}
+        return p = convert(Ptr{UnknownSxp}, sexp(y))::Ptr{UnknownSxp}
     catch e
         ccall((:Rf_error,libR),Ptr{Void},(Ptr{Cchar},),string(e))
-        return convert(Ptr{UnknownSxp},sexp(Const.NilValue))::Ptr{UnknownSxp}
+        return convert(Ptr{UnknownSxp}, sexp(Const.NilValue))::Ptr{UnknownSxp}
+    finally
+        unprotect(1)
     end
 end
 
@@ -129,12 +132,15 @@ function sexp(::Type{ClosSxp}, f)
                            juliaCallback,
                            fptr,
                            Const.DotsSymbol))
+    nprotect = 2
     local clos
     try
-        lang = rlang_p(:function, sexp_arglist_dots(), body)
+        args = protect(sexp_arglist_dots())
+        nprotect += 1
+        lang = rlang_p(:function, args, body)
         clos = reval_p(lang)
     finally
-        unprotect(2)
+        unprotect(nprotect)
     end
     clos
 end
