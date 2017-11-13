@@ -30,8 +30,9 @@ conversion. `sexp` function takes a julia object and returns an SEXP object
 import RCall.sexp
 
 function sexp(f::Foo)
-    r = sexp(Dict(:x => f.x, :y => f.y))
+    r = protect(sexp(Dict(:x => f.x, :y => f.y)))
     setclass!(r, sexp("Bar"))
+    unprotect(1)
     r
 end
 

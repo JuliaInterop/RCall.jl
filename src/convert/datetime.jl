@@ -36,24 +36,28 @@ eltype(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp}) = DateTime
 # Julia -> R
 
 function sexp(RealSxp, d::Date)
-    res = sexp(RealSxp, Float64(Dates.value(d)) - 719163)
+    res = protect(sexp(RealSxp, Float64(Dates.value(d)) - 719163))
     setclass!(res, sexp("Date"))
+    unprotect(1)
     res
 end
 function sexp(RealSxp, a::Array{Date})
-    res = sexp(RealSxp, map((x) -> Float64(Dates.value(x)) - 719163, a))
+    res = protect(sexp(RealSxp, map((x) -> Float64(Dates.value(x)) - 719163, a)))
     setclass!(res, sexp("Date"))
+    unprotect(1)
     res
 end
 function sexp(RealSxp, d::DateTime)
-    res = sexp(RealSxp, Float64(Dates.value(d) / 1000) - 62135683200)
+    res = protect(sexp(RealSxp, Float64(Dates.value(d) / 1000) - 62135683200))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", sexp("UTC"))
+    unprotect(1)
     res
 end
 function sexp(RealSxp, a::Array{DateTime})
-    res = sexp(RealSxp, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a))
+    res = protect(sexp(RealSxp, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a)))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", sexp("UTC"))
+    unprotect(1)
     res
 end
