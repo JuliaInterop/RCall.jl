@@ -245,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Julia to R direction",
     "category": "section",
-    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).import RCall.sexp\n\nfunction sexp(f::Foo)\n    r = sexp(Dict(:x => f.x, :y => f.y))\n    setclass!(r, sexp(\"Bar\"))\n    r\nend\n\nroo = RObject(foo)\nnothing # hideRemark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected."
+    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).import RCall.sexp\n\nfunction sexp(f::Foo)\n    r = protect(sexp(Dict(:x => f.x, :y => f.y)))\n    setclass!(r, sexp(\"Bar\"))\n    unprotect(1)\n    r\nend\n\nroo = RObject(foo)\nnothing # hideRemark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected."
 },
 
 {
@@ -913,7 +913,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.parseVector-Union{Tuple{Ptr{RCall.StrSxp},Ptr{S}}, Tuple{Ptr{RCall.StrSxp}}, Tuple{S}} where S<:RCall.Sxp",
+    "location": "internal.html#RCall.parseVector-Union{Tuple{Ptr{RCall.StrSxp},Ref{Int32},Ptr{S}}, Tuple{Ptr{RCall.StrSxp},Ref{Int32}}, Tuple{S}} where S<:RCall.Sxp",
     "page": "Internal",
     "title": "RCall.parseVector",
     "category": "Method",
@@ -1073,7 +1073,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.tryEval-Union{Tuple{Ptr{S},Ptr{RCall.EnvSxp}}, Tuple{Ptr{S}}, Tuple{S}} where S<:RCall.Sxp",
+    "location": "internal.html#RCall.tryEval-Union{Tuple{Ptr{S},Ptr{RCall.EnvSxp},Ref{Int32}}, Tuple{Ptr{S},Ptr{RCall.EnvSxp}}, Tuple{Ptr{S}}, Tuple{S}} where S<:RCall.Sxp",
     "page": "Internal",
     "title": "RCall.tryEval",
     "category": "Method",
@@ -1133,7 +1133,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "Macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#86)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(RCall.#85)\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n"
 },
 
 {

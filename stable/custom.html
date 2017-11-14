@@ -2,52 +2,33 @@
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Custom Conversion · RCall.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>RCall.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="index.html">Introduction</a></li><li><a class="toctext" href="installation.html">Installation</a></li><li><a class="toctext" href="gettingstarted.html">Getting Started</a></li><li><a class="toctext" href="conversions.html">Supported Conversions</a></li><li class="current"><a class="toctext" href="custom.html">Custom Conversion</a><ul class="internal"><li><a class="toctext" href="#Julia-to-R-direction-1">Julia to R direction</a></li><li><a class="toctext" href="#R-to-Julia-direction-1">R to Julia direction</a></li><li><a class="toctext" href="#Using-@rput-and-@rget-is-seamless-1">Using @rput and @rget is seamless</a></li><li><a class="toctext" href="#Nested-conversion-1">Nested conversion</a></li></ul></li><li><a class="toctext" href="internal.html">Internal</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href="custom.html">Custom Conversion</a></li></ul><a class="edit-page" href="https://github.com/JuliaInterop/RCall.jl/blob/master/docs/src/custom.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Custom Conversion</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Custom-Conversion-1" href="#Custom-Conversion-1">Custom Conversion</a></h1><p>RCall supports an API for implicitly converting between R and Julia objects by means of <code>rcopy</code> and <code>RObject</code>.</p><p>To illustrate the idea, we consider the following Julia type</p><div></div><div><pre><code class="language-julia">type Foo
     x::Float64
     y::String
-end</code></pre></div><div><pre><code class="language-julia">foo = Foo(1.0, &quot;hello&quot;)</code></pre></div><h2><a class="nav-anchor" id="Julia-to-R-direction-1" href="#Julia-to-R-direction-1">Julia to R direction</a></h2><p>The function <a href="internal.html#RCall.sexp-Tuple{Ptr{RCall.SxpHead}}"><code>RCall.sexp</code></a> has to be overwritten to allow Julia to R conversion. <code>sexp</code> function takes a julia object and returns an SEXP object (pointer to [<code>Sxp</code>]).</p><div><pre><code class="language-julia">import RCall.sexp
+end</code></pre></div><div><pre><code class="language-julia">foo = Foo(1.0, &quot;hello&quot;)</code></pre></div><h2><a class="nav-anchor" id="Julia-to-R-direction-1" href="#Julia-to-R-direction-1">Julia to R direction</a></h2><p>The function <a href="internal.html#RCall.sexp-Tuple{Ptr{RCall.SxpHead}}"><code>RCall.sexp</code></a> has to be overwritten to allow Julia to R conversion. <code>sexp</code> function takes a julia object and returns an SEXP object (pointer to [<code>Sxp</code>]).</p><pre><code class="language-">import RCall.sexp
 
 function sexp(f::Foo)
-    r = sexp(Dict(:x =&gt; f.x, :y =&gt; f.y))
+    r = protect(sexp(Dict(:x =&gt; f.x, :y =&gt; f.y)))
     setclass!(r, sexp(&quot;Bar&quot;))
+    unprotect(1)
     r
 end
 
-roo = RObject(foo)</code></pre></div><p>Remark: <a href="internal.html#RCall.protect-Union{Tuple{Ptr{S}}, Tuple{S}} where S&lt;:RCall.Sxp"><code>RCall.protect</code></a> and <a href="internal.html#RCall.unprotect-Tuple{Integer}"><code>RCall.unprotect</code></a> should be used to protect SEXP from being garbage collected.</p><h2><a class="nav-anchor" id="R-to-Julia-direction-1" href="#R-to-Julia-direction-1">R to Julia direction</a></h2><p>The function <code>rcopy</code> and <code>rcopytype</code> are responsible for conversions of this direction. First we define an explicit converter for VecSxp (SEXP for list)</p><div><pre><code class="language-julia">import RCall.rcopy
+roo = RObject(foo)
+nothing # hide</code></pre><p>Remark: <a href="internal.html#RCall.protect-Union{Tuple{Ptr{S}}, Tuple{S}} where S&lt;:RCall.Sxp"><code>RCall.protect</code></a> and <a href="internal.html#RCall.unprotect-Tuple{Integer}"><code>RCall.unprotect</code></a> should be used to protect SEXP from being garbage collected.</p><h2><a class="nav-anchor" id="R-to-Julia-direction-1" href="#R-to-Julia-direction-1">R to Julia direction</a></h2><p>The function <code>rcopy</code> and <code>rcopytype</code> are responsible for conversions of this direction. First we define an explicit converter for VecSxp (SEXP for list)</p><div><pre><code class="language-julia">import RCall.rcopy
 
 function rcopy(::Type{Foo}, s::Ptr{VecSxp})
     Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))
-end</code></pre><pre><code class="language-none">rcopy (generic function with 117 methods)</code></pre></div><p>The <code>convert</code> function will dispatch the corresponding <code>rcopy</code> function when it is found.</p><div><pre><code class="language-julia">rcopy(Foo, roo)
+end</code></pre><pre><code class="language-none">rcopy (generic function with 117 methods)</code></pre></div><p>The <code>convert</code> function will dispatch the corresponding <code>rcopy</code> function when it is found.</p><pre><code class="language-">rcopy(Foo, roo)
 convert(Foo, roo) # calls `rcopy`
-Foo(roo)</code></pre></div><p>To allow the automatic conversion via <code>rcopy(roo)</code>, the R class <code>Bar</code> has to be registered.</p><div><pre><code class="language-julia">import RCall: RClass, rcopytype
+Foo(roo)
+nothing # hide</code></pre><p>To allow the automatic conversion via <code>rcopy(roo)</code>, the R class <code>Bar</code> has to be registered.</p><pre><code class="language-">import RCall: RClass, rcopytype
 
 rcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo
-boo = rcopy(roo)</code></pre></div><h2><a class="nav-anchor" id="Using-@rput-and-@rget-is-seamless-1" href="#Using-@rput-and-@rget-is-seamless-1">Using @rput and @rget is seamless</a></h2><div><pre><code class="language-julia">boo.x = 2.0
+boo = rcopy(roo)
+nothing # hide</code></pre><h2><a class="nav-anchor" id="Using-@rput-and-@rget-is-seamless-1" href="#Using-@rput-and-@rget-is-seamless-1">Using @rput and @rget is seamless</a></h2><pre><code class="language-">boo.x = 2.0
 @rput boo
 R&quot;&quot;&quot;
 boo[&quot;x&quot;]
-&quot;&quot;&quot;</code></pre><pre><code class="language-none">RCall.RObject{RCall.VecSxp}
-$x
-[1] 2</code></pre></div><div><pre><code class="language-julia">R&quot;&quot;&quot;
+&quot;&quot;&quot;</code></pre><pre><code class="language-">R&quot;&quot;&quot;
 boo[&quot;x&quot;] = 3.0
 &quot;&quot;&quot;
 @rget boo
-boo.x</code></pre><pre><code class="language-none">3.0</code></pre></div><h2><a class="nav-anchor" id="Nested-conversion-1" href="#Nested-conversion-1">Nested conversion</a></h2><div><pre><code class="language-julia">l = R&quot;list(boo = boo, roo = $roo)&quot;</code></pre><pre><code class="language-none">RCall.RObject{RCall.VecSxp}
-$boo
-$y
-[1] &quot;hello&quot;
-
-$x
-[1] 3
-
-attr(,&quot;class&quot;)
-[1] &quot;Bar&quot;
-
-$roo
-$y
-[1] &quot;hello&quot;
-
-$x
-[1] 1
-
-attr(,&quot;class&quot;)
-[1] &quot;Bar&quot;</code></pre></div><div><pre><code class="language-julia">rcopy(l)</code></pre><pre><code class="language-none">Dict{Symbol,Any} with 2 entries:
-  :boo =&gt; ex-2.Foo(3.0, &quot;hello&quot;)
-  :roo =&gt; ex-2.Foo(1.0, &quot;hello&quot;)</code></pre></div><footer><hr/><a class="previous" href="conversions.html"><span class="direction">Previous</span><span class="title">Supported Conversions</span></a><a class="next" href="internal.html"><span class="direction">Next</span><span class="title">Internal</span></a></footer></article></body></html>
+boo.x</code></pre><h2><a class="nav-anchor" id="Nested-conversion-1" href="#Nested-conversion-1">Nested conversion</a></h2><pre><code class="language-">l = R&quot;list(boo = boo, roo = $roo)&quot;</code></pre><pre><code class="language-">rcopy(l)</code></pre><footer><hr/><a class="previous" href="conversions.html"><span class="direction">Previous</span><span class="title">Supported Conversions</span></a><a class="next" href="internal.html"><span class="direction">Next</span><span class="title">Internal</span></a></footer></article></body></html>
