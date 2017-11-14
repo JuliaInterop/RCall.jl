@@ -196,15 +196,19 @@ end
 # VecSxp
 rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)
 rcopy(::Type{Vector}, s::Ptr{VecSxp}) = rcopy(Vector{Any}, s)
-function rcopy(::Type{A}, s::Ptr{VecSxp}) where A<:Associative
+function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:Associative
     protect(s)
     local a
     try
         a = A()
         K = keytype(a)
         V = valtype(a)
-        for (k,v) in zip(getnames(s),s)
-            a[rcopy(K,k)] = rcopy(V,v)
+        for (k, v) in zip(getnames(s), s)
+            if sanitize && (K <: AbstractString || K <: Symbol)
+                a[K(replace(rcopy(String, k), ".", "_"))] = rcopy(V, v)
+            else
+                a[rcopy(K, k)] = rcopy(V, v)
+            end
         end
     finally
         unprotect(1)

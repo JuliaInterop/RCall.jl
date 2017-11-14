@@ -145,7 +145,7 @@ function rcopytype(::Type{RClass{Sym}}, s::Ptr{VecSxp}) where Sym
     elseif isnull(getnames(s))
         Array{Any}
     else
-        Dict{Symbol,Any}
+        OrderedDict{Symbol,Any}
     end
 end
 
