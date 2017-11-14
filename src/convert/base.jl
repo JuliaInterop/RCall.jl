@@ -203,10 +203,12 @@ function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:Associat
         a = A()
         K = keytype(a)
         V = valtype(a)
-        for (k, v) in zip(getnames(s), s)
-            if sanitize && (K <: AbstractString || K <: Symbol)
+        if sanitize && (K <: AbstractString || K <: Symbol)
+            for (k, v) in zip(getnames(s), s)
                 a[K(replace(rcopy(String, k), ".", "_"))] = rcopy(V, v)
-            else
+            end
+        else
+            for (k, v) in zip(getnames(s), s)
                 a[rcopy(K, k)] = rcopy(V, v)
             end
         end
