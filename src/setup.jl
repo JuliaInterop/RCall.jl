@@ -50,7 +50,7 @@ end
     const Rhome, libR = locate_Rhome_libR()
 
     function ask_yes_no_cancel(prompt::Ptr{Cchar})
-        println(isdefined(Core, :String) ? String(prompt) : bytestring(prompt))
+        println(String(prompt))
         query = readline(STDIN)
         c = uppercase(query[1])
         local r::Cint
