@@ -23,36 +23,10 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
                 unprotect(1)
             end
         end
-        function rcopy(::Type{NullableVector},s::Ptr{$S})
-            protect(s)
-            try
-                class = rcopy(Symbol, getclass(s, true))
-                return rcopy(NullableVector{eltype(RClass{class}, s)}, s)
-            finally
-                unprotect(1)
-            end
-        end
-        function rcopy(::Type{NullableArray},s::Ptr{$S})
-            protect(s)
-            try
-                class = rcopy(Symbol, getclass(s, true))
-                return rcopy(NullableArray{eltype(RClass{class}, s)}, s)
-            finally
-                unprotect(1)
-            end
-        end
     end
 end
 
-function rcopy(::Type{NullableArray{T}}, s::Ptr{S}) where {T,S<:VectorSxp}
-    NullableArray(rcopy(Array{T},s), isna(s))
-end
-
-function rcopy(::Type{NullableVector{T}}, s::Ptr{S}) where {T, S<:VectorSxp}
-    NullableArray(rcopy(Vector{T},s), isna(s))
-end
-
-# Nullable and NullableArray to sexp conversion.
+# Nullable to sexp conversion.
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
     @eval begin
         function sexp(::Type{$S}, x::Nullable)
@@ -61,19 +35,6 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
             else
                 return sexp($S, x.value)
             end
-        end
-        function sexp(::Type{$S}, v::NullableArray)
-            rv = protect(sexp($S, v.values))
-            try
-                for (i,isna) = enumerate(v.isnull)
-                    if isna
-                        rv[i] = naeltype($S)
-                    end
-                end
-            finally
-                unprotect(1)
-            end
-            rv
         end
     end
 end
