@@ -65,7 +65,11 @@ function render(script::String)
             c = ' '
         end
         if c != '\$'
-            throw(RParseError("error in locating julia expression"))
+            errormsg = "error in locating julia expression"
+            if !isassic(script)
+                errormsg *= ", check if unicode is supported `l10n_info()`"
+            end
+            throw(RParseError())
         end
 
         ast, i = parse(script, index+1, greedy=false)
