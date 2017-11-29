@@ -24,10 +24,10 @@ end
 # Fallbacks
 # convert Ptr{S} to Any would use the default conversions to allow
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
-rcopy(::Type{Any}, s::Ptr{S}) where S<:Sxp = rcopy(s)
+rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T} = rcopy(s)
 
 # NilSxp
-rcopy(::Type{Any}, ::Ptr{NilSxp}) = Nullable()
+rcopy(::Type{T}, ::Ptr{NilSxp}) where T = Nullable()
 rcopy(::Type{T}, ::Ptr{NilSxp}) where T<:AbstractArray = T()
 
 # SymSxp
@@ -234,15 +234,6 @@ sexp(::Type{S}, ::Void) where S<:Sxp = sexp(Const.NilValue)
 
 # null
 sexp(::Type{S}, ::Missing) where S<:Sxp = naeltype($S)
-
-# nullable
-function sexp(::Type{S}, s::Nullable) where S<:Sxp
-    if isnull(s)
-        naeltype(S)
-    else
-        sexp(S, s.value)
-    end
-end
 
 # symbol
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))

@@ -2,7 +2,7 @@
 
 function rcopy(::Type{Nullable{T}}, s::Ptr{S}) where {T,S<:Sxp}
     length(s) == 1 || error("length of s must be 1.")
-    if isNA(s[1])
+    if isnull(s[1]) || isNA(s[1])
         Nullable{T}()
     else
         Nullable{T}(rcopy(T, s))
@@ -27,14 +27,10 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
 end
 
 # Nullable to sexp conversion.
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
-    @eval begin
-        function sexp(::Type{$S}, x::Nullable)
-            if isnull(x)
-                return sexp($S, naeltype($S))
-            else
-                return sexp($S, x.value)
-            end
-        end
+function sexp(::Type{S}, s::Nullable) where S<:Sxp
+    if isnull(s)
+        sexp(Const.NilValue)
+    else
+        sexp(S, s.value)
     end
 end
