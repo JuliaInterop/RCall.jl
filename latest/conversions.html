@@ -54,22 +54,10 @@ rcopy(r)</code></pre><pre><code class="language-none">3×1 DataFrames.DataFrame
 │ 7   │ 7   │
 │ 8   │ 8   │
 │ 9   │ 9   │
-│ 10  │ 10  │</code></pre></div><h2><a class="nav-anchor" id="DataArrays-1" href="#DataArrays-1">DataArrays</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
+│ 10  │ 10  │</code></pre></div><h2><a class="nav-anchor" id="DataArrays-1" href="#DataArrays-1">DataArrays</a></h2><pre><code class="language-"># Julia -&gt; R
 aa = DataArray([1,2,3], [true, true, false])
-r = RObject(aa)</code></pre><pre><code class="language-none">RCall.RObject{RCall.IntSxp}
-[1] NA NA  3</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
-rcopy(DataArray, r)</code></pre><pre><code class="language-none">3-element DataArrays.DataArray{Int64,1}:
-  NA
-  NA
- 3</code></pre></div><h2><a class="nav-anchor" id="AxisArrays-1" href="#AxisArrays-1">AxisArrays</a></h2><div><pre><code class="language-julia"># Julia -&gt; R
+r = RObject(aa)</code></pre><pre><code class="language-"># R -&gt; Julia
+rcopy(DataArray, r)</code></pre><h2><a class="nav-anchor" id="AxisArrays-1" href="#AxisArrays-1">AxisArrays</a></h2><pre><code class="language-"># Julia -&gt; R
 aa = AxisArray([1,2,3], Axis{:id}([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))
-r = RObject(aa)</code></pre><pre><code class="language-none">RCall.RObject{RCall.IntSxp}
-id
-a b c
-1 2 3</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
-rcopy(AxisArray, r)</code></pre><pre><code class="language-none">1-dimensional AxisArray{Int64,1,...} with axes:
-    :id, String[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
-And data, a 3-element Array{Int64,1}:
- 1
- 2
- 3</code></pre></div><footer><hr/><a class="previous" href="gettingstarted.html"><span class="direction">Previous</span><span class="title">Getting Started</span></a><a class="next" href="custom.html"><span class="direction">Next</span><span class="title">Custom Conversion</span></a></footer></article></body></html>
+r = RObject(aa)</code></pre><pre><code class="language-"># R -&gt; Julia
+rcopy(AxisArray, r)</code></pre><footer><hr/><a class="previous" href="gettingstarted.html"><span class="direction">Previous</span><span class="title">Getting Started</span></a><a class="next" href="custom.html"><span class="direction">Next</span><span class="title">Custom Conversion</span></a></footer></article></body></html>
