@@ -152,7 +152,8 @@ setindex!(s::Ptr{S}, value, label::Symbol) where S<:VectorSxp = setindex!(s, val
 
 # for RObjects
 setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
-setindex!(r::RObject{S}, ::Null, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
+setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
+setindex!(r::RObject{S}, ::Nullable{Union{}}, keys...) where S<:VectorSxp = setindex!(sexp(r), sexp(Const.NilValue), keys...)
 
 start(s::Ptr{S}) where S<:VectorSxp = 0
 next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
@@ -252,7 +253,7 @@ setindex!(s::Ptr{S}, value, label::Symbol) where S<:PairListSxp = setindex!(s, v
 
 # for RObjects
 setindex!(r::RObject{S}, value, key) where S<:PairListSxp = setindex!(sexp(r), value, key)
-setindex!(r::RObject{S}, ::Null, key) where S<:PairListSxp = setindex!(sexp(r), naeltype(S), key)
+setindex!(r::RObject{S}, ::Nullable{Union{}}, key) where S<:PairListSxp = setindex!(sexp(r), sexp(Const.NilValue), key)
 
 
 # S4Sxp
@@ -280,7 +281,7 @@ end
 setindex!(s::Ptr{S4Sxp}, value, sym) = setindex!(s, sexp(value), sexp(SymSxp, sym))
 # for RObjects
 setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(sexp(s), value, sym)
-setindex!(s::RObject{S4Sxp}, ::Null, sym) = setindex!(sexp(s), naeltype(S4Sxp), sym)
+setindex!(s::RObject{S4Sxp}, ::Nullable{Union{}}, sym) = setindex!(sexp(s), sexp(Const.NilValue), sym)
 
 
 "Return a particular attribute of an RObject"
@@ -376,7 +377,7 @@ naeltype(::Type{IntSxp}) = Const.NaInt
 naeltype(::Type{RealSxp}) = Const.NaReal
 naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
-naeltype(::Type{S}) where S<:Sxp = sexp(Const.NilValue)
+# naeltype(::Type{S}) where S<:Sxp = sexp(Const.NilValue)
 
 """
 Check if a value corresponds to R's sentinel NA values.
@@ -488,7 +489,7 @@ function setindex!(e::Ptr{EnvSxp},v,s)
     end
 end
 setindex!(e::RObject{EnvSxp}, v, s) = setindex!(sexp(e), v, s)
-setindex!(e::RObject{EnvSxp}, ::Null, s) = setindex!(sexp(e), naeltype(EnvSxp), s)
+setindex!(e::RObject{EnvSxp}, ::Nullable{Union{}}, s) = setindex!(sexp(e), sexp(Const.NilValue), s)
 
 """
     newEnvironment([env])

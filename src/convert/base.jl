@@ -27,8 +27,7 @@ end
 rcopy(::Type{Any}, s::Ptr{S}) where S<:Sxp = rcopy(s)
 
 # NilSxp
-rcopy(::Type{Any}, ::Ptr{NilSxp}) = null
-rcopy(::Type{T}, ::Ptr{NilSxp}) where T = null
+rcopy(::Type{Any}, ::Ptr{NilSxp}) = Nullable()
 rcopy(::Type{T}, ::Ptr{NilSxp}) where T<:AbstractArray = T()
 
 # SymSxp
@@ -234,7 +233,7 @@ end
 sexp(::Type{S}, ::Void) where S<:Sxp = sexp(Const.NilValue)
 
 # null
-sexp(::Type{S}, ::Null) where S<:Sxp = naeltype($S)
+sexp(::Type{S}, ::Missing) where S<:Sxp = naeltype($S)
 
 # nullable
 function sexp(::Type{S}, s::Nullable) where S<:Sxp

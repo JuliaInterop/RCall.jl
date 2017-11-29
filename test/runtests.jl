@@ -22,6 +22,7 @@ if VERSION < v"0.6.0"
 end
 
 using RCall
+using Missings
 
 # https://github.com/JuliaStats/RCall.jl/issues/68
 @test hd == homedir()
@@ -34,7 +35,6 @@ tests = ["basic",
          "convert/base",
          "convert/datetime",
          "convert/dataframe",
-         # "convert/datatable",
          "convert/categorical",
          "convert/nullable",
          "convert/axisarray",
