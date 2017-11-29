@@ -1,5 +1,3 @@
-using Nulls
-
 # strings
 x = "ppzz!#"
 r = RObject(x)

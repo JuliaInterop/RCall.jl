@@ -1,5 +1,3 @@
-using Nulls
-
 lsv = reval("ls()")
 @test length(lsv) == 0
 @test isa(lsv, RObject{StrSxp})
@@ -35,26 +33,26 @@ globalEnv[:y] = RObject([4,5,6])
 @test isna(R"list(a=1, b=NA)", 2) == true
 
 
-# setindex with null
+# setindex with missing and Nullable()
 a = R"1:10"
-a[2] = null
+a[2] = missing
 @test isna(a, 2)
 
 a = R"c('a', 'b', 'c')"
-a[2] = null
+a[2] = missing
 @test isna(a) == [false, true, false]
 
 a = R"list(x=1, y=2)"
-a[2] = null
+a[2] = Nullable()
 @test isnull(a[2])
-a[:x] = null
+a[:x] = Nullable()
 @test isnull(a[:x])
 
 env = reval("new.env()")
 env[:x] = 1
 @test rcopy(env[:x]) == 1
-env[:x] = null
-@test isnull(rcopy(env[:x]))
+env[:x] = Nullable()
+@test isnull(env[:x])
 
 
 # rparse

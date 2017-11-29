@@ -2,31 +2,27 @@ __precompile__()
 module RCall
 using Compat
 
-using Nulls
+using Missings
 using DataArrays
 using CategoricalArrays
 using DataFrames
-# using DataTables
-using NullableArrays, AxisArrays, NamedArrays
+using AxisArrays
 
 import DataStructures: OrderedDict
+
+using Compat.Dates
+
+if isdefined(DataArrays, :isna)
+    import DataArrays: isna
+end
+
+if isdefined(DataArrays, :anyna)
+    import DataArrays: anyna
+end
 
 import Base: eltype, convert, isascii, isnull,
     names, length, size, getindex, setindex!, start, next, done,
     show, showerror, write
-
-
-if isdefined(DataFrames, :isna)
-    import DataFrames: isna
-elseif isdefined(DataArrays, :isna)
-    import DataArrays: isna
-end
-
-if isdefined(DataFrames, :anyna)
-    import DataFrames: anyna
-elseif isdefined(DataArrays, :anyna)
-    import DataArrays: anyna
-end
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,

@@ -1,4 +1,4 @@
-# conversion methods for NullableArrays
+# conversion methods for Nullable
 
 function rcopy(::Type{Nullable{T}}, s::Ptr{S}) where {T,S<:Sxp}
     length(s) == 1 || error("length of s must be 1.")
@@ -10,7 +10,7 @@ function rcopy(::Type{Nullable{T}}, s::Ptr{S}) where {T,S<:Sxp}
 end
 
 
-# Default behaviors of copying R vectors to nullablearrays
+# Default behaviors of copying to Nullable
 
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
     @eval begin

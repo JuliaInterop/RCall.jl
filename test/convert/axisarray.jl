@@ -1,4 +1,5 @@
 using AxisArrays
+using Compat.Dates
 
 # AxisArray
 aa = rcopy(AxisArray, R"Titanic")
@@ -14,7 +15,7 @@ aa = AxisArray(d, Axis{:time}(["t0", "t2", "t3"]))
 r = RObject(aa)
 @test rcopy(getclass(r)) == "Date"
 @test isa(rcopy(AxisArray, r), AxisArray{Date})
-r[2] = null
+r[2] = missing
 ab = rcopy(AxisArray, r)
-@test isa(ab, AxisArray{Date})
+@test eltype(ab) == Union{Date, Missing}
 @test isa(ab.data, DataArray)

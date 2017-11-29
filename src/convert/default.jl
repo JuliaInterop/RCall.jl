@@ -15,37 +15,21 @@ function rcopy(s::Ptr{S}; kwargs...) where S<:Sxp
     end
 end
 
-#  force vector conversion in dataframe
-if Pkg.installed("CategoricalArrays") < v"0.2.0"
-    function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
-        protect(s)
-        try
-            if isFactor(s)
-                return anyna(s) ? rcopy(NullableCategoricalArray, s) : rcopy(CategoricalArray, s)
-            else
-                return anyna(s) ? rcopy(DataArray, s) : rcopy(Array, s)
-            end
-        finally
-            unprotect(1)
+function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
+    protect(s)
+    try
+        if isFactor(s)
+            return rcopy(CategoricalArray, s)
+        else
+            return anyna(s) ? rcopy(DataArray, s) : rcopy(Array, s)
         end
-    end
-else
-    function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
-        protect(s)
-        try
-            if isFactor(s)
-                return rcopy(CategoricalArray, s)
-            else
-                return anyna(s) ? rcopy(DataArray, s) : rcopy(Array, s)
-            end
-        finally
-            unprotect(1)
-        end
+    finally
+        unprotect(1)
     end
 end
 
 # NilSxp
-rcopy(::Ptr{NilSxp}) = null
+rcopy(::Ptr{NilSxp}) = Nullable()
 
 # SymSxp and CharSxp
 rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
@@ -63,31 +47,18 @@ function rcopytype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym
 end
 eltype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym = String
 
-if Pkg.installed("CategoricalArrays") < v"0.2.0"
-    function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
-        if length(s) == 1
-            Int
-        elseif isFactor(s)
-            anyna(s) ? NullableCategoricalArray : CategoricalArray
-        elseif anyna(s)
-            DataArray{Int}
-        else
-            Array{Int}
-        end
-    end
-else
-    function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
-        if length(s) == 1
-            Int
-        elseif isFactor(s)
-            CategoricalArray
-        elseif anyna(s)
-            DataArray{Int}
-        else
-            Array{Int}
-        end
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
+    if length(s) == 1
+        Int
+    elseif isFactor(s)
+        CategoricalArray
+    elseif anyna(s)
+        DataArray{Int}
+    else
+        Array{Int}
     end
 end
+
 eltype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym = Int
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym
@@ -170,20 +141,17 @@ RObject(s) = RObject(sexp(s))
 # nothing
 sexp(::Void) = sexp(Const.NilValue)
 
-# Null
-sexp(x::Null) = sexp(LglSxp, Const.NaInt)
-
 # Nullable
-sexp(x::Nullable{Union{}}) = sexp(LglSxp, Const.NaInt)
+sexp(::Nullable{Union{}}) = sexp(Const.NilValue)
+
+# Missing
+sexp(::Missing) = sexp(LglSxp, Const.NaInt)
 
 # Symbol
 sexp(s::Symbol) = sexp(SymSxp,s)
 
 # DataFrame
 sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
-
-# DataTable
-# sexp(d::AbstractDataTable) = sexp(VecSxp, d)
 
 
 # Number, Array and DataArray
@@ -213,26 +181,16 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractString, :StrSxp))
     @eval begin
         sexp(x::Nullable{T}) where T<:$J = sexp($S, x)
-        sexp(v::NullableArray{T}) where T<:$J = sexp($S, v)
     end
 end
 
 # RawSxp
+sexp(x::UInt8) = sexp(RawSxp, x)
 sexp(a::AbstractArray{UInt8}) = sexp(RawSxp, a)
 sexp(a::AbstractDataArray{UInt8}) = sexp(RawSxp, a)
-sexp(a::NullableArray{UInt8}) = sexp(RawSxp, a)
-sexp(x::UInt8) = sexp(RawSxp, x)
 
 
-if Pkg.installed("CategoricalArrays") < v"0.2.0"
-    CAtypes = [:NullableCategoricalArray, :CategoricalArray]
-else
-    CAtypes = [:CategoricalArray]
-end
-
-for typ in CAtypes
-    @eval sexp(v::$typ) = sexp(IntSxp, v)
-end
+sexp(v::CategoricalArray) = sexp(IntSxp, v)
 
 # AxisArray
 for (J,S) in ((:Integer,:IntSxp),
@@ -245,15 +203,15 @@ end
 
 # Date
 sexp(d::Date) = sexp(RealSxp, d)
-sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
 sexp(d::Nullable{Date}) = sexp(RealSxp, d)
-sexp(d::NullableArray{Date}) = sexp(RealSxp, d)
+sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
+sexp(d::AbstractDataArray{Date}) = sexp(RealSxp, d)
 
 # DateTime
 sexp(d::DateTime) = sexp(RealSxp, d)
-sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
 sexp(d::Nullable{DateTime}) = sexp(RealSxp, d)
-sexp(d::NullableArray{DateTime}) = sexp(RealSxp, d)
+sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
+sexp(d::AbstractDataArray{DateTime}) = sexp(RealSxp, d)
 
 
 # Function
