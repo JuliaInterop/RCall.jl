@@ -38,30 +38,6 @@ rcopy(::Type{T},s::Ptr{CharSxp}) where T<:AbstractString = convert(T, String(uns
 rcopy(::Type{Symbol},s::Ptr{CharSxp}) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::Ptr{CharSxp}) = parse(Int, rcopy(s))
 
-# Default behaviors of copying R vectors to arrays
-
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
-    @eval begin
-        function rcopy(::Type{Vector},s::Ptr{$S})
-            protect(s)
-            try
-                class = rcopy(Symbol, getclass(s, true))
-                return rcopy(Vector{eltype(RClass{class}, s)}, s)
-            finally
-                unprotect(1)
-            end
-        end
-        function rcopy(::Type{Array},s::Ptr{$S})
-            protect(s)
-            try
-                class = rcopy(Symbol, getclass(s, true))
-                return rcopy(Array{eltype(RClass{class}, s)}, s)
-            finally
-                unprotect(1)
-            end
-        end
-    end
-end
 
 # IntSxp, RealSxp, CplxSxp, LglSxp, StrSxp, VecSxp to Array{T}
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :VecSxp)

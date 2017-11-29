@@ -1,22 +1,8 @@
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
-    @eval begin
-        function rcopy(::Type{AxisArray},s::Ptr{$S})
-            protect(s)
-            try
-                class = rcopy(Symbol, getclass(s, true))
-                return rcopy(AxisArray{eltype(RClass{class}, s)}, s)
-            finally
-                unprotect(1)
-            end
-        end
-    end
-end
-
-function rcopy(::Type{AxisArray{T}}, r::Ptr{S}) where {S<:VectorSxp, T}
+function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
     dnames = getattrib(r, Const.DimNamesSymbol)
     isnull(dnames) && error("r has no dimnames")
     dsym = rcopy(Array{Symbol}, getnames(dnames))
-    AxisArray(anyna(r) ? rcopy(DataArray{T}, r) : rcopy(Array{T}, r),
+    AxisArray(rcopy(AbstractArray, r),
              [Axis{dsym[i]}(rcopy(n)) for (i,n) in enumerate(dnames)]...)
 end
 

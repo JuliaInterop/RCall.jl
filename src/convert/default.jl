@@ -15,6 +15,8 @@ function rcopy(s::Ptr{S}; kwargs...) where S<:Sxp
     end
 end
 
+# Default behaviors of copying R vectors to AbstractArray
+
 function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
     protect(s)
     try
@@ -25,6 +27,31 @@ function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
         end
     finally
         unprotect(1)
+    end
+end
+
+# Default behaviors of copying R vectors to arrays
+
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
+    @eval begin
+        function rcopy(::Type{Vector},s::Ptr{$S})
+            protect(s)
+            try
+                class = rcopy(Symbol, getclass(s, true))
+                return rcopy(Vector{eltype(RClass{class}, s)}, s)
+            finally
+                unprotect(1)
+            end
+        end
+        function rcopy(::Type{Array},s::Ptr{$S})
+            protect(s)
+            try
+                class = rcopy(Symbol, getclass(s, true))
+                return rcopy(Array{eltype(RClass{class}, s)}, s)
+            finally
+                unprotect(1)
+            end
+        end
     end
 end
 
