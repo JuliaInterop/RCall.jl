@@ -1,53 +1,5 @@
-"""
-    validate_libR(libR)
-
-Checks that the R library `libR` can be loaded and is satisfies version requirements.
-Returns `true` if valid, throws an error if not.
-"""
-function validate_libR(libR)
-    # Issue #143
-    # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
-    libptr = Libdl.dlopen_e(libR)
-    if libptr == C_NULL
-        if Compat.Sys.iswindows()
-            error("Could not load library $libR. Try adding $(dirname(libR)) to the \"PATH\" environmental variable and restarting Julia.")
-        else
-            error("Could not load library $libR. Try adding $(dirname(libR)) to the \"LD_LIBRARY_PATH\" environmental variable and restarting Julia.")
-        end
-    end
-    # R_tryCatchError is only available on v3.4.0 or later.
-    if Libdl.dlsym_e(libptr,"R_tryCatchError") == C_NULL
-        error("R library $libR appears to be too old. RCall.jl requires R 3.4.0 or later")
-    end
-    Libdl.dlclose(libptr)
-    return true
-end
-
-
 @static if Compat.Sys.iswindows()
     import WinReg
-
-    function locate_Rhome_libR()
-        Rhome = if haskey(ENV,"R_HOME")
-            ENV["R_HOME"]
-        else
-            try
-                WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
-            catch e
-                ""
-            end
-        end
-
-        libR = Libdl.find_library(["R"],[joinpath(Rhome,"bin",Sys.WORD_SIZE==64 ? "x64" : "i386")])
-
-        if isdir(Rhome) && validate_libR(libR)
-            info("Using R installation at $Rhome")
-            return Rhome, libR
-        end
-        error("Could not locate R installation. Try setting \"R_HOME\" environmental variable.")
-    end
-
-    const Rhome, libR = locate_Rhome_libR()
 
     function ask_yes_no_cancel(prompt::Ptr{Cchar})
         println(String(prompt))
@@ -99,28 +51,75 @@ end
 
 end
 
-@static if Compat.Sys.isunix()
-    function locate_Rhome_libR()
-        Rhome = if haskey(ENV,"R_HOME")
-            ENV["R_HOME"]
+"""
+    validate_libR(libR)
+
+Checks that the R library `libR` can be loaded and is satisfies version requirements.
+"""
+function validate_libR(libR)
+    if !isfile(libR)
+        error("Could not find library $libR. Make sure that R shared library exists.")
+    end
+    # Issue #143
+    # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
+    libptr = try
+        Libdl.dlopen(libR)
+    catch er
+        Base.with_output_color(:red, STDERR) do io
+            print(io, "ERROR: ")
+            showerror(io, er)
+            println(io)
+        end
+        if Compat.Sys.iswindows()
+            error("Try adding $(dirname(libR)) to the \"PATH\" environmental variable and restarting Julia.")
         else
-            try
-                readchomp(`R RHOME`)
+            error("Try adding $(dirname(libR)) to the \"LD_LIBRARY_PATH\" environmental variable and restarting Julia.")
+        end
+    end
+    # R_tryCatchError is only available on v3.4.0 or later.
+    if Libdl.dlsym_e(libptr, "R_tryCatchError") == C_NULL
+        error("R library $libR appears to be too old. RCall.jl requires R 3.4.0 or later")
+    end
+    Libdl.dlclose(libptr)
+end
+
+function locate_Rhome()
+    Rhome = if haskey(ENV,"R_HOME")
+        ENV["R_HOME"]
+    else
+        try
+            readchomp(`R RHOME`)
+        catch e
+            ""
+        end
+    end
+    @static if Compat.Sys.iswindows() && Rhome == ""
+        Rhome = try
+                WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R", "InstallPath")
             catch e
                 ""
             end
-        end
-        libR = joinpath(Rhome,"lib","libR.$(Libdl.dlext)")
-        if isdir(Rhome) && isfile(libR) && validate_libR(libR)
-            info("Using R installation at $Rhome")
-            return Rhome, libR
-        end
+    end
+    if Rhome != "" && isdir(Rhome)
+        info("Using R installation at $Rhome")
+        Rhome
+    else
         error("Could not find R installation. Either set the \"R_HOME\" environmental variable, or ensure the R executable is available in \"PATH\".")
     end
-
-    const Rhome, libR = locate_Rhome_libR()
 end
 
+function locate_libR(Rhome)
+    @static if Compat.Sys.iswindows()
+        libR = Libdl.find_library(["R"], [joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386")])
+    else
+        libR = joinpath(Rhome,"lib", "libR.$(Libdl.dlext)")
+    end
+    validate_libR(libR)
+    libR
+end
+
+const Rhome = locate_Rhome()
+const libR = locate_libR(Rhome)
 const Rembedded = Ref{Bool}(false)
 const voffset = Ref{UInt}()
 
@@ -207,7 +206,7 @@ Close embedded R session.
 """
 function endEmbeddedR()
     if Rembedded[]
-        ccall((:Rf_endEmbeddedR,libR),Void,(Cint,),0)
+        ccall((:Rf_endEmbeddedR, libR),Void,(Cint,),0)
         Rembedded[] = false
     end
 end
@@ -216,14 +215,14 @@ function __init__()
     validate_libR(libR)
 
     # Check if R already running
-    Rinited = unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void})) != C_NULL
+    Rinited = unsafe_load(cglobal((:R_NilValue, libR),Ptr{Void})) != C_NULL
 
     if !Rinited
         initEmbeddedR()
     end
 
-    ip = ccall((:Rf_ScalarInteger,libR),Ptr{Void},(Cint,),0)
-    voffset[] = ccall((:INTEGER,libR),Ptr{Void},(Ptr{Void},),ip) - ip
+    ip = ccall((:Rf_ScalarInteger, libR),Ptr{Void},(Cint,),0)
+    voffset[] = ccall((:INTEGER, libR),Ptr{Void},(Ptr{Void},),ip) - ip
 
     Const.load()
 
