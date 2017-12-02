@@ -89,23 +89,24 @@ function locate_Rhome()
     else
         try
             readchomp(`R RHOME`)
-        catch e
+        catch er
             ""
         end
     end
-    @static if Compat.Sys.iswindows() && Rhome == ""
-        Rhome = try
-                WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R", "InstallPath")
-            catch e
-                ""
-            end
+    @static if Compat.Sys.iswindows()
+        if Rhome == ""
+            Rhome = try
+                    WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R", "InstallPath")
+                catch er
+                    ""
+                end
+        end
     end
-    if Rhome != "" && isdir(Rhome)
-        info("Using R installation at $Rhome")
-        Rhome
-    else
+    if Rhome == "" || !isdir(Rhome)
         error("Could not find R installation. Either set the \"R_HOME\" environmental variable, or ensure the R executable is available in \"PATH\".")
     end
+    info("Using R installation at $Rhome")
+    Rhome
 end
 
 function locate_libR(Rhome)
