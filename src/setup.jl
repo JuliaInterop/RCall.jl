@@ -111,9 +111,9 @@ end
 
 function locate_libR(Rhome)
     @static if Compat.Sys.iswindows()
-        libR = Libdl.find_library(["R"], [joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386")])
+        libR = joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386", "R.dll")
     else
-        libR = joinpath(Rhome,"lib", "libR.$(Libdl.dlext)")
+        libR = joinpath(Rhome, "lib", "libR.$(Libdl.dlext)")
     end
     validate_libR(libR)
     libR
