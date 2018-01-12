@@ -33,6 +33,7 @@ using Missings
 
 tests = ["basic",
          "convert/base",
+         "convert/missing",
          "convert/datetime",
          "convert/dataframe",
          "convert/categorical",

@@ -188,6 +188,7 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:Bool, :LglSxp),
                  (:AbstractString, :StrSxp))
     @eval begin
+        sexp(a::Array{Union{T, Missing}}) where T<:$J = sexp($S,a)
         sexp(a::AbstractArray{T}) where T<:$J = sexp($S,a)
         sexp(a::AbstractDataArray{T}) where T<:$J = sexp($S,a)
         sexp(v::$J) = sexp($S,v)
