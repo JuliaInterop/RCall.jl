@@ -1,5 +1,5 @@
 # sexp to Array{Union{T, Missing}}
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
     @eval begin
         function rcopy(::Type{Array{Union{T, Missing}}}, s::Ptr{$S}) where T
             protect(s)
@@ -28,8 +28,7 @@ for (J,S) in ((:Integer, :IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
                  (:Bool, :LglSxp),
-                 (:AbstractString, :StrSxp),
-                 (:UInt8, :RawSxp))
+                 (:AbstractString, :StrSxp))
     @eval begin
         function sexp(::Type{$S}, v::AbstractArray{Union{T, Missing}}) where T <: $J
             rv = protect(allocArray($S, size(v)...))
