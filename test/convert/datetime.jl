@@ -13,10 +13,10 @@ r = RObject(d)
 @test rcopy(Date, R"as.Date($s)") == d
 @test rcopy(R"identical(as.Date($s), $d)")
 v = rcopy(Nullable, R"as.Date(NA)")
-@test isa(v, Nullable{Date})
+@test isa(v, Nullable)
 @test isnull(v)
 v = rcopy(Nullable, R"as.Date($s)")
-@test isa(v, Nullable{Date})
+@test isa(v, Nullable)
 @test !isnull(v)
 
 
@@ -42,6 +42,19 @@ r = RObject(d)
 @test rcopy(r) == d
 @test rcopy(R"as.Date(character(0))") == Date[]
 
+
+# Missing array date
+d = [Date("2001-01-01"), missing, Date("2012-12-12")]
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == "Date"
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(r)[[1,3]] == d[[1,3]]
+@test ismissing(rcopy(r)[2])
+@test rcopy(Array, r)[[1,3]] == d[[1,3]]
+@test ismissing(rcopy(Array, r)[2])
+
 # DataArray date
 s = DataArray(["0001-01-01", "2012-12-12"], [true, false])
 d = DataArray(Date.(s.data), s.na)
@@ -51,8 +64,6 @@ r = RObject(d)
 @test isa(rcopy(DataArray, r), DataArray{Date})
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(r).na == d.na
-@test rcopy(r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataVector, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataVector{Date}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataArray, r).data[map(!,d.na)] == d.data[map(!,d.na)]
@@ -91,10 +102,10 @@ r = RObject(d)
 @test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
 @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 v = rcopy(Nullable, R"as.POSIXct(NA, 'UTC', '%Y-%m-%dT%H:%M:%S')")
-@test isa(v, Nullable{DateTime})
+@test isa(v, Nullable)
 @test isnull(v)
 v = rcopy(Nullable, R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')")
-@test isa(v, Nullable{DateTime})
+@test isa(v, Nullable)
 @test !isnull(v)
 
 s = ["2001-01-01T01:01:01", "1111-11-11T11:11:00", "2012-12-12T12:12:12"]
@@ -122,8 +133,22 @@ r = RObject(d)
 @test rcopy(r) == d
 @test rcopy(R"as.POSIXct(character(0))") == Date[]
 
+# Missing array dateTime
+
+# Missing array date
+d = [DateTime("2001-01-01T01:01:01"), missing, DateTime("2012-12-12T12:12:12")]
+r = RObject(d)
+@test isa(r,RObject{RealSxp})
+@test rcopy(getclass(r)) == ["POSIXct", "POSIXt"]
+@test length(r) == length(d)
+@test size(r) == size(d)
+@test rcopy(r)[[1,3]] == d[[1,3]]
+@test ismissing(rcopy(r)[2])
+@test rcopy(Array, r)[[1,3]] == d[[1,3]]
+@test ismissing(rcopy(Array, r)[2])
+
 # DataArray dateTime
-s = DataArray(["0001-01-01", "2012-12-12T12:12:12"], [true, false])
+s = DataArray(["2001-01-01T01:01:01", "2012-12-12T12:12:12"], [true, false])
 d = DataArray(DateTime.(s.data), s.na)
 r = RObject(d)
 @test isa(r,RObject{RealSxp})
@@ -132,8 +157,6 @@ r = RObject(d)
 @test isa(rcopy(DataArray, r), DataArray{DateTime})
 @test length(r) == length(d)
 @test size(r) == size(d)
-@test rcopy(r).na == d.na
-@test rcopy(r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataVector, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataVector{DateTime}, r).data[map(!,d.na)] == d.data[map(!,d.na)]
 @test rcopy(DataArray, r).data[map(!,d.na)] == d.data[map(!,d.na)]

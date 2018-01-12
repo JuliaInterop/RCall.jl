@@ -6,20 +6,15 @@ function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
              [Axis{dsym[i]}(rcopy(n)) for (i,n) in enumerate(dnames)]...)
 end
 
-
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
-    @eval begin
-        function sexp(::Type{$S}, aa::AxisArray)
-            rv = protect(sexp($S, aa.data))
-            try
-                d = OrderedDict(
-                    k => v.val for (k, v) in zip(axisnames(aa), axes(aa)))
-                setattrib!(rv, Const.DimSymbol, collect(size(aa)))
-                setattrib!(rv, Const.DimNamesSymbol, d)
-            finally
-                unprotect(1)
-            end
-            rv
-        end
+function sexp(aa::AxisArray)
+    rv = protect(sexp(aa.data))
+    try
+        d = OrderedDict(
+            k => v.val for (k, v) in zip(axisnames(aa), axes(aa)))
+        setattrib!(rv, Const.DimSymbol, collect(size(aa)))
+        setattrib!(rv, Const.DimNamesSymbol, d)
+    finally
+        unprotect(1)
     end
+    rv
 end

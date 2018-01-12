@@ -11,18 +11,15 @@ end
 
 
 # Default behaviors of copying to Nullable
+rcopy(::Type{Nullable}, ::Ptr{NilSxp}) = Nullable()
 
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
-    @eval begin
-        function rcopy(::Type{Nullable}, s::Ptr{$S})
-            protect(s)
-            try
-                class = rcopy(Symbol, getclass(s, true))
-                return rcopy(Nullable{eltype(RClass{class}, s)}, s)
-            finally
-                unprotect(1)
-            end
-        end
+function rcopy(::Type{Nullable}, s::Ptr{S}) where S<:Sxp
+    protect(s)
+    try
+        class = rcopy(Symbol, getclass(s, true))
+        return rcopy(Nullable{eltype(RClass{class}, s)}, s)
+    finally
+        unprotect(1)
     end
 end
 

@@ -39,8 +39,8 @@ rcopy(::Type{Symbol},s::Ptr{CharSxp}) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::Ptr{CharSxp}) = parse(Int, rcopy(s))
 
 
-# IntSxp, RealSxp, CplxSxp, LglSxp, StrSxp, VecSxp to Array{T}
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :VecSxp)
+# IntSxp, RealSxp, CplxSxp, LglSxp, StrSxp, RawSxp, VecSxp to Array{T}
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp, :VecSxp)
     @eval begin
         function rcopy(::Type{Array{T}}, s::Ptr{$S}) where T
             protect(s)

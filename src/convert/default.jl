@@ -23,7 +23,7 @@ function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
         if isFactor(s)
             return rcopy(CategoricalArray, s)
         else
-            return anyna(s) ? rcopy(DataArray, s) : rcopy(Array, s)
+            return rcopy(Array, s)
         end
     finally
         unprotect(1)
@@ -67,12 +67,18 @@ function rcopytype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym
     if length(s) == 1
         String
     elseif anyna(s)
-        DataArray{String}
+        Array{Union{String, Missing}}
     else
         Array{String}
     end
 end
-eltype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym = String
+function eltype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym
+    if anyna(s)
+        Union{String, Missing}
+    else
+        String
+    end
+end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
     if length(s) == 1
@@ -80,61 +86,87 @@ function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
     elseif isFactor(s)
         CategoricalArray
     elseif anyna(s)
-        DataArray{Int}
+        Array{Union{Int, Missing}}
     else
         Array{Int}
     end
 end
 
-eltype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym = Int
+function eltype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
+    if anyna(s)
+        Union{Int, Missing}
+    else
+        Int
+    end
+end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym
     if length(s) == 1
         Float64
     elseif anyna(s)
-        DataArray{Float64}
+        Array{Union{Float64, Missing}}
     else
         Array{Float64}
     end
 end
-eltype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym = Float64
-
+function eltype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym
+    if anyna(s)
+        Union{Float64, Missing}
+    else
+        Float64
+    end
+end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
     if length(s) == 1
         Complex128
     elseif anyna(s)
-        DataArray{Complex128}
+        Array{Union{Complex128, Missing}}
     else
         Array{Complex128}
     end
 end
-eltype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym = Complex128
-
+function eltype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
+    if anyna(s)
+        Union{Complex128, Missing}
+    else
+        Complex128
+    end
+end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym
     if length(s) == 1
         Bool
     elseif anyna(s)
-        DataArray{Bool}
+        Array{Union{Bool, Missing}}
     else
         BitArray
     end
 end
-eltype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym = Bool
-
+function eltype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym
+    if anyna(s)
+        Union{Bool, Missing}
+    else
+        Bool
+    end
+end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym
     if length(s) == 1
         UInt8
     elseif anyna(s)
-        DataArray{UInt8}
+        Array{Union{UInt8, Missing}}
     else
         Array{UInt8}
     end
 end
-eltype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym = UInt8
-
+function eltype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym
+    if anyna(s)
+        Union{UInt8, Missing}
+    else
+        UInt8
+    end
+end
 
 # VecSxp
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{VecSxp}) where Sym
@@ -186,12 +218,14 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
                  (:Bool, :LglSxp),
-                 (:AbstractString, :StrSxp))
+                 (:AbstractString, :StrSxp),
+                 (:UInt8, :RawSxp))
     @eval begin
+        sexp(v::$J) = sexp($S,v)
+        sexp(x::Nullable{T}) where T<:$J = sexp($S, x)
         sexp(a::Array{Union{T, Missing}}) where T<:$J = sexp($S,a)
         sexp(a::AbstractArray{T}) where T<:$J = sexp($S,a)
         sexp(a::AbstractDataArray{T}) where T<:$J = sexp($S,a)
-        sexp(v::$J) = sexp($S,v)
     end
 end
 
@@ -200,47 +234,6 @@ sexp(a::AbstractArray) = sexp(VecSxp,a)
 
 # Associative
 sexp(d::Associative) = sexp(VecSxp,d)
-
-
-for (J,S) in ((:Integer,:IntSxp),
-                 (:AbstractFloat, :RealSxp),
-                 (:Complex, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:AbstractString, :StrSxp))
-    @eval begin
-        sexp(x::Nullable{T}) where T<:$J = sexp($S, x)
-    end
-end
-
-# RawSxp
-sexp(x::UInt8) = sexp(RawSxp, x)
-sexp(a::AbstractArray{UInt8}) = sexp(RawSxp, a)
-sexp(a::AbstractDataArray{UInt8}) = sexp(RawSxp, a)
-
-
-sexp(v::CategoricalArray) = sexp(IntSxp, v)
-
-# AxisArray
-for (J,S) in ((:Integer,:IntSxp),
-                 (:AbstractFloat, :RealSxp),
-                 (:Complex, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:AbstractString, :StrSxp))
-    @eval sexp(aa::AxisArray{T}) where T<:$J = sexp($S, aa)
-end
-
-# Date
-sexp(d::Date) = sexp(RealSxp, d)
-sexp(d::Nullable{Date}) = sexp(RealSxp, d)
-sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
-sexp(d::AbstractDataArray{Date}) = sexp(RealSxp, d)
-
-# DateTime
-sexp(d::DateTime) = sexp(RealSxp, d)
-sexp(d::Nullable{DateTime}) = sexp(RealSxp, d)
-sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
-sexp(d::AbstractDataArray{DateTime}) = sexp(RealSxp, d)
-
 
 # Function
 sexp(f::Function) = sexp(ClosSxp, f)

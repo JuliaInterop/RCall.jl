@@ -18,4 +18,4 @@ r = RObject(aa)
 r[2] = missing
 ab = rcopy(AxisArray, r)
 @test eltype(ab) == Union{Date, Missing}
-@test isa(ab.data, DataArray)
+@test isa(ab.data, Array{Union{Date, Missing}})

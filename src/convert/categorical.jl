@@ -33,3 +33,7 @@ function sexp(::Type{IntSxp}, v::CategoricalArray)
     end
     rv
 end
+
+# default
+
+sexp(v::CategoricalArray) = sexp(IntSxp, v)
