@@ -1,5 +1,5 @@
 # sexp to Array{Union{T, Missing}}
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp, :VecSxp)
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
     @eval begin
         function rcopy(::Type{Array{Union{T, Missing}}}, s::Ptr{$S}) where T
             protect(s)
