@@ -2,7 +2,7 @@
 
 # Default behaviors of copying R vectors to dataarrays
 
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
     @eval begin
         function rcopy(::Type{DataVector},s::Ptr{$S})
             protect(s)
@@ -35,7 +35,7 @@ end
 
 
 ## DataArray to sexp conversion.
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp)
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
     @eval begin
         function sexp(::Type{$S}, v::DataArray)
             rv = protect(sexp($S, v.data))

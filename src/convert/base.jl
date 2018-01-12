@@ -39,27 +39,32 @@ rcopy(::Type{Symbol},s::Ptr{CharSxp}) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::Ptr{CharSxp}) = parse(Int, rcopy(s))
 
 
-# IntSxp, RealSxp, CplxSxp, LglSxp, StrSxp, RawSxp, VecSxp to Array{T}
+# sexp to Array{T}
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp, :VecSxp)
     @eval begin
         function rcopy(::Type{Array{T}}, s::Ptr{$S}) where T
             protect(s)
-            v = T[rcopy(T,e) for e in s]
-            ret = reshape(v,size(s))
-            unprotect(1)
-            ret
+            v = try
+                T[rcopy(T,e) for e in s]
+            finally
+                unprotect(1)
+            end
+            reshape(v,size(s))
         end
         function rcopy(::Type{Vector{T}}, s::Ptr{$S}) where T
             protect(s)
-            ret = T[rcopy(T,e) for e in s]
-            unprotect(1)
-            ret
+            v = try
+                T[rcopy(T,e) for e in s]
+            finally
+                unprotect(1)
+            end
+            v
         end
     end
 end
 
-# IntSxp, RealSxp, CplxSxp, LglSxp scalar conversion
-for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp)
+# IntSxp, RealSxp, CplxSxp, LglSxp, RawSxp scalar conversion
+for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :RawSxp)
     @eval begin
         function rcopy(::Type{T},s::Ptr{$S}) where T<:Number
             length(s) == 1 || error("length of s must be 1.")
@@ -68,10 +73,11 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp)
     end
 end
 
-# IntSxp, RealSxp, CplxSxp to their corresponding Julia types.
+# IntSxp, RealSxp, CplxSxp, RawSxp to their corresponding Julia types.
 for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
-                 (:Complex, :CplxSxp))
+                 (:Complex, :CplxSxp),
+                 (:UInt8, :RawSxp))
     @eval begin
         function rcopy(::Type{Vector{T}},s::Ptr{$S}) where T<:$J
             a = Array{T}(length(s))
@@ -139,25 +145,6 @@ function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a
 end
 
-# RawSxp
-function rcopy(::Type{UInt8},s::Ptr{RawSxp})
-    length(s) == 1 || error("length of s must be 1.")
-    s[1]
-end
-
-function rcopy(::Type{Vector{UInt8}},s::Ptr{RawSxp})
-    a = Array{UInt8}(length(s))
-    copy!(a,unsafe_vec(s))
-    a
-end
-
-function rcopy(::Type{Array{UInt8}},s::Ptr{RawSxp})
-    a = Array{UInt8}(size(s)...)
-    copy!(a,unsafe_vec(s))
-    a
-end
-
-
 # StrSxp
 function rcopy(::Type{Symbol}, s::Ptr{StrSxp})
     length(s) == 1 || error("length of s must be 1.")
@@ -173,9 +160,8 @@ rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)
 rcopy(::Type{Vector}, s::Ptr{VecSxp}) = rcopy(Vector{Any}, s)
 function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:Associative
     protect(s)
-    local a
+    a = A()
     try
-        a = A()
         K = keytype(a)
         V = valtype(a)
         if sanitize && (K <: AbstractString || K <: Symbol)
@@ -220,7 +206,9 @@ sexp(::Type{StrSxp},s::Symbol) = sexp(StrSxp,sexp(CharSxp,s))
 # number and numeric array
 for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
-                 (:Complex, :CplxSxp))
+                 (:Complex, :CplxSxp),
+                 (:Bool, :LglSxp),
+                 (:UInt8, :RawSxp))
     @eval begin
         # Could use Rf_Scalar... methods, but see weird error on Appveyor Windows for Complex.
         function sexp(::Type{$S},v::$J)
@@ -236,23 +224,11 @@ for (J,S) in ((:Integer,:IntSxp),
     end
 end
 
-# bool and boolean array, handle seperately
-sexp(::Type{LglSxp},v::Union{Bool,Cint}) =
+# additional methods for bool
+sexp(::Type{LglSxp},v::Cint) =
     ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
-function sexp(::Type{LglSxp}, a::AbstractArray{T}) where T<:Union{Bool,Cint}
+function sexp(::Type{LglSxp}, a::AbstractArray{Cint})
     ra = allocArray(LglSxp, size(a)...)
-    copy!(unsafe_vec(ra),a)
-    ra
-end
-
-# UInt8 to Raw vector
-function sexp(::Type{RawSxp},v::UInt8)
-    ra = allocArray(RawSxp,1)
-    unsafe_store!(dataptr(ra),v)
-    ra
-end
-function sexp(::Type{RawSxp}, a::AbstractArray{UInt8})
-    ra = allocArray(RawSxp, size(a)...)
     copy!(unsafe_vec(ra),a)
     ra
 end
