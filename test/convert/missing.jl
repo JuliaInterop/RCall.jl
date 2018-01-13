@@ -1,4 +1,5 @@
 # bool
+@test ismissing(rcopy(R"NA"))
 v = [true ,true ,missing, false]
 r = RObject(v)
 @test isna(r, 3)
@@ -7,6 +8,7 @@ r = RObject(v)
 @test rcopy(r)[1:2] == v[1:2]
 
 # integer
+@test ismissing(rcopy(R"as.integer(NA)"))
 v = [1 ,2 ,missing, 4]
 r = RObject(v)
 @test isna(r, 3)
@@ -22,6 +24,7 @@ r = RObject(v)
 @test rcopy(r)[1:2] == v[1:2]
 
 # float
+@test ismissing(rcopy(R"as.double(NA)"))
 v = [1.0 ,2.0 ,missing, 4.0]
 r = RObject(v)
 @test isna(r, 3)
@@ -37,6 +40,7 @@ r = RObject(v)
 @test rcopy(r)[1:2] == v[1:2]
 
 #string
+@test ismissing(rcopy(R"as.character(NA)"))
 v = ["a" ,"b" ,missing, "d"]
 r = RObject(v)
 @test isna(r, 3)

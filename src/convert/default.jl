@@ -64,12 +64,10 @@ rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
 
 # StrSxp
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym
-    if length(s) == 1
-        String
-    elseif anyna(s)
-        Array{Union{String, Missing}}
+    if anyna(s)
+        length(s) == 1 ? Missing : Array{Union{String, Missing}}
     else
-        Array{String}
+        length(s) == 1 ? String : Array{String}
     end
 end
 function eltype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym
@@ -81,14 +79,14 @@ function eltype(::Type{RClass{Sym}}, s::Ptr{StrSxp}) where Sym
 end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
-    if length(s) == 1
-        Int
-    elseif isFactor(s)
+    if isFactor(s)
         CategoricalArray
-    elseif anyna(s)
-        Array{Union{Int, Missing}}
     else
-        Array{Int}
+        if anyna(s)
+            length(s) == 1 ? Missing : Array{Union{Int, Missing}}
+        else
+            length(s) == 1 ? Int : Array{Int}
+        end
     end
 end
 
@@ -101,12 +99,10 @@ function eltype(::Type{RClass{Sym}}, s::Ptr{IntSxp}) where Sym
 end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym
-    if length(s) == 1
-        Float64
-    elseif anyna(s)
-        Array{Union{Float64, Missing}}
+    if anyna(s)
+        length(s) == 1 ? Missing : Array{Union{Float64, Missing}}
     else
-        Array{Float64}
+        length(s) == 1 ? Float64 : Array{Float64}
     end
 end
 function eltype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym
@@ -118,12 +114,10 @@ function eltype(::Type{RClass{Sym}}, s::Ptr{RealSxp}) where Sym
 end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
-    if length(s) == 1
-        Complex128
-    elseif anyna(s)
-        Array{Union{Complex128, Missing}}
+    if anyna(s)
+        length(s) == 1 ? Missing : Array{Union{Complex128, Missing}}
     else
-        Array{Complex128}
+        length(s) == 1 ? Complex128 : Array{Complex128}
     end
 end
 function eltype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
@@ -135,12 +129,10 @@ function eltype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
 end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym
-    if length(s) == 1
-        Bool
-    elseif anyna(s)
-        Array{Union{Bool, Missing}}
+    if anyna(s)
+        length(s) == 1 ? Missing : Array{Union{Bool, Missing}}
     else
-        BitArray
+        length(s) == 1 ? Bool : BitArray
     end
 end
 function eltype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym
@@ -152,12 +144,10 @@ function eltype(::Type{RClass{Sym}}, s::Ptr{LglSxp}) where Sym
 end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym
-    if length(s) == 1
-        UInt8
-    elseif anyna(s)
-        Array{Union{UInt8, Missing}}
+    if anyna(s)
+        length(s) == 1 ? Missing : Array{Union{UInt8, Missing}}
     else
-        Array{UInt8}
+        length(s) == 1 ? UInt8 : Array{UInt8}
     end
 end
 function eltype(::Type{RClass{Sym}}, s::Ptr{RawSxp}) where Sym

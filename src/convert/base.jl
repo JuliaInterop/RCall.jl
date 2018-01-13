@@ -26,6 +26,9 @@ end
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
 rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T} = rcopy(s)
 
+# Missing
+rcopy(::Type{Missing}, ::Ptr{S}) where S<:Sxp = missing
+
 # NilSxp
 rcopy(::Type{T}, ::Ptr{NilSxp}) where T = Nullable()
 rcopy(::Type{T}, ::Ptr{NilSxp}) where T<:AbstractArray = T()

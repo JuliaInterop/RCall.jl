@@ -11,21 +11,17 @@ rcopy(::Type{DateTime}, x::Float64) =
 
 # implicit conversion `rcopy(d)`.
 function rcopytype(::Type{RClass{:Date}}, s::Ptr{RealSxp})
-    if length(s) == 1
-        return Date
-    elseif anyna(s)
-        return Array{Union{Date, Missing}}
+    if anyna(s)
+        length(s) == 1 ? Missing : Array{Union{Date, Missing}}
     else
-        return Array{Date}
+        length(s) == 1 ? Date : Array{Date}
     end
 end
 function rcopytype(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp})
-    if length(s) == 1
-        return DateTime
-    elseif anyna(s)
-        return Array{Union{DateTime, Missing}}
+    if anyna(s)
+        length(s) == 1 ? Missing : Array{Union{DateTime, Missing}}
     else
-        return Array{DateTime}
+        length(s) == 1 ? DateTime : Array{DateTime}
     end
 end
 
