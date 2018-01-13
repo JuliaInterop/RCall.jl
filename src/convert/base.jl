@@ -24,7 +24,7 @@ end
 # Fallbacks
 # convert Ptr{S} to Any would use the default conversions to allow
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
-rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T} = rcopy(s)
+rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T<:Any} = rcopy(s)
 
 # Missing
 rcopy(::Type{Missing}, ::Ptr{S}) where S<:Sxp = missing
