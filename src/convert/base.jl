@@ -1,14 +1,9 @@
 struct RClass{Symbol} end
 
-# conversion to Base Julia types
-
-rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, r.p; kwargs...)
-# make sure convert doesn't invoke rcopy in the following situations
-convert(::Type{Any}, r::RObject{S}) where S<:Sxp = r
-convert(::Type{RObject}, r::RObject{S}) where S<:Sxp = r
-convert(::Type{RObject{S}}, r::RObject{S}) where S<:Sxp = r
 # allow `Int(R"1+1")`
 convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, r.p)
+convert(::Type{RObject}, r::RObject{S}) where S<:Sxp = r
+convert(::Type{RObject{S}}, r::RObject{S}) where S<:Sxp = r
 
 # conversion between numbers which understands different NAs
 function rcopy(::Type{T}, x::R) where {T<:Number, R<:Number}
@@ -21,7 +16,8 @@ function rcopy(::Type{T}, x::R) where {T<:Number, R<:Number}
     end
 end
 
-# Fallbacks
+# conversion to Base Julia types
+rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, r.p; kwargs...)
 # convert Ptr{S} to Any would use the default conversions to allow
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
 rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T<:Any} = rcopy(s)

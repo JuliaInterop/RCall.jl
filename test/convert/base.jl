@@ -300,3 +300,7 @@ b = RObject(true)
 
 # issue 195
 @test isnull(rcopy(R"list(a=NULL)")[:a])
+
+# convert to Any
+@test isa(rcopy(Any, R"1"), Float64)
+@test isa(convert(Any, R"1"), RObject)
