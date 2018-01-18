@@ -9,6 +9,14 @@ function render(script::String)
     local col
     local c
 
+
+    if !isascii(script)
+        l10n_info = rcopy(rcall(:l10n_info))
+        if !(:MBCS in keys(l10n_info) && l10n_info[:MBCS]) && \
+                !(Symbol("UTF-8") in keys(l10n_info) && l10n_info[Symbol("UTF-8")])
+            RParseError("unicode script is not supported")
+        end
+    end
     while true
         parse_error = false
         sf = protect(rcall_p(:srcfile, "xx"))
@@ -65,12 +73,7 @@ function render(script::String)
             c = ' '
         end
         if c != '\$'
-            errormsg = "error in locating julia expression"
-            if !isascii(script)
-                errormsg *= ", check if unicode is supported `l10n_info()`"
-            end
-            println(errormsg)
-            throw(RParseError())
+            throw(lastex)
         end
 
         ast, i = parse(script, index+1, greedy=false)
@@ -87,7 +90,7 @@ function render(script::String)
         elseif isa(ast, Expr) && (ast.head == :incomplete || ast.head == :continue)
             throw(RParseIncomplete("incomplete julia expression"))
         else
-            throw(RParseError())
+            throw(lastex)
         end
 
         symdict[sym] = ast

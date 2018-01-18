@@ -58,3 +58,5 @@ for t in tests
         end
     end
 end
+
+@test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
