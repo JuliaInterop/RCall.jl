@@ -48,6 +48,6 @@ if (:MBCS in keys(l10n_info) && l10n_info[:MBCS]) || \
 
 else
 
-@test_throws ParseError RCall.render("x = 'β'")
+@test_throws RCall.RParseError RCall.render("x = 'β'")
 
 end
