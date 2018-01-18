@@ -32,6 +32,8 @@ globalEnv[:y] = RObject([4,5,6])
 @test isna(R"list(a=1, b=NA)", 1) == false
 @test isna(R"list(a=1, b=NA)", 2) == true
 
+@test length(R"mtcars") == 11
+@test size(R"mtcars") == (32, 11)
 
 # setindex with missing and Nullable()
 a = R"1:10"

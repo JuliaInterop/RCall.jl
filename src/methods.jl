@@ -305,12 +305,19 @@ attributes(s::Ptr{S}) where S<:Sxp = attributes(unsafe_load(s))
 attributes(s::RObject) = RObject(attributes(s.p))
 
 
+"""
+Returns the size of an R object.
+"""
 function size(s::Ptr{S}) where S<:Sxp
-    isArray(s) || return (length(s),)
-    tuple(convert(Array{Int},unsafe_vec(getattrib(s,Const.DimSymbol)))...)
+    if isFrame(s)
+        (length(getattrib(s, Const.RowNamesSymbol)), length(s))
+    elseif isArray(s)
+        tuple(convert(Array{Int},unsafe_vec(getattrib(s,Const.DimSymbol)))...)
+    else
+        (length(s),)
+    end
 end
-size(r::RObject) = size(sexp(r))
-
+size(r::RObject) = size(r.p)
 
 """
 Returns the names of an R vector.
