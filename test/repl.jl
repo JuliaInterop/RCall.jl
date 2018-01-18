@@ -32,18 +32,19 @@ end
 
 send_repl(x, enter=true) = write(stdin_write, enter ? "$x\n" : x)
 
-function check_repl(io::IO, x)
-    read_task = @task readuntil(io, x)
+function read_repl(io::IO, x)
+    cache = Ref{Any}("")
+    read_task = @task cache[] = readuntil(io, x)
     t = Base.Timer((_) -> Base.throwto(read_task,
                 ErrorException("Expect \"$x\", but wait too long.")), 5)
     schedule(read_task)
     wait(read_task)
     close(t)
-    true
+    cache[]
 end
 
-check_repl_stdout(x) = check_repl(stdout_read, x)
-check_repl_stderr(x) = check_repl(stderr_read, x)
+check_repl_stdout(x) = length(read_repl(stdout_read, x)) > 0
+check_repl_stderr(x) = length(read_repl(stderr_read, x)) > 0
 
 # waiting for the repl
 send_repl("using RCall")
@@ -97,3 +98,13 @@ send_repl("\$x")
 
 send_repl("\$not_found")
 @test check_repl_stderr("UndefVarError")
+
+# check visibility
+
+send_repl("'apple'")
+send_repl("paste0('check', 'point')")
+@test contains(read_repl(stdout_read, "checkpoint"), "\"apple\"")
+
+send_repl("invisible('apple')")
+send_repl("paste0('check', 'point')")
+@test !contains(read_repl(stdout_read, "checkpoint"), "\"apple\"")

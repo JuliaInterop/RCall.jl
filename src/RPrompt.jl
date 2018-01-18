@@ -13,6 +13,8 @@ import ..RCall:
     rprint,
     rcopy,
     render,
+    protect,
+    unprotect,
     prepare_inline_julia_code,
     RParseIncomplete,
     RException,
@@ -44,17 +46,17 @@ function parse_status(script::String)
 end
 
 function repl_eval(script::String, stdout::IO, stderr::IO)
-    local status
-    local val
+    local nprotect = 0
     try
         script, symdict = render(script)
         if length(symdict) > 0
             eval(Main, prepare_inline_julia_code(symdict))
         end
-        val = reval_p(rparse_p(script), Const.GlobalEnv.p)
+        ret = protect(reval_p(rparse_p("withVisible({$script})"), Const.GlobalEnv.p))
+        nprotect += 1
         # print if the last expression is visible
-        if unsafe_load(cglobal((:R_Visible, libR),Int)) == 1
-             rprint(stdout, val)
+        if rcopy(Bool, ret[:visible])
+             rprint(stdout, ret[:value])
         end
     catch ex
         if isa(ex, REvalError)
@@ -65,6 +67,7 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
             simple_showerror(stderr, ex)
         end
     finally
+        unprotect(nprotect)
         return nothing
     end
 end
@@ -178,7 +181,7 @@ function create_r_repl(repl, main)
                 repl_eval(script, repl.t.out_stream, repl.t.err_stream)
             catch y
                 # should never reach
-                simple_showerror(stderr, y)
+                simple_showerror(repl.t.err_stream, y)
             end
         end
         REPL.prepare_next(repl)
