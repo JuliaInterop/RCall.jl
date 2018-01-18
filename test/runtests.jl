@@ -51,12 +51,9 @@ tests = ["basic",
 println("Running tests:")
 
 for t in tests
+    println(t)
     tfile = string(t, ".jl")
-    @eval begin
-        @testset $t begin
-            include($tfile)
-        end
-    end
+    include(tfile)
 end
 
 @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
