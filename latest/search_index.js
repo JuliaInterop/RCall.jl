@@ -777,6 +777,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#Base.size-Union{Tuple{Ptr{S}}, Tuple{S}} where S<:RCall.Sxp",
+    "page": "Internal",
+    "title": "Base.size",
+    "category": "Method",
+    "text": "Returns the size of an R object.\n\n\n\n"
+},
+
+{
     "location": "internal.html#RCall.bound-Union{Tuple{Ptr{S}}, Tuple{S}} where S<:RCall.Sxp",
     "page": "Internal",
     "title": "RCall.bound",
