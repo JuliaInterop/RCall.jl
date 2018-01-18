@@ -34,11 +34,7 @@ y = "foo"
 
 @test_throws Exception R"""a = $(error("foo"))"""
 
-
-l10n_info = rcopy(rcall(:l10n_info))
-
-if (:MBCS in keys(l10n_info) && l10n_info[:MBCS]) || \
-        (Symbol("UTF-8") in keys(l10n_info) && l10n_info[Symbol("UTF-8")])
+if rcopy(reval("isTRUE(l10n_info()\$`UTF-8`)"))
 
 @test RCall.render("x = 'β'")[1] == "x = 'β'"
 
@@ -48,6 +44,6 @@ if (:MBCS in keys(l10n_info) && l10n_info[:MBCS]) || \
 
 else
 
-@test_throws RCall.RParseError RCall.render("x = 'β'")
+@test_throws RCall.RParseError RCall.render("x = \$β")
 
 end

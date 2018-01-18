@@ -9,12 +9,9 @@ function render(script::String)
     local col
     local c
 
-
     if !isascii(script)
-        l10n_info = rcopy(rcall(:l10n_info))
-        if !(:MBCS in keys(l10n_info) && l10n_info[:MBCS]) && \
-                !(Symbol("UTF-8") in keys(l10n_info) && l10n_info[Symbol("UTF-8")])
-            RParseError("unicode script is not supported")
+        if !rcopy(reval("isTRUE(l10n_info()\$`UTF-8`)"))
+            throw(RParseError("unicode script is not supported"))
         end
     end
     while true
