@@ -66,7 +66,7 @@ function render(script::String)
         end
         if c != '\$'
             errormsg = "error in locating julia expression"
-            if !isassic(script)
+            if !isascii(script)
                 errormsg *= ", check if unicode is supported `l10n_info()`"
             end
             println(errormsg)
