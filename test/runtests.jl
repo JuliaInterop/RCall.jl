@@ -24,6 +24,10 @@ end
 using RCall
 using Missings
 
+println(R"sessionInfo()")
+
+println(R"l10n_info()")
+
 # https://github.com/JuliaStats/RCall.jl/issues/68
 @test hd == homedir()
 @test pd == Pkg.dir()

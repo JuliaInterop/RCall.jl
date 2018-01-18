@@ -69,6 +69,7 @@ function render(script::String)
             if !isassic(script)
                 errormsg *= ", check if unicode is supported `l10n_info()`"
             end
+            println(errormsg)
             throw(RParseError())
         end
 
