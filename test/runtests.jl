@@ -59,5 +59,8 @@ end
 @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
 
 # test jupyter
+using Conda
+Conda.add("nbconvert")
+
 jupyter = readstring(Pkg.dir("IJulia","deps","JUPYTER"))
-run(`$jupyter nbconvert --execute test.ipynb --to ipynb --output=test_run.ipynb`)
+run(`$jupyter nbconvert --execute test.ipynb --to notebook --output=test_run.ipynb`)
