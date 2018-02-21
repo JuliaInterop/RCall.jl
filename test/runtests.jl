@@ -58,9 +58,15 @@ end
 
 @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
 
-# test jupyter
-using Conda
-Conda.add("nbconvert")
+# test jupyter integration
 
-jupyter = readstring(Pkg.dir("IJulia","deps","JUPYTER"))
-run(`$jupyter nbconvert --execute test.ipynb --to notebook --output=test_run.ipynb`)
+nbconvert = "jupyter nbconvert"
+if !success(spawn(`$nbconvert --version`))    
+    using Conda
+    Conda.add("nbconvert")
+    nbconvert = abspath(Conda.SCRIPTDIR,"jupyter-nbconvert")
+    if !success(spawn(`$nbconvert --version`))
+        error("Could not find `jupyter-nbconvert`")
+    end
+end
+run(`$nbconvert --execute test.ipynb --to notebook --output=test_run.ipynb`)
