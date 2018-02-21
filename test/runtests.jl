@@ -59,13 +59,16 @@ end
 @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
 
 # test jupyter integration
-
 nbconvert = "jupyter nbconvert"
-if !success(spawn(`$nbconvert --version`))    
-    using Conda
-    Conda.add("nbconvert")
-    nbconvert = abspath(Conda.SCRIPTDIR,"jupyter-nbconvert")
-    if !success(spawn(`$nbconvert --version`))
+try
+    run(`$nbconvert --version`)
+catch e
+    try
+        using Conda
+        Conda.add("nbconvert")
+        nbconvert = abspath(Conda.SCRIPTDIR,"jupyter-nbconvert")
+        run(`$nbconvert --version`)
+    catch e
         error("Could not find `jupyter-nbconvert`")
     end
 end
