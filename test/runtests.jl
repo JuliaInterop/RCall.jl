@@ -57,3 +57,7 @@ for t in tests
 end
 
 @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
+
+# test jupyter
+jupyter = readstring(Pkg.dir("IJulia","deps","JUPYTER"))
+run(`$jupyter nbconvert --inplace --execute test.ipynb`)
