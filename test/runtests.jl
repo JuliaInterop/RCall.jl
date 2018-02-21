@@ -60,4 +60,4 @@ end
 
 # test jupyter
 jupyter = readstring(Pkg.dir("IJulia","deps","JUPYTER"))
-run(`$jupyter nbconvert --inplace --execute test.ipynb`)
+run(`$jupyter nbconvert --execute test.ipynb --to ipynb --output=test_run.ipynb`)
