@@ -1,3 +1,6 @@
+const Rembedded = Ref{Bool}(false)
+const voffset = Ref{UInt}()
+
 @static if Compat.Sys.iswindows()
     import WinReg
 
@@ -50,80 +53,6 @@
                       C_NULL,C_NULL,2,C_NULL)
 
 end
-
-"""
-    validate_libR(libR)
-
-Checks that the R library `libR` can be loaded and is satisfies version requirements.
-"""
-function validate_libR(libR)
-    if !isfile(libR)
-        error("Could not find library $libR. Make sure that R shared library exists.")
-    end
-    # Issue #143
-    # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
-    libptr = try
-        Libdl.dlopen(libR)
-    catch er
-        Base.with_output_color(:red, STDERR) do io
-            print(io, "ERROR: ")
-            showerror(io, er)
-            println(io)
-        end
-        if Compat.Sys.iswindows()
-            error("Try adding $(dirname(libR)) to the \"PATH\" environmental variable and restarting Julia.")
-        else
-            error("Try adding $(dirname(libR)) to the \"LD_LIBRARY_PATH\" environmental variable and restarting Julia.")
-        end
-    end
-    # R_tryCatchError is only available on v3.4.0 or later.
-    if Libdl.dlsym_e(libptr, "R_tryCatchError") == C_NULL
-        error("R library $libR appears to be too old. RCall.jl requires R 3.4.0 or later")
-    end
-    Libdl.dlclose(libptr)
-end
-
-function locate_Rhome()
-    Rhome = if haskey(ENV,"R_HOME")
-        ENV["R_HOME"]
-    else
-        try
-            readchomp(`R RHOME`)
-        catch er
-            ""
-        end
-    end
-    @static if Compat.Sys.iswindows()
-        if Rhome == ""
-            Rhome = try
-                    WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R", "InstallPath")
-                catch er
-                    ""
-                end
-        end
-    end
-    if Rhome == "" || !isdir(Rhome)
-        error("Could not find R installation. Either set the \"R_HOME\" environmental variable, or ensure the R executable is available in \"PATH\".")
-    end
-    info("Using R installation at $Rhome")
-    Rhome
-end
-
-function locate_libR(Rhome)
-    @static if Compat.Sys.iswindows()
-        libR = joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386", "R.dll")
-    else
-        libR = joinpath(Rhome, "lib", "libR.$(Libdl.dlext)")
-    end
-    validate_libR(libR)
-    libR
-end
-
-const Rhome = locate_Rhome()
-const libR = locate_libR(Rhome)
-const Rembedded = Ref{Bool}(false)
-const voffset = Ref{UInt}()
-
 
 """
     initEmbeddedR()
@@ -211,6 +140,9 @@ function endEmbeddedR()
         Rembedded[] = false
     end
 end
+
+# for validate_libR
+include(joinpath(dirname(@__FILE__),"..","deps","setup.jl"))
 
 function __init__()
     validate_libR(libR)

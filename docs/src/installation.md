@@ -1,15 +1,49 @@
 # Installing RCall.jl
 
-RCall.jl requires that a recent version of R, at least 3.4.0, be installed. 
-
-## Standard installations
-
-If R has been installed using one of the standard approaches below, then RCall.jl can simply be installed with
+RCall.jl can simply be installed with
 ```julia
 Pkg.add("RCall")
 ```
+
+RCall.jl will automatically install R for you using [Conda](https://github.com/JuliaPy/Conda.jl)
+if it doesn't detect that you have R 3.4.0 or later installed already.
+
+## Customizing the R installation
+
+Before installing its own copy of R, the RCall build script (run by `Pkg.add`)
+will check for an existing R installation by looking in the following locations,
+in order.
+
+* The `R_HOME` environment variable, if set, should be the location of the
+  [R home directory](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Rhome.html).
+* Otherwise, it runs the `R HOME` command, assuming `R` is located in your [`PATH`](https://en.wikipedia.org/wiki/PATH_(variable)).
+* Otherwise, on Windows, it looks in the [Windows registry](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#Does-R-use-the-Registry_003f).
+* Otherwise, it installs the [`r-base` conda-forge package](https://anaconda.org/conda-forge/r-base).
+
+To change which R installation is used for RCall, set the `R_HOME` environment variable
+and run `Pkg.build("RCall")`.   Once this is configured, RCall remembers the location
+of R in future updates, so you don't need to set `R_HOME` permanently.
+
+You can set `R_HOME` to the empty string `""` to force `Pkg.build` to re-run the
+`R HOME` command, e.g. if you change your PATH:
+```julia
+ENV["R_HOME"]=""
+ENV["PATH"]="....directory of R executable..."
+Pkg.build("RCall")
+```
+
+You can also set `R_HOME` to `"*"` (or any invalid path) to force RCall to use
+its own Conda installation of R:
+```julia
+ENV["R_HOME"]="*"
+Pkg.build("RCall") # will install R via Conda
+```
+
 Should you experience problems with any of these methods, please [open an issue](https://github.com/JuliaStats/RCall.jl/issues/new).
 
+## Standard installations
+
+If you want to install R yourself, rather than relying on the automatic Conda installation, you can use one of the following options:
 
 ### Windows
 The current [Windows binary from CRAN](https://cran.r-project.org/bin/windows/base/).
@@ -28,29 +62,11 @@ The following will update R on recent versions of Ubuntu:
     sudo apt-get update -y
     sudo apt-get install -y r-base r-base-dev
 
+### Other methods
+
+If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set `R_HOME` or your `PATH` as described above before running `Pkg.build("RCall")` in order for the build script to find your R installation.
+
 ## Updating R
 
-If you have updated the R installation, you may need to rebuild the RCall cache via
-```julia
-Base.compilecache("RCall")
-```
-     
-## Other methods
-
-If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).
-
-Firstly, try setting the `R_HOME` environmental variable to the location of your R installation, which can be found by running `R.home()` from within R. This can be set in your `~/.juliarc.jl` file via the `ENV` global variable, e.g.
-```julia
-ENV["R_HOME"] = ...
-```
-
-You may also need to specify the variable `LD_LIBRARY_PATH` before launching Julia, for example
-```bash
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
-julia
-```
-
-### Windows PATH
-
-The `PATH` environmental variable should contain the location of your R binary, and the `HOME` variable should contain the current user's home directory. These need to be set before Julia is started.
-
+If you have updated your R installation, you may need to re-run `Pkg.build("RCall")`
+as described above, possibly changing the `R_HOME` environment variable first.
