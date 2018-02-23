@@ -18,7 +18,7 @@ in order.
   [R home directory](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Rhome.html).
 * Otherwise, it runs the `R HOME` command, assuming `R` is located in your [`PATH`](https://en.wikipedia.org/wiki/PATH_(variable)).
 * Otherwise, on Windows, it looks in the [Windows registry](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#Does-R-use-the-Registry_003f).
-* Otherwise, it installs the [`r-base` conda-forge package](https://anaconda.org/conda-forge/r-base).
+* Otherwise, it installs the [`r-base` package](https://anaconda.org/r/r-base).
 
 To change which R installation is used for RCall, set the `R_HOME` environment variable
 and run `Pkg.build("RCall")`.   Once this is configured, RCall remembers the location

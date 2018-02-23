@@ -33,7 +33,7 @@ try
         if isempty(libR)
             different = "  To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\")."
             info("Installing R via Conda.$different")
-            Conda.add_channel("conda-forge")
+            Conda.add_channel("r")
             Conda.add("r-base")
             Rhome = joinpath(Conda.LIBDIR, "R")
             libR = locate_libR(Rhome, false)
