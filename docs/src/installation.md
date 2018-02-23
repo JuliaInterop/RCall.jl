@@ -32,7 +32,7 @@ The following will update R on recent versions of Ubuntu:
 
 If you have updated the R installation, you may need to rebuild the RCall cache via
 ```julia
-Base.compilecache("RCall")
+Pkg.build("RCall")
 ```
      
 ## Other methods
