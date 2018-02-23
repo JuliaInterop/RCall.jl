@@ -173,8 +173,9 @@ function endEmbeddedR()
     end
 end
 
-const depfile = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
-include(depfile)
+const depsfile = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
+isfile(depsfile) || error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
+include(depsfile)
 
 function __init__()
     validate_libR(libR)
