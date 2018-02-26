@@ -29,7 +29,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Installing RCall.jl",
     "category": "section",
-    "text": "RCall.jl requires that a recent version of R, at least 3.4.0, be installed. "
+    "text": "RCall.jl can simply be installed withPkg.add(\"RCall\")RCall.jl will automatically install R for you using Conda if it doesn\'t detect that you have R 3.4.0 or later installed already."
+},
+
+{
+    "location": "installation.html#Customizing-the-R-installation-1",
+    "page": "Installation",
+    "title": "Customizing the R installation",
+    "category": "section",
+    "text": "Before installing its own copy of R, the RCall build script (run by Pkg.add) will check for an existing R installation by looking in the following locations, in order.The R_HOME environment variable, if set, should be the location of the R home directory.\nOtherwise, it runs the R HOME command, assuming R is located in your PATH.\nOtherwise, on Windows, it looks in the Windows registry.\nOtherwise, it installs the r-base package.To change which R installation is used for RCall, set the R_HOME environment variable and run Pkg.build(\"RCall\").   Once this is configured, RCall remembers the location of R in future updates, so you don\'t need to set R_HOME permanently.You can set R_HOME to the empty string \"\" to force Pkg.build to re-run the R HOME command, e.g. if you change your PATH:ENV[\"R_HOME\"]=\"\"\nENV[\"PATH\"]=\"....directory of R executable...\"\nPkg.build(\"RCall\")You can also set R_HOME to \"*\" (or any invalid path) to force RCall to use its own Conda installation of R:ENV[\"R_HOME\"]=\"*\"\nPkg.build(\"RCall\") # will install R via CondaShould you experience problems with any of these methods, please open an issue."
 },
 
 {
@@ -37,7 +45,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Standard installations",
     "category": "section",
-    "text": "If R has been installed using one of the standard approaches below, then RCall.jl can simply be installed withPkg.add(\"RCall\")Should you experience problems with any of these methods, please open an issue."
+    "text": "If you want to install R yourself, rather than relying on the automatic Conda installation, you can use one of the following options:"
 },
 
 {
@@ -73,27 +81,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "installation.html#Updating-R-1",
-    "page": "Installation",
-    "title": "Updating R",
-    "category": "section",
-    "text": "If you have updated the R installation, you may need to rebuild the RCall cache viaBase.compilecache(\"RCall\")"
-},
-
-{
     "location": "installation.html#Other-methods-1",
     "page": "Installation",
     "title": "Other methods",
     "category": "section",
-    "text": "If you have installed R by some other method, then some further modifications may be necessary, for example, if you're building R from scratch, or the files have been copied but not installed in the usual manner (common on cluster installations).Firstly, try setting the R_HOME environmental variable to the location of your R installation, which can be found by running R.home() from within R. This can be set in your ~/.juliarc.jl file via the ENV global variable, e.g.ENV[\"R_HOME\"] = ...You may also need to specify the variable LD_LIBRARY_PATH before launching Julia, for exampleexport LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:`R RHOME`/lib\"\njulia"
+    "text": "If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set R_HOME or your PATH as described above before running Pkg.build(\"RCall\") in order for the build script to find your R installation."
 },
 
 {
-    "location": "installation.html#Windows-PATH-1",
+    "location": "installation.html#Updating-R-1",
     "page": "Installation",
-    "title": "Windows PATH",
+    "title": "Updating R",
     "category": "section",
-    "text": "The PATH environmental variable should contain the location of your R binary, and the HOME variable should contain the current user's home directory. These need to be set before Julia is started."
+    "text": "If you have updated your R installation, you may need to re-run Pkg.build(\"RCall\") as described above, possibly changing the R_HOME environment variable first."
 },
 
 {
@@ -141,7 +141,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "@R_str string macro",
     "category": "section",
-    "text": "Another way to use RCall is the R\"\" string macro, it is especially useful in script files.R\"rnorm(10)\"This evaluates the expression inside the string in R, and returns the result as an RObject, which is a Julia wrapper type around an R object.The R\"\" string macro supports variable substitution of Julia objects via the $ symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as aa$bb):x = randn(10)\nR\"t.test($x)\"It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parenthesesR\"optim(0, $(x -> x-cos(x)), method='BFGS')\"A large chunk of code could be quoted between triple string quotationsy = 1\nR\"\"\"\nf <- function(x, y) x + y\nret <- f(1, $y)\n\"\"\""
+    "text": "Another way to use RCall is the R\"\" string macro, it is especially useful in script files.R\"rnorm(10)\"This evaluates the expression inside the string in R, and returns the result as an RObject, which is a Julia wrapper type around an R object.The R\"\" string macro supports variable substitution of Julia objects via the $ symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as aa$bb):x = randn(10)\nR\"t.test($x)\"It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parenthesesR\"optim(0, $(x -> x-cos(x)), method=\'BFGS\')\"A large chunk of code could be quoted between triple string quotationsy = 1\nR\"\"\"\nf <- function(x, y) x + y\nret <- f(1, $y)\n\"\"\""
 },
 
 {
@@ -149,7 +149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "RCall API",
     "category": "section",
-    "text": "The reval function evaluates any given input string as R code in the R environment. The returned result is an RObject object.jmtcars = reval(\"mtcars\");\nnames(jmtcars)\njmtcars[:mpg]\ntypeof(jmtcars)The rcall function is used to construct function calls.rcall(:dim, jmtcars)The arguments will be implicitly converted to RObject upon evaluation.rcall(:sum, Float64[1.0, 4.0, 6.0])The rcopy function converts RObjects to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:rcopy(R\"c(1)\")\nrcopy(R\"c(1, 2)\")\nrcopy(R\"list(1, 'zz')\")\nrcopy(R\"list(a=1, b='zz')\")It is possible to force a specific conversion by passing the output type as the first argument:rcopy(Array{Int}, R\"c(1,2)\")Converters and Constructors could also be used specifically to yield the desired type.convert(Array{Float64}, R\"c(1,2)\")\nFloat64(R\"1+3\")"
+    "text": "The reval function evaluates any given input string as R code in the R environment. The returned result is an RObject object.jmtcars = reval(\"mtcars\");\nnames(jmtcars)\njmtcars[:mpg]\ntypeof(jmtcars)The rcall function is used to construct function calls.rcall(:dim, jmtcars)The arguments will be implicitly converted to RObject upon evaluation.rcall(:sum, Float64[1.0, 4.0, 6.0])The rcopy function converts RObjects to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:rcopy(R\"c(1)\")\nrcopy(R\"c(1, 2)\")\nrcopy(R\"list(1, \'zz\')\")\nrcopy(R\"list(a=1, b=\'zz\')\")It is possible to force a specific conversion by passing the output type as the first argument:rcopy(Array{Int}, R\"c(1,2)\")Converters and Constructors could also be used specifically to yield the desired type.convert(Array{Float64}, R\"c(1,2)\")\nFloat64(R\"1+3\")"
 },
 
 {
@@ -405,7 +405,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.Sxp",
     "category": "Type",
-    "text": "RCall.jl's type Sxp mirrors the R symbolic expression record SEXPREC in R API. These are represented by a pointer Ptr{S<:Sxp} (which is called SEXP in R API).\n\n\n\n"
+    "text": "RCall.jl\'s type Sxp mirrors the R symbolic expression record SEXPREC in R API. These are represented by a pointer Ptr{S<:Sxp} (which is called SEXP in R API).\n\n\n\n"
 },
 
 {
@@ -533,7 +533,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "DataArrays.isna",
     "category": "Method",
-    "text": "Check if the ith member of s coorespond to R's NA values.\n\n\n\n"
+    "text": "Check if the ith member of s coorespond to R\'s NA values.\n\n\n\n"
 },
 
 {
@@ -621,7 +621,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.rprint",
     "category": "Method",
-    "text": "Print the value of an Sxp using R's printing mechanism\n\n\n\n"
+    "text": "Print the value of an Sxp using R\'s printing mechanism\n\n\n\n"
 },
 
 {
@@ -709,7 +709,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "Base.isascii",
     "category": "Method",
-    "text": "Determines the encoding of the CharSxp. This is determined by the 'gp' part of the sxpinfo (this is the middle 16 bits).\n\n0x00_0002_00 (bit 1): set of bytes (no known encoding)\n0x00_0004_00 (bit 2): Latin-1\n0x00_0008_00 (bit 3): UTF-8\n0x00_0040_00 (bit 6): ASCII\n\nWe only support ASCII and UTF-8.\n\n\n\n"
+    "text": "Determines the encoding of the CharSxp. This is determined by the \'gp\' part of the sxpinfo (this is the middle 16 bits).\n\n0x00_0002_00 (bit 1): set of bytes (no known encoding)\n0x00_0004_00 (bit 2): Latin-1\n0x00_0008_00 (bit 3): UTF-8\n0x00_0040_00 (bit 6): ASCII\n\nWe only support ASCII and UTF-8.\n\n\n\n"
 },
 
 {
@@ -717,7 +717,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "Base.isnull",
     "category": "Method",
-    "text": "Check if values correspond to R's NULL object.\n\n\n\n"
+    "text": "Check if values correspond to R\'s NULL object.\n\n\n\n"
 },
 
 {
@@ -725,7 +725,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "Base.length",
     "category": "Method",
-    "text": "Sxp methods for length return the R length.\n\nRf_xlength handles Sxps that are not vector-like and R's \"long vectors\", which have a negative value for the length member.\n\n\n\n"
+    "text": "Sxp methods for length return the R length.\n\nRf_xlength handles Sxps that are not vector-like and R\'s \"long vectors\", which have a negative value for the length member.\n\n\n\n"
 },
 
 {
@@ -877,7 +877,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.isNA",
     "category": "Method",
-    "text": "Check if a value corresponds to R's sentinel NA values. These function should not be exported.\n\n\n\n"
+    "text": "Check if a value corresponds to R\'s sentinel NA values. These function should not be exported.\n\n\n\n"
 },
 
 {
@@ -1077,7 +1077,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.tryCatchError",
     "category": "Method",
-    "text": "A wrapper of R_tryCatchError. It evaluates a given function with the given argument. It also catches possible R's stop calls which may cause longjmp in c. The error handler is evaluate when such an exception is caught.\n\n\n\n"
+    "text": "A wrapper of R_tryCatchError. It evaluates a given function with the given argument. It also catches possible R\'s stop calls which may cause longjmp in c. The error handler is evaluate when such an exception is caught.\n\n\n\n"
 },
 
 {
@@ -1109,15 +1109,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.unsafe_vec",
     "category": "Method",
-    "text": "Represent the contents of a VectorSxp type as a Vector.\n\nThis does __not__ copy the contents.  If the argument is not named (in R) or otherwise protected from R's garbage collection (e.g. by keeping the containing RObject in scope) the contents of this vector can be modified or could cause a memory error when accessed.\n\nThe contents are as stored in R.  Missing values (NA's) are represented in R by sentinels.  Missing data values in RealSxp and CplxSxp show up as NaN and NaN + NaNim, respectively.  Missing data in IntSxp show up as -2147483648, the minimum 32-bit integer value.  Internally a LglSxp is represented as Vector{Int32}.  The convention is that 0 is false, -2147483648 is NA and all other values represent true.\n\n\n\n"
+    "text": "Represent the contents of a VectorSxp type as a Vector.\n\nThis does __not__ copy the contents.  If the argument is not named (in R) or otherwise protected from R\'s garbage collection (e.g. by keeping the containing RObject in scope) the contents of this vector can be modified or could cause a memory error when accessed.\n\nThe contents are as stored in R.  Missing values (NA\'s) are represented in R by sentinels.  Missing data values in RealSxp and CplxSxp show up as NaN and NaN + NaNim, respectively.  Missing data in IntSxp show up as -2147483648, the minimum 32-bit integer value.  Internally a LglSxp is represented as Vector{Int32}.  The convention is that 0 is false, -2147483648 is NA and all other values represent true.\n\n\n\n"
 },
 
 {
-    "location": "internal.html#RCall.validate_libR-Tuple{Any}",
+    "location": "internal.html#RCall.validate_libR",
     "page": "Internal",
     "title": "RCall.validate_libR",
-    "category": "Method",
-    "text": "validate_libR(libR)\n\nChecks that the R library libR can be loaded and is satisfies version requirements.\n\n\n\n"
+    "category": "Function",
+    "text": "validate_libR(libR, raise=true)\n\nChecks that the R library libR can be loaded and is satisfies version requirements.\n\nIf raise is set to false, then returns a boolean indicating success rather than throwing exceptions.\n\n\n\n"
 },
 
 {
