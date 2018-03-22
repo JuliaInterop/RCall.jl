@@ -197,7 +197,10 @@ end
 done(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
 start(s::RObject{S}) where S<:PairListSxp = start(s.p)
-next(s::RObject{S},state) where S<:PairListSxp = next(s.p, state)
+function next(s::RObject{S},state) where S<:PairListSxp
+    item, state = next(s.p, state)
+    RObject(item[2]), state
+end
 done(s::RObject{S},state) where S<:PairListSxp = done(s.p, state)
 
 "extract the i-th element of a PairListSxp"
