@@ -190,18 +190,28 @@ setcdr!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcdr!(s,sex
 
 start(s::Ptr{S}) where S<:PairListSxp = s
 function next(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
-    t = tag(state)
-    c = car(state)
-    (t,c), cdr(state)
+    car(state), cdr(state)
 end
 done(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
 start(s::RObject{S}) where S<:PairListSxp = start(s.p)
 function next(s::RObject{S},state) where S<:PairListSxp
     item, state = next(s.p, state)
-    RObject(item[2]), state
+    RObject(item), state
 end
 done(s::RObject{S},state) where S<:PairListSxp = done(s.p, state)
+
+start(s::Enumerate{Ptr{S}}) where S<:PairListSxp = s.itr
+function next(s::Enumerate{Ptr{S}},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
+    (tag(state), car(state)), cdr(state)
+end
+done(s::Enumerate{Ptr{S}},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
+
+start(s::Enumerate{RObject{S}}) where S<:PairListSxp = start(s.itr)
+function next(s::Enumerate{RObject{S}},state) where S<:PairListSxp
+    (RObject(tag(state)), RObject(car(state))), cdr(state)
+end
+done(s::Enumerate{RObject{S}},state) where S<:PairListSxp = done(s.itr, state)
 
 "extract the i-th element of a PairListSxp"
 function getindex(l::Ptr{S},I::Integer) where S<:PairListSxp
