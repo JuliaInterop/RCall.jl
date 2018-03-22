@@ -16,7 +16,7 @@ nothing # hide</code></pre><p>Remark: <a href="internal.html#RCall.protect-Union
 
 function rcopy(::Type{Foo}, s::Ptr{VecSxp})
     Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))
-end</code></pre><pre><code class="language-none">rcopy (generic function with 109 methods)</code></pre></div><p>The <code>convert</code> function will dispatch the corresponding <code>rcopy</code> function when it is found.</p><pre><code class="language-">rcopy(Foo, roo)
+end</code></pre><pre><code class="language-none">rcopy (generic function with 108 methods)</code></pre></div><p>The <code>convert</code> function will dispatch the corresponding <code>rcopy</code> function when it is found.</p><pre><code class="language-">rcopy(Foo, roo)
 convert(Foo, roo) # calls `rcopy`
 Foo(roo)
 nothing # hide</code></pre><p>To allow the automatic conversion via <code>rcopy(roo)</code>, the R class <code>Bar</code> has to be registered.</p><pre><code class="language-">import RCall: RClass, rcopytype
