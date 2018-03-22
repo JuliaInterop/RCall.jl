@@ -190,7 +190,9 @@ setcdr!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcdr!(s,sex
 
 start(s::Ptr{S}) where S<:PairListSxp = s
 function next(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
-    car(state), cdr(state)
+    t = tag(state)
+    c = car(state)
+    (t,c), cdr(state)
 end
 done(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
