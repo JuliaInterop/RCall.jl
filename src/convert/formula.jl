@@ -36,24 +36,26 @@ end
 # julia Formula to R formula
 
 # formula
-function rlang_formula(e::Expr)
+function sexp_formula(e::Expr)
     e.head == :call || error("invalid formula object")
     op = e.args[1]
     if op == :&
         op = :(:)
     end
     if length(e.args) > 3 && op in (:+, :*, :(:))
-        rlang_p(op, rlang_formula(Expr(e.head, e.args[1:end-1]...)), rlang_formula(e.args[end]))
+        rlang_p(op, sexp_formula(Expr(e.head, e.args[1:end-1]...)), sexp_formula(e.args[end]))
     else
-        rlang_p(op, map(rlang_formula, e.args[2:end])...)
+        rlang_p(op, map(sexp_formula, e.args[2:end])...)
     end
 end
-rlang_formula(e::Symbol) = e
-rlang_formula(n::Number) = n
+sexp_formula(e::Symbol) = sexp(SymSxp, e)
+sexp_formula(n::Integer) = sexp(RealSxp, Float64(n))
+sexp_formula(n::Number) = sexp(n)
+
 
 # R formula objects
 function sexp(::Type{LangSxp}, f::Formula)
-    s = protect(rlang_p(:~, rlang_formula(f.lhs),rlang_formula(f.rhs)))
+    s = protect(rlang_p(:~, sexp_formula(f.lhs), sexp_formula(f.rhs)))
     try
         setattrib!(s, Const.ClassSymbol, sexp("formula"))
         setattrib!(s, ".Environment", Const.GlobalEnv)
