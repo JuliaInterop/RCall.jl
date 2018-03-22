@@ -172,9 +172,10 @@ end
 # FunctionSxp
 rcopy(s::Ptr{S}) where S<:FunctionSxp = rcopy(Function,s)
 
-# TODO: LangSxp
-rcopy(l::Ptr{LangSxp}) = RObject(l)
-rcopy(r::RObject{LangSxp}) = r
+# Fallback for LangSxp
+function rcopytype(::Type{RClass{Sym}}, s::Ptr{LangSxp}) where Sym
+    Any
+end
 
 # Fallback for non SEXP
 rcopy(r) = r
