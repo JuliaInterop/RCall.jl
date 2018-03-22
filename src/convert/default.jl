@@ -172,10 +172,12 @@ end
 # FunctionSxp
 rcopy(s::Ptr{S}) where S<:FunctionSxp = rcopy(Function,s)
 
-# Fallback for LangSxp
-function rcopytype(::Type{RClass{Sym}}, s::Ptr{LangSxp}) where Sym
-    Any
-end
+# LangSxp
+rcopytype(::Type{RClass{:call}}, l::Ptr{LangSxp}) = Expr
+rcopytype(::Type{RClass{Symbol("(")}}, l::Ptr{LangSxp}) = Expr
+rcopytype(::Type{RClass{:formula}}, l::Ptr{LangSxp}) = Formula
+# Fallback
+rcopytype(::Type{RClass{Sym}}, s::Ptr{LangSxp}) where Sym = Any
 
 # Fallback for non SEXP
 rcopy(r) = r
@@ -228,3 +230,6 @@ sexp(d::Associative) = sexp(VecSxp,d)
 
 # Function
 sexp(f::Function) = sexp(ClosSxp, f)
+
+# LangSxp
+sexp(f::Formula) = sexp(LangSxp, f)

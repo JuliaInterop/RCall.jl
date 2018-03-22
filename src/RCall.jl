@@ -7,7 +7,7 @@ using DataArrays
 using CategoricalArrays
 using DataFrames
 using AxisArrays
-
+import StatsModels:Formula
 import DataStructures: OrderedDict
 
 using Compat.Dates
@@ -50,6 +50,7 @@ include("convert/dataarray.jl")
 include("convert/categorical.jl")
 include("convert/datetime.jl")
 include("convert/dataframe.jl")
+include("convert/formula.jl")
 include("convert/nullable.jl")
 include("convert/axisarray.jl")
 include("convert/default.jl")
