@@ -295,9 +295,6 @@ b = RObject(true)
 @test isa(convert(Any, R"list(a=1,b=2)"), RObject)
 @test isa(convert(RObject{}, R"list(a=1,b=2)"), RObject)
 
-#RCall.rlang_formula(parse("a+b"))
-# @test RCall.rlang_formula(:a) == :a
-
 # issue 195
 @test isnull(rcopy(R"list(a=NULL)")[:a])
 
