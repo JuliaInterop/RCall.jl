@@ -14,8 +14,8 @@ using StatsModels
 @test StatsModels.Terms(rcopy(R"y ~ a + b : c : d")) == StatsModels.Terms(@formula y ~ a + b & c & d)
 
 
-@test rcopy(rcall(Symbol("=="), R"y ~ x + (1L | g)", RObject(@formula y ~ x + (1 | g))))
-@test rcopy(rcall(Symbol("=="), R"y ~ x + (1L | g) + (1L | d)", RObject(@formula y ~ x + (1 | g) + (1 | d))))
+@test rcopy(rcall(Symbol("=="), R"y ~ x + (1 | g)", RObject(@formula y ~ x + (1 | g))))
+@test rcopy(rcall(Symbol("=="), R"y ~ x + (1 | g) + (1 | d)", RObject(@formula y ~ x + (1 | g) + (1 | d))))
 @test rcopy(rcall(Symbol("=="), R"y ~ (a + b) * c", RObject(@formula y ~ (a + b) * c)))
 @test rcopy(rcall(Symbol("=="), R"y ~ c * (a + b)", RObject(@formula y ~ c * (a + b))))
 
