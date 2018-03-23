@@ -148,7 +148,9 @@ function __init__()
     validate_libR(libR)
 
     # Check if R already running
-    Rinited = unsafe_load(cglobal((:R_NilValue, libR),Ptr{Void})) != C_NULL
+    # for some reaons, R_NilValue doesn't work on rstudio/linux
+    # https://github.com/Non-Contradiction/JuliaCall/issues/34
+    Rinited = unsafe_load(cglobal((:R_BaseSymbol, libR),Ptr{Void})) != C_NULL
 
     if !Rinited
         initEmbeddedR()
