@@ -1,7 +1,5 @@
 using StatsModels
 
-@test RCall.sexp_formula(:a) == :a
-
 @test StatsModels.Terms(rcopy(R"y ~ x + (1 | g)")) == StatsModels.Terms(@formula y ~ x + (1 | g))
 @test StatsModels.Terms(rcopy(R"y ~ x + (1 | g) + (1 | d)")) == StatsModels.Terms(@formula y ~ x + (1 | g) + (1 | d))
 @test StatsModels.Terms(rcopy(R"y ~ (a + b) * c")) == StatsModels.Terms(@formula y ~ (a + b) * c)
