@@ -1,6 +1,6 @@
 using StatsModels
 
-@test RCall.rlang_formula(:a) == :a
+@test RCall.sexp_formula(:a) == :a
 
 @test StatsModels.Terms(rcopy(R"y ~ x + (1 | g)")) == StatsModels.Terms(@formula y ~ x + (1 | g))
 @test StatsModels.Terms(rcopy(R"y ~ x + (1 | g) + (1 | d)")) == StatsModels.Terms(@formula y ~ x + (1 | g) + (1 | d))
