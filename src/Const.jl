@@ -62,7 +62,7 @@ macro load_const(s)
     :($s.p = unsafe_load(cglobal(($(string(:R_,s)),libR),typeof($s.p))))
 end
 
-function load(Rinited = false)
+function load()
     for constant in (:NaString, :BlankString, :BlankScalarString, :BaseSymbol,
         :BraceSymbol, :Bracket2Symbol, :BracketSymbol, :ClassSymbol, :DeviceSymbol,
         :DimNamesSymbol, :DimSymbol, :DollarSymbol, :DotsSymbol, :DoubleColonSymbol,
@@ -72,9 +72,9 @@ function load(Rinited = false)
         :SourceSymbol, :SpecSymbol, :TripleColonSymbol, :dot_defined, :dot_Method,
         :dot_packageName, :dot_target, :EmptyEnv, :GlobalEnv, :BaseEnv, :BaseNamespace,
         :NilValue, :UnboundValue)
-        if Rinited
+        try
             @eval @load_embedded_const $constant
-        else
+        catch
             @eval @load_const $constant
         end
     end

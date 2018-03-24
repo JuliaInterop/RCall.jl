@@ -153,7 +153,7 @@ function __init__()
     Rinited = try
         unsafe_load(cglobal(:R_NilValue, Ptr{Void})) != C_NULL
     catch
-        false
+        unsafe_load(cglobal((:R_NilValue, libR), Ptr{Void})) != C_NULL
     end
 
     if !Rinited
@@ -163,7 +163,7 @@ function __init__()
     ip = ccall((:Rf_ScalarInteger, libR),Ptr{Void},(Cint,),0)
     voffset[] = ccall((:INTEGER, libR),Ptr{Void},(Ptr{Void},),ip) - ip
 
-    Const.load(Rinited)
+    Const.load()
 
     # set up function callbacks
     setup_callbacks()
