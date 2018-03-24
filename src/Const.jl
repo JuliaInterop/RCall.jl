@@ -54,28 +54,22 @@ const BaseNamespace      = RObject{EnvSxp}()
 const NilValue           = RObject{NilSxp}()
 const UnboundValue       = RObject{SxpHead}()
 
-macro load_embedded_const(s)
-    :($s.p = unsafe_load(cglobal($(string(:R_,s)),typeof($s.p))))
-end
-
-macro load_const(s)
-    :($s.p = unsafe_load(cglobal(($(string(:R_,s)),libR),typeof($s.p))))
-end
-
 function load()
-    for constant in (:NaString, :BlankString, :BlankScalarString, :BaseSymbol,
-        :BraceSymbol, :Bracket2Symbol, :BracketSymbol, :ClassSymbol, :DeviceSymbol,
-        :DimNamesSymbol, :DimSymbol, :DollarSymbol, :DotsSymbol, :DoubleColonSymbol,
-        :DropSymbol, :LastvalueSymbol, :LevelsSymbol, :MissingArg, :ModeSymbol,
-        :NaRmSymbol, :NameSymbol, :NamesSymbol, :NamespaceEnvSymbol, :PackageSymbol,
-        :PreviousSymbol, :QuoteSymbol, :RowNamesSymbol, :SeedsSymbol, :SortListSymbol,
-        :SourceSymbol, :SpecSymbol, :TripleColonSymbol, :dot_defined, :dot_Method,
-        :dot_packageName, :dot_target, :EmptyEnv, :GlobalEnv, :BaseEnv, :BaseNamespace,
-        :NilValue, :UnboundValue)
-        try
-            @eval @load_embedded_const $constant
-        catch
-            @eval @load_const $constant
+    for s in (:NaString, :BlankString, :BlankScalarString, :BaseSymbol,
+            :BraceSymbol, :Bracket2Symbol, :BracketSymbol, :ClassSymbol, :DeviceSymbol,
+            :DimNamesSymbol, :DimSymbol, :DollarSymbol, :DotsSymbol, :DoubleColonSymbol,
+            :DropSymbol, :LastvalueSymbol, :LevelsSymbol, :MissingArg, :ModeSymbol,
+            :NaRmSymbol, :NameSymbol, :NamesSymbol, :NamespaceEnvSymbol, :PackageSymbol,
+            :PreviousSymbol, :QuoteSymbol, :RowNamesSymbol, :SeedsSymbol, :SortListSymbol,
+            :SourceSymbol, :SpecSymbol, :TripleColonSymbol, :dot_defined, :dot_Method,
+            :dot_packageName, :dot_target, :EmptyEnv, :GlobalEnv, :BaseEnv, :BaseNamespace,
+            :NilValue, :UnboundValue)
+        @eval begin
+            try
+                $s.p = unsafe_load(cglobal($(string(:R_,s)), typeof($s.p)))
+            catch
+                $s.p = unsafe_load(cglobal(($(string(:R_,s)), libR),typeof($s.p)))
+            end
         end
     end
 end
