@@ -54,57 +54,30 @@ const BaseNamespace      = RObject{EnvSxp}()
 const NilValue           = RObject{NilSxp}()
 const UnboundValue       = RObject{SxpHead}()
 
+macro load_embedded_const(s)
+    :($s.p = unsafe_load(cglobal($(string(:R_,s)),typeof($s.p))))
+end
+
 macro load_const(s)
     :($s.p = unsafe_load(cglobal(($(string(:R_,s)),libR),typeof($s.p))))
 end
 
-function load()
-    @load_const NaString
-    @load_const BlankString
-
-    @load_const BlankScalarString
-
-    @load_const BaseSymbol
-    @load_const BraceSymbol
-    @load_const Bracket2Symbol
-    @load_const BracketSymbol
-    @load_const ClassSymbol
-    @load_const DeviceSymbol
-    @load_const DimNamesSymbol
-    @load_const DimSymbol
-    @load_const DollarSymbol
-    @load_const DotsSymbol
-    @load_const DoubleColonSymbol
-    @load_const DropSymbol
-    @load_const LastvalueSymbol
-    @load_const LevelsSymbol
-    @load_const MissingArg
-    @load_const ModeSymbol
-    @load_const NaRmSymbol
-    @load_const NameSymbol
-    @load_const NamesSymbol
-    @load_const NamespaceEnvSymbol
-    @load_const PackageSymbol
-    @load_const PreviousSymbol
-    @load_const QuoteSymbol
-    @load_const RowNamesSymbol
-    @load_const SeedsSymbol
-    @load_const SortListSymbol
-    @load_const SourceSymbol
-    @load_const SpecSymbol
-    @load_const TripleColonSymbol
-    @load_const dot_defined
-    @load_const dot_Method
-    @load_const dot_packageName
-    @load_const dot_target
-
-    @load_const EmptyEnv
-    @load_const GlobalEnv
-    @load_const BaseEnv
-    @load_const BaseNamespace
-
-    @load_const NilValue
-    @load_const UnboundValue
+function load(Rinited = false)
+    for constant in (:NaString, :BlankString, :BlankScalarString, :BaseSymbol,
+        :BraceSymbol, :Bracket2Symbol, :BracketSymbol, :ClassSymbol, :DeviceSymbol,
+        :DimNamesSymbol, :DimSymbol, :DollarSymbol, :DotsSymbol, :DoubleColonSymbol,
+        :DropSymbol, :LastvalueSymbol, :LevelsSymbol, :MissingArg, :ModeSymbol,
+        :NaRmSymbol, :NameSymbol, :NamesSymbol, :NamespaceEnvSymbol, :PackageSymbol,
+        :PreviousSymbol, :QuoteSymbol, :RowNamesSymbol, :SeedsSymbol, :SortListSymbol,
+        :SourceSymbol, :SpecSymbol, :TripleColonSymbol, :dot_defined, :dot_Method,
+        :dot_packageName, :dot_target, :EmptyEnv, :GlobalEnv, :BaseEnv, :BaseNamespace,
+        :NilValue, :UnboundValue)
+        if Rinited
+            @eval @load_embedded_const $constant
+        else
+            @eval @load_const $constant
+        end
+    end
 end
 
 end # module

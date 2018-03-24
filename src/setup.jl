@@ -148,9 +148,13 @@ function __init__()
     validate_libR(libR)
 
     # Check if R already running
-    # for some reaons, R_NilValue doesn't work on rstudio/linux
+    # for some reaons, cglobal((:R_NilValue, libR)) doesn't work on rstudio/linux
     # https://github.com/Non-Contradiction/JuliaCall/issues/34
-    Rinited = unsafe_load(cglobal((:R_BaseSymbol, libR),Ptr{Void})) != C_NULL
+    Rinited = try
+        unsafe_load(cglobal(:R_NilValue, Ptr{Void})) != C_NULL
+    catch
+        false
+    end
 
     if !Rinited
         initEmbeddedR()
@@ -159,7 +163,7 @@ function __init__()
     ip = ccall((:Rf_ScalarInteger, libR),Ptr{Void},(Cint,),0)
     voffset[] = ccall((:INTEGER, libR),Ptr{Void},(Ptr{Void},),ip) - ip
 
-    Const.load()
+    Const.load(Rinited)
 
     # set up function callbacks
     setup_callbacks()
