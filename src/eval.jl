@@ -1,9 +1,10 @@
-"""
-A wrapper of R_ToplevelExec. It evaluates a given function with argument `data` at R top level.
-"""
-function toplevelExec(fun::Function, data::Tuple)
-    fptr = cfunction((dptr) -> fun(unsafe_pointer_to_objref(dptr)...), Void, (Ptr{Void},))
-    ccall((:R_ToplevelExec, libR), Cint, (Ptr{Void}, Ptr{Void}), fptr, pointer_from_objref(data))
+function make_error_handler(err)
+    function error_handler(condition, a)
+        protect(condition)
+        ret = err(condition, unsafe_pointer_to_objref(a)...)
+        unprotect(1)
+        convert(Ptr{UnknownSxp}, ret)
+    end
 end
 
 """
@@ -15,9 +16,7 @@ function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
     fptr = cfunction(
         (a) -> convert(Ptr{UnknownSxp}, f(unsafe_pointer_to_objref(a)...)),
         Ptr{UnknownSxp}, (Ptr{Void}, ))
-    eptr = cfunction(
-        (cond, a) -> convert(Ptr{UnknownSxp}, err(cond, unsafe_pointer_to_objref(a)...)),
-        Ptr{UnknownSxp}, (Ptr{UnknownSxp}, Ptr{Void}))
+    eptr = cfunction(make_error_handler(err), Ptr{UnknownSxp}, (Ptr{UnknownSxp}, Ptr{Void}))
     ret = ccall((:R_tryCatchError, libR), Ptr{UnknownSxp},
           (Ptr{Void}, Ptr{Void}, Ptr{Void}, Ptr{Void}),
           fptr, pointer_from_objref(fargs),
@@ -26,7 +25,7 @@ function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
 end
 
 function tryCatchError(f::Function, fargs::Tuple)
-    tryCatchError(f, fargs, (c, a) -> sexp(c), (C_NULL,))
+    tryCatchError(f, fargs, (c, a) -> (c), (C_NULL,))
 end
 
 "A pure julia wrapper of R_ParseVector"
