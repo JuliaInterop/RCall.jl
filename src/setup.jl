@@ -150,10 +150,10 @@ function __init__()
     # Check if R already running
     # for some reaons, cglobal((:R_NilValue, libR)) doesn't work on rstudio/linux
     # https://github.com/Non-Contradiction/JuliaCall/issues/34
-    Rinited = try
-        unsafe_load(cglobal(:R_NilValue, Ptr{Void})) != C_NULL
+    Rinited, from_libR = try
+        unsafe_load(cglobal(:R_NilValue, Ptr{Void})) != C_NULL, false
     catch
-        unsafe_load(cglobal((:R_NilValue, libR), Ptr{Void})) != C_NULL
+        unsafe_load(cglobal((:R_NilValue, libR), Ptr{Void})) != C_NULL, true
     end
 
     if !Rinited
@@ -163,7 +163,7 @@ function __init__()
     ip = ccall((:Rf_ScalarInteger, libR),Ptr{Void},(Cint,),0)
     voffset[] = ccall((:INTEGER, libR),Ptr{Void},(Ptr{Void},),ip) - ip
 
-    Const.load()
+    Const.load(from_libR)
 
     # set up function callbacks
     setup_callbacks()

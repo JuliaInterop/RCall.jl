@@ -54,7 +54,7 @@ const BaseNamespace      = RObject{EnvSxp}()
 const NilValue           = RObject{NilSxp}()
 const UnboundValue       = RObject{SxpHead}()
 
-function load()
+function load(from_libR::Bool=true)
     for s in (:NaString, :BlankString, :BlankScalarString, :BaseSymbol,
             :BraceSymbol, :Bracket2Symbol, :BracketSymbol, :ClassSymbol, :DeviceSymbol,
             :DimNamesSymbol, :DimSymbol, :DollarSymbol, :DotsSymbol, :DoubleColonSymbol,
@@ -64,11 +64,13 @@ function load()
             :SourceSymbol, :SpecSymbol, :TripleColonSymbol, :dot_defined, :dot_Method,
             :dot_packageName, :dot_target, :EmptyEnv, :GlobalEnv, :BaseEnv, :BaseNamespace,
             :NilValue, :UnboundValue)
-        @eval begin
-            try
-                $s.p = unsafe_load(cglobal($(string(:R_,s)), typeof($s.p)))
-            catch
+        if from_libR
+            @eval begin
                 $s.p = unsafe_load(cglobal(($(string(:R_,s)), libR),typeof($s.p)))
+            end
+        else
+            @eval begin
+                $s.p = unsafe_load(cglobal($(string(:R_,s)), typeof($s.p)))
             end
         end
     end
