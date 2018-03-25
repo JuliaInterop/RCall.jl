@@ -35,19 +35,19 @@ julia&gt; @rput foo bar
 R&gt; foo + bar
 [1] 6</code></pre><h2><a class="nav-anchor" id="@R_str-string-macro-1" href="#@R_str-string-macro-1">@R_str string macro</a></h2><p>Another way to use RCall is the <a href="internal.html#RCall.@R_str-Tuple{Any}"><code>R&quot;&quot;</code></a> string macro, it is especially useful in script files.</p><pre><code class="language-julia-repl">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  0.31413399 -0.60243354 -0.48665807 -0.25730866 -0.83973547 -0.44819394
- [7] -0.60462493  1.55225676 -1.13134178  0.02341988</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="internal.html#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
+ [1]  1.39531130  0.58218089  0.07814799 -1.15173291  1.18399141  1.26113189
+ [7] -1.04232753  1.07916031 -1.26323279  0.04434923</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="internal.html#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
- -0.118855
- -0.172691
- -2.03165
-  0.32225
- -0.399071
-  0.528347
-  0.297902
- -1.37683
- -0.418549
-  2.60307
+ -0.208136
+ -1.11682
+  0.774686
+ -0.0330968
+ -0.259377
+  0.770408
+  1.85802
+ -0.419305
+  1.00481
+  0.798988
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
@@ -55,13 +55,13 @@ RCall.RObject{RCall.VecSxp}
 	One Sample t-test
 
 data:  `#JL`$x
-t = -0.19714, df = 9, p-value = 0.8481
+t = 1.1513, df = 9, p-value = 0.2793
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.9556758  0.8024587
+ -0.3058727  0.9399082
 sample estimates:
-  mean of x
--0.07660853</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
+mean of x
+0.3170177</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
 RCall.RObject{RCall.VecSxp}
 $par
 [1] -1.56343
