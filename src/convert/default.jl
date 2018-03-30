@@ -177,7 +177,7 @@ rcopytype(::Type{RClass{:call}}, l::Ptr{LangSxp}) = Expr
 rcopytype(::Type{RClass{Symbol("(")}}, l::Ptr{LangSxp}) = Expr
 rcopytype(::Type{RClass{:formula}}, l::Ptr{LangSxp}) = Formula
 # Fallback
-rcopytype(::Type{RClass{Sym}}, s::Ptr{LangSxp}) where Sym = Any
+rcopytype(::Type{RClass{Sym}}, s::Ptr{LangSxp}) where Sym = RObject
 
 # Fallback for non SEXP
 rcopy(r) = r

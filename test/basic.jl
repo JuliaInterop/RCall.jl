@@ -156,7 +156,7 @@ data(iris)
 model <- lm(Sepal.Width ~ Petal.Length, iris)
 """
 model = rcopy(R"model")
-@test typeof(model[:call]) <: RObject
+@test typeof(model[:call]) <: Expr
 
 # getclass
 @test rcopy(getclass(reval("1"))) == "numeric"
