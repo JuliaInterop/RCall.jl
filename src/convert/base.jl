@@ -187,11 +187,6 @@ function rcopy(::Type{Function}, r::RObject{S}) where S<:FunctionSxp
     (args...) -> rcopy(rcall_p(r,args...))
 end
 
-# LangSxp
-function rcopy(::Type{Any}, s::Ptr{S}) where S<:LangSxp
-    RObject(s)
-end
-
 
 # conversion from Base Julia types
 
