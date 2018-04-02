@@ -54,25 +54,111 @@ const BaseNamespace      = RObject{EnvSxp}()
 const NilValue           = RObject{NilSxp}()
 const UnboundValue       = RObject{SxpHead}()
 
+macro load_const(s)
+    :($s.p = unsafe_load(cglobal(($(string(:R_,s)),libR),typeof($s.p))))
+end
+
+macro load_const_embedded(s)
+    :($s.p = unsafe_load(cglobal($(string(:R_,s)),typeof($s.p))))
+end
+
 function load(from_libR::Bool=true)
-    for s in (:NaString, :BlankString, :BlankScalarString, :BaseSymbol,
-            :BraceSymbol, :Bracket2Symbol, :BracketSymbol, :ClassSymbol, :DeviceSymbol,
-            :DimNamesSymbol, :DimSymbol, :DollarSymbol, :DotsSymbol, :DoubleColonSymbol,
-            :DropSymbol, :LastvalueSymbol, :LevelsSymbol, :MissingArg, :ModeSymbol,
-            :NaRmSymbol, :NameSymbol, :NamesSymbol, :NamespaceEnvSymbol, :PackageSymbol,
-            :PreviousSymbol, :QuoteSymbol, :RowNamesSymbol, :SeedsSymbol, :SortListSymbol,
-            :SourceSymbol, :SpecSymbol, :TripleColonSymbol, :dot_defined, :dot_Method,
-            :dot_packageName, :dot_target, :EmptyEnv, :GlobalEnv, :BaseEnv, :BaseNamespace,
-            :NilValue, :UnboundValue)
-        if from_libR
-            @eval begin
-                $s.p = unsafe_load(cglobal(($(string(:R_,s)), libR),typeof($s.p)))
-            end
-        else
-            @eval begin
-                $s.p = unsafe_load(cglobal($(string(:R_,s)), typeof($s.p)))
-            end
-        end
+    # as it seems that @eval cannot be used in __init__()
+    # we need to duplicate the following block twice
+    if from_libR
+        @load_const NaString
+        @load_const BlankString
+
+        @load_const BlankScalarString
+
+        @load_const BaseSymbol
+        @load_const BraceSymbol
+        @load_const Bracket2Symbol
+        @load_const BracketSymbol
+        @load_const ClassSymbol
+        @load_const DeviceSymbol
+        @load_const DimNamesSymbol
+        @load_const DimSymbol
+        @load_const DollarSymbol
+        @load_const DotsSymbol
+        @load_const DoubleColonSymbol
+        @load_const DropSymbol
+        @load_const LastvalueSymbol
+        @load_const LevelsSymbol
+        @load_const MissingArg
+        @load_const ModeSymbol
+        @load_const NaRmSymbol
+        @load_const NameSymbol
+        @load_const NamesSymbol
+        @load_const NamespaceEnvSymbol
+        @load_const PackageSymbol
+        @load_const PreviousSymbol
+        @load_const QuoteSymbol
+        @load_const RowNamesSymbol
+        @load_const SeedsSymbol
+        @load_const SortListSymbol
+        @load_const SourceSymbol
+        @load_const SpecSymbol
+        @load_const TripleColonSymbol
+        @load_const dot_defined
+        @load_const dot_Method
+        @load_const dot_packageName
+        @load_const dot_target
+
+        @load_const EmptyEnv
+        @load_const GlobalEnv
+        @load_const BaseEnv
+        @load_const BaseNamespace
+
+        @load_const NilValue
+        @load_const UnboundValue
+    else
+        @load_const_embedded NaString
+        @load_const_embedded BlankString
+
+        @load_const_embedded BlankScalarString
+
+        @load_const_embedded BaseSymbol
+        @load_const_embedded BraceSymbol
+        @load_const_embedded Bracket2Symbol
+        @load_const_embedded BracketSymbol
+        @load_const_embedded ClassSymbol
+        @load_const_embedded DeviceSymbol
+        @load_const_embedded DimNamesSymbol
+        @load_const_embedded DimSymbol
+        @load_const_embedded DollarSymbol
+        @load_const_embedded DotsSymbol
+        @load_const_embedded DoubleColonSymbol
+        @load_const_embedded DropSymbol
+        @load_const_embedded LastvalueSymbol
+        @load_const_embedded LevelsSymbol
+        @load_const_embedded MissingArg
+        @load_const_embedded ModeSymbol
+        @load_const_embedded NaRmSymbol
+        @load_const_embedded NameSymbol
+        @load_const_embedded NamesSymbol
+        @load_const_embedded NamespaceEnvSymbol
+        @load_const_embedded PackageSymbol
+        @load_const_embedded PreviousSymbol
+        @load_const_embedded QuoteSymbol
+        @load_const_embedded RowNamesSymbol
+        @load_const_embedded SeedsSymbol
+        @load_const_embedded SortListSymbol
+        @load_const_embedded SourceSymbol
+        @load_const_embedded SpecSymbol
+        @load_const_embedded TripleColonSymbol
+        @load_const_embedded dot_defined
+        @load_const_embedded dot_Method
+        @load_const_embedded dot_packageName
+        @load_const_embedded dot_target
+
+        @load_const_embedded EmptyEnv
+        @load_const_embedded GlobalEnv
+        @load_const_embedded BaseEnv
+        @load_const_embedded BaseNamespace
+
+        @load_const_embedded NilValue
+        @load_const_embedded UnboundValue
     end
 end
 
