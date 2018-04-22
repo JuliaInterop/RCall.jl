@@ -31,7 +31,7 @@ try
         end
         libR = isempty(Rhome) || !isdir(Rhome) ? "" : locate_libR(Rhome, false)
         if isempty(libR)
-            if empty(get(ENV, "R_HOME", ""))
+            if get(ENV, "R_HOME", "") == "*"
                 different = "  To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\")."
                 info("Installing R via Conda.$different")
                 Conda.add_channel("r")

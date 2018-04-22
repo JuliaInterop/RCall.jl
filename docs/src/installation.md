@@ -32,12 +32,8 @@ ENV["PATH"]="....directory of R executable..."
 Pkg.build("RCall")
 ```
 
-You can also set `R_HOME` to `"*"` (or any invalid path) to force RCall to use
-its own Conda installation of R:
-```julia
-ENV["R_HOME"]="*"
-Pkg.build("RCall") # will install R via Conda
-```
+When `R HOME` doesn't return a valid R library or `R_HOME` is set to `"*"`, RCall will use its own Conda installation of R.
+
 
 Should you experience problems with any of these methods, please [open an issue](https://github.com/JuliaStats/RCall.jl/issues/new).
 
