@@ -39,6 +39,10 @@ end
 Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
 """
 dataptr(s::Ptr{S}) where S<:VectorSxp = convert(Ptr{eltype(S)}, s+voffset[])
+for (S, J) in ((:LglSxp, "LOGICAL"), (:IntSxp, "INTEGER"),
+                (:RealSxp, "REAL"), (:CplxSxp, "COMPLEX"), (:RawSxp, "RAW"))
+    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Void}, (Ptr{SxpPtrInfo},), s))
+end
 
 """
 Represent the contents of a VectorSxp type as a `Vector`.
