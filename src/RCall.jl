@@ -7,7 +7,7 @@ using DataArrays
 using CategoricalArrays
 using DataFrames
 using AxisArrays
-import StatsModels:Formula
+import StatsModels: Formula, @formula
 import DataStructures: OrderedDict
 
 using Compat.Dates
