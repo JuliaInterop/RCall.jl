@@ -32,7 +32,9 @@ end
 
 function rcopy(::Type{Formula}, l::Ptr{LangSxp})
     ex_orig = rcopy(Expr, l)
-    @eval @formula $ex_orig
+    ex = parse!(copy(ex_orig))
+    lhs, rhs = ex.args[2:3]
+    Formula(ex_orig, ex, lhs, rhs)
 end
 
 
