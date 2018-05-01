@@ -62,6 +62,12 @@ The following will update R on recent versions of Ubuntu:
 
 If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set `R_HOME` or your `PATH` as described above before running `Pkg.build("RCall")` in order for the build script to find your R installation.
 
+For some environments, you might also need to specify `LD_LIBRARY_PATH`
+```sh
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:`R RHOME`/lib"
+```
+
+
 ## Updating R
 
 If you have updated your R installation, you may need to re-run `Pkg.build("RCall")`
