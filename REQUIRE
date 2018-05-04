@@ -6,6 +6,6 @@ DataArrays 0.7.0
 CategoricalArrays 0.3.0
 AxisArrays 0.0.6
 Compat 0.34.0
-StatsModels 0.2.0
+StatsModels 0.2.0 0.2.4
 Conda
 @windows WinReg 0.2.0
