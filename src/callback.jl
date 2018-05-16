@@ -36,8 +36,8 @@ function julia_extptr_callback(p::Ptr{ListSxp})
 
         # julia function pointer
         f_sxp = car(l)::Ptr{ExtPtrSxp}
-        f_sxprec = unsafe_load(f_sxp)
-        f = unsafe_pointer_to_objref(f_sxprec.ptr)
+        ptr = ccall((:R_ExternalPtrAddr, libR), Ptr{Void}, (Ptr{ExtPtrSxp},), f_sxp)
+        f = unsafe_pointer_to_objref(ptr)
         l = cdr(l)
 
         # # extract arguments
