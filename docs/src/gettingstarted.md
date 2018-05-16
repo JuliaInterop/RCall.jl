@@ -17,6 +17,8 @@ RCall provides multiple ways to allow R interacting with Julia.
 - [`@rput`](@ref) and [`@rget`](@ref) macros
 - `R""` string macro
 - RCall API: [`reval`](@ref), [`rcall`](@ref) and [`rcopy`](@ref) etc.
+- `@rlibrary` macro
+
 
 ## R REPL mode
 The R REPL mode allows real time switching between the Julia prompt and R prompt. Press `$` to activate the R REPL mode and the R prompt will be shown. (Press `backspace` to leave R REPL mode in case you did not know.)
@@ -156,4 +158,25 @@ Converters and Constructors could also be used specifically to yield the desired
 ```@repl 1
 convert(Array{Float64}, R"c(1,2)")
 Float64(R"1+3")
+```
+
+
+## `@rlibrary` macro
+
+This micro loads all exported functions/objects of an R package to the current module.
+
+```@repl 1
+@rlibrary boot
+city = rcopy(R"boot::city")  # get some data
+ratio(d, w) = sum(d[:x] .* w)/sum(d[:u] .* w)
+b = boot(city, ratio, R = 100, stype = "w");
+rcall(:summary, b[:t])
+```
+
+Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The `R""` string macro is more recommended for efficiency.
+
+Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,
+
+```
+sum([1, 2, 3], var"rm.na" = True)
 ```
