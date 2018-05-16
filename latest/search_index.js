@@ -685,7 +685,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "Base.getindex",
     "category": "method",
-    "text": "String indexing finds the first element with the matching name\n\n\n\n"
+    "text": "Set element of a VectorSxp by a label.\n\n\n\n"
 },
 
 {
@@ -694,14 +694,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Base.getindex",
     "category": "method",
     "text": "extract the i-th element of a PairListSxp\n\n\n\n"
-},
-
-{
-    "location": "internal.html#Base.getindex-Union{Tuple{Ptr{S},Integer}, Tuple{S}} where S<:RCall.VectorAtomicSxp",
-    "page": "Internal",
-    "title": "Base.getindex",
-    "category": "method",
-    "text": "Indexing into VectorSxp types uses Julia indexing into the vec result, except for StrSxp and the VectorListSxp types, which must apply sexp to the Ptr{Void} obtained by indexing into the vec result.\n\n\n\n"
 },
 
 {
@@ -790,14 +782,6 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.bound",
     "category": "method",
     "text": "The R NAMED property, represented by 2 bits in the info field. This can take values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more symbols. See http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.dataptr-Union{Tuple{Ptr{S}}, Tuple{S}} where S<:RCall.VectorSxp",
-    "page": "Internal",
-    "title": "RCall.dataptr",
-    "category": "method",
-    "text": "Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.\n\n\n\n"
 },
 
 {
