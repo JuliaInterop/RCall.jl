@@ -31,7 +31,10 @@ function rcopy(::Type{Expr}, l::Ptr{LangSxp})
 end
 
 function rcopy(::Type{Formula}, l::Ptr{LangSxp})
-    Formula(rcopy(l[2]), rcopy(l[3]))
+    ex_orig = rcopy(Expr, l)
+    ex = parse!(copy(ex_orig))
+    lhs, rhs = ex.args[2:3]
+    Formula(ex_orig, ex, lhs, rhs)
 end
 
 
@@ -57,7 +60,7 @@ sexp_formula(n::Number) = sexp(n)
 
 # R formula objects
 function sexp(::Type{LangSxp}, f::Formula)
-    s = protect(rlang_p(:~, sexp_formula(f.lhs), sexp_formula(f.rhs)))
+    s = protect(sexp_formula(f.ex_orig == :() ? f.ex : f.ex_orig))
     try
         setattrib!(s, Const.ClassSymbol, sexp("formula"))
         setattrib!(s, ".Environment", Const.GlobalEnv)
