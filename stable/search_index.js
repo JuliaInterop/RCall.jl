@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Other methods",
     "category": "section",
-    "text": "If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set R_HOME or your PATH as described above before running Pkg.build(\"RCall\") in order for the build script to find your R installation."
+    "text": "If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set R_HOME or your PATH as described above before running Pkg.build(\"RCall\") in order for the build script to find your R installation.For some environments, you might also need to specify LD_LIBRARY_PATHexport LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:`R RHOME`/lib\""
 },
 
 {
@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "Several Ways to use RCall",
     "category": "section",
-    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput and @rget macros\nR\"\" string macro\nRCall API: reval, rcall and rcopy etc."
+    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput and @rget macros\nR\"\" string macro\nRCall API: reval, rcall and rcopy etc.\n@rlibrary macro"
 },
 
 {
@@ -150,6 +150,14 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall API",
     "category": "section",
     "text": "The reval function evaluates any given input string as R code in the R environment. The returned result is an RObject object.jmtcars = reval(\"mtcars\");\nnames(jmtcars)\njmtcars[:mpg]\ntypeof(jmtcars)The rcall function is used to construct function calls.rcall(:dim, jmtcars)The arguments will be implicitly converted to RObject upon evaluation.rcall(:sum, Float64[1.0, 4.0, 6.0])The rcopy function converts RObjects to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:rcopy(R\"c(1)\")\nrcopy(R\"c(1, 2)\")\nrcopy(R\"list(1, \'zz\')\")\nrcopy(R\"list(a=1, b=\'zz\')\")It is possible to force a specific conversion by passing the output type as the first argument:rcopy(Array{Int}, R\"c(1,2)\")Converters and Constructors could also be used specifically to yield the desired type.convert(Array{Float64}, R\"c(1,2)\")\nFloat64(R\"1+3\")"
+},
+
+{
+    "location": "gettingstarted.html#@rlibrary-macro-1",
+    "page": "Getting Started",
+    "title": "@rlibrary macro",
+    "category": "section",
+    "text": "This micro loads all exported functions/objects of an R package to the current module.@rlibrary boot\ncity = rcopy(R\"boot::city\")  # get some data\nratio(d, w) = sum(d[:x] .* w)/sum(d[:u] .* w)\nb = boot(city, ratio, R = 100, stype = \"w\");\nrcall(:summary, b[:t])Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The R\"\" string macro is more recommended for efficiency.Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,sum([1, 2, 3], var\"rm.na\" = True)"
 },
 
 {
@@ -685,7 +693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "Base.getindex",
     "category": "method",
-    "text": "String indexing finds the first element with the matching name\n\n\n\n"
+    "text": "Set element of a VectorSxp by a label.\n\n\n\n"
 },
 
 {
@@ -694,14 +702,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Base.getindex",
     "category": "method",
     "text": "extract the i-th element of a PairListSxp\n\n\n\n"
-},
-
-{
-    "location": "internal.html#Base.getindex-Union{Tuple{Ptr{S},Integer}, Tuple{S}} where S<:RCall.VectorAtomicSxp",
-    "page": "Internal",
-    "title": "Base.getindex",
-    "category": "method",
-    "text": "Indexing into VectorSxp types uses Julia indexing into the vec result, except for StrSxp and the VectorListSxp types, which must apply sexp to the Ptr{Void} obtained by indexing into the vec result.\n\n\n\n"
 },
 
 {
@@ -790,14 +790,6 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.bound",
     "category": "method",
     "text": "The R NAMED property, represented by 2 bits in the info field. This can take values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more symbols. See http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.dataptr-Union{Tuple{Ptr{S}}, Tuple{S}} where S<:RCall.VectorSxp",
-    "page": "Internal",
-    "title": "RCall.dataptr",
-    "category": "method",
-    "text": "Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.\n\n\n\n"
 },
 
 {
