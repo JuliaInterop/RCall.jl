@@ -33,7 +33,9 @@ rcopy(::Type{T}, ::Ptr{NilSxp}) where T = Nullable()
 rcopy(::Type{T}, ::Ptr{NilSxp}) where T<:AbstractArray = T()
 
 # SymSxp
-rcopy(::Type{T},s::Ptr{SymSxp}) where T<:Union{Symbol,AbstractString} = rcopy(T, sexp(unsafe_load(s).name))
+function rcopy(::Type{T},s::Ptr{SymSxp}) where T<:Union{Symbol,AbstractString}
+    rcopy(T, ccall((:PRINTNAME, libR), Ptr{CharSxp}, (Ptr{SymSxp},), s))
+end
 
 # CharSxp
 rcopy(::Type{T},s::Ptr{CharSxp}) where T<:AbstractString = convert(T, String(unsafe_vec(s)))
