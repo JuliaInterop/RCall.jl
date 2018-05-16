@@ -42,9 +42,9 @@ build_script:
   - C:\projects\julia\bin\julia -e "versioninfo();
       Pkg.clone(pwd(), \"RCall\"); Pkg.build(\"RCall\")"
 
-test_script:
-  - C:\projects\julia\bin\julia --check-bounds=yes -e "Pkg.test(\"RCall\")"
+# test_script:
+  # - C:\projects\julia\bin\julia --check-bounds=yes -e "Pkg.test(\"RCall\")"
 
 on_finish:
 # uncomment to enable RDP to Appveyor
-# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
