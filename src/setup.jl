@@ -1,5 +1,4 @@
 const Rembedded = Ref{Bool}(false)
-const voffset = Ref{UInt}()
 
 @static if Compat.Sys.iswindows()
     import WinReg
@@ -161,7 +160,6 @@ function __init__()
     end
 
     ip = ccall((:Rf_ScalarInteger, libR),Ptr{Void},(Cint,),0)
-    voffset[] = ccall((:INTEGER, libR),Ptr{Void},(Ptr{Void},),ip) - ip
 
     Const.load(from_libR)
 

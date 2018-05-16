@@ -38,7 +38,10 @@ function rcopy(::Type{T},s::Ptr{SymSxp}) where T<:Union{Symbol,AbstractString}
 end
 
 # CharSxp
-rcopy(::Type{T},s::Ptr{CharSxp}) where T<:AbstractString = convert(T, String(unsafe_vec(s)))
+function rcopy(::Type{T},s::Ptr{CharSxp}) where T<:AbstractString
+    c = ccall((:R_CHAR, libR), Ptr{Cchar}, (Ptr{CharSxp},), s)
+    convert(T, unsafe_string(c))
+end
 rcopy(::Type{Symbol},s::Ptr{CharSxp}) = Symbol(rcopy(AbstractString,s))
 rcopy(::Type{Int}, s::Ptr{CharSxp}) = parse(Int, rcopy(s))
 

@@ -35,13 +35,9 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
     end
 end
 
-"""
-Pointer to start of the data array in a SEXPREC. Corresponds to DATAPTR C macro.
-"""
-dataptr(s::Ptr{S}) where S<:VectorSxp = convert(Ptr{eltype(S)}, s+voffset[])
 for (S, J) in ((:LglSxp, "LOGICAL"), (:IntSxp, "INTEGER"),
                 (:RealSxp, "REAL"), (:CplxSxp, "COMPLEX"), (:RawSxp, "RAW"))
-    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Void}, (Ptr{SxpPtrInfo},), s))
+    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Void}, (Ptr{UnknownSxp},), s))
 end
 
 """
@@ -78,21 +74,24 @@ next(r::RObject{NilSxp},state) = (r, state)
 done(r::RObject{NilSxp},state) = true
 
 
-"""
-Indexing into `VectorSxp` types uses Julia indexing into the `vec` result,
-except for `StrSxp` and the `VectorListSxp` types, which must apply `sexp`
-to the `Ptr{Void}` obtained by indexing into the `vec` result.
-"""
-getindex(s::Ptr{S}, I::Integer) where S<:VectorAtomicSxp = getindex(unsafe_vec(s),I)
-getindex(s::Ptr{S}, I::Integer...) where S<:VectorAtomicSxp = getindex(unsafe_array(s),I...)
-getindex(s::Ptr{S}, I::AbstractVector) where S<:VectorAtomicSxp = getindex(unsafe_vec(s),I)
+# VectorSxp
 
-getindex(s::Ptr{S}, I::Integer) where S<:VectorListSxp = sexp(getindex(unsafe_vec(s),I))
-getindex(s::Ptr{S}, I::Integer...) where S<:VectorListSxp = sexp(getindex(unsafe_array(s),I...))
-getindex(s::Ptr{S}, I::AbstractVector) where S<:VectorListSxp = map(sexp, getindex(unsafe_vec(s),I))
+getindex(r::RObject{S}, I...) where S<:VectorSxp = getindex(sexp(r), I...)
+getindex(r::RObject{S}, I::AbstractArray) where S<:VectorSxp = getindex(sexp(r), I)
+setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
+setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
+setindex!(r::RObject{S}, ::Nullable{Union{}}, keys...) where S<:VectorSxp = setindex!(sexp(r), sexp(Const.NilValue), keys...)
+
+start(s::Ptr{S}) where S<:VectorSxp = 0
+next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
+done(s::Ptr{S},state) where S<:VectorSxp = state ≥ length(s)
+
+start(s::RObject{S}) where S<:VectorSxp = start(s.p)
+next(s::RObject{S},state) where S<:VectorSxp = next(s.p, state)
+done(s::RObject{S},state) where S<:VectorSxp = done(s.p, state)
 
 """
-String indexing finds the first element with the matching name
+Set element of a VectorSxp by a label.
 """
 function getindex(s::Ptr{S}, label::AbstractString) where S<:VectorSxp
     ls = getnames(s)
@@ -105,39 +104,6 @@ function getindex(s::Ptr{S}, label::AbstractString) where S<:VectorSxp
 end
 getindex(s::Ptr{S}, label::Symbol) where S<:VectorSxp = getindex(s,string(label))
 
-getindex(r::RObject{S}, I...) where S<:VectorAtomicSxp = getindex(sexp(r), I...)
-getindex(r::RObject{S}, I::AbstractArray) where S<:VectorAtomicSxp = getindex(sexp(r), I)
-
-getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
-getindex(r::RObject{S}, I::AbstractArray) where S<:VectorListSxp = map(RObject,getindex(sexp(r),I))
-
-
-function setindex!(s::Ptr{S}, value, I::Integer...) where S<:VectorAtomicSxp
-    setindex!(unsafe_array(s), value, I...)
-end
-function setindex!(s::Ptr{S}, value, I::Integer) where S<:VectorAtomicSxp
-    setindex!(unsafe_vec(s), value, I)
-end
-function setindex!(s::Ptr{StrSxp}, value::Ptr{CharSxp}, key::Integer)
-    1 <= key <= length(s) || throw(BoundsError())
-    ccall((:SET_STRING_ELT,libR), Void,
-          (Ptr{StrSxp},Cptrdiff_t, Ptr{CharSxp}),
-          s, key-1, value)
-    value
-end
-function setindex!(s::Ptr{StrSxp}, value::AbstractString, key::Integer)
-    setindex!(s,sexp(CharSxp,value),key)
-end
-
-function setindex!(s::Ptr{S}, value::Ptr{T}, key::Integer) where {S<:Union{VecSxp,ExprSxp}, T<:Sxp}
-    1 <= key <= length(s) || throw(BoundsError())
-    ccall((:SET_VECTOR_ELT,libR), Ptr{T},
-          (Ptr{S},Cptrdiff_t, Ptr{T}),
-          s, key-1, value)
-end
-function setindex!(s::Ptr{S}, value, key::Integer) where {S<:Union{VecSxp,ExprSxp}}
-    setindex!(s,sexp(value),key)
-end
 """
 Set element of a VectorSxp by a label.
 """
@@ -154,18 +120,56 @@ end
 setindex!(s::Ptr{S}, value, label::AbstractString) where S<:VectorSxp = setindex!(s, sexp(value), label)
 setindex!(s::Ptr{S}, value, label::Symbol) where S<:VectorSxp = setindex!(s, value, string(label))
 
-# for RObjects
-setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
-setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
-setindex!(r::RObject{S}, ::Nullable{Union{}}, keys...) where S<:VectorSxp = setindex!(sexp(r), sexp(Const.NilValue), keys...)
 
-start(s::Ptr{S}) where S<:VectorSxp = 0
-next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
-done(s::Ptr{S},state) where S<:VectorSxp = state ≥ length(s)
+# VectorAtomicSxp
+getindex(s::Ptr{S}, I::Integer) where S<:VectorAtomicSxp = getindex(unsafe_vec(s),I)
+getindex(s::Ptr{S}, I::Integer...) where S<:VectorAtomicSxp = getindex(unsafe_array(s),I...)
+getindex(s::Ptr{S}, I::AbstractVector) where S<:VectorAtomicSxp = getindex(unsafe_vec(s),I)
 
-start(s::RObject{S}) where S<:VectorSxp = start(s.p)
-next(s::RObject{S},state) where S<:VectorSxp = next(s.p, state)
-done(s::RObject{S},state) where S<:VectorSxp = done(s.p, state)
+function setindex!(s::Ptr{S}, value, I::Integer...) where S<:VectorAtomicSxp
+    setindex!(unsafe_array(s), value, I...)
+end
+function setindex!(s::Ptr{S}, value, I::Integer) where S<:VectorAtomicSxp
+    setindex!(unsafe_vec(s), value, I)
+end
+
+# VectorList
+
+getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
+getindex(r::RObject{S}, I::AbstractArray) where S<:VectorListSxp = RObject(getindex(sexp(r), I))
+
+# StrSxp
+
+function getindex(s::Ptr{StrSxp}, key::Integer)
+    c = ccall((:STRING_ELT, libR), Ptr{CharSxp}, (Ptr{StrSxp}, Cint), s, key-1)
+end
+
+function setindex!(s::Ptr{StrSxp}, value::Ptr{CharSxp}, key::Integer)
+    1 <= key <= length(s) || throw(BoundsError())
+    ccall((:SET_STRING_ELT,libR), Void,
+          (Ptr{StrSxp},Cptrdiff_t, Ptr{CharSxp}),
+          s, key-1, value)
+    value
+end
+function setindex!(s::Ptr{StrSxp}, value::AbstractString, key::Integer)
+    setindex!(s,sexp(CharSxp,value),key)
+end
+
+# VecSxp and ExprSxp
+
+function getindex(s::Ptr{S}, key::Integer) where S<:Union{VecSxp,ExprSxp}
+    sexp(ccall((:VECTOR_ELT, libR), Ptr{UnknownSxp}, (Ptr{S}, Cint), s, key-1))
+end
+
+function setindex!(s::Ptr{S}, value::Ptr{T}, key::Integer) where {S<:Union{VecSxp,ExprSxp}, T<:Sxp}
+    1 <= key <= length(s) || throw(BoundsError())
+    ccall((:SET_VECTOR_ELT,libR), Ptr{T},
+          (Ptr{S},Cptrdiff_t, Ptr{T}),
+          s, key-1, value)
+end
+function setindex!(s::Ptr{S}, value, key::Integer) where {S<:Union{VecSxp,ExprSxp}}
+    setindex!(s,sexp(value),key)
+end
 
 
 # PairListSxps
