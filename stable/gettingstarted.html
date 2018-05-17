@@ -35,19 +35,19 @@ julia&gt; @rput foo bar
 R&gt; foo + bar
 [1] 6</code></pre><h2><a class="nav-anchor" id="@R_str-string-macro-1" href="#@R_str-string-macro-1">@R_str string macro</a></h2><p>Another way to use RCall is the <a href="internal.html#RCall.@R_str-Tuple{Any}"><code>R&quot;&quot;</code></a> string macro, it is especially useful in script files.</p><pre><code class="language-julia-repl">julia&gt; R&quot;rnorm(10)&quot;
 RCall.RObject{RCall.RealSxp}
- [1]  0.87115372 -0.48065507 -0.20703474  0.04334168  0.25822024  0.36978840
- [7] -1.86541407  0.29831230 -1.54877148  1.43642038</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="internal.html#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
+ [1]  0.66532580 -0.29464604 -1.35986911  1.07707539  0.41491506  0.52715259
+ [7] -1.61191812  1.12051872 -0.01094949 -0.76818122</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="internal.html#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.611987
- -1.85067
- -0.43502
-  1.7347
-  0.173241
- -0.0982618
-  1.24888
-  1.02696
-  1.01272
- -1.90038
+ -2.06042
+  1.68813
+  1.2801
+  1.67491
+ -1.80122
+  2.07468
+  0.411632
+ -0.913437
+ -0.938663
+  0.47925
 
 julia&gt; R&quot;t.test($x)&quot;
 RCall.RObject{RCall.VecSxp}
@@ -55,13 +55,13 @@ RCall.RObject{RCall.VecSxp}
 	One Sample t-test
 
 data:  `#JL`$x
-t = 0.38566, df = 9, p-value = 0.7087
+t = 0.39377, df = 9, p-value = 0.7029
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.7415959  1.0464273
+ -0.8991428  1.2781384
 sample estimates:
 mean of x
-0.1524157</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
+0.1894978</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
 RCall.RObject{RCall.VecSxp}
 $par
 [1] -1.56343
@@ -162,9 +162,9 @@ julia&gt; b = boot(city, ratio, R = 100, stype = &quot;w&quot;);
 julia&gt; rcall(:summary, b[:t])
 RCall.RObject{RCall.StrSxp}
        V1
- Min.   :1.203
- 1st Qu.:1.379
- Median :1.506
- Mean   :1.539
- 3rd Qu.:1.635
- Max.   :2.397</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-none">sum([1, 2, 3], var&quot;rm.na&quot; = True)</code></pre><footer><hr/><a class="previous" href="installation.html"><span class="direction">Previous</span><span class="title">Installation</span></a><a class="next" href="conversions.html"><span class="direction">Next</span><span class="title">Supported Conversions</span></a></footer></article></body></html>
+ Min.   :1.154
+ 1st Qu.:1.461
+ Median :1.560
+ Mean   :1.577
+ 3rd Qu.:1.647
+ Max.   :2.082</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-none">sum([1, 2, 3], var&quot;rm.na&quot; = True)</code></pre><footer><hr/><a class="previous" href="installation.html"><span class="direction">Previous</span><span class="title">Installation</span></a><a class="next" href="conversions.html"><span class="direction">Next</span><span class="title">Supported Conversions</span></a></footer></article></body></html>
