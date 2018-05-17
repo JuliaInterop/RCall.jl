@@ -41,6 +41,7 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     nothing
 end
 rprint(io::IO, r::RObject) = rprint(io::IO, r.p)
+rprint(r::Ptr{S}) where S<:Sxp = rprint(STDOUT, r)
 rprint(r::RObject) = rprint(STDOUT, r)
 
 function show(io::IO,r::RObject)
