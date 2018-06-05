@@ -189,7 +189,9 @@ end
 
 # FunctionSxp
 function rcopy(::Type{Function}, s::Ptr{S}) where S<:FunctionSxp
-    (args...) -> rcopy(rcall_p(s,args...))
+    # prevent s begin gc'ed
+    r = RObject(s)
+    (args...) -> rcopy(rcall_p(r,args...))
 end
 function rcopy(::Type{Function}, r::RObject{S}) where S<:FunctionSxp
     (args...) -> rcopy(rcall_p(r,args...))
