@@ -172,11 +172,16 @@ function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:Abstract
         V = valtype(a)
         if sanitize && (K <: AbstractString || K <: Symbol)
             for k in rcopy(Array{String}, getnames(s))
-                a[convert(K, replace(k, "." => "_"))] = rcopy(V, s[k])
+                a[K(replace(k, "." => "_"))] = rcopy(V, s[k])
             end
         else
             for k in rcopy(Array{String}, getnames(s))
-                a[convert(K, k)] = rcopy(V, s[k])
+                if K <: AbstractString || K <: Symbol
+                    key = K(k)
+                else
+                    key = convert(K, k)
+                end
+                a[key] = rcopy(V, s[k])
             end
         end
     finally
