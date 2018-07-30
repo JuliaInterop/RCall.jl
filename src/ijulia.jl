@@ -41,8 +41,8 @@ function ijulia_displayfile(m::MIME"image/svg+xml", f)
     open(f) do f
         r = randstring()
         d = readstring(f)
-        d = replace(d,"id=\"glyph","id=\"glyph"*r)
-        d = replace(d,"href=\"#glyph","href=\"#glyph"*r)
+        d = replace(d, "id=\"glyph" => "id=\"glyph"*r)
+        d = replace(d, "href=\"#glyph" => "href=\"#glyph"*r)
         display(m,d)
     end
 end

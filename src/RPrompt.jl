@@ -2,7 +2,6 @@ module RPrompt
 
 using REPL
 import REPL: REPL, LineEdit, REPLCompletions
-import DataStructures: OrderedDict
 import ..REvalError
 import ..Const
 import ..RCall:
@@ -51,7 +50,7 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
     try
         script, symdict = render(script)
         if length(symdict) > 0
-            eval(Main, prepare_inline_julia_code(symdict))
+            Core.eval(Main, prepare_inline_julia_code(symdict))
         end
         ret = protect(reval_p(rparse_p("withVisible({$script})"), Const.GlobalEnv.p))
         nprotect += 1
@@ -138,9 +137,9 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     partial = String(buf.data[1:buf.ptr-1])
     # complete latex
     full = LineEdit.input_string(s)
-    ret, range, should_complete = REPLCompletions.bslash_completions(full, endof(partial))[2]
+    ret, range, should_complete = REPLCompletions.bslash_completions(full, lastindex(partial))[2]
     if length(ret) > 0 && should_complete
-        return ret, partial[range], true
+        return map(REPLCompletions.completion_text, ret), partial[range], should_complete
     end
 
     # complete r

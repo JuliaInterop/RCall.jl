@@ -16,7 +16,7 @@ import DataStructures: OrderedDict
 import Nullables: isnull
 
 import Base: eltype, convert, isascii,
-    names, length, size, getindex, setindex!, iterate,
+    names, length, size, getindex, setindex!, iterate, IteratorSize, IteratorEltype,
     show, showerror, write
 import Base.Iterators: Enumerate
 

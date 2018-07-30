@@ -1,3 +1,5 @@
+using Random
+
 # strings
 x = "ppzz!#"
 r = RObject(x)
@@ -246,9 +248,9 @@ r = RObject(d)
 l = rcopy(R"list(a=1,b=c(1,3,4))")
 @test l[:a] == 1
 @test l[:b][3] == 4
-d = RObject(Dict(1=>2))
-@test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
-@test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
+d = RObject(Dict("a"=>2))
+@test Dict{Any,Any}("a" => 2) == rcopy(Dict, d)
+@test Dict{String,Int}("a"=>2) == rcopy(Dict{String,Int}, d)
 
 # list
 a = Any[1, 1:10]

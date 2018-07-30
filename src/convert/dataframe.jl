@@ -4,7 +4,7 @@ function rcopy(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true) where T<:Abstract
     isFrame(s) || error("s is not an R data frame")
     vnames = rcopy(Array{Symbol},getnames(s))
     if sanitize
-        vnames = [Symbol(replace(string(v), '.', '_')) for v in vnames]
+        vnames = [Symbol(replace(string(v), '.' => '_')) for v in vnames]
     end
     DataFrame([rcopy(AbstractArray, c) for c in s], vnames)
 end

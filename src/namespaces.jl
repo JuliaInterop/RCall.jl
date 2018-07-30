@@ -28,7 +28,7 @@ function rimport(pkg::String, s::Symbol=:__anonymous__)
                        Symbol(x),
                        rcall(Symbol("::"), pkg, x))) for x in members]
         exports = [Symbol(x) for x in members]
-        eval(m, Expr(:toplevel, id, consts..., Expr(:export, exports...), :(rmember(x) = ($getindex)($ns, x))))
+        Core.eval(m, Expr(:toplevel, id, consts..., Expr(:export, exports...), :(rmember(x) = ($getindex)($ns, x))))
         cached_namespaces[pkg] = m
     end
     m
@@ -83,6 +83,6 @@ macro rlibrary(x)
     m = gensym("RCall")
     quote
         $(esc(m)) = rimport($(QuoteNode(x)))
-        eval(@__MODULE__, Expr(:using, :., $(QuoteNode(m))))
+        Core.eval(@__MODULE__, Expr(:using, Expr(:., :., $(QuoteNode(m)))))
     end
 end

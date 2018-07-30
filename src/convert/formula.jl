@@ -20,7 +20,7 @@ function rcopy(::Type{Expr}, l::Ptr{LangSxp})
         f = rcopy(Expr, l[2])
     else
         f = Expr(:call, op,
-            [ isNull(t) ? rcopy_formula(s) : Expr(:(=), rcopy_formula(t), rcopy_formula(s))
+            Any[ isNull(t) ? rcopy_formula(s) : Expr(:(=), rcopy_formula(t), rcopy_formula(s))
                 for (t, s) in enumerate(args)]...)
     end
     # unwind these opeators

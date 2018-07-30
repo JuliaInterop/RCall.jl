@@ -1,8 +1,7 @@
-using Base.Test
+using Test
 using Compat
 
 hd = homedir()
-pd = Pkg.dir()
 
 if Compat.Sys.iswindows()
     Rhome = if haskey(ENV,"R_HOME")
@@ -17,11 +16,9 @@ else
 end
 
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
-if VERSION < v"0.6.0"
-    libpaths = map(chomp, libpaths)
-end
 
 using RCall
+using Nullables
 using Missings
 
 println(R"sessionInfo()")
@@ -30,7 +27,6 @@ println(R"l10n_info()")
 
 # https://github.com/JuliaStats/RCall.jl/issues/68
 @test hd == homedir()
-@test pd == Pkg.dir()
 
 # https://github.com/JuliaInterop/RCall.jl/issues/206
 @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
@@ -43,7 +39,7 @@ tests = ["basic",
          "convert/categorical",
          "convert/formula",
          "convert/nullable",
-         "convert/axisarray",
+         # "convert/axisarray", FIXME: AxisArrays is not yet fully compatible with v0.7
          "macros",
          "namespaces",
          "repl",

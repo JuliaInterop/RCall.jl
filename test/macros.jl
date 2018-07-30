@@ -24,7 +24,7 @@ y = "foo"
 
 @test_throws RCall.RParseIncomplete RCall.render("x = \$(begin")
 
-@test_throws ParseError RCall.render("x = \$(begin)")
+@test_throws Meta.ParseError RCall.render("x = \$(begin)")
 
 @test_throws RCall.RParseIncomplete RCall.render("x = ")
 

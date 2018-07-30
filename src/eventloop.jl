@@ -47,7 +47,7 @@ global timeout = nothing
 function rgui_start(silent=false)
     global timeout
     if timeout == nothing
-        timeout = Base.Timer(x -> process_events(), 0.05, 0.05)
+        timeout = Base.Timer(x -> process_events(), 0.05, interval = 0.05)
         return true
     else
         silent || error("eventloop is already running.")

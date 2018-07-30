@@ -111,8 +111,6 @@ We store the pointer and the object in a const Dict to prevent it being
 removed by the Julia GC.
 """
 function sexp(::Type{ExtPtrSxp}, j)
-    # pointer_from_objref cannot be used on immutable objects in julia 0.7
-    # https://github.com/JuliaLang/julia/commit/1502bd0b436d2675d15a7df5ab02e8bb27622f59
     jptr = ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), j)
     s = makeExternalPtr(jptr)
     jtypExtPtrs[s] = j

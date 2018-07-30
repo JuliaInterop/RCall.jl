@@ -7,8 +7,11 @@ function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
             dsym[i] = i == 1 ? (:row) : i == 2 ? (:col) : i == 3 ? (:page) : Symbol(:dim_, i)
         end
     end
-    AxisArray(rcopy(AbstractArray, r),
-             [Axis{dsym[i]}(isnull(n) ? (1:(size(r)[i])) : rcopy(n)) for (i,n) in enumerate(dnames)]...)
+    as = Any[]
+    for (i,n) in enumerate(dnames)
+        push!(as, Axis{dsym[i]}(isnull(n) ? (1:(size(r)[i])) : rcopy(n)))
+    end
+    AxisArray(rcopy(AbstractArray, r), as...)
 end
 
 function sexp(aa::AxisArray)

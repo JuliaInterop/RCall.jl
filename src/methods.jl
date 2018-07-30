@@ -71,6 +71,15 @@ unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
     return next(x, state)
 end
 
+IteratorSize(x::Ptr{S}) where S<:Sxp = Base.HasLength()
+IteratorEltype(x::Ptr{S}) where S<:Sxp = Base.HasEltype()
+
+iterate(x::RObject) = iterate(x.p)
+iterate(x::RObject, status) = iterate(x.p, status)
+IteratorSize(x::RObject) = Base.HasLength()
+IteratorEltype(x::RObject) = Base.HasEltype()
+
+
 start(s::Ptr{NilSxp}) = 0
 next(s::Ptr{NilSxp},state) = (s, state)
 done(s::Ptr{NilSxp},state) = true
@@ -214,6 +223,15 @@ function next(s::RObject{S},state) where S<:PairListSxp
     RObject(item), state
 end
 done(s::RObject{S},state) where S<:PairListSxp = done(s.p, state)
+
+# overwrite Enumerate for PairListSxp
+
+@inline iterate(x::Enumerate{Ptr{S}}) where S<:PairListSxp = iterate(x, start(x))
+@inline function iterate(x::Enumerate{Ptr{S}}, state) where S<:PairListSxp
+    done(x, state) && return nothing
+    return next(x, state)
+end
+IteratorEltype(x::Enumerate{Ptr{S}}) where S<:PairListSxp = Base.EltypeUnknown()
 
 start(s::Enumerate{Ptr{S}}) where S<:PairListSxp = s.itr
 function next(s::Enumerate{Ptr{S}},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}

@@ -1,6 +1,5 @@
 struct RClass{Symbol} end
 
-# allow `Int(R"1+1")`
 convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, r.p)
 convert(::Type{RObject}, r::RObject{S}) where S<:Sxp = r
 convert(::Type{RObject{S}}, r::RObject{S}) where S<:Sxp = r
@@ -21,7 +20,6 @@ rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, r.p; kwargs...)
 # convert Ptr{S} to Any would use the default conversions to allow
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
 rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T<:Any} = rcopy(s)
-
 rcopy(::Type{RObject}, s::Ptr{S}) where S<:LangSxp = RObject(s)
 
 
@@ -87,13 +85,13 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:UInt8, :RawSxp))
     @eval begin
         function rcopy(::Type{Vector{T}},s::Ptr{$S}) where T<:$J
-            a = Array{T}(length(s))
-            copy!(a,unsafe_vec(s))
+            a = Array{T}(undef, length(s))
+            copyto!(a,unsafe_vec(s))
             a
         end
         function rcopy(::Type{Array{T}},s::Ptr{$S}) where T<:$J
-            a = Array{T}(size(s)...)
-            copy!(a,unsafe_vec(s))
+            a = Array{T}(undef, size(s)...)
+            copyto!(a,unsafe_vec(s))
             a
         end
     end
@@ -110,12 +108,12 @@ function rcopy(::Type{Bool},s::Ptr{LglSxp})
 end
 
 function rcopy(::Type{Vector{Cint}},s::Ptr{LglSxp})
-    a = Array{Cint}(length(s))
-    copy!(a,unsafe_vec(s))
+    a = Array{Cint}(undef, length(s))
+    copyto!(a,unsafe_vec(s))
     a
 end
 function rcopy(::Type{Vector{Bool}},s::Ptr{LglSxp})
-    a = Array{Bool}(length(s))
+    a = Array{Bool}(undef, length(s))
     v = unsafe_vec(s)
     for i = 1:length(a)
         a[i] = v[i] != 0
@@ -123,7 +121,7 @@ function rcopy(::Type{Vector{Bool}},s::Ptr{LglSxp})
     a
 end
 function rcopy(::Type{BitVector},s::Ptr{LglSxp})
-    a = BitArray(length(s))
+    a = BitArray(undef, length(s))
     v = unsafe_vec(s)
     for i = 1:length(a)
         a[i] = v[i] != 0
@@ -131,12 +129,12 @@ function rcopy(::Type{BitVector},s::Ptr{LglSxp})
     a
 end
 function rcopy(::Type{Array{Cint}},s::Ptr{LglSxp})
-    a = Array{Cint}(size(s)...)
-    copy!(a,unsafe_vec(s))
+    a = Array{Cint}(undef, size(s)...)
+    copyto!(a,unsafe_vec(s))
     a
 end
 function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
-    a = Array{Bool}(size(s)...)
+    a = Array{Bool}(undef, size(s)...)
     v = unsafe_vec(s)
     for i = 1:length(a)
         a[i] = v[i] != 0
@@ -144,7 +142,7 @@ function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
     a
 end
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
-    a = BitArray(size(s)...)
+    a = BitArray(undef, size(s)...)
     v = unsafe_vec(s)
     for i = 1:length(a)
         a[i] = v[i] != 0
@@ -172,12 +170,14 @@ function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:Abstract
         K = keytype(a)
         V = valtype(a)
         if sanitize && (K <: AbstractString || K <: Symbol)
-            for (k, v) in zip(getnames(s), s)
-                a[K(replace(rcopy(String, k), ".", "_"))] = rcopy(V, v)
+            for k in rcopy(Array{String}, getnames(s))
+                println(typeof(rcopy(V, s[k])))
+                a[K(replace(k, "." => "_"))] = rcopy(V, s[k])
+                println(".")
             end
         else
-            for (k, v) in zip(getnames(s), s)
-                a[rcopy(K, k)] = rcopy(V, v)
+            for k in rcopy(Array{String}, getnames(s))
+                a[K(k)] = rcopy(V, s[k])
             end
         end
     finally
@@ -226,7 +226,7 @@ for (J,S) in ((:Integer,:IntSxp),
         end
         function sexp(::Type{$S}, a::AbstractArray{T}) where T<:$J
             ra = allocArray($S, size(a)...)
-            copy!(unsafe_vec(ra),a)
+            copyto!(unsafe_vec(ra),a)
             ra
         end
     end
