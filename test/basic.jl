@@ -153,13 +153,12 @@ model =  R"lm(Sepal_Length ~ Sepal_Width,data=$iris)"
 @test rcopy(R"data.frame(a=rep('test',10), stringsAsFactors = TRUE)")[:a] == fill("test",10)
 
 
-# FIXME: OrderedDict has an issue of taking RObject items, e.g. A["a"] = R"1" will fail
-# R"""
-# data(iris)
-# model <- lm(Sepal.Width ~ Petal.Length, iris)
-# """
-# model = rcopy(R"model")
-# @test typeof(model[:call]) <: Expr
+R"""
+data(iris)
+model <- lm(Sepal.Width ~ Petal.Length, iris)
+"""
+model = rcopy(R"model")
+@test typeof(model[:call]) <: Expr
 
 # getclass
 @test rcopy(getclass(reval("1"))) == "numeric"

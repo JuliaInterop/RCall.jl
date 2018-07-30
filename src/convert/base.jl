@@ -1,6 +1,7 @@
 struct RClass{Symbol} end
 
 convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, r.p)
+convert(::Type{Any}, r::RObject{S}) where S<:Sxp = r
 convert(::Type{RObject}, r::RObject{S}) where S<:Sxp = r
 convert(::Type{RObject{S}}, r::RObject{S}) where S<:Sxp = r
 
