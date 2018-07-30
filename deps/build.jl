@@ -20,12 +20,12 @@ try
     else
         Rhome = get(ENV, "R_HOME", "")
         if isempty(Rhome)
-            try Rhome = readchomp(`R RHOME`); end
+            try Rhome = readchomp(`R RHOME`); catch; end
         end
         @static if Sys.iswindows()
             if isempty(Rhome)
                 try Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE,
-                                            "Software\\R-Core\\R", "InstallPath"); end
+                                            "Software\\R-Core\\R", "InstallPath"); catch; end
             end
         end
         libR = isempty(Rhome) || !isdir(Rhome) ? "" : locate_libR(Rhome, false)

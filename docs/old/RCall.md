@@ -82,11 +82,11 @@ An `SEXP` is represented in `RCall` as a templated type, also called
 `SEXP`, which contains only a void pointer.
 
 ```julia
-type SEXP{N}                # N is the R SEXPREC type (see R_h.jl)
-    p::Ptr{Void}
+mutable struct SEXP{N}                # N is the R SEXPREC type (see R_h.jl)
+    p::Ptr{Cvoid}
 end
                             # determine the R SEXPREC type from the Ptr{Void}
-sexp(p::Ptr{Void}) = SEXP{unsafe_load(convert(Ptr{Cint},p)) & 0x1f}(p)
+sexp(p::Ptr{Cvoid}) = SEXP{unsafe_load(convert(Ptr{Cint},p)) & 0x1f}(p)
 ```
 
 The purpose of the templated type is to allow dispatch on the kind of
@@ -231,7 +231,7 @@ for (N,elt) in ((STRSXP,:STRING_ELT),(VECSXP,:VECTOR_ELT),(EXPRSXP,:VECTOR_ELT))
     @eval begin
         function Base.getindex(s::SEXP{$N},I::Number)  # extract a single element
             0 < I ≤ length(s) || throw(BoundsError())
-            sexp(ccall(($(string(elt)),libR),Ptr{Void},(Ptr{Void},Cint),s,I-1))
+            sexp(ccall(($(string(elt)),libR),Ptr{Cvoid},(Ptr{Cvoid},Cint),s,I-1))
         end
         Base.start(s::SEXP{$N}) = 0  # start,next,done and eltype provide an iterator
         Base.next(s::SEXP{$N},state) = (state += 1;(s[state],state))
@@ -241,8 +241,8 @@ for (N,elt) in ((STRSXP,:STRING_ELT),(VECSXP,:VECTOR_ELT),(EXPRSXP,:VECTOR_ELT))
 end
 Base.eltype(s::SEXP{STRSXP}) = SEXP{CHARSXP} # be more specific for STRSXP
 
-Base.names(s::SEXP) = copyvec(sexp(ccall((:Rf_getAttrib,libR),Ptr{Void},
-                                         (Ptr{Void},Ptr{Void}),s,namesSymbol)))
+Base.names(s::SEXP) = copyvec(sexp(ccall((:Rf_getAttrib,libR),Ptr{Cvoid},
+                                         (Ptr{Cvoid},Ptr{Cvoid}),s,namesSymbol)))
 function dataset(s::SEXP{VECSXP})
     val = [dataset(v) for v in s]
     isFrame(s) ? DataFrame(val,Symbol[symbol(nm) for nm in names(s)]) : val
@@ -286,17 +286,17 @@ function __init__()
     i > 0 || error("initEmbeddedR failed.  Try running Pkg.build(\"RCall\").")
     global const R_NaInt =  unsafe_load(cglobal((:R_NaInt,libR),Cint),1)
     global const R_NaReal = unsafe_load(cglobal((:R_NaReal,libR),Cdouble),1)
-    global const R_NaString = sexp(unsafe_load(cglobal((:R_NaString,libR),Ptr{Void}),1))
-    global const classSymbol = sexp(unsafe_load(cglobal((:R_ClassSymbol,libR),Ptr{Void}),1))
-    global const emptyEnv = sexp(unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{Void}),1))
-    global const dimSymbol = sexp(unsafe_load(cglobal((:R_DimSymbol,libR),Ptr{Void}),1))
-    global const globalEnv = sexp(unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{Void}),1))
-    global const levelsSymbol = sexp(unsafe_load(cglobal((:R_LevelsSymbol,libR),Ptr{Void}),1))
-    global const namesSymbol = sexp(unsafe_load(cglobal((:R_NamesSymbol,libR),Ptr{Void}),1))
-    global const nilValue = sexp(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Void}),1))
+    global const R_NaString = sexp(unsafe_load(cglobal((:R_NaString,libR),Ptr{Cvoid}),1))
+    global const classSymbol = sexp(unsafe_load(cglobal((:R_ClassSymbol,libR),Ptr{Cvoid}),1))
+    global const emptyEnv = sexp(unsafe_load(cglobal((:R_EmptyEnv,libR),Ptr{Cvoid}),1))
+    global const dimSymbol = sexp(unsafe_load(cglobal((:R_DimSymbol,libR),Ptr{Cvoid}),1))
+    global const globalEnv = sexp(unsafe_load(cglobal((:R_GlobalEnv,libR),Ptr{Cvoid}),1))
+    global const levelsSymbol = sexp(unsafe_load(cglobal((:R_LevelsSymbol,libR),Ptr{Cvoid}),1))
+    global const namesSymbol = sexp(unsafe_load(cglobal((:R_NamesSymbol,libR),Ptr{Cvoid}),1))
+    global const nilValue = sexp(unsafe_load(cglobal((:R_NilValue,libR),Ptr{Cvoid}),1))
     rone = sexp(1.)
     ## offsets (in bytes) from the Ptr{Void} to an R object and its vector contents
-    global const voffset = int(ccall((:REAL,libR),Ptr{Void},(Ptr{Void},),rone) - rone.p)
+    global const voffset = int(ccall((:REAL,libR),Ptr{Cvoid},(Ptr{Cvoid},),rone) - rone.p)
     ## offsets (in bytes) from the Ptr{Void} to an R object and its length
     global const loffset = voffset - 2*sizeof(Cint)
 end
@@ -322,7 +322,7 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isReal,:isS4,:isString,:isTs,:isUnordered,:isUnsorted,
             :isUserBinop,:isValidString,:isValidStringF,:isVector,
             :isVectorAtomic,:isVectorizable,:isVectorList)
-    @eval $sym(s::SEXP) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{Void},),s)
+    @eval $sym(s::SEXP) = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{Cvoid},),s)
 end
 ```
 although not all these functions are exported by `RCall` and many are
@@ -344,29 +344,29 @@ for (typ,rnm,tag,rtyp) in ((:Bool,:Logical,LGLSXP,:Int32),
                            (:Real,:Real,REALSXP,:Float64))
     @eval begin
         function sexp(v::$typ)
-            preserve(sexp(ccall(($(string("Rf_Scalar",rnm)),libR),Ptr{Void},($rtyp,),v)))
+            preserve(sexp(ccall(($(string("Rf_Scalar",rnm)),libR),Ptr{Cvoid},($rtyp,),v)))
         end
-        function sexp{T<:$typ}(v::Vector{T})
+        function sexp(v::Vector{T}) where T<:$typ
             l = length(v)
-            vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),$tag,l))
+            vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Cvoid},(Cint,Cptrdiff_t),$tag,l))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),l),v)
             preserve(vv)
         end
-        function sexp{T<:$typ}(m::Matrix{T})
+        function sexp(m::Matrix{T}) where T<:$typ
             p,q = size(m)
-            vv = sexp(ccall((:Rf_allocMatrix,libR),Ptr{Void},(Cint,Cint,Cint),$tag,p,q))
+            vv = sexp(ccall((:Rf_allocMatrix,libR),Ptr{Cvoid},(Cint,Cint,Cint),$tag,p,q))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),p*q),m)
             preserve(vv)
         end
-        function sexp{T<:$typ}(a::Array{T,3})
+        function sexp(a::Array{T,3}) where T<:$typ
             p,q,r = size(a)
-            vv = sexp(ccall((:Rf_alloc3DArray,libR),Ptr{Void},(Cint,Cint,Cint,Cint),$tag,p,q,r))
+            vv = sexp(ccall((:Rf_alloc3DArray,libR),Ptr{Cvoid},(Cint,Cint,Cint,Cint),$tag,p,q,r))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),length(a)),a)
             preserve(vv)
         end
-        function sexp{T<:$typ}(a::Array{T})
+        function sexp(a::Array{T}) where T<:$typ
             rdims = sexp([size(a)...])
-            vv = sexp(ccall((:Rf_allocArray,libR),Ptr{Void},(Cint,Ptr{Void}),$tag,rdims))
+            vv = sexp(ccall((:Rf_allocArray,libR),Ptr{Cvoid},(Cint,Ptr{Cvoid}),$tag,rdims))
             copy!(pointer_to_array(convert(Ptr{$rtyp},vv.p+voffset),length(a)),a)
             preserve(vv)
         end
@@ -378,14 +378,14 @@ Separate methods are needed for Julia symbols, character strings and
 vectors of strings.
 
 ```julia
-sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Void},(Ptr{Uint8},),string(s)))
-sexp(st::Union(ASCIIString,UTF8String)) = sexp(ccall((:Rf_mkString,libR),Ptr{Void},(Ptr{Uint8},),st))
-function sexp{T<:Union(ASCIIString,UTF8String)}(v::Vector{T})
+sexp(s::Symbol) = sexp(ccall((:Rf_install,libR),Ptr{Cvoid},(Ptr{Uint8},),string(s)))
+sexp(st::Union(ASCIIString,UTF8String)) = sexp(ccall((:Rf_mkString,libR),Ptr{Cvoid},(Ptr{Uint8},),st))
+function sexp(v::Vector{T}) where T<:Union(ASCIIString,UTF8String)
     l = length(v)
-    vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Void},(Cint,Cptrdiff_t),STRSXP,l))
+    vv = sexp(ccall((:Rf_allocVector,libR),Ptr{Cvoid},(Cint,Cptrdiff_t),STRSXP,l))
     for i in 1:l
-        ccall((:SET_STRING_ELT,libR),Void,(Ptr{Void},Cint,Ptr{Void}),
-              vv,i-1,ccall((:Rf_mkChar,libR),Ptr{Void},(Ptr{Uint8},),v[i]))
+        ccall((:SET_STRING_ELT,libR),Cvoid,(Ptr{Cvoid},Cint,Ptr{Cvoid}),
+              vv,i-1,ccall((:Rf_mkChar,libR),Ptr{Cvoid},(Ptr{Uint8},),v[i]))
     end
     preserve(vv)
 end
