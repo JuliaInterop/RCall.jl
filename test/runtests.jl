@@ -1,9 +1,8 @@
 using Test
-using Compat
 
 hd = homedir()
 
-if Compat.Sys.iswindows()
+if Sys.iswindows()
     Rhome = if haskey(ENV,"R_HOME")
         ENV["R_HOME"]
     else

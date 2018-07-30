@@ -1,6 +1,6 @@
 const Rembedded = Ref{Bool}(false)
 
-@static if Compat.Sys.iswindows()
+@static if Sys.iswindows()
     import WinReg
 
     function ask_yes_no_cancel(prompt::Ptr{Cchar})
@@ -63,7 +63,7 @@ function initEmbeddedR()
     # disable R signal handling
     unsafe_store!(cglobal((:R_SignalHandlers,RCall.libR),Cint),0)
 
-    @static if Compat.Sys.iswindows()
+    @static if Sys.iswindows()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
 
@@ -100,7 +100,7 @@ function initEmbeddedR()
         ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},),&rs)
     end
 
-    @static if Compat.Sys.isunix()
+    @static if Sys.isunix()
         # set necessary environmental variables
         ENV["R_HOME"] = Rhome
         ENV["R_DOC_DIR"] = joinpath(Rhome,"doc")

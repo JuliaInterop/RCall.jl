@@ -1,7 +1,6 @@
 __precompile__()
 module RCall
 
-using Compat
 using Dates
 using Libdl
 using Random

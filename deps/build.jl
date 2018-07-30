@@ -1,6 +1,5 @@
-using Compat
 import Conda
-@static if Compat.Sys.iswindows()
+@static if Sys.iswindows()
     import WinReg
 end
 
@@ -23,7 +22,7 @@ try
         if isempty(Rhome)
             try Rhome = readchomp(`R RHOME`); end
         end
-        @static if Compat.Sys.iswindows()
+        @static if Sys.iswindows()
             if isempty(Rhome)
                 try Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE,
                                             "Software\\R-Core\\R", "InstallPath"); end

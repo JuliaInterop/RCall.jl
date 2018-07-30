@@ -1,5 +1,3 @@
-using Compat.Dates
-
 # date
 s = "2012-12-12"
 d = Date(s)
