@@ -9,9 +9,9 @@ const SxpPtrInfo = UInt32 # sxpinfo_struct
 "R Sxp header: a pointer to this is used for unknown types."
 struct SxpHead <: Sxp # SEXPREC_HEADER
     info::SxpPtrInfo
-    attrib::Ptr{Void}
-    gc_next::Ptr{Void}
-    gc_prev::Ptr{Void}
+    attrib::Ptr{Nothing}
+    gc_next::Ptr{Nothing}
+    gc_prev::Ptr{Nothing}
 end
 const UnknownSxp = SxpHead
 
@@ -180,8 +180,8 @@ end
 "R external pointer"
 struct ExtPtrSxp <: Sxp  # type tag 22
     head::SxpHead
-    ptr::Ptr{Void}
-    prot::Ptr{Void}
+    ptr::Ptr{Nothing}
+    prot::Ptr{Nothing}
     tag::Ptr{UnknownSxp}
 end
 # const ExtPtrSxpPtr = Ptr{ExtPtrSxp}
@@ -234,7 +234,6 @@ RObject{RealSxp}
 [1] 1 2 3
 ```
 """
-
 mutable struct RObject{S<:Sxp}
     p::Ptr{S}
     # used for pre-defined constants
@@ -244,7 +243,7 @@ mutable struct RObject{S<:Sxp}
     function RObject{S}(p::Ptr{S}) where S
         preserve(p)
         r = new{S}(p)
-        finalizer(r, release)
+        finalizer(release, r)
         r
     end
     # SymSxps are not garbage collected, so preserve not necessary.
@@ -261,7 +260,7 @@ Element types of R vectors.
 eltype(::Type{LglSxp}) = Cint
 eltype(::Type{IntSxp}) = Cint
 eltype(::Type{RealSxp}) = Float64
-eltype(::Type{CplxSxp}) = Complex128
+eltype(::Type{CplxSxp}) = ComplexF64
 eltype(::Type{CharSxp}) = UInt8
 eltype(::Type{RawSxp}) = UInt8
 
@@ -279,12 +278,12 @@ Prevent garbage collection of an R object. Object can be released via `release`.
 This is slower than `protect`, as it requires searching an internal list, but
 more flexible.
 """
-preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject,libR), Void, (Ptr{S},), p)
+preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject,libR), Nothing, (Ptr{S},), p)
 
 """
 Release object that has been gc protected by `preserve`.
 """
-release(p::Ptr{S}) where S<:Sxp = ccall((:R_ReleaseObject,libR),Void,(Ptr{S},),p)
+release(p::Ptr{S}) where S<:Sxp = ccall((:R_ReleaseObject,libR),Nothing,(Ptr{S},),p)
 release(r::RObject{S}) where S<:Sxp = release(r.p)
 
 """
@@ -299,7 +298,7 @@ protect(p::Ptr{S}) where S<:Sxp = ccall((:Rf_protect,libR), Ptr{S}, (Ptr{S},), p
 """
 Release last `n` objects gc-protected by `protect`.
 """
-unprotect(n::Integer) = ccall((:Rf_unprotect,libR), Void, (Cint,), n)
+unprotect(n::Integer) = ccall((:Rf_unprotect,libR), Nothing, (Cint,), n)
 
 """
 The SEXPTYPE number of a `Sxp`
@@ -313,13 +312,13 @@ sexpnum(p::Ptr{S}) where S<:Sxp = sexpnum(unsafe_load(p))
 "vector of R Sxp types"
 const typs = [NilSxp,SymSxp,ListSxp,ClosSxp,EnvSxp,
               PromSxp,LangSxp,SpecialSxp,BuiltinSxp,CharSxp,
-              LglSxp,Void,Void,IntSxp,RealSxp,
+              LglSxp,Nothing,Nothing,IntSxp,RealSxp,
               CplxSxp,StrSxp,DotSxp,AnySxp,VecSxp,
               ExprSxp,BcodeSxp,ExtPtrSxp,WeakRefSxp,RawSxp,
               S4Sxp]
 
 for (i,T) in enumerate(typs)
-    if T != Void
+    if T != Nothing
         @eval sexpnum(::Type{$T}) = $(i-1)
     end
 end

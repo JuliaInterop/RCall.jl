@@ -110,11 +110,9 @@ sexp(d::Date) = sexp(RealSxp, d)
 sexp(d::Nullable{Date}) = sexp(RealSxp, d)
 sexp(d::Array{Union{Date, Missing}}) = sexp(RealSxp, d)
 sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
-sexp(d::AbstractDataArray{Date}) = sexp(RealSxp, d)
 
 # DateTime
 sexp(d::DateTime) = sexp(RealSxp, d)
 sexp(d::Nullable{DateTime}) = sexp(RealSxp, d)
 sexp(d::Array{Union{DateTime, Missing}}) = sexp(RealSxp, d)
 sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)
-sexp(d::AbstractDataArray{DateTime}) = sexp(RealSxp, d)

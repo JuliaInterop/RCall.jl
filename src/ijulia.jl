@@ -73,8 +73,12 @@ function ijulia_cleanup()
     end
 end
 
+
+const ijulia_file_dir = ""
+
 function ijulia_init()
-    global const ijulia_file_dir = mktempdir()
+    global ijulia_file_dir
+    ijulia_file_dir = mktempdir()
     ijulia_file_fmt = joinpath(ijulia_file_dir,"rij_%03d")
     rcall_p(:options,rcalljl_filename=ijulia_file_fmt)
 

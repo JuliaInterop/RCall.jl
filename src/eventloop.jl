@@ -7,9 +7,9 @@ if Compat.Sys.isunix()
 end
 
 "Event Callback: allows R to process Julia events when R is busy.
-For example, writing output to STDOUT while running an expensive R command."
+For example, writing output to stdout while running an expensive R command."
 function event_callback()
-    # dump output buffer to STDOUT when available
+    # dump output buffer to stdout when available
     handle_eval_stdout()
     nothing
 end
@@ -29,13 +29,13 @@ function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0
         @static if Compat.Sys.iswindows() || Compat.Sys.isapple()
-            ccall((:R_ProcessEvents, libR), Void, ())
+            ccall((:R_ProcessEvents, libR), Nothing, ())
         end
         @static if Compat.Sys.isunix()
-            what = ccall((:R_checkActivity,libR),Ptr{Void},(Cint,Cint),0,1)
+            what = ccall((:R_checkActivity,libR),Ptr{Nothing},(Cint,Cint),0,1)
             if what != C_NULL
-                R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Void}))
-                ccall((:R_runHandlers,libR),Void,(Ptr{Void},Ptr{Void}),R_InputHandlers,what)
+                R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Nothing}))
+                ccall((:R_runHandlers,libR),Nothing,(Ptr{Nothing},Ptr{Nothing}),R_InputHandlers,what)
             end
         end
     end

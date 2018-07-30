@@ -1,7 +1,8 @@
-import Base: REPL, LineEdit, Terminals
+using REPL
+import REPL: Terminals
 using RCall
 
-mutable struct FakeTerminal <: Base.Terminals.UnixTerminal
+mutable struct FakeTerminal <: Terminals.UnixTerminal
     in_stream::Base.IO
     out_stream::Base.IO
     err_stream::Base.IO
@@ -11,9 +12,9 @@ mutable struct FakeTerminal <: Base.Terminals.UnixTerminal
         new(stdin,stdout,stderr,hascolor,false)
 end
 
-Base.Terminals.hascolor(t::FakeTerminal) = t.hascolor
-Base.Terminals.raw!(t::FakeTerminal, raw::Bool) = t.raw = raw
-Base.Terminals.size(t::FakeTerminal) = (24, 80)
+Terminals.hascolor(t::FakeTerminal) = t.hascolor
+Terminals.raw!(t::FakeTerminal, raw::Bool) = t.raw = raw
+Terminals.size(t::FakeTerminal) = (24, 80)
 
 # fake repl
 
@@ -24,10 +25,10 @@ Base.link_pipe(stdin_read,true,stdin_write,true)
 Base.link_pipe(stdout_read,true,stdout_write,true)
 Base.link_pipe(stderr_read,true,stderr_write,true)
 
-repl = Base.REPL.LineEditREPL(FakeTerminal(stdin_read, stdout_write, stderr_write,false))
+repl = REPL.LineEditREPL(FakeTerminal(stdin_read, stdout_write, stderr_write,false))
 
 repltask = @async begin
-    Base.REPL.run_repl(repl)
+    REPL.run_repl(repl)
 end
 
 send_repl(x, enter=true) = write(stdin_write, enter ? "$x\n" : x)

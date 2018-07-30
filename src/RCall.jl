@@ -1,28 +1,24 @@
 __precompile__()
 module RCall
-using Compat
 
+using Compat
+using Dates
+using Libdl
+using Random
+using REPL
 using Missings
-using DataArrays
+using Nullables
 using CategoricalArrays
 using DataFrames
 using AxisArrays
 import StatsModels: Formula, parse!
 import DataStructures: OrderedDict
+import Nullables: isnull
 
-using Compat.Dates
-
-if isdefined(DataArrays, :isna)
-    import DataArrays: isna
-end
-
-if isdefined(DataArrays, :anyna)
-    import DataArrays: anyna
-end
-
-import Base: eltype, convert, isascii, isnull,
-    names, length, size, getindex, setindex!, start, next, done,
+import Base: eltype, convert, isascii,
+    names, length, size, getindex, setindex!, iterate,
     show, showerror, write
+import Base.Iterators: Enumerate
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
@@ -46,7 +42,6 @@ include("Const.jl")
 include("methods.jl")
 include("convert/base.jl")
 include("convert/missing.jl")
-include("convert/dataarray.jl")
 include("convert/categorical.jl")
 include("convert/datetime.jl")
 include("convert/dataframe.jl")

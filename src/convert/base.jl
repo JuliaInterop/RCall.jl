@@ -165,7 +165,7 @@ end
 # VecSxp
 rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)
 rcopy(::Type{Vector}, s::Ptr{VecSxp}) = rcopy(Vector{Any}, s)
-function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:Associative
+function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:AbstractDict
     protect(s)
     a = A()
     try
@@ -200,10 +200,10 @@ end
 # conversion from Base Julia types
 
 # nothing
-sexp(::Type{S}, ::Void) where S<:Sxp = sexp(Const.NilValue)
+sexp(::Type{S}, ::Nothing) where S<:Sxp = sexp(Const.NilValue)
 
 # null
-sexp(::Type{S}, ::Missing) where S<:Sxp = naeltype($S)
+sexp(::Type{S}, ::Missing) where S<:Sxp = naeltype(S)
 
 # symbol
 sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
@@ -261,10 +261,10 @@ function sexp(::Type{StrSxp}, a::AbstractArray{T}) where T<:AbstractString
     ra
 end
 
-# Associative to VecSxp
+# AbstractDict to VecSxp
 # R does not have a native dictionary type, but named lists is often
 # used to this effect.
-function sexp(::Type{VecSxp},d::Associative)
+function sexp(::Type{VecSxp},d::AbstractDict)
     n = length(d)
     vs = protect(allocArray(VecSxp,n))
     ks = protect(allocArray(StrSxp,n))

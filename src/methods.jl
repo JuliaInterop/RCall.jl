@@ -37,7 +37,7 @@ end
 
 for (S, J) in ((:LglSxp, "LOGICAL"), (:IntSxp, "INTEGER"),
                 (:RealSxp, "REAL"), (:CplxSxp, "COMPLEX"), (:RawSxp, "RAW"))
-    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Void}, (Ptr{UnknownSxp},), s))
+    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Nothing}, (Ptr{UnknownSxp},), s))
 end
 
 """
@@ -65,6 +65,12 @@ unsafe_array(s::Ptr{S}) where S<:VectorSxp =  unsafe_wrap(Array, dataptr(s), siz
 unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
 
 # used in indexing
+@inline iterate(x::Ptr{S}) where S<:Sxp = iterate(x, start(x))
+@inline function iterate(x::Ptr{S}, state) where S<:Sxp
+    done(x, state) && return nothing
+    return next(x, state)
+end
+
 start(s::Ptr{NilSxp}) = 0
 next(s::Ptr{NilSxp},state) = (s, state)
 done(s::Ptr{NilSxp},state) = true
@@ -146,7 +152,7 @@ end
 
 function setindex!(s::Ptr{StrSxp}, value::Ptr{CharSxp}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
-    ccall((:SET_STRING_ELT,libR), Void,
+    ccall((:SET_STRING_ELT,libR), Nothing,
           (Ptr{StrSxp},Cptrdiff_t, Ptr{CharSxp}),
           s, key-1, value)
     value
@@ -179,19 +185,19 @@ car(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:CAR,libR),Ptr{UnknownSxp},(Pt
 tag(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:TAG,libR),Ptr{UnknownSxp},(Ptr{S},),s))
 
 function setcar!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
+    ccall((:SETCAR,libR),Ptr{Nothing},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 setcar!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcar!(s,sexp(c))
 
 function settag!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SET_TAG,libR),Void,(Ptr{S},Ptr{T}),s,c)
+    ccall((:SET_TAG,libR),Nothing,(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 settag!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = settag!(s,sexp(c))
 
 function setcdr!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SETCDR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
+    ccall((:SETCDR,libR),Ptr{Nothing},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 setcdr!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcdr!(s,sexp(c))
@@ -314,7 +320,7 @@ getattrib(r::RObject, sym) = RObject(getattrib(r.p,sym))
 
 "Set a particular attribute of an RObject"
 function setattrib!(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T}) where {S<:Sxp, T<:Sxp}
-    ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
+    ccall((:Rf_setAttrib,libR),Ptr{Nothing},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
 end
 setattrib!(s::Ptr{S}, sym, t) where S<:Sxp = setattrib!(s, sexp(SymSxp,sym), sexp(t))
@@ -411,7 +417,7 @@ naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 Check if a value corresponds to R's sentinel NA values.
 These function should not be exported.
 """
-isNA(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
+isNA(x::ComplexF64) = real(x) === Const.NaReal && imag(x) === Const.NaReal
 isNA(x::Float64) = x === Const.NaReal
 isNA(x::Int32) = x == Const.NaInt
 isNA(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
@@ -483,7 +489,7 @@ end
 findVarInFrame(e, s) = findVarInFrame(sexp(e), sexp(SymSxp, s))
 
 function defineVar(s::Ptr{SymSxp}, v::Ptr{S}, e::Ptr{EnvSxp}) where S<:Sxp
-    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
+    ccall((:Rf_defineVar,libR),Nothing,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
     nothing
 end
 defineVar(s, v, p) = defineVar(sexp(SymSxp, s), sexp(v), sexp(p))
@@ -543,6 +549,6 @@ getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"
 
 "Set the variable .Last.value to a given value"
 function set_last_value(s::Ptr{S}) where S<:Sxp
-    ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
+    ccall((:SET_SYMVALUE,libR),Nothing,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
     nothing
 end

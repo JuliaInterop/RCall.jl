@@ -35,14 +35,14 @@ const Rembedded = Ref{Bool}(false)
         NoRenviron::Cint
         rhome::Ptr{Cchar}
         home::Ptr{Cchar}
-        ReadConsole::Ptr{Void}
-        WriteConsole::Ptr{Void}
-        CallBack::Ptr{Void}
-        ShowMessage::Ptr{Void}
-        YesNoCancel::Ptr{Void}
-        Busy::Ptr{Void}
+        ReadConsole::Ptr{Nothing}
+        WriteConsole::Ptr{Nothing}
+        CallBack::Ptr{Nothing}
+        ShowMessage::Ptr{Nothing}
+        YesNoCancel::Ptr{Nothing}
+        Busy::Ptr{Nothing}
         CharacterMode::Cint
-        WriteConsoleEx::Ptr{Void}
+        WriteConsoleEx::Ptr{Nothing}
     end
     RStart() = RStart(0,0,0,0,0,
                       0,0,0,0,0,
@@ -85,19 +85,19 @@ function initEmbeddedR()
         end
 
         rs = RStart()
-        ccall((:R_DefParams,libR),Void,(Ptr{RStart},),&rs)
+        ccall((:R_DefParams,libR),Nothing,(Ptr{RStart},),&rs)
 
-        rs.rhome          = ccall((:get_R_HOME,libR),Ptr{Cchar},())
+        rs.rhome          = ccall((:get_R_HOME,libR), Ptr{Cchar}, ())
         rs.home           = Ruser_ptr
-        rs.ReadConsole    = cglobal((:R_ReadConsole,libR), Void)
-        rs.CallBack       = cfunction(event_callback,Void,())
-        rs.ShowMessage    = cglobal((:R_ShowMessage,libR),Void)
-        rs.YesNoCancel    = cfunction(ask_yes_no_cancel,Cint,(Ptr{Cchar},))
-        rs.Busy           = cglobal((:R_Busy,libR),Void)
+        rs.ReadConsole    = cglobal((:R_ReadConsole, libR), Nothing)
+        rs.CallBack       = @cfunction($event_callback, Nothing, ()).ptr
+        rs.ShowMessage    = cglobal((:R_ShowMessage, libR), Nothing)
+        rs.YesNoCancel    = @cfunction($ask_yes_no_cancel, Cint, (Ptr{Cchar},)).ptr
+        rs.Busy           = cglobal((:R_Busy, libR), Nothing)
         rs.WriteConsole   = C_NULL
-        rs.WriteConsoleEx = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
+        rs.WriteConsoleEx = @cfunction($write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint)).ptr
 
-        ccall((:R_SetParams,libR),Void,(Ptr{RStart},),&rs)
+        ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},),&rs)
     end
 
     @static if Compat.Sys.isunix()
@@ -114,13 +114,13 @@ function initEmbeddedR()
             error("Could not start embedded R session.")
         end
 
-        ptr_write_console_ex = cfunction(write_console_ex,Void,(Ptr{UInt8},Cint,Cint))
-        unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Void}), C_NULL)
-        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Void}), ptr_write_console_ex)
-        unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Void}), C_NULL)
-        unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Void}), C_NULL)
-        ptr_polled_events = cfunction(polled_events,Void,())
-        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Void}), ptr_polled_events)
+        ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
+        unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Nothing}), C_NULL)
+        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Nothing}), ptr_write_console_ex)
+        unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Nothing}), C_NULL)
+        unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Nothing}), C_NULL)
+        ptr_polled_events = @cfunction($polled_events,Nothing,()).ptr
+        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Nothing}), ptr_polled_events)
     end
 
     Rembedded[] = true
@@ -135,7 +135,7 @@ Close embedded R session.
 """
 function endEmbeddedR()
     if Rembedded[]
-        ccall((:Rf_endEmbeddedR, libR),Void,(Cint,),0)
+        ccall((:Rf_endEmbeddedR, libR),Nothing,(Cint,),0)
         Rembedded[] = false
     end
 end
@@ -150,16 +150,16 @@ function __init__()
     # for some reaons, cglobal((:R_NilValue, libR)) doesn't work on rstudio/linux
     # https://github.com/Non-Contradiction/JuliaCall/issues/34
     Rinited, from_libR = try
-        unsafe_load(cglobal(:R_NilValue, Ptr{Void})) != C_NULL, false
+        unsafe_load(cglobal(:R_NilValue, Ptr{Nothing})) != C_NULL, false
     catch
-        unsafe_load(cglobal((:R_NilValue, libR), Ptr{Void})) != C_NULL, true
+        unsafe_load(cglobal((:R_NilValue, libR), Ptr{Nothing})) != C_NULL, true
     end
 
     if !Rinited
         initEmbeddedR()
     end
 
-    ip = ccall((:Rf_ScalarInteger, libR),Ptr{Void},(Cint,),0)
+    ip = ccall((:Rf_ScalarInteger, libR),Ptr{Nothing},(Cint,),0)
 
     Const.load(from_libR)
 
@@ -177,7 +177,7 @@ function __init__()
 
     # R REPL mode
     isdefined(Base, :active_repl) &&
-        isinteractive() && typeof(Base.active_repl) != Base.REPL.BasicREPL &&
+        isinteractive() && typeof(Base.active_repl) != REPL.BasicREPL &&
             !RPrompt.repl_inited(Base.active_repl) && RPrompt.repl_init(Base.active_repl)
 
     # # IJulia hooks

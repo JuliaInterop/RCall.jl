@@ -17,7 +17,7 @@ function validate_libR(libR, raise=true)
         Libdl.dlopen(libR)
     catch er
         raise || return false
-        Base.with_output_color(:red, STDERR) do io
+        Base.with_output_color(:red, stderr) do io
             print(io, "ERROR: ")
             showerror(io, er)
             println(io)

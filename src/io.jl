@@ -24,7 +24,7 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
         end
     else
         # Rf_PrintValueRec not found on unix!?
-        # ccall((:Rf_PrintValueRec,libR),Void,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
+        # ccall((:Rf_PrintValueRec,libR),Nothing,(Ptr{S},Ptr{EnvSxp}),s, Const.GlobalEnv)
         tryEval(rlang_p(Const.BaseNamespace[Symbol("print.default")], :x), env, status)
     end
     defineVar(:x, Const.NilValue, env)
@@ -41,8 +41,8 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     nothing
 end
 rprint(io::IO, r::RObject) = rprint(io::IO, r.p)
-rprint(r::Ptr{S}) where S<:Sxp = rprint(STDOUT, r)
-rprint(r::RObject) = rprint(STDOUT, r)
+rprint(r::Ptr{S}) where S<:Sxp = rprint(stdout, r)
+rprint(r::RObject) = rprint(stdout, r)
 
 function show(io::IO,r::RObject)
     println(io, typeof(r))
@@ -97,14 +97,14 @@ function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
-function handle_eval_stdout(;io::IO=STDOUT, force::Bool=false)
-    if (!_output_is_locked || force) && nb_available(output_buffer) != 0
+function handle_eval_stdout(;io::IO=stdout, force::Bool=false)
+    if (!_output_is_locked || force) && bytesavailable(output_buffer) != 0
         write(io, String(take!(output_buffer)))
     end
 end
 
 function handle_eval_stderr(;as_warning::Bool=false)
-    if nb_available(error_buffer) != 0
+    if bytesavailable(error_buffer) != 0
         s = String(take!(error_buffer))
         if as_warning
             warn("RCall.jl: ", s)

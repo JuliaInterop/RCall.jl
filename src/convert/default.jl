@@ -115,16 +115,16 @@ end
 
 function rcopytype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{Complex128, Missing}}
+        length(s) == 1 ? Missing : Array{Union{ComplexF64, Missing}}
     else
-        length(s) == 1 ? Complex128 : Array{Complex128}
+        length(s) == 1 ? ComplexF64 : Array{ComplexF64}
     end
 end
 function eltype(::Type{RClass{Sym}}, s::Ptr{CplxSxp}) where Sym
     if anyna(s)
-        Union{Complex128, Missing}
+        Union{ComplexF64, Missing}
     else
-        Complex128
+        ComplexF64
     end
 end
 
@@ -187,11 +187,10 @@ rcopy(r) = r
 """
 `sexp(x)` converts a Julia object `x` to a pointer to a corresponding Sxp Object.
 """
-
 RObject(s) = RObject(sexp(s))
 
 # nothing
-sexp(::Void) = sexp(Const.NilValue)
+sexp(::Nothing) = sexp(Const.NilValue)
 
 # Nullable
 sexp(::Nullable{Union{}}) = sexp(Const.NilValue)
@@ -206,7 +205,7 @@ sexp(s::Symbol) = sexp(SymSxp,s)
 sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
 
 
-# Number, Array and DataArray
+# Number, Array
 for (J,S) in ((:Integer,:IntSxp),
                  (:AbstractFloat, :RealSxp),
                  (:Complex, :CplxSxp),
@@ -218,15 +217,14 @@ for (J,S) in ((:Integer,:IntSxp),
         sexp(x::Nullable{T}) where T<:$J = sexp($S, x)
         sexp(a::Array{Union{T, Missing}}) where T<:$J = sexp($S,a)
         sexp(a::AbstractArray{T}) where T<:$J = sexp($S,a)
-        sexp(a::AbstractDataArray{T}) where T<:$J = sexp($S,a)
     end
 end
 
 # Fallback: convert AbstractArray to VecSxp (R list)
 sexp(a::AbstractArray) = sexp(VecSxp,a)
 
-# Associative
-sexp(d::Associative) = sexp(VecSxp,d)
+# AbstractDict
+sexp(d::AbstractDict) = sexp(VecSxp,d)
 
 # Function
 sexp(f::Function) = sexp(ClosSxp, f)
