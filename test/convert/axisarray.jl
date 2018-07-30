@@ -1,10 +1,9 @@
 using AxisArrays
-using Compat.Dates
 
 # AxisArray
 aa = rcopy(AxisArray, R"Titanic")
 @test size(aa) == (4, 2, 2, 2)
-@test length(aa.axes[1]) == 4
+@test length(AxisArrays.axes(aa, 1)) == 4
 @test names(getattrib(RObject(aa), :dimnames))[1] == :Class
 
 @test_throws ErrorException rcopy(AxisArray, R"c(1,1)")

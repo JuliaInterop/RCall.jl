@@ -39,7 +39,7 @@ tests = ["basic",
          "convert/categorical",
          "convert/formula",
          "convert/nullable",
-         # "convert/axisarray", FIXME: AxisArrays is not yet fully compatible with v0.7
+         "convert/axisarray",
          "macros",
          "namespaces",
          "repl",

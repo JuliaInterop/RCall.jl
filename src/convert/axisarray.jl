@@ -18,7 +18,7 @@ function sexp(aa::AxisArray)
     rv = protect(sexp(aa.data))
     try
         d = OrderedDict(
-            k => v.val for (k, v) in zip(axisnames(aa), axes(aa)))
+            k => v.val for (k, v) in zip(axisnames(aa), AxisArrays.axes(aa)))
         setattrib!(rv, Const.DimSymbol, collect(size(aa)))
         setattrib!(rv, Const.DimNamesSymbol, d)
     finally
