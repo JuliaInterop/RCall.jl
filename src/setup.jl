@@ -85,7 +85,7 @@ function initEmbeddedR()
         end
 
         rs = RStart()
-        ccall((:R_DefParams,libR),Nothing,(Ptr{RStart},),&rs)
+        ccall((:R_DefParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
 
         rs.rhome          = ccall((:get_R_HOME,libR), Ptr{Cchar}, ())
         rs.home           = Ruser_ptr
@@ -97,7 +97,7 @@ function initEmbeddedR()
         rs.WriteConsole   = C_NULL
         rs.WriteConsoleEx = @cfunction($write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint)).ptr
 
-        ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},),&rs)
+        ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
     end
 
     @static if Sys.isunix()
