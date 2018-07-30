@@ -64,31 +64,20 @@ The same as `unsafe_vec`, except returns an appropriately sized array.
 unsafe_array(s::Ptr{S}) where S<:VectorSxp =  unsafe_wrap(Array, dataptr(s), size(s))
 unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
 
-# used in indexing
-@inline iterate(x::Ptr{S}) where S<:Sxp = iterate(x, start(x))
-@inline function iterate(x::Ptr{S}, state) where S<:Sxp
-    done(x, state) && return nothing
-    return next(x, state)
-end
+
+# Sxp iterator
 IteratorSize(x::Ptr{S}) where S<:Sxp = Base.HasLength()
 IteratorEltype(x::Ptr{S}) where S<:Sxp = Base.EltypeUnknown()
-#  RObject
-@inline iterate(x::RObject) = iterate(x, start(x))
-@inline function iterate(x::RObject, state)
-    done(x, state) && return nothing
-    return next(x, state)
-end
+# RObject iterator
+@inline iterate(x::RObject) = iterate(x.p)
+@inline iterate(x::RObject, state) = iterate(x.p, state)
 IteratorSize(x::RObject) = IteratorSize(x.p)
 IteratorEltype(x::RObject) = IteratorEltype(x.p)
 
 # NilSxp
 
-start(s::Ptr{NilSxp}) = 0
-done(s::Ptr{NilSxp},state) = true
-
-start(r::RObject{NilSxp}) = 0
-done(r::RObject{NilSxp},state) = true
-
+iterate(s::Ptr{NilSxp}) = nothing
+iterate(s::Ptr{NilSxp}, state) = nothing
 
 # VectorSxp
 
@@ -98,13 +87,13 @@ setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r),
 setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
 
 IteratorEltype(x::Ptr{S}) where S<:VectorSxp = Base.HasEltype()
-start(s::Ptr{S}) where S<:VectorSxp = 0
-next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
-done(s::Ptr{S},state) where S<:VectorSxp = state ≥ length(s)
+iterate(s::Ptr{S}) where S<:VectorSxp = iterate(s, 0)
+function iterate(s::Ptr{S}, state) where S<:VectorSxp
+    state ≥ length(s) && return nothing
+    state += 1
+    (s[state], state)
+end
 
-start(s::RObject{S}) where S<:VectorSxp = start(s.p)
-next(s::RObject{S},state) where S<:VectorSxp = next(s.p, state)
-done(s::RObject{S},state) where S<:VectorSxp = done(s.p, state)
 
 """
 Set element of a VectorSxp by a label.
@@ -151,11 +140,15 @@ end
 
 # VectorList
 
-getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
-function next(s::RObject{S},state) where S<:VectorListSxp
-    value, state = next(s.p, state)
-    RObject(value), state
+IteratorEltype(x::RObject{S}) where S<:VectorListSxp = Base.EltypeUnknown()
+iterate(s::RObject{S}) where S<:VectorListSxp = iterate(s, 0)
+function iterate(s::RObject{S}, state) where S<:VectorListSxp
+    state ≥ length(s) && return nothing
+    state += 1
+    (RObject(s[state]), state)
 end
+getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
+
 
 # StrSxp
 
@@ -215,38 +208,31 @@ function setcdr!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
 end
 setcdr!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcdr!(s,sexp(c))
 
-start(s::Ptr{S}) where S<:PairListSxp = s
-function next(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
+iterate(s::Ptr{S}) where S<:PairListSxp = iterate(s, s)
+function iterate(s::Ptr{S}, state) where S<:PairListSxp
+    state == sexp(Const.NilValue) && return nothing
     car(state), cdr(state)
 end
-done(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
-function next(s::RObject{S},state) where S<:PairListSxp
-    item, state = next(s.p, state)
-    RObject(item), state
+iterate(s::RObject{S}) where S<:PairListSxp = iterate(s, s.p)
+function iterate(s::RObject{S}, state) where S<:PairListSxp
+    state == sexp(Const.NilValue) && return nothing
+    RObject(car(state)), cdr(state)
 end
-done(s::RObject{S},state) where S<:PairListSxp = done(s.p, state)
 
-# overwrite Enumerate for PairListSxp
 
-@inline iterate(x::Enumerate{Ptr{S}}) where S<:PairListSxp = iterate(x, start(x))
+# iterator for PairListSxp
+@inline iterate(x::Enumerate{Ptr{S}}) where S<:PairListSxp = iterate(x, x.itr)
 @inline function iterate(x::Enumerate{Ptr{S}}, state) where S<:PairListSxp
-    done(x, state) && return nothing
-    return next(x, state)
-end
-IteratorEltype(x::Enumerate{Ptr{S}}) where S<:PairListSxp = Base.EltypeUnknown()
-
-start(s::Enumerate{Ptr{S}}) where S<:PairListSxp = s.itr
-function next(s::Enumerate{Ptr{S}},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
+    state == sexp(Const.NilValue) && return nothing
     (tag(state), car(state)), cdr(state)
 end
-done(s::Enumerate{Ptr{S}},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
-start(s::Enumerate{RObject{S}}) where S<:PairListSxp = start(s.itr)
-function next(s::Enumerate{RObject{S}},state) where S<:PairListSxp
+@inline iterate(x::Enumerate{RObject{S}}) where S<:PairListSxp = iterate(x, x.itr.p)
+@inline function iterate(x::Enumerate{RObject{S}}, state) where S<:PairListSxp
+    state == sexp(Const.NilValue) && return nothing
     (RObject(tag(state)), RObject(car(state))), cdr(state)
 end
-done(s::Enumerate{RObject{S}},state) where S<:PairListSxp = done(s.itr, state)
 
 "extract the i-th element of a PairListSxp"
 function getindex(l::Ptr{S},I::Integer) where S<:PairListSxp
