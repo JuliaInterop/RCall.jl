@@ -70,22 +70,23 @@ unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
     done(x, state) && return nothing
     return next(x, state)
 end
-
 IteratorSize(x::Ptr{S}) where S<:Sxp = Base.HasLength()
-IteratorEltype(x::Ptr{S}) where S<:Sxp = Base.HasEltype()
+IteratorEltype(x::Ptr{S}) where S<:Sxp = Base.EltypeUnknown()
+#  RObject
+@inline iterate(x::RObject) = iterate(x, start(x))
+@inline function iterate(x::RObject, state)
+    done(x, state) && return nothing
+    return next(x, state)
+end
+IteratorSize(x::RObject) = IteratorSize(x.p)
+IteratorEltype(x::RObject) = IteratorEltype(x.p)
 
-iterate(x::RObject) = iterate(x.p)
-iterate(x::RObject, status) = iterate(x.p, status)
-IteratorSize(x::RObject) = Base.HasLength()
-IteratorEltype(x::RObject) = Base.HasEltype()
-
+# NilSxp
 
 start(s::Ptr{NilSxp}) = 0
-next(s::Ptr{NilSxp},state) = (s, state)
 done(s::Ptr{NilSxp},state) = true
 
 start(r::RObject{NilSxp}) = 0
-next(r::RObject{NilSxp},state) = (r, state)
 done(r::RObject{NilSxp},state) = true
 
 
@@ -96,6 +97,7 @@ getindex(r::RObject{S}, I::AbstractArray) where S<:VectorSxp = getindex(sexp(r),
 setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
 setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
 
+IteratorEltype(x::Ptr{S}) where S<:VectorSxp = Base.HasEltype()
 start(s::Ptr{S}) where S<:VectorSxp = 0
 next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
 done(s::Ptr{S},state) where S<:VectorSxp = state ≥ length(s)
@@ -150,7 +152,10 @@ end
 # VectorList
 
 getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
-getindex(r::RObject{S}, I::AbstractArray) where S<:VectorListSxp = RObject(getindex(sexp(r), I))
+function next(s::RObject{S},state) where S<:VectorListSxp
+    value, state = next(s.p, state)
+    RObject(value), state
+end
 
 # StrSxp
 
@@ -216,7 +221,6 @@ function next(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
 end
 done(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
-start(s::RObject{S}) where S<:PairListSxp = start(s.p)
 function next(s::RObject{S},state) where S<:PairListSxp
     item, state = next(s.p, state)
     RObject(item), state
