@@ -17,8 +17,8 @@ end
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 
 using RCall
-using Nullables
 using Missings
+using Dates
 
 println(R"sessionInfo()")
 
@@ -37,7 +37,6 @@ tests = ["basic",
          "convert/dataframe",
          "convert/categorical",
          "convert/formula",
-         "convert/nullable",
          "convert/axisarray",
          "macros",
          "namespaces",

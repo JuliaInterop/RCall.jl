@@ -35,7 +35,7 @@ globalEnv[:y] = RObject([4,5,6])
 @test length(R"mtcars") == 11
 @test size(R"mtcars") == (32, 11)
 
-# setindex with missing and Nullable()
+# setindex with missing and nothing
 a = R"1:10"
 a[2] = missing
 @test isna(a, 2)
@@ -45,15 +45,15 @@ a[2] = missing
 @test isna(a) == [false, true, false]
 
 a = R"list(x=1, y=2)"
-a[2] = Nullable()
+a[2] = nothing
 @test isnull(a[2])
-a[:x] = Nullable()
+a[:x] = nothing
 @test isnull(a[:x])
 
 env = reval("new.env()")
 env[:x] = 1
 @test rcopy(env[:x]) == 1
-env[:x] = Nullable()
+env[:x] = nothing
 @test isnull(env[:x])
 
 

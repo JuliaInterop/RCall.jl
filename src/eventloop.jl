@@ -83,7 +83,7 @@ function rgui_init()
 
     # inject rgui_start(TRUE) to utils::help
     help_type = rcopy(rcall(:options, "help_type")[1])
-    if  !isnull(help_type) && help_type == "html"
+    if  help_type == "html"
         # need to hack both as.environment('package:utils') and  getNamespace("utils")
         # to make ?foo and help("foo") to work
         l = rparse("help <- function(...) { foo(); bar(...) }")

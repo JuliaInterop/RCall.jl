@@ -298,7 +298,7 @@ b = RObject(true)
 @test isa(convert(RObject{}, R"list(a=1,b=2)"), RObject)
 
 # issue 195
-@test isnull(rcopy(R"list(a=NULL)")[:a])
+@test isa(rcopy(R"list(a=NULL)")[:a], Nothing)
 
 # convert to Any
 @test isa(rcopy(Any, R"1"), Float64)

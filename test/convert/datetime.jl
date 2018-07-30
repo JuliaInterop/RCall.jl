@@ -9,12 +9,6 @@ r = RObject(d)
 @test rcopy(Date, r) === d
 @test rcopy(Date, R"as.Date($s)") == d
 @test rcopy(R"identical(as.Date($s), $d)")
-v = rcopy(Nullable, R"as.Date(NA)")
-@test isa(v, Nullable)
-@test isnull(v)
-v = rcopy(Nullable, R"as.Date($s)")
-@test isa(v, Nullable)
-@test !isnull(v)
 
 
 s = ["2001-01-01", "1111-11-11", "2012-12-12"]
@@ -66,12 +60,6 @@ r = RObject(d)
 @test rcopy(DateTime, r) === d
 @test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
 @test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
-v = rcopy(Nullable, R"as.POSIXct(NA, 'UTC', '%Y-%m-%dT%H:%M:%S')")
-@test isa(v, Nullable)
-@test isnull(v)
-v = rcopy(Nullable, R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')")
-@test isa(v, Nullable)
-@test !isnull(v)
 
 s = ["2001-01-01T01:01:01", "1111-11-11T11:11:00", "2012-12-12T12:12:12"]
 d = DateTime.(s)

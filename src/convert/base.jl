@@ -27,7 +27,7 @@ rcopy(::Type{RObject}, s::Ptr{S}) where S<:LangSxp = RObject(s)
 rcopy(::Type{Missing}, ::Ptr{S}) where S<:Sxp = missing
 
 # NilSxp
-rcopy(::Type{T}, ::Ptr{NilSxp}) where T = Nullable()
+rcopy(::Type{T}, ::Ptr{NilSxp}) where T = nothing
 rcopy(::Type{T}, ::Ptr{NilSxp}) where T<:AbstractArray = T()
 
 # SymSxp
@@ -171,13 +171,11 @@ function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:Abstract
         V = valtype(a)
         if sanitize && (K <: AbstractString || K <: Symbol)
             for k in rcopy(Array{String}, getnames(s))
-                println(typeof(rcopy(V, s[k])))
-                a[K(replace(k, "." => "_"))] = rcopy(V, s[k])
-                println(".")
+                a[convert(K, replace(k, "." => "_"))] = rcopy(V, s[k])
             end
         else
             for k in rcopy(Array{String}, getnames(s))
-                a[K(k)] = rcopy(V, s[k])
+                a[convert(K, k)] = rcopy(V, s[k])
             end
         end
     finally

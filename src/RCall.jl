@@ -6,13 +6,11 @@ using Libdl
 using Random
 using REPL
 using Missings
-using Nullables
 using CategoricalArrays
 using DataFrames
 using AxisArrays
 import StatsModels: Formula, parse!
 import DataStructures: OrderedDict
-import Nullables: isnull
 
 import Base: eltype, convert, isascii,
     names, length, size, getindex, setindex!, iterate, IteratorSize, IteratorEltype,
@@ -24,7 +22,7 @@ export RObject,
    ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
    getattrib, setattrib!, getnames, setnames!, getclass, setclass!, attributes,
    globalEnv,
-   isna, anyna,
+   isnull, isna, anyna,
    rcopy, rparse, rprint, reval, rcall, rlang,
    rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
@@ -45,7 +43,6 @@ include("convert/categorical.jl")
 include("convert/datetime.jl")
 include("convert/dataframe.jl")
 include("convert/formula.jl")
-include("convert/nullable.jl")
 include("convert/axisarray.jl")
 include("convert/default.jl")
 include("eventloop.jl")

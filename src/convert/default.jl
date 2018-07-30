@@ -56,7 +56,7 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
 end
 
 # NilSxp
-rcopy(::Ptr{NilSxp}) = Nullable()
+rcopy(::Ptr{NilSxp}) = nothing
 
 # SymSxp and CharSxp
 rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
@@ -192,9 +192,6 @@ RObject(s) = RObject(sexp(s))
 # nothing
 sexp(::Nothing) = sexp(Const.NilValue)
 
-# Nullable
-sexp(::Nullable{Union{}}) = sexp(Const.NilValue)
-
 # Missing
 sexp(::Missing) = sexp(LglSxp, Const.NaInt)
 
@@ -214,7 +211,6 @@ for (J,S) in ((:Integer,:IntSxp),
                  (:UInt8, :RawSxp))
     @eval begin
         sexp(v::$J) = sexp($S,v)
-        sexp(x::Nullable{T}) where T<:$J = sexp($S, x)
         sexp(a::Array{Union{T, Missing}}) where T<:$J = sexp($S,a)
         sexp(a::AbstractArray{T}) where T<:$J = sexp($S,a)
     end
