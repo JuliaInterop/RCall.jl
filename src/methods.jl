@@ -66,16 +66,20 @@ unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
 
 
 # Sxp iterator
-IteratorSize(x::Ptr{S}) where S<:Sxp = Base.HasLength()
+IteratorSize(x::Ptr{S}) where S<:Sxp = Base.SizeUnknown()
 IteratorEltype(x::Ptr{S}) where S<:Sxp = Base.EltypeUnknown()
+pairs(s::Ptr{S}) where S<:Sxp = Pairs(s, Base.OneTo(length(s)))
+
 # RObject iterator
 @inline iterate(x::RObject) = iterate(x.p)
 @inline iterate(x::RObject, state) = iterate(x.p, state)
 IteratorSize(x::RObject) = IteratorSize(x.p)
 IteratorEltype(x::RObject) = IteratorEltype(x.p)
+pairs(r::RObject{S}) where S<:Sxp = Pairs(r, Base.OneTo(length(r)))
 
 # NilSxp
 
+IteratorSize(x::Ptr{NilSxp}) = Base.HasLength()
 iterate(s::Ptr{NilSxp}) = nothing
 iterate(s::Ptr{NilSxp}, state) = nothing
 
@@ -86,6 +90,7 @@ getindex(r::RObject{S}, I::AbstractArray) where S<:VectorSxp = getindex(sexp(r),
 setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
 setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
 
+IteratorSize(x::Ptr{S}) where S<:VectorSxp = Base.HasLength()
 IteratorEltype(x::Ptr{S}) where S<:VectorSxp = Base.HasEltype()
 iterate(s::Ptr{S}) where S<:VectorSxp = iterate(s, 0)
 function iterate(s::Ptr{S}, state) where S<:VectorSxp
@@ -222,14 +227,18 @@ end
 
 
 # iterator for PairListSxp
-@inline iterate(x::Enumerate{Ptr{S}}) where S<:PairListSxp = iterate(x, x.itr)
-@inline function iterate(x::Enumerate{Ptr{S}}, state) where S<:PairListSxp
+IteratorSize(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
+IteratorEltype(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
+@inline iterate(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data)
+@inline function iterate(x::Pairs{K, V, I, Ptr{S}}, state) where {K, V, I, S<:PairListSxp}
     state == sexp(Const.NilValue) && return nothing
     (tag(state), car(state)), cdr(state)
 end
 
-@inline iterate(x::Enumerate{RObject{S}}) where S<:PairListSxp = iterate(x, x.itr.p)
-@inline function iterate(x::Enumerate{RObject{S}}, state) where S<:PairListSxp
+IteratorSize(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
+IteratorEltype(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
+@inline iterate(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data.p)
+@inline function iterate(x::Pairs{K, V, I, RObject{S}}, state) where {K, V, I, S<:PairListSxp}
     state == sexp(Const.NilValue) && return nothing
     (RObject(tag(state)), RObject(car(state))), cdr(state)
 end

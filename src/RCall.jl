@@ -13,9 +13,9 @@ import StatsModels: Formula, parse!
 import DataStructures: OrderedDict
 
 import Base: eltype, convert, isascii,
-    names, length, size, getindex, setindex!, iterate, IteratorSize, IteratorEltype,
+    names, length, size, getindex, setindex!,
     show, showerror, write
-import Base.Iterators: Enumerate
+import Base.Iterators: iterate, IteratorSize, IteratorEltype, Pairs, pairs
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,

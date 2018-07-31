@@ -43,7 +43,7 @@ function julia_extptr_callback(p::Ptr{ListSxp})
         # # extract arguments
         args = Any[]
         kwargs = Any[]
-        for (k,a) in enumerate(l)
+        for (k,a) in pairs(l)
             # TODO: provide a mechanism for users to specify their own
             # conversion routines
             if k == sexp(Const.NilValue)
