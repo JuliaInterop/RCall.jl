@@ -18,9 +18,9 @@ function sexp(::Type{RClass{:list}}, d::AbstractDataFrame)
         for i in 1:nc
             rd[i] = sexp(d[nv[i]])
         end
-        setattrib!(rd,Const.NamesSymbol, sexp([string(n) for n in nv]))
-        setattrib!(rd,Const.ClassSymbol, sexp("data.frame"))
-        setattrib!(rd,Const.RowNamesSymbol, sexp(1:nr))
+        setattrib!(rd,Const.NamesSymbol, [string(n) for n in nv])
+        setattrib!(rd,Const.ClassSymbol, "data.frame")
+        setattrib!(rd,Const.RowNamesSymbol, 1:nr)
     finally
         unprotect(1)
     end

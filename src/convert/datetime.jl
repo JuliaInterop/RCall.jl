@@ -74,14 +74,14 @@ end
 function sexp(::Type{RClass{:POSIXct}}, d::DateTime)
     res = protect(sexp(RClass{:numeric}, Float64(Dates.value(d) / 1000) - 62135683200))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
-    setattrib!(res, "tzone", sexp("UTC"))
+    setattrib!(res, "tzone", "UTC")
     unprotect(1)
     res
 end
 function sexp(::Type{RClass{:POSIXct}}, a::Array{DateTime})
     res = protect(sexp(RClass{:numeric}, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a)))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
-    setattrib!(res, "tzone", sexp("UTC"))
+    setattrib!(res, "tzone", "UTC")
     unprotect(1)
     res
 end
@@ -96,7 +96,7 @@ function sexp(::Type{RClass{:POSIXct}}, a::Array{Union{DateTime, Missing}})
             end
         end
         setclass!(rv, sexp(["POSIXct", "POSIXt"]))
-        setattrib!(rv, "tzone", sexp("UTC"))
+        setattrib!(rv, "tzone", "UTC")
     finally
         unprotect(1)
     end

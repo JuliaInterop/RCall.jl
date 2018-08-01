@@ -68,7 +68,7 @@ sexp_formula(n::Number) = sexp(n)
 function sexp(::Type{RClass{:formula}}, f::Formula)
     s = protect(sexp_formula(f.ex_orig == :() ? f.ex : f.ex_orig))
     try
-        setattrib!(s, Const.ClassSymbol, sexp("formula"))
+        setattrib!(s, Const.ClassSymbol, "formula")
         setattrib!(s, ".Environment", Const.GlobalEnv)
     finally
         unprotect(1)

@@ -8,7 +8,7 @@ function makeNativeSymbolRef(fptr::Ptr{Nothing})
     rexfn = ccall((:R_MakeExternalPtrFn,libR), Ptr{ExtPtrSxp},
                      (Ptr{Nothing}, Ptr{Nothing}, Ptr{Nothing}),
                      fptr, sexp(Symbol("native symbol")), sexp(Const.NilValue))
-    setattrib!(rexfn, Const.ClassSymbol, sexp("NativeSymbol"))
+    setattrib!(rexfn, Const.ClassSymbol, "NativeSymbol")
     preserve(rexfn)
     rexfn
 end

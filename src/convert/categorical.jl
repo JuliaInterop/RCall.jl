@@ -23,8 +23,8 @@ function sexp(::Type{RClass{:factor}}, v::CategoricalArray)
             end
         end
         # due to a bug of CategoricalArrays, we use index(v.pool) instead of index(v)
-        setattrib!(rv, Const.LevelsSymbol, sexp(CategoricalArrays.index(v.pool)))
-        setattrib!(rv, Const.ClassSymbol, sexp("factor"))
+        setattrib!(rv, Const.LevelsSymbol, CategoricalArrays.index(v.pool))
+        setattrib!(rv, Const.ClassSymbol, "factor")
         if CategoricalArrays.isordered(v)
             rv = rcall(:ordered, rv, CategoricalArrays.levels(v))
         end
