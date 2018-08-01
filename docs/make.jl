@@ -10,6 +10,7 @@ makedocs(
         "Getting Started" => "gettingstarted.md",
         "Supported Conversions" => "conversions.md",
         "Custom Conversion" => "custom.md",
+        "Eventloop" => "eventloop.md",
         "Internal" => "internal.md"
     ]
 )

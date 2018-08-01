@@ -16,8 +16,8 @@ RCall provides multiple ways to allow R interacting with Julia.
 - R REPL mode
 - [`@rput`](@ref) and [`@rget`](@ref) macros
 - `R""` string macro
-- RCall API: [`reval`](@ref), [`rcall`](@ref) and [`rcopy`](@ref) etc.
-- `@rlibrary` macro
+- RCall API: [`reval`](@ref), [`rcall`](@ref), [`rcopy`](@ref) and [`robject`](@ref) etc.
+- `@rlibrary` and `@rimport` macros
 
 
 ## R REPL mode
@@ -144,24 +144,30 @@ The [`rcopy`](@ref) function converts `RObject`s to Julia objects. It uses a var
 rcopy(R"c(1)")
 rcopy(R"c(1, 2)")
 rcopy(R"list(1, 'zz')")
-rcopy(R"list(a=1, b='zz')")
+rcopy(R"list(a = 1, b= 'zz')")
 ```
 
 It is possible to force a specific conversion by passing the output type as the first argument:
 
 ```@repl 1
-rcopy(Array{Int}, R"c(1,2)")
+rcopy(Array{Int}, R"c(1, 2)")
 ```
 
-Converters and Constructors could also be used specifically to yield the desired type.
+Converter could also be used specifically to yield the desired type.
 
 ```@repl 1
-convert(Array{Float64}, R"c(1,2)")
-Float64(R"1+3")
+convert(Array{Float64}, R"c(1, 2)")
+```
+
+The [`robject`](@ref) function converts any julia object to an RObject.
+
+```@repl 1
+robject(1)
+robject(Dict(:a => 1, :b = 2))
 ```
 
 
-## `@rlibrary` macro
+## `@rlibrary` and `@rimport` macros
 
 This micro loads all exported functions/objects of an R package to the current module.
 
@@ -177,6 +183,7 @@ Of course, it is highly inefficient, because the data are copying multiple times
 
 Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,
 
-```
-sum([1, 2, 3], var"rm.na" = True)
+```@repl 1
+@rimport base as rbase
+rbase.sum([1, 2, 3], var"rm.na" = true)
 ```

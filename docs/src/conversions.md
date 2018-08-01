@@ -3,7 +3,12 @@
 RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., `DataFrames`, `CategoricalArrays` and `AxisArrays`.
 
 ```@setup 1
+using Pkg
+Pkg.add("DataFrames")
+Pkg.add("AxisArrays")
+
 using RCall
+using Dates
 using DataFrames
 using AxisArrays
 ```

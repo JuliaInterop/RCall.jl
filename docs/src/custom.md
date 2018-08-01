@@ -9,7 +9,7 @@ using RCall
 ```
 
 ```@example 2
-type Foo
+mutable struct Foo
     x::Float64
     y::String
 end
@@ -17,6 +17,11 @@ end
 
 ```@example 2
 foo = Foo(1.0, "hello") 
+bar = R"""
+    bar <- list(x = 1, y = "hello")
+    class(bar) <- "Bar"
+    bar
+"""
 nothing # hide
 ```
 
@@ -38,19 +43,18 @@ end
 The `convert` function will dispatch the corresponding `rcopy` function when it is found.
 
 ```@example 2
-rcopy(Foo, roo)
-convert(Foo, roo) # calls `rcopy`
-Foo(roo)
+rcopy(Foo, bar)
+convert(Foo, bar) # calls `rcopy`
 nothing # hide
 ```
 
-To allow the automatic conversion via `rcopy(roo)`, the R class `Bar` has to be registered.
+To allow the automatic conversion via `rcopy(bar)`, the R class `Bar` has to be registered.
 
 ```@example 2
 import RCall: RClass, rcopytype
 
 rcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo
-boo = rcopy(roo)
+foo2 = rcopy(bar)
 nothing # hide
 ```
 
@@ -64,7 +68,7 @@ conversion. `sexp` function takes a julia object and returns an SEXP object
 First we define an explicit converter from Julia type `Foo` to R class `Bar`
 
 ```@example 2
-import RCall: sexp, RClass
+import RCall: sexp, protect, unprotect, setclass!, RClass
 
 function sexp(::Type{RClass{:Bar}}, f::Foo)
     r = protect(sexp(Dict(:x => f.x, :y => f.y)))
@@ -73,7 +77,7 @@ function sexp(::Type{RClass{:Bar}}, f::Foo)
     r
 end
 
-roo = robject(:Bar, foo)
+bar = robject(:Bar, foo)
 nothing # hide
 ```
 
@@ -85,32 +89,32 @@ To register the default conversion via `robject(foo)`, we need to define `sexpcl
 import RCall.sexpclass
 
 sexpclass(f::Foo) = RClass{:Bar}
-roo = robject(foo)
+bar = robject(foo)
 nothing # hide
 ```
 
 ## Using @rput and @rget is seamless
 
 ```@example 2
-boo.x = 2.0
-@rput boo
+foo2.x = 2.0
+@rput foo2
 R"""
-boo["x"]
+foo2["x"]
 """
 ```
 
 ```@example 2
 R"""
-boo["x"] = 3.0
+foo2["x"] = 3.0
 """
-@rget boo
-boo.x
+@rget foo2
+foo2.x
 ```
 
 ## Nested conversion
 
 ```@example 2
-l = R"list(boo = boo, roo = $roo)"
+l = R"list(foo2 = foo2, bar = $bar)"
 ```
 
 ```@example 2
