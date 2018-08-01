@@ -1,35 +1,28 @@
 __precompile__()
 module RCall
-using Compat
 
+using Dates
+using Libdl
+using Random
+using REPL
 using Missings
-using DataArrays
 using CategoricalArrays
 using DataFrames
 using AxisArrays
 import StatsModels: Formula, parse!
 import DataStructures: OrderedDict
 
-using Compat.Dates
-
-if isdefined(DataArrays, :isna)
-    import DataArrays: isna
-end
-
-if isdefined(DataArrays, :anyna)
-    import DataArrays: anyna
-end
-
-import Base: eltype, convert, isascii, isnull,
-    names, length, size, getindex, setindex!, start, next, done,
+import Base: eltype, convert, isascii,
+    names, length, size, getindex, setindex!,
     show, showerror, write
+import Base.Iterators: iterate, IteratorSize, IteratorEltype, Pairs, pairs
 
 export RObject,
    Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
    ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
    getattrib, setattrib!, getnames, setnames!, getclass, setclass!, attributes,
    globalEnv,
-   isna, anyna,
+   isnull, isna, anyna,
    rcopy, rparse, rprint, reval, rcall, rlang,
    rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
@@ -46,12 +39,10 @@ include("Const.jl")
 include("methods.jl")
 include("convert/base.jl")
 include("convert/missing.jl")
-include("convert/dataarray.jl")
 include("convert/categorical.jl")
 include("convert/datetime.jl")
 include("convert/dataframe.jl")
 include("convert/formula.jl")
-include("convert/nullable.jl")
 include("convert/axisarray.jl")
 include("convert/default.jl")
 include("eventloop.jl")

@@ -3,10 +3,10 @@ Register a function pointer as an R NativeSymbol. We technically are supposed to
 R_registerRoutines. Starting from R 3.4, `R_MakeExternalPtrFn` is a part of R API in R 3.4.
 It is probably safe to such to make the external pointer.
 """
-function makeNativeSymbolRef(fptr::Ptr{Void})
+function makeNativeSymbolRef(fptr::Ptr{Nothing})
     # mirror Rf_MakeNativeSymbolRef of Rdynload.c
     rexfn = ccall((:R_MakeExternalPtrFn,libR), Ptr{ExtPtrSxp},
-                     (Ptr{Void}, Ptr{Void}, Ptr{Void}),
+                     (Ptr{Nothing}, Ptr{Nothing}, Ptr{Nothing}),
                      fptr, sexp(Symbol("native symbol")), sexp(Const.NilValue))
     setattrib!(rexfn, Const.ClassSymbol, sexp("NativeSymbol"))
     preserve(rexfn)
@@ -15,9 +15,9 @@ end
 
 
 "Create an Ptr{ExtPtrSxp} object"
-makeExternalPtr(ptr::Ptr{Void}, tag=Const.NilValue, prot=Const.NilValue) =
+makeExternalPtr(ptr::Ptr{Nothing}, tag=Const.NilValue, prot=Const.NilValue) =
     ccall((:R_MakeExternalPtr,libR), Ptr{ExtPtrSxp},
-          (Ptr{Void}, Ptr{UnknownSxp}, Ptr{UnknownSxp}),
+          (Ptr{Nothing}, Ptr{UnknownSxp}, Ptr{UnknownSxp}),
           ptr, sexp(tag), sexp(prot))
 
 
@@ -36,14 +36,14 @@ function julia_extptr_callback(p::Ptr{ListSxp})
 
         # julia function pointer
         f_sxp = car(l)::Ptr{ExtPtrSxp}
-        ptr = ccall((:R_ExternalPtrAddr, libR), Ptr{Void}, (Ptr{ExtPtrSxp},), f_sxp)
+        ptr = ccall((:R_ExternalPtrAddr, libR), Ptr{Nothing}, (Ptr{ExtPtrSxp},), f_sxp)
         f = unsafe_pointer_to_objref(ptr)
         l = cdr(l)
 
         # # extract arguments
         args = Any[]
         kwargs = Any[]
-        for (k,a) in enumerate(l)
+        for (k,a) in pairs(l)
             # TODO: provide a mechanism for users to specify their own
             # conversion routines
             if k == sexp(Const.NilValue)
@@ -59,7 +59,7 @@ function julia_extptr_callback(p::Ptr{ListSxp})
         # return appropriate sexp
         return p = convert(Ptr{UnknownSxp}, sexp(y))::Ptr{UnknownSxp}
     catch e
-        ccall((:Rf_error,libR),Ptr{Void},(Ptr{Cchar},),string(e))
+        ccall((:Rf_error,libR),Ptr{Nothing},(Ptr{Cchar},),string(e))
         return convert(Ptr{UnknownSxp}, sexp(Const.NilValue))::Ptr{UnknownSxp}
     finally
         unprotect(1)
@@ -87,9 +87,9 @@ Register finalizer to be called by the R GC.
 """
 function registerCFinalizerEx(s::Ptr{ExtPtrSxp})
     protect(s)
-    decref_extptr_ptr = cfunction(decref_extptr,Void,(Ptr{ExtPtrSxp},))
-    ccall((:R_RegisterCFinalizerEx,libR),Void,
-          (Ptr{ExtPtrSxp}, Ptr{Void}, Cint),
+    decref_extptr_ptr = @cfunction(decref_extptr,Nothing,(Ptr{ExtPtrSxp},))
+    ccall((:R_RegisterCFinalizerEx,libR),Nothing,
+          (Ptr{ExtPtrSxp}, Ptr{Nothing}, Cint),
           s,decref_extptr_ptr,0)
     unprotect(1)
 end
@@ -99,7 +99,7 @@ const juliaCallback = RObject{ExtPtrSxp}()
 
 
 function setup_callbacks()
-    julia_extptr_callback_ptr = cfunction(julia_extptr_callback,Ptr{UnknownSxp},(Ptr{ListSxp},))
+    julia_extptr_callback_ptr = @cfunction(julia_extptr_callback,Ptr{UnknownSxp},(Ptr{ListSxp},))
     juliaCallback.p = makeNativeSymbolRef(julia_extptr_callback_ptr)
 end
 
@@ -111,7 +111,7 @@ We store the pointer and the object in a const Dict to prevent it being
 removed by the Julia GC.
 """
 function sexp(::Type{ExtPtrSxp}, j)
-    jptr = pointer_from_objref(j)
+    jptr = ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), j)
     s = makeExternalPtr(jptr)
     jtypExtPtrs[s] = j
     registerCFinalizerEx(s)

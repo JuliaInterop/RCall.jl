@@ -1,7 +1,8 @@
-import Base: REPL, LineEdit, Terminals
+using REPL
+import REPL: Terminals
 using RCall
 
-mutable struct FakeTerminal <: Base.Terminals.UnixTerminal
+mutable struct FakeTerminal <: Terminals.UnixTerminal
     in_stream::Base.IO
     out_stream::Base.IO
     err_stream::Base.IO
@@ -11,26 +12,26 @@ mutable struct FakeTerminal <: Base.Terminals.UnixTerminal
         new(stdin,stdout,stderr,hascolor,false)
 end
 
-Base.Terminals.hascolor(t::FakeTerminal) = t.hascolor
-Base.Terminals.raw!(t::FakeTerminal, raw::Bool) = t.raw = raw
-Base.Terminals.size(t::FakeTerminal) = (24, 80)
+Terminals.hascolor(t::FakeTerminal) = t.hascolor
+Terminals.raw!(t::FakeTerminal, raw::Bool) = t.raw = raw
+Terminals.size(t::FakeTerminal) = (24, 80)
 
 # fake repl
 
-stdin_read,stdin_write = (Base.PipeEndpoint(), Base.PipeEndpoint())
-stdout_read,stdout_write = (Base.PipeEndpoint(), Base.PipeEndpoint())
-stderr_read,stderr_write = (Base.PipeEndpoint(), Base.PipeEndpoint())
-Base.link_pipe(stdin_read,true,stdin_write,true)
-Base.link_pipe(stdout_read,true,stdout_write,true)
-Base.link_pipe(stderr_read,true,stderr_write,true)
+input = Pipe()
+output = Pipe()
+err = Pipe()
+Base.link_pipe!(input, reader_supports_async=true, writer_supports_async=true)
+Base.link_pipe!(output, reader_supports_async=true, writer_supports_async=true)
+Base.link_pipe!(err, reader_supports_async=true, writer_supports_async=true)
 
-repl = Base.REPL.LineEditREPL(FakeTerminal(stdin_read, stdout_write, stderr_write,false))
+repl = REPL.LineEditREPL(FakeTerminal(input.out, output.in, err.in), true)
 
 repltask = @async begin
-    Base.REPL.run_repl(repl)
+    REPL.run_repl(repl)
 end
 
-send_repl(x, enter=true) = write(stdin_write, enter ? "$x\n" : x)
+send_repl(x, enter=true) = write(input, enter ? "$x\n" : x)
 
 function read_repl(io::IO, x)
     cache = Ref{Any}("")
@@ -38,13 +39,13 @@ function read_repl(io::IO, x)
     t = Base.Timer((_) -> Base.throwto(read_task,
                 ErrorException("Expect \"$x\", but wait too long.")), 5)
     schedule(read_task)
-    wait(read_task)
+    fetch(read_task)
     close(t)
     cache[]
 end
 
-check_repl_stdout(x) = length(read_repl(stdout_read, x)) > 0
-check_repl_stderr(x) = length(read_repl(stderr_read, x)) > 0
+check_repl_stdout(x) = length(read_repl(output, x)) > 0
+check_repl_stderr(x) = length(read_repl(err, x)) > 0
 
 # waiting for the repl
 send_repl("using RCall")
@@ -103,8 +104,8 @@ send_repl("\$not_found")
 
 send_repl("'apple'")
 send_repl("paste0('check', 'point')")
-@test contains(read_repl(stdout_read, "checkpoint"), "\"apple\"")
+@test occursin("\"apple\"", read_repl(output, "checkpoint"))
 
 send_repl("invisible('apple')")
 send_repl("paste0('check', 'point')")
-@test !contains(read_repl(stdout_read, "checkpoint"), "\"apple\"")
+@test !occursin("\"apple\"", read_repl(output, "checkpoint"))

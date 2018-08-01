@@ -1,11 +1,9 @@
-julia 0.6
+julia 0.7.0-beta2
 Missings 0.2.0
 DataStructures 0.5.0
 DataFrames 0.11.0
-DataArrays 0.7.0
 CategoricalArrays 0.3.0
 AxisArrays 0.0.6
-Compat 0.34.0
 StatsModels 0.2.4
 Conda
 @windows WinReg 0.2.0

@@ -37,7 +37,7 @@ end
 
 for (S, J) in ((:LglSxp, "LOGICAL"), (:IntSxp, "INTEGER"),
                 (:RealSxp, "REAL"), (:CplxSxp, "COMPLEX"), (:RawSxp, "RAW"))
-    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Void}, (Ptr{UnknownSxp},), s))
+    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Nothing}, (Ptr{UnknownSxp},), s))
 end
 
 """
@@ -64,15 +64,24 @@ The same as `unsafe_vec`, except returns an appropriately sized array.
 unsafe_array(s::Ptr{S}) where S<:VectorSxp =  unsafe_wrap(Array, dataptr(s), size(s))
 unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
 
-# used in indexing
-start(s::Ptr{NilSxp}) = 0
-next(s::Ptr{NilSxp},state) = (s, state)
-done(s::Ptr{NilSxp},state) = true
 
-start(r::RObject{NilSxp}) = 0
-next(r::RObject{NilSxp},state) = (r, state)
-done(r::RObject{NilSxp},state) = true
+# Sxp iterator
+IteratorSize(x::Ptr{S}) where S<:Sxp = Base.SizeUnknown()
+IteratorEltype(x::Ptr{S}) where S<:Sxp = Base.EltypeUnknown()
+pairs(s::Ptr{S}) where S<:Sxp = Pairs(s, Base.OneTo(length(s)))
 
+# RObject iterator
+@inline iterate(x::RObject) = iterate(x.p)
+@inline iterate(x::RObject, state) = iterate(x.p, state)
+IteratorSize(x::RObject) = IteratorSize(x.p)
+IteratorEltype(x::RObject) = IteratorEltype(x.p)
+pairs(r::RObject{S}) where S<:Sxp = Pairs(r, Base.OneTo(length(r)))
+
+# NilSxp
+
+IteratorSize(x::Ptr{NilSxp}) = Base.HasLength()
+iterate(s::Ptr{NilSxp}) = nothing
+iterate(s::Ptr{NilSxp}, state) = nothing
 
 # VectorSxp
 
@@ -80,15 +89,16 @@ getindex(r::RObject{S}, I...) where S<:VectorSxp = getindex(sexp(r), I...)
 getindex(r::RObject{S}, I::AbstractArray) where S<:VectorSxp = getindex(sexp(r), I)
 setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
 setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
-setindex!(r::RObject{S}, ::Nullable{Union{}}, keys...) where S<:VectorSxp = setindex!(sexp(r), sexp(Const.NilValue), keys...)
 
-start(s::Ptr{S}) where S<:VectorSxp = 0
-next(s::Ptr{S},state) where S<:VectorSxp = (state += 1;(s[state],state))
-done(s::Ptr{S},state) where S<:VectorSxp = state ≥ length(s)
+IteratorSize(x::Ptr{S}) where S<:VectorSxp = Base.HasLength()
+IteratorEltype(x::Ptr{S}) where S<:VectorSxp = Base.HasEltype()
+iterate(s::Ptr{S}) where S<:VectorSxp = iterate(s, 0)
+function iterate(s::Ptr{S}, state) where S<:VectorSxp
+    state ≥ length(s) && return nothing
+    state += 1
+    (s[state], state)
+end
 
-start(s::RObject{S}) where S<:VectorSxp = start(s.p)
-next(s::RObject{S},state) where S<:VectorSxp = next(s.p, state)
-done(s::RObject{S},state) where S<:VectorSxp = done(s.p, state)
 
 """
 Set element of a VectorSxp by a label.
@@ -135,8 +145,15 @@ end
 
 # VectorList
 
+IteratorEltype(x::RObject{S}) where S<:VectorListSxp = Base.EltypeUnknown()
+iterate(s::RObject{S}) where S<:VectorListSxp = iterate(s, 0)
+function iterate(s::RObject{S}, state) where S<:VectorListSxp
+    state ≥ length(s) && return nothing
+    state += 1
+    (RObject(s[state]), state)
+end
 getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
-getindex(r::RObject{S}, I::AbstractArray) where S<:VectorListSxp = RObject(getindex(sexp(r), I))
+
 
 # StrSxp
 
@@ -146,7 +163,7 @@ end
 
 function setindex!(s::Ptr{StrSxp}, value::Ptr{CharSxp}, key::Integer)
     1 <= key <= length(s) || throw(BoundsError())
-    ccall((:SET_STRING_ELT,libR), Void,
+    ccall((:SET_STRING_ELT,libR), Nothing,
           (Ptr{StrSxp},Cptrdiff_t, Ptr{CharSxp}),
           s, key-1, value)
     value
@@ -179,47 +196,52 @@ car(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:CAR,libR),Ptr{UnknownSxp},(Pt
 tag(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:TAG,libR),Ptr{UnknownSxp},(Ptr{S},),s))
 
 function setcar!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SETCAR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
+    ccall((:SETCAR,libR),Ptr{Nothing},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 setcar!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcar!(s,sexp(c))
 
 function settag!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SET_TAG,libR),Void,(Ptr{S},Ptr{T}),s,c)
+    ccall((:SET_TAG,libR),Nothing,(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 settag!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = settag!(s,sexp(c))
 
 function setcdr!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SETCDR,libR),Ptr{Void},(Ptr{S},Ptr{T}),s,c)
+    ccall((:SETCDR,libR),Ptr{Nothing},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 setcdr!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcdr!(s,sexp(c))
 
-start(s::Ptr{S}) where S<:PairListSxp = s
-function next(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
+iterate(s::Ptr{S}) where S<:PairListSxp = iterate(s, s)
+function iterate(s::Ptr{S}, state) where S<:PairListSxp
+    state == sexp(Const.NilValue) && return nothing
     car(state), cdr(state)
 end
-done(s::Ptr{S},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
-start(s::RObject{S}) where S<:PairListSxp = start(s.p)
-function next(s::RObject{S},state) where S<:PairListSxp
-    item, state = next(s.p, state)
-    RObject(item), state
+iterate(s::RObject{S}) where S<:PairListSxp = iterate(s, s.p)
+function iterate(s::RObject{S}, state) where S<:PairListSxp
+    state == sexp(Const.NilValue) && return nothing
+    RObject(car(state)), cdr(state)
 end
-done(s::RObject{S},state) where S<:PairListSxp = done(s.p, state)
 
-start(s::Enumerate{Ptr{S}}) where S<:PairListSxp = s.itr
-function next(s::Enumerate{Ptr{S}},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp}
+
+# iterator for PairListSxp
+IteratorSize(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
+IteratorEltype(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
+@inline iterate(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data)
+@inline function iterate(x::Pairs{K, V, I, Ptr{S}}, state) where {K, V, I, S<:PairListSxp}
+    state == sexp(Const.NilValue) && return nothing
     (tag(state), car(state)), cdr(state)
 end
-done(s::Enumerate{Ptr{S}},state::Ptr{T}) where {S<:PairListSxp, T<:PairListSxp} = state == sexp(Const.NilValue)
 
-start(s::Enumerate{RObject{S}}) where S<:PairListSxp = start(s.itr)
-function next(s::Enumerate{RObject{S}},state) where S<:PairListSxp
+IteratorSize(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
+IteratorEltype(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
+@inline iterate(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data.p)
+@inline function iterate(x::Pairs{K, V, I, RObject{S}}, state) where {K, V, I, S<:PairListSxp}
+    state == sexp(Const.NilValue) && return nothing
     (RObject(tag(state)), RObject(car(state))), cdr(state)
 end
-done(s::Enumerate{RObject{S}},state) where S<:PairListSxp = done(s.itr, state)
 
 "extract the i-th element of a PairListSxp"
 function getindex(l::Ptr{S},I::Integer) where S<:PairListSxp
@@ -274,7 +296,6 @@ setindex!(s::Ptr{S}, value, label::Symbol) where S<:PairListSxp = setindex!(s, v
 
 # for RObjects
 setindex!(r::RObject{S}, value, key) where S<:PairListSxp = setindex!(sexp(r), value, key)
-setindex!(r::RObject{S}, ::Nullable{Union{}}, key) where S<:PairListSxp = setindex!(sexp(r), sexp(Const.NilValue), key)
 
 
 # S4Sxp
@@ -302,7 +323,6 @@ end
 setindex!(s::Ptr{S4Sxp}, value, sym) = setindex!(s, sexp(value), sexp(SymSxp, sym))
 # for RObjects
 setindex!(s::RObject{S4Sxp}, value, sym) = setindex!(sexp(s), value, sym)
-setindex!(s::RObject{S4Sxp}, ::Nullable{Union{}}, sym) = setindex!(sexp(s), sexp(Const.NilValue), sym)
 
 
 "Return a particular attribute of an RObject"
@@ -314,7 +334,7 @@ getattrib(r::RObject, sym) = RObject(getattrib(r.p,sym))
 
 "Set a particular attribute of an RObject"
 function setattrib!(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T}) where {S<:Sxp, T<:Sxp}
-    ccall((:Rf_setAttrib,libR),Ptr{Void},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
+    ccall((:Rf_setAttrib,libR),Ptr{Nothing},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
 end
 setattrib!(s::Ptr{S}, sym, t) where S<:Sxp = setattrib!(s, sexp(SymSxp,sym), sexp(t))
@@ -411,7 +431,7 @@ naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 Check if a value corresponds to R's sentinel NA values.
 These function should not be exported.
 """
-isNA(x::Complex128) = real(x) === Const.NaReal && imag(x) === Const.NaReal
+isNA(x::ComplexF64) = real(x) === Const.NaReal && imag(x) === Const.NaReal
 isNA(x::Float64) = x === Const.NaReal
 isNA(x::Int32) = x == Const.NaInt
 isNA(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
@@ -483,7 +503,7 @@ end
 findVarInFrame(e, s) = findVarInFrame(sexp(e), sexp(SymSxp, s))
 
 function defineVar(s::Ptr{SymSxp}, v::Ptr{S}, e::Ptr{EnvSxp}) where S<:Sxp
-    ccall((:Rf_defineVar,libR),Void,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
+    ccall((:Rf_defineVar,libR),Nothing,(Ptr{SymSxp},Ptr{S},Ptr{EnvSxp}),s,v,e)
     nothing
 end
 defineVar(s, v, p) = defineVar(sexp(SymSxp, s), sexp(v), sexp(p))
@@ -517,7 +537,6 @@ function setindex!(e::Ptr{EnvSxp},v,s)
     end
 end
 setindex!(e::RObject{EnvSxp}, v, s) = setindex!(sexp(e), v, s)
-setindex!(e::RObject{EnvSxp}, ::Nullable{Union{}}, s) = setindex!(sexp(e), sexp(Const.NilValue), s)
 
 """
     newEnvironment([env])
@@ -543,6 +562,6 @@ getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"
 
 "Set the variable .Last.value to a given value"
 function set_last_value(s::Ptr{S}) where S<:Sxp
-    ccall((:SET_SYMVALUE,libR),Void,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
+    ccall((:SET_SYMVALUE,libR),Nothing,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
     nothing
 end

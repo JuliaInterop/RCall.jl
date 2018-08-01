@@ -1,4 +1,4 @@
-if Compat.Sys.isunix()
+if Sys.isunix()
     "R eventloop hook on Unix system"
     function polled_events()
         event_callback()
@@ -7,16 +7,16 @@ if Compat.Sys.isunix()
 end
 
 "Event Callback: allows R to process Julia events when R is busy.
-For example, writing output to STDOUT while running an expensive R command."
+For example, writing output to stdout while running an expensive R command."
 function event_callback()
-    # dump output buffer to STDOUT when available
+    # dump output buffer to stdout when available
     handle_eval_stdout()
     nothing
 end
 
 # there is no use now, maybe useful for the future.
 function interrupts_pending(s::Bool=true)
-    @static if Compat.Sys.iswindows()
+    @static if Sys.iswindows()
         unsafe_store!(cglobal((:UserBreak,libR),Cint), s ? 1 : 0)
     else
         unsafe_store!(cglobal((:R_interrupts_pending,libR),Cint), s ? 1 : 0)
@@ -28,14 +28,14 @@ end
 function process_events()
     ##FIXME: a dirty fix to prevent segfault right after a sigint
     if unsafe_load(cglobal((:R_interrupts_pending,libR),Cint)) == 0
-        @static if Compat.Sys.iswindows() || Compat.Sys.isapple()
-            ccall((:R_ProcessEvents, libR), Void, ())
+        @static if Sys.iswindows() || Sys.isapple()
+            ccall((:R_ProcessEvents, libR), Nothing, ())
         end
-        @static if Compat.Sys.isunix()
-            what = ccall((:R_checkActivity,libR),Ptr{Void},(Cint,Cint),0,1)
+        @static if Sys.isunix()
+            what = ccall((:R_checkActivity,libR),Ptr{Nothing},(Cint,Cint),0,1)
             if what != C_NULL
-                R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Void}))
-                ccall((:R_runHandlers,libR),Void,(Ptr{Void},Ptr{Void}),R_InputHandlers,what)
+                R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Nothing}))
+                ccall((:R_runHandlers,libR),Nothing,(Ptr{Nothing},Ptr{Nothing}),R_InputHandlers,what)
             end
         end
     end
@@ -47,7 +47,7 @@ global timeout = nothing
 function rgui_start(silent=false)
     global timeout
     if timeout == nothing
-        timeout = Base.Timer(x -> process_events(), 0.05, 0.05)
+        timeout = Base.Timer(x -> process_events(), 0.05, interval = 0.05)
         return true
     else
         silent || error("eventloop is already running.")
@@ -83,7 +83,7 @@ function rgui_init()
 
     # inject rgui_start(TRUE) to utils::help
     help_type = rcopy(rcall(:options, "help_type")[1])
-    if  !isnull(help_type) && help_type == "html"
+    if  help_type == "html"
         # need to hack both as.environment('package:utils') and  getNamespace("utils")
         # to make ?foo and help("foo") to work
         l = rparse("help <- function(...) { foo(); bar(...) }")

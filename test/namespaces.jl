@@ -4,7 +4,7 @@
 
 module NamespaceTests
     using RCall
-    using Base.Test
+    using Test
 
     @rimport MASS
     @test rcopy(rcall(MASS.ginv, RObject([1 2; 0 4]))) ≈ [1 -0.5; 0 0.25]

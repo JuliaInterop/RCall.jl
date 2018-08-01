@@ -1,10 +1,8 @@
-using Base.Test
-using Compat
+using Test
 
 hd = homedir()
-pd = Pkg.dir()
 
-if Compat.Sys.iswindows()
+if Sys.iswindows()
     Rhome = if haskey(ENV,"R_HOME")
         ENV["R_HOME"]
     else
@@ -17,12 +15,10 @@ else
 end
 
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
-if VERSION < v"0.6.0"
-    libpaths = map(chomp, libpaths)
-end
 
 using RCall
 using Missings
+using Dates
 
 println(R"sessionInfo()")
 
@@ -30,7 +26,6 @@ println(R"l10n_info()")
 
 # https://github.com/JuliaStats/RCall.jl/issues/68
 @test hd == homedir()
-@test pd == Pkg.dir()
 
 # https://github.com/JuliaInterop/RCall.jl/issues/206
 @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
@@ -42,7 +37,6 @@ tests = ["basic",
          "convert/dataframe",
          "convert/categorical",
          "convert/formula",
-         "convert/nullable",
          "convert/axisarray",
          "macros",
          "namespaces",

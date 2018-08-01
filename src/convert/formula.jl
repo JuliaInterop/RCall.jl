@@ -19,9 +19,15 @@ function rcopy(::Type{Expr}, l::Ptr{LangSxp})
     if op == Symbol("(")
         f = rcopy(Expr, l[2])
     else
-        f = Expr(:call, op,
-            [ isNull(t) ? rcopy_formula(s) : Expr(:(=), rcopy_formula(t), rcopy_formula(s))
-                for (t, s) in enumerate(args)]...)
+        cargs = []
+        for (t, s) in pairs(args)
+            if isNull(t)
+                push!(cargs, rcopy_formula(s))
+            else
+                push!(cargs, Expr(:(=), rcopy_formula(t), rcopy_formula(s)))
+            end
+        end
+        f = Expr(:call, op, cargs...)
     end
     # unwind these opeators
     if op in (:+, :*, :&) && isa(f.args[2], Expr) && f.args[2].args[1] == op

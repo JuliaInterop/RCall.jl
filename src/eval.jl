@@ -13,14 +13,14 @@ It also catches possible R's `stop` calls which may cause longjmp in c. The erro
 evaluate when such an exception is caught.
 """
 function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
-    fptr = cfunction(
-        (a) -> convert(Ptr{UnknownSxp}, f(unsafe_pointer_to_objref(a)...)),
-        Ptr{UnknownSxp}, (Ptr{Void}, ))
-    eptr = cfunction(make_error_handler(err), Ptr{UnknownSxp}, (Ptr{UnknownSxp}, Ptr{Void}))
+    fptr = @cfunction(
+        $((a) -> convert(Ptr{UnknownSxp}, f(unsafe_pointer_to_objref(a)...))),
+        Ptr{UnknownSxp}, (Ptr{Nothing}, )).ptr
+    eptr = @cfunction($(make_error_handler(err)), Ptr{UnknownSxp}, (Ptr{UnknownSxp}, Ptr{Nothing})).ptr
     ret = ccall((:R_tryCatchError, libR), Ptr{UnknownSxp},
-          (Ptr{Void}, Ptr{Void}, Ptr{Void}, Ptr{Void}),
-          fptr, pointer_from_objref(fargs),
-          eptr, pointer_from_objref(eargs))
+          (Ptr{Nothing}, Ptr{Nothing}, Ptr{Nothing}, Ptr{Nothing}),
+          fptr, ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), fargs),
+          eptr, ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), eargs))
     sexp(ret)
 end
 
@@ -108,7 +108,7 @@ end
 
 """
 Evaluate an R expression array iteratively. If `throw_error` is `false`,
-the error message and warning will be thrown to STDERR.
+the error message and warning will be thrown to stderr.
 """
 function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     local val

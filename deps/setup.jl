@@ -17,12 +17,12 @@ function validate_libR(libR, raise=true)
         Libdl.dlopen(libR)
     catch er
         raise || return false
-        Base.with_output_color(:red, STDERR) do io
+        Base.with_output_color(:red, stderr) do io
             print(io, "ERROR: ")
             showerror(io, er)
             println(io)
         end
-        if Compat.Sys.iswindows()
+        if Sys.iswindows()
             error("Try adding $(dirname(libR)) to the \"PATH\" environmental variable and restarting Julia.")
         else
             error("Try adding $(dirname(libR)) to the \"LD_LIBRARY_PATH\" environmental variable and restarting Julia.")
@@ -43,7 +43,7 @@ function validate_libR(libR, raise=true)
 end
 
 function locate_libR(Rhome, raise=true)
-    @static if Compat.Sys.iswindows()
+    @static if Sys.iswindows()
         libR = joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386", "R.dll")
     else
         libR = joinpath(Rhome, "lib", "libR.$(Libdl.dlext)")

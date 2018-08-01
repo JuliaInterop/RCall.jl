@@ -1,7 +1,7 @@
 module RPrompt
 
-import Base: LineEdit, REPL, REPLCompletions
-import DataStructures: OrderedDict
+using REPL
+import REPL: REPL, LineEdit, REPLCompletions
 import ..REvalError
 import ..Const
 import ..RCall:
@@ -50,7 +50,7 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
     try
         script, symdict = render(script)
         if length(symdict) > 0
-            eval(Main, prepare_inline_julia_code(symdict))
+            Core.eval(Main, prepare_inline_julia_code(symdict))
         end
         ret = protect(reval_p(rparse_p("withVisible({$script})"), Const.GlobalEnv.p))
         nprotect += 1
@@ -77,7 +77,7 @@ function bracketed_paste_callback(s, o...)
     sbuffer = LineEdit.buffer(s)
     curspos = position(sbuffer)
     seek(sbuffer, 0)
-    shouldeval = (nb_available(sbuffer) == curspos && search(sbuffer, UInt8('\n')) == 0)
+    shouldeval = (bytesavailable(sbuffer) == curspos && search(sbuffer, UInt8('\n')) == 0)
     seek(sbuffer, curspos)
     if curspos == 0
         # if pasting at the beginning, strip leading whitespace
@@ -137,9 +137,9 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
     partial = String(buf.data[1:buf.ptr-1])
     # complete latex
     full = LineEdit.input_string(s)
-    ret, range, should_complete = REPLCompletions.bslash_completions(full, endof(partial))[2]
+    ret, range, should_complete = REPLCompletions.bslash_completions(full, lastindex(partial))[2]
     if length(ret) > 0 && should_complete
-        return ret, partial[range], true
+        return map(REPLCompletions.completion_text, ret), partial[range], should_complete
     end
 
     # complete r
@@ -167,7 +167,7 @@ function create_r_repl(repl, main)
     r_mode.hist = hp
     r_mode.complete = RCompletionProvider(repl)
     r_mode.on_enter = (s) -> begin
-        status = parse_status(String(LineEdit.buffer(s)))
+        status = parse_status(String(take!(copy(LineEdit.buffer(s)))))
         status == :ok || status == :error
     end
     r_mode.on_done = (s, buf, ok) -> begin
@@ -189,7 +189,7 @@ function create_r_repl(repl, main)
         s.current_mode.sticky || REPL.transition(s, main)
     end
 
-    const bracketed_paste_mode_keymap = Dict{Any,Any}(
+    bracketed_paste_mode_keymap = Dict{Any,Any}(
         "\e[200~" => bracketed_paste_callback
     )
 
@@ -216,7 +216,7 @@ function repl_init(repl)
     r_mode = create_r_repl(mirepl, main_mode)
     push!(mirepl.interface.modes,r_mode)
 
-    const r_prompt_keymap = Dict{Any,Any}(
+    r_prompt_keymap = Dict{Any,Any}(
         '$' => function (s,args...)
             if isempty(s) || position(LineEdit.buffer(s)) == 0
                 buf = copy(LineEdit.buffer(s))

@@ -58,7 +58,7 @@ function render(script::String)
 
         index = 0
         for i in 1:(line-1)
-            index = search(script, '\n', index+1)
+            index = something(findnext(isequal('\n'), script, index+1), 0)
         end
         for j in 1:col
             index = nextind(script, index)
@@ -73,7 +73,7 @@ function render(script::String)
             throw(lastex)
         end
 
-        ast, i = parse(script, index+1, greedy=false)
+        ast, i = Meta.parse(script, index+1, greedy=false)
 
         if isa(ast,Symbol)
             sym = "$ast"
@@ -107,5 +107,5 @@ function prepare_inline_julia_code(symdict, escape::Bool=false)
     for (rsym, expr) in symdict
         push!(blk.args, Expr(:(=), Expr(:ref, :env, rsym), escape ? esc(expr) : expr))
     end
-    Expr(:let, blk, new_env)
+    Expr(:let, new_env, blk)
 end

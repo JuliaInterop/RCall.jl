@@ -1,10 +1,9 @@
 using AxisArrays
-using Compat.Dates
 
 # AxisArray
 aa = rcopy(AxisArray, R"Titanic")
 @test size(aa) == (4, 2, 2, 2)
-@test length(aa.axes[1]) == 4
+@test length(AxisArrays.axes(aa, 1)) == 4
 @test names(getattrib(RObject(aa), :dimnames))[1] == :Class
 
 @test_throws ErrorException rcopy(AxisArray, R"c(1,1)")
@@ -28,8 +27,8 @@ a
 """
 aa = rcopy(AxisArray, a)
 @test axisnames(aa) == (:row, :b)
-@test axes(aa,1).val == 1:4
-@test axes(aa,2).val == rcopy(R"LETTERS[1:3]")
+@test AxisArrays.axes(aa,1).val == 1:4
+@test AxisArrays.axes(aa,2).val == rcopy(R"LETTERS[1:3]")
 
 a = R"""
 a = matrix(0, nr=4, nc=3)
@@ -38,5 +37,5 @@ a
 """
 aa = rcopy(AxisArray, a)
 @test axisnames(aa) == (:a, :b)
-@test axes(aa,1).val == 1:4
-@test axes(aa,2).val == rcopy(R"LETTERS[1:3]")
+@test AxisArrays.axes(aa,1).val == 1:4
+@test AxisArrays.axes(aa,2).val == rcopy(R"LETTERS[1:3]")

@@ -1,3 +1,5 @@
+using Random
+
 # strings
 x = "ppzz!#"
 r = RObject(x)
@@ -190,53 +192,53 @@ r = RObject(x)
 @test isa(r,RObject{CplxSxp})
 @test length(r) == 1
 @test size(r) == (1,)
-@test rcopy(r) === convert(Complex128,x)
-@test r[1] === convert(Complex128,x)
+@test rcopy(r) === convert(ComplexF64,x)
+@test r[1] === convert(ComplexF64,x)
 
 v = randn(7)+im*randn(7)
 r = RObject(v)
 @test isa(r,RObject{CplxSxp})
 @test length(r) == length(v)
 @test size(r) == size(v)
-@test isa(rcopy(r), Vector{Complex128})
+@test isa(rcopy(r), Vector{ComplexF64})
 @test rcopy(r) == collect(v)
 @test rcopy(Vector, r) == collect(v)
-@test r[1] === convert(Complex128,v[1])
-@test r[3] === convert(Complex128,v[3])
+@test r[1] === convert(ComplexF64,v[1])
+@test r[3] === convert(ComplexF64,v[3])
 
 m = Float64[-5 2 9; 7 -8 3] + im*Float64[-5 2 9; 7 -8 3]
 r = RObject(m)
 @test isa(r,RObject{CplxSxp})
 @test length(r) == length(m)
 @test size(r) == size(m)
-@test isa(rcopy(r), Matrix{Complex128})
+@test isa(rcopy(r), Matrix{ComplexF64})
 @test rcopy(r) == m
 @test rcopy(Array, r) == m
-@test r[1] === convert(Complex128,m[1])
-@test r[3] === convert(Complex128,m[3])
-@test r[2,2] === convert(Complex128,m[2,2])
+@test r[1] === convert(ComplexF64,m[1])
+@test r[3] === convert(ComplexF64,m[3])
+@test r[2,2] === convert(ComplexF64,m[2,2])
 
 a = rand(2,4,5)+im*randn(2,4,5)
 r = RObject(a)
 @test isa(r,RObject{CplxSxp})
 @test length(r) == length(a)
 @test size(r) == size(a)
-@test isa(rcopy(r), Array{Complex128,3})
+@test isa(rcopy(r), Array{ComplexF64,3})
 @test rcopy(r) == a
-@test r[1] === convert(Complex128,a[1])
-@test r[3] === convert(Complex128,a[3])
-@test r[2,3,2] === convert(Complex128,a[2,3,2])
+@test r[1] === convert(ComplexF64,a[1])
+@test r[3] === convert(ComplexF64,a[3])
+@test r[2,3,2] === convert(ComplexF64,a[2,3,2])
 
 a = rand(2,4,2,3)+im*randn(2,4,2,3)
 r = RObject(a)
 @test isa(r,RObject{CplxSxp})
 @test length(r) == length(a)
 @test size(r) == size(a)
-@test isa(rcopy(r), Array{Complex128,4})
+@test isa(rcopy(r), Array{ComplexF64,4})
 @test rcopy(r) == a
-@test r[1] === convert(Complex128,a[1])
-@test r[3] === convert(Complex128,a[3])
-@test r[2,3,1,2] === convert(Complex128,a[2,3,1,2])
+@test r[1] === convert(ComplexF64,a[1])
+@test r[3] === convert(ComplexF64,a[3])
+@test r[2,3,1,2] === convert(ComplexF64,a[2,3,1,2])
 
 # dict
 d = Dict(:a=>[1, 2, 4], :b=> ["e", "d", "f"])
@@ -246,9 +248,9 @@ r = RObject(d)
 l = rcopy(R"list(a=1,b=c(1,3,4))")
 @test l[:a] == 1
 @test l[:b][3] == 4
-d = RObject(Dict(1=>2))
-@test Dict{Any,Any}("1" => 2) == rcopy(Dict, d)
-@test Dict{Int,Int}(1=>2) == rcopy(Dict{Int,Int}, d)
+d = RObject(Dict("a"=>2))
+@test Dict{Any,Any}("a" => 2) == rcopy(Dict, d)
+@test Dict{String,Int}("a"=>2) == rcopy(Dict{String,Int}, d)
 
 # list
 a = Any[1, 1:10]
@@ -284,7 +286,7 @@ a = RObject(rand(10))
 @test length(rcopy(Any, a)) == 10
 # @test typeof(RCall.sexp(Cint, 1)) == Cint
 # @test typeof(RCall.sexp(Float64, 1)) == Float64
-# @test typeof(RCall.sexp(Complex128, 1)) == Complex128
+# @test typeof(RCall.sexp(ComplexF64, 1)) == ComplexF64
 @test typeof(rcopy(Vector{Float64}, a.p)) == Vector{Float64}
 b = RObject(true)
 @test rcopy(Cint, b.p) == 1
@@ -296,7 +298,7 @@ b = RObject(true)
 @test isa(convert(RObject{}, R"list(a=1,b=2)"), RObject)
 
 # issue 195
-@test isnull(rcopy(R"list(a=NULL)")[:a])
+@test isa(rcopy(R"list(a=NULL)")[:a], Nothing)
 
 # convert to Any
 @test isa(rcopy(Any, R"1"), Float64)
