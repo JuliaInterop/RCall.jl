@@ -62,7 +62,7 @@ macro rimport(x, args...)
             const $(esc(m)) = rimport($pkg)
             nothing
         elseif typeof($(esc(m))) <: Module &&
-                    :__package__ in names($(esc(m)), true) &&
+                    :__package__ in names($(esc(m)), all=true) &&
                     $(esc(m)).__package__ == $pkg
             nothing
         else

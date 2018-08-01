@@ -40,7 +40,7 @@ function ijulia_displayfile(m::MIME"image/svg+xml", f)
     # we get around this by renaming the elements.
     open(f) do f
         r = randstring()
-        d = readstring(f)
+        d = read(f, String)
         d = replace(d, "id=\"glyph" => "id=\"glyph"*r)
         d = replace(d, "href=\"#glyph" => "href=\"#glyph"*r)
         display(m,d)
