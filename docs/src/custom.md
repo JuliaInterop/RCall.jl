@@ -72,7 +72,7 @@ import RCall: sexp, protect, unprotect, setclass!, RClass
 
 function sexp(::Type{RClass{:Bar}}, f::Foo)
     r = protect(sexp(Dict(:x => f.x, :y => f.y)))
-    setclass!(r, sexp("Bar"))
+    setclass!(r, "Bar")
     unprotect(1)
     r
 end
