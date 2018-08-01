@@ -32,10 +32,10 @@ function process_events()
             ccall((:R_ProcessEvents, libR), Nothing, ())
         end
         @static if Sys.isunix()
-            what = ccall((:R_checkActivity,libR),Ptr{Nothing},(Cint,Cint),0,1)
+            what = ccall((:R_checkActivity,libR),Ptr{Cvoid},(Cint,Cint),0,1)
             if what != C_NULL
-                R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Nothing}))
-                ccall((:R_runHandlers,libR),Nothing,(Ptr{Nothing},Ptr{Nothing}),R_InputHandlers,what)
+                R_InputHandlers = unsafe_load(cglobal((:R_InputHandlers,libR),Ptr{Cvoid}))
+                ccall((:R_runHandlers,libR),Nothing,(Ptr{Cvoid},Ptr{Cvoid}),R_InputHandlers,what)
             end
         end
     end

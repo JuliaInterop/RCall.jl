@@ -35,14 +35,14 @@ const Rembedded = Ref{Bool}(false)
         NoRenviron::Cint
         rhome::Ptr{Cchar}
         home::Ptr{Cchar}
-        ReadConsole::Ptr{Nothing}
-        WriteConsole::Ptr{Nothing}
-        CallBack::Ptr{Nothing}
-        ShowMessage::Ptr{Nothing}
-        YesNoCancel::Ptr{Nothing}
-        Busy::Ptr{Nothing}
+        ReadConsole::Ptr{Cvoid}
+        WriteConsole::Ptr{Cvoid}
+        CallBack::Ptr{Cvoid}
+        ShowMessage::Ptr{Cvoid}
+        YesNoCancel::Ptr{Cvoid}
+        Busy::Ptr{Cvoid}
         CharacterMode::Cint
-        WriteConsoleEx::Ptr{Nothing}
+        WriteConsoleEx::Ptr{Cvoid}
     end
     RStart() = RStart(0,0,0,0,0,
                       0,0,0,0,0,
@@ -115,12 +115,12 @@ function initEmbeddedR()
         end
 
         ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
-        unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Nothing}), C_NULL)
-        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Nothing}), ptr_write_console_ex)
-        unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Nothing}), C_NULL)
-        unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Nothing}), C_NULL)
+        unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Cvoid}), C_NULL)
+        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Cvoid}), ptr_write_console_ex)
+        unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Cvoid}), C_NULL)
+        unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Cvoid}), C_NULL)
         ptr_polled_events = @cfunction($polled_events,Nothing,()).ptr
-        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Nothing}), ptr_polled_events)
+        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Cvoid}), ptr_polled_events)
     end
 
     Rembedded[] = true
@@ -150,16 +150,16 @@ function __init__()
     # for some reaons, cglobal((:R_NilValue, libR)) doesn't work on rstudio/linux
     # https://github.com/Non-Contradiction/JuliaCall/issues/34
     Rinited, from_libR = try
-        unsafe_load(cglobal(:R_NilValue, Ptr{Nothing})) != C_NULL, false
+        unsafe_load(cglobal(:R_NilValue, Ptr{Cvoid})) != C_NULL, false
     catch
-        unsafe_load(cglobal((:R_NilValue, libR), Ptr{Nothing})) != C_NULL, true
+        unsafe_load(cglobal((:R_NilValue, libR), Ptr{Cvoid})) != C_NULL, true
     end
 
     if !Rinited
         initEmbeddedR()
     end
 
-    ip = ccall((:Rf_ScalarInteger, libR),Ptr{Nothing},(Cint,),0)
+    ip = ccall((:Rf_ScalarInteger, libR),Ptr{Cvoid},(Cint,),0)
 
     Const.load(from_libR)
 

@@ -37,7 +37,7 @@ end
 
 for (S, J) in ((:LglSxp, "LOGICAL"), (:IntSxp, "INTEGER"),
                 (:RealSxp, "REAL"), (:CplxSxp, "COMPLEX"), (:RawSxp, "RAW"))
-    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Nothing}, (Ptr{UnknownSxp},), s))
+    @eval dataptr(s::Ptr{$S}) = convert(Ptr{eltype($S)}, ccall(($J,libR), Ptr{Cvoid}, (Ptr{UnknownSxp},), s))
 end
 
 """
@@ -196,7 +196,7 @@ car(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:CAR,libR),Ptr{UnknownSxp},(Pt
 tag(s::Ptr{S}) where S<:PairListSxp = sexp(ccall((:TAG,libR),Ptr{UnknownSxp},(Ptr{S},),s))
 
 function setcar!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SETCAR,libR),Ptr{Nothing},(Ptr{S},Ptr{T}),s,c)
+    ccall((:SETCAR,libR),Ptr{Cvoid},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 setcar!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcar!(s,sexp(c))
@@ -208,7 +208,7 @@ end
 settag!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = settag!(s,sexp(c))
 
 function setcdr!(s::Ptr{S}, c::Ptr{T}) where {S<:PairListSxp, T<:Sxp}
-    ccall((:SETCDR,libR),Ptr{Nothing},(Ptr{S},Ptr{T}),s,c)
+    ccall((:SETCDR,libR),Ptr{Cvoid},(Ptr{S},Ptr{T}),s,c)
     nothing
 end
 setcdr!(s::Ptr{S}, c::RObject{T}) where {S<:PairListSxp, T<:Sxp} = setcdr!(s,sexp(c))
@@ -334,7 +334,7 @@ getattrib(r::RObject, sym) = RObject(getattrib(r.p,sym))
 
 "Set a particular attribute of an RObject"
 function setattrib!(s::Ptr{S},sym::Ptr{SymSxp},t::Ptr{T}) where {S<:Sxp, T<:Sxp}
-    ccall((:Rf_setAttrib,libR),Ptr{Nothing},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
+    ccall((:Rf_setAttrib,libR),Ptr{Cvoid},(Ptr{S},Ptr{SymSxp},Ptr{T}),s,sym,t)
     return nothing
 end
 setattrib!(s::Ptr{S}, sym, t) where S<:Sxp = setattrib!(s, sexp(SymSxp,sym), sexp(t))

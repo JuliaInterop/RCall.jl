@@ -3,10 +3,10 @@ Register a function pointer as an R NativeSymbol. We technically are supposed to
 R_registerRoutines. Starting from R 3.4, `R_MakeExternalPtrFn` is a part of R API in R 3.4.
 It is probably safe to such to make the external pointer.
 """
-function makeNativeSymbolRef(fptr::Ptr{Nothing})
+function makeNativeSymbolRef(fptr::Ptr{Cvoid})
     # mirror Rf_MakeNativeSymbolRef of Rdynload.c
     rexfn = ccall((:R_MakeExternalPtrFn,libR), Ptr{ExtPtrSxp},
-                     (Ptr{Nothing}, Ptr{Nothing}, Ptr{Nothing}),
+                     (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
                      fptr, sexp(Symbol("native symbol")), sexp(Const.NilValue))
     setattrib!(rexfn, Const.ClassSymbol, "NativeSymbol")
     preserve(rexfn)
@@ -15,9 +15,9 @@ end
 
 
 "Create an Ptr{ExtPtrSxp} object"
-makeExternalPtr(ptr::Ptr{Nothing}, tag=Const.NilValue, prot=Const.NilValue) =
+makeExternalPtr(ptr::Ptr{Cvoid}, tag=Const.NilValue, prot=Const.NilValue) =
     ccall((:R_MakeExternalPtr,libR), Ptr{ExtPtrSxp},
-          (Ptr{Nothing}, Ptr{UnknownSxp}, Ptr{UnknownSxp}),
+          (Ptr{Cvoid}, Ptr{UnknownSxp}, Ptr{UnknownSxp}),
           ptr, sexp(tag), sexp(prot))
 
 
@@ -36,7 +36,7 @@ function julia_extptr_callback(p::Ptr{ListSxp})
 
         # julia function pointer
         f_sxp = car(l)::Ptr{ExtPtrSxp}
-        ptr = ccall((:R_ExternalPtrAddr, libR), Ptr{Nothing}, (Ptr{ExtPtrSxp},), f_sxp)
+        ptr = ccall((:R_ExternalPtrAddr, libR), Ptr{Cvoid}, (Ptr{ExtPtrSxp},), f_sxp)
         f = unsafe_pointer_to_objref(ptr)
         l = cdr(l)
 
@@ -59,7 +59,7 @@ function julia_extptr_callback(p::Ptr{ListSxp})
         # return appropriate sexp
         return p = convert(Ptr{UnknownSxp}, sexp(y))::Ptr{UnknownSxp}
     catch e
-        ccall((:Rf_error,libR),Ptr{Nothing},(Ptr{Cchar},),string(e))
+        ccall((:Rf_error,libR),Ptr{Cvoid},(Ptr{Cchar},),string(e))
         return convert(Ptr{UnknownSxp}, sexp(Const.NilValue))::Ptr{UnknownSxp}
     finally
         unprotect(1)
@@ -89,7 +89,7 @@ function registerCFinalizerEx(s::Ptr{ExtPtrSxp})
     protect(s)
     decref_extptr_ptr = @cfunction(decref_extptr,Nothing,(Ptr{ExtPtrSxp},))
     ccall((:R_RegisterCFinalizerEx,libR),Nothing,
-          (Ptr{ExtPtrSxp}, Ptr{Nothing}, Cint),
+          (Ptr{ExtPtrSxp}, Ptr{Cvoid}, Cint),
           s,decref_extptr_ptr,0)
     unprotect(1)
 end

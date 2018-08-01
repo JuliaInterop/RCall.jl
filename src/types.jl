@@ -8,9 +8,9 @@ const SxpPtrInfo = UInt32 # sxpinfo_struct
 "R Sxp header: a pointer to this is used for unknown types."
 struct SxpHead <: Sxp # SEXPREC_HEADER
     info::SxpPtrInfo
-    attrib::Ptr{Nothing}
-    gc_next::Ptr{Nothing}
-    gc_prev::Ptr{Nothing}
+    attrib::Ptr{Cvoid}
+    gc_next::Ptr{Cvoid}
+    gc_prev::Ptr{Cvoid}
 end
 const UnknownSxp = SxpHead
 
@@ -159,8 +159,8 @@ end
 "R external pointer"
 struct ExtPtrSxp <: Sxp  # type tag 22
     head::SxpHead
-    ptr::Ptr{Nothing}
-    prot::Ptr{Nothing}
+    ptr::Ptr{Cvoid}
+    prot::Ptr{Cvoid}
     tag::Ptr{UnknownSxp}
 end
 
