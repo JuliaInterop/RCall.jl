@@ -253,7 +253,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Julia to R direction",
     "category": "section",
-    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).First we define an explicit converter from Julia type Foo to R class Barimport RCall: sexp, protect, unprotect, setclass!, RClass\n\nfunction sexp(::Type{RClass{:Bar}}, f::Foo)\n    r = protect(sexp(Dict(:x => f.x, :y => f.y)))\n    setclass!(r, sexp(\"Bar\"))\n    unprotect(1)\n    r\nend\n\nbar = robject(:Bar, foo)\nnothing # hideRemark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected.To register the default conversion via robject(foo), we need to define sexpclassimport RCall.sexpclass\n\nsexpclass(f::Foo) = RClass{:Bar}\nbar = robject(foo)\nnothing # hide"
+    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).First we define an explicit converter from Julia type Foo to R class Barimport RCall: sexp, protect, unprotect, setclass!, RClass\n\nfunction sexp(::Type{RClass{:Bar}}, f::Foo)\n    r = protect(sexp(Dict(:x => f.x, :y => f.y)))\n    setclass!(r, \"Bar\")\n    unprotect(1)\n    r\nend\n\nbar = robject(:Bar, foo)\nnothing # hideRemark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected.To register the default conversion via robject(foo), we need to define sexpclassimport RCall.sexpclass\n\nsexpclass(f::Foo) = RClass{:Bar}\nbar = robject(foo)\nnothing # hide"
 },
 
 {
