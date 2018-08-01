@@ -117,7 +117,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "Several Ways to use RCall",
     "category": "section",
-    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput and @rget macros\nR\"\" string macro\nRCall API: reval, rcall and rcopy etc.\n@rlibrary macro"
+    "text": "RCall provides multiple ways to allow R interacting with Julia. R REPL mode\n@rput and @rget macros\nR\"\" string macro\nRCall API: reval, rcall, rcopy and robject etc.\n@rlibrary and @rimport macros"
 },
 
 {
@@ -149,15 +149,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Getting Started",
     "title": "RCall API",
     "category": "section",
-    "text": "The reval function evaluates any given input string as R code in the R environment. The returned result is an RObject object.jmtcars = reval(\"mtcars\");\nnames(jmtcars)\njmtcars[:mpg]\ntypeof(jmtcars)The rcall function is used to construct function calls.rcall(:dim, jmtcars)The arguments will be implicitly converted to RObject upon evaluation.rcall(:sum, Float64[1.0, 4.0, 6.0])The rcopy function converts RObjects to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:rcopy(R\"c(1)\")\nrcopy(R\"c(1, 2)\")\nrcopy(R\"list(1, \'zz\')\")\nrcopy(R\"list(a=1, b=\'zz\')\")It is possible to force a specific conversion by passing the output type as the first argument:rcopy(Array{Int}, R\"c(1,2)\")Converters and Constructors could also be used specifically to yield the desired type.convert(Array{Float64}, R\"c(1,2)\")\nFloat64(R\"1+3\")"
+    "text": "The reval function evaluates any given input string as R code in the R environment. The returned result is an RObject object.jmtcars = reval(\"mtcars\");\nnames(jmtcars)\njmtcars[:mpg]\ntypeof(jmtcars)The rcall function is used to construct function calls.rcall(:dim, jmtcars)The arguments will be implicitly converted to RObject upon evaluation.rcall(:sum, Float64[1.0, 4.0, 6.0])The rcopy function converts RObjects to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:rcopy(R\"c(1)\")\nrcopy(R\"c(1, 2)\")\nrcopy(R\"list(1, \'zz\')\")\nrcopy(R\"list(a = 1, b= \'zz\')\")It is possible to force a specific conversion by passing the output type as the first argument:rcopy(Array{Int}, R\"c(1, 2)\")Converter could also be used specifically to yield the desired type.convert(Array{Float64}, R\"c(1, 2)\")The robject function converts any julia object to an RObject.robject(1)\nrobject(Dict(:a => 1, :b = 2))"
 },
 
 {
-    "location": "gettingstarted.html#@rlibrary-macro-1",
+    "location": "gettingstarted.html#@rlibrary-and-@rimport-macros-1",
     "page": "Getting Started",
-    "title": "@rlibrary macro",
+    "title": "@rlibrary and @rimport macros",
     "category": "section",
-    "text": "This micro loads all exported functions/objects of an R package to the current module.@rlibrary boot\ncity = rcopy(R\"boot::city\")  # get some data\nratio(d, w) = sum(d[:x] .* w)/sum(d[:u] .* w)\nb = boot(city, ratio, R = 100, stype = \"w\");\nrcall(:summary, b[:t])Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The R\"\" string macro is more recommended for efficiency.Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,sum([1, 2, 3], var\"rm.na\" = True)"
+    "text": "This micro loads all exported functions/objects of an R package to the current module.@rlibrary boot\ncity = rcopy(R\"boot::city\")  # get some data\nratio(d, w) = sum(d[:x] .* w)/sum(d[:u] .* w)\nb = boot(city, ratio, R = 100, stype = \"w\");\nrcall(:summary, b[:t])Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The R\"\" string macro is more recommended for efficiency.Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,@rimport base as rbase\nrbase.sum([1, 2, 3], var\"rm.na\" = true)"
 },
 
 {
@@ -173,7 +173,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Supported Conversions",
     "title": "Supported Conversions",
     "category": "section",
-    "text": "RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., DataFrames, CategoricalArrays and AxisArrays.using RCall\nusing DataFrames\nusing AxisArrays"
+    "text": "RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., DataFrames, CategoricalArrays and AxisArrays.using Pkg\nPkg.add(\"DataFrames\")\nPkg.add(\"AxisArrays\")\n\nusing RCall\nusing Dates\nusing DataFrames\nusing AxisArrays"
 },
 
 {
@@ -237,7 +237,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Custom Conversion",
     "category": "section",
-    "text": "RCall supports an API for implicitly converting between R and Julia objects by means of rcopy and robject.To illustrate the idea, we consider the following Julia typeusing RCalltype Foo\n    x::Float64\n    y::String\nendfoo = Foo(1.0, \"hello\") \nnothing # hide"
+    "text": "RCall supports an API for implicitly converting between R and Julia objects by means of rcopy and robject.To illustrate the idea, we consider the following Julia typeusing RCallmutable struct Foo\n    x::Float64\n    y::String\nendfoo = Foo(1.0, \"hello\") \nbar = R\"\"\"\n    bar <- list(x = 1, y = \"hello\")\n    class(bar) <- \"Bar\"\n    bar\n\"\"\"\nnothing # hide"
 },
 
 {
@@ -245,7 +245,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "R to Julia direction",
     "category": "section",
-    "text": "The function rcopy and rcopytype are responsible for conversions of this direction. First we define an explicit converter for VecSxp (SEXP for list)import RCall.rcopy\n\nfunction rcopy(::Type{Foo}, s::Ptr{VecSxp})\n    Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))\nendThe convert function will dispatch the corresponding rcopy function when it is found.rcopy(Foo, roo)\nconvert(Foo, roo) # calls `rcopy`\nFoo(roo)\nnothing # hideTo allow the automatic conversion via rcopy(roo), the R class Bar has to be registered.import RCall: RClass, rcopytype\n\nrcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo\nboo = rcopy(roo)\nnothing # hide"
+    "text": "The function rcopy and rcopytype are responsible for conversions of this direction. First we define an explicit converter for VecSxp (SEXP for list)import RCall.rcopy\n\nfunction rcopy(::Type{Foo}, s::Ptr{VecSxp})\n    Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))\nendThe convert function will dispatch the corresponding rcopy function when it is found.rcopy(Foo, bar)\nconvert(Foo, bar) # calls `rcopy`\nnothing # hideTo allow the automatic conversion via rcopy(bar), the R class Bar has to be registered.import RCall: RClass, rcopytype\n\nrcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo\nfoo2 = rcopy(bar)\nnothing # hide"
 },
 
 {
@@ -253,7 +253,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Julia to R direction",
     "category": "section",
-    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).First we define an explicit converter from Julia type Foo to R class Barimport RCall: sexp, RClass\n\nfunction sexp(::Type{RClass{:Bar}}, f::Foo)\n    r = protect(sexp(Dict(:x => f.x, :y => f.y)))\n    setclass!(r, sexp(\"Bar\"))\n    unprotect(1)\n    r\nend\n\nroo = robject(:Bar, foo)\nnothing # hideRemark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected.To register the default conversion via robject(foo), we need to define sexpclassimport RCall.sexpclass\n\nsexpclass(f::Foo) = RClass{:Bar}\nroo = robject(foo)\nnothing # hide"
+    "text": "The function RCall.sexp has to be overwritten to allow Julia to R conversion. sexp function takes a julia object and returns an SEXP object (pointer to [Sxp]).First we define an explicit converter from Julia type Foo to R class Barimport RCall: sexp, protect, unprotect, setclass!, RClass\n\nfunction sexp(::Type{RClass{:Bar}}, f::Foo)\n    r = protect(sexp(Dict(:x => f.x, :y => f.y)))\n    setclass!(r, sexp(\"Bar\"))\n    unprotect(1)\n    r\nend\n\nbar = robject(:Bar, foo)\nnothing # hideRemark: RCall.protect and RCall.unprotect should be used to protect SEXP from being garbage collected.To register the default conversion via robject(foo), we need to define sexpclassimport RCall.sexpclass\n\nsexpclass(f::Foo) = RClass{:Bar}\nbar = robject(foo)\nnothing # hide"
 },
 
 {
@@ -261,7 +261,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Using @rput and @rget is seamless",
     "category": "section",
-    "text": "boo.x = 2.0\n@rput boo\nR\"\"\"\nboo[\"x\"]\n\"\"\"R\"\"\"\nboo[\"x\"] = 3.0\n\"\"\"\n@rget boo\nboo.x"
+    "text": "foo2.x = 2.0\n@rput foo2\nR\"\"\"\nfoo2[\"x\"]\n\"\"\"R\"\"\"\nfoo2[\"x\"] = 3.0\n\"\"\"\n@rget foo2\nfoo2.x"
 },
 
 {
@@ -269,7 +269,23 @@ var documenterSearchIndex = {"docs": [
     "page": "Custom Conversion",
     "title": "Nested conversion",
     "category": "section",
-    "text": "l = R\"list(boo = boo, roo = $roo)\"rcopy(l)"
+    "text": "l = R\"list(foo2 = foo2, bar = $bar)\"rcopy(l)"
+},
+
+{
+    "location": "eventloop.html#",
+    "page": "Eventloop",
+    "title": "Eventloop",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "eventloop.html#Eventloop-1",
+    "page": "Eventloop",
+    "title": "Eventloop",
+    "category": "section",
+    "text": "In a non-IJulia interactive session, by R will by default open a new window to display the plot. In order to enable interactive features, such as plot-resizing, the R eventlopp will be started automatically.You could start manually the R event loop viaRCall.rgui_start()This runs frequent calls to R to check if the plot has changed, and redraw if necessary. It can be stopped withRCall.rgui_stop()"
 },
 
 {
