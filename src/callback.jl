@@ -110,7 +110,7 @@ Wrap a Julia object an a R `Ptr{ExtPtrSxp}`.
 We store the pointer and the object in a const Dict to prevent it being
 removed by the Julia GC.
 """
-function sexp(::Type{ExtPtrSxp}, j)
+function sexp(::Type{RClass{:externalptr}}, j)
     jptr = ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), j)
     s = makeExternalPtr(jptr)
     jtypExtPtrs[s] = j
@@ -126,8 +126,8 @@ Constructs the following R code
     function(...) .External(juliaCallback, fExPtr, ...)
 
 """
-function sexp(::Type{ClosSxp}, f)
-    fptr = protect(sexp(ExtPtrSxp,f))
+function sexp(::Type{RClass{:function}}, f)
+    fptr = protect(sexp(RClass{:externalptr}, f))
     body = protect(rlang_p(Symbol(".External"),
                            juliaCallback,
                            fptr,

@@ -23,7 +23,7 @@ export RObject,
    getattrib, setattrib!, getnames, setnames!, getclass, setclass!, attributes,
    globalEnv,
    isnull, isna, anyna,
-   rcopy, rparse, rprint, reval, rcall, rlang,
+   robject, rcopy, rparse, rprint, reval, rcall, rlang,
    rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
 const depfile = joinpath(dirname(@__FILE__),"..","deps","deps.jl")

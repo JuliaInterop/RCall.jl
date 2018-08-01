@@ -12,7 +12,7 @@ using AxisArrays
 
 ```@example 1
 # Julia -> R
-a = RObject(1)
+a = robject(1)
 ```
 
 ```@example 1
@@ -22,7 +22,7 @@ rcopy(a)
 
 ```@example 1
 # Julia -> R
-a = RObject([1.0, 2.0])
+a = robject([1.0, 2.0])
 ```
 
 ```@example 1
@@ -35,7 +35,7 @@ rcopy(a)
 ```@example 1
 # Julia -> R
 d = Dict(:a => 1, :b => [4, 5, 3])
-r = RObject(d)
+r = robject(d)
 ```
 
 ```@example 1
@@ -48,7 +48,7 @@ rcopy(r)
 ```@example 1
 # Julia -> R
 d = Date(2012, 12, 12)
-r = RObject(d)
+r = robject(d)
 ```
 
 ```@example 1
@@ -61,7 +61,7 @@ rcopy(r)
 ```@example 1
 # julia -> R
 d = DateTime(2012, 12, 12, 12, 12, 12)
-r = RObject(d)
+r = robject(d)
 ```
 
 ```@example 1
@@ -74,7 +74,7 @@ rcopy(r)
 ```@example 1
 d = DataFrame([[1.0, 4.5, 7.0]], [:x])
 # Julia -> R
-r = RObject(d)
+r = robject(d)
 ```
 
 ```@example 1
@@ -99,7 +99,7 @@ rcopy(R"data.frame(a.b = 1:10)"; sanitize = false)
 ```@example 1
 # Julia -> R
 aa = AxisArray([1,2,3], Axis{:id}(["a", "b", "c"]))
-r = RObject(aa)
+r = robject(aa)
 ```
 
 ```@example 1

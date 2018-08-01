@@ -1,5 +1,3 @@
-struct RClass{Symbol} end
-
 convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, r.p)
 convert(::Type{Any}, r::RObject{S}) where S<:Sxp = r
 convert(::Type{RObject}, r::RObject{S}) where S<:Sxp = r
@@ -203,32 +201,38 @@ end
 
 # conversion from Base Julia types
 
-# nothing
-sexp(::Type{S}, ::Nothing) where S<:Sxp = sexp(Const.NilValue)
+robject(T::RClass, s) = RObject(sexp(T, s))
+robject(T::Symbol, s) = RObject(sexp(RClass{T}, s))
+robject(T::String, s) = RObject(sexp(RClass{Symbol(T)}, s))
 
-# null
-sexp(::Type{S}, ::Missing) where S<:Sxp = naeltype(S)
+# fallback
+sexp(::T, s::Ptr{S}) where {T, S<:Sxp} = s
+sexp(::T, r::RObject{S}) where {T, S<:Sxp} = r
+
+# nothing / missing
+sexp(::Type{NilSxp}, ::Nothing) where T = sexp(Const.NilValue)
+sexp(::Type{C}, ::Missing) where C<:RClass = naeltype(C)
 
 # symbol
-sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp,string(s))
-sexp(::Type{CharSxp}, sym::Symbol) = sexp(CharSxp, string(sym))
-sexp(::Type{StrSxp},s::Symbol) = sexp(StrSxp,sexp(CharSxp,s))
+sexp(::Type{SymSxp}, s::Symbol) = sexp(SymSxp, string(s))
+sexp(::Type{CharSxp}, s::Symbol) = sexp(CharSxp, string(s))
+sexp(::Type{RClass{:character}}, s::Symbol) = sexp(RClass{:character}, sexp(CharSxp, s))
 
 
 # number and numeric array
-for (J,S) in ((:Integer,:IntSxp),
-                 (:AbstractFloat, :RealSxp),
-                 (:Complex, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:UInt8, :RawSxp))
+for (J, S, C) in ((:Integer, :IntSxp, :integer),
+                 (:AbstractFloat, :RealSxp, :numeric),
+                 (:Complex, :CplxSxp, :complex),
+                 (:Bool, :LglSxp, :logical),
+                 (:UInt8, :RawSxp, :raw))
     @eval begin
         # Could use Rf_Scalar... methods, but see weird error on Appveyor Windows for Complex.
-        function sexp(::Type{$S},v::$J)
+        function sexp(::Type{RClass{$(QuoteNode(C))}}, v::$J)
             ra = allocArray($S,1)
             unsafe_store!(dataptr(ra),convert(eltype($S),v))
             ra
         end
-        function sexp(::Type{$S}, a::AbstractArray{T}) where T<:$J
+        function sexp(::Type{RClass{$(QuoteNode(C))}}, a::AbstractArray{T}) where T<:$J
             ra = allocArray($S, size(a)...)
             copyto!(unsafe_vec(ra),a)
             ra
@@ -237,9 +241,9 @@ for (J,S) in ((:Integer,:IntSxp),
 end
 
 # additional methods for bool
-sexp(::Type{LglSxp},v::Cint) =
+sexp(::Type{RClass{:logical}}, v::Cint) =
     ccall((:Rf_ScalarLogical,libR),Ptr{LglSxp},(Cint,),v)
-function sexp(::Type{LglSxp}, a::AbstractArray{Cint})
+function sexp(::Type{RClass{:logical}}, a::AbstractArray{Cint})
     ra = allocArray(LglSxp, size(a)...)
     copy!(unsafe_vec(ra),a)
     ra
@@ -247,13 +251,11 @@ end
 
 # String
 sexp(::Type{SymSxp}, s::AbstractString) = ccall((:Rf_install, libR), Ptr{SymSxp}, (Ptr{UInt8},), s)
-sexp(::Type{CharSxp}, st::String) =
-    ccall((:Rf_mkCharLenCE, libR), Ptr{CharSxp},
-          (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
+sexp(::Type{CharSxp}, st::String) = ccall((:Rf_mkCharLenCE, libR), Ptr{CharSxp}, (Ptr{UInt8}, Cint, Cint), st, sizeof(st), isascii(st) ? 0 : 1)
 sexp(::Type{CharSxp}, st::AbstractString) = sexp(CharSxp, String(st))
-sexp(::Type{StrSxp}, s::Ptr{CharSxp}) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(Ptr{CharSxp},),s)
-sexp(::Type{StrSxp},st::AbstractString) = sexp(StrSxp,sexp(CharSxp,st))
-function sexp(::Type{StrSxp}, a::AbstractArray{T}) where T<:AbstractString
+sexp(::Type{RClass{:character}}, s::Ptr{CharSxp}) = ccall((:Rf_ScalarString,libR),Ptr{StrSxp},(Ptr{CharSxp},),s)
+sexp(::Type{RClass{:character}},st::AbstractString) = sexp(RClass{:character}, sexp(CharSxp,st))
+function sexp(::Type{RClass{:character}}, a::AbstractArray{T}) where T<:AbstractString
     ra = protect(allocArray(StrSxp, size(a)...))
     try
         for i in 1:length(a)
@@ -268,7 +270,7 @@ end
 # AbstractDict to VecSxp
 # R does not have a native dictionary type, but named lists is often
 # used to this effect.
-function sexp(::Type{VecSxp},d::AbstractDict)
+function sexp(::Type{RClass{:list}}, d::AbstractDict)
     n = length(d)
     vs = protect(allocArray(VecSxp,n))
     ks = protect(allocArray(StrSxp,n))
@@ -285,7 +287,7 @@ function sexp(::Type{VecSxp},d::AbstractDict)
 end
 
 # AbstractArray to VecSxp
-function sexp(::Type{VecSxp}, a::AbstractArray)
+function sexp(::Type{RClass{:list}}, a::AbstractArray)
     ra = protect(allocArray(VecSxp, size(a)...))
     try
         for i in 1:length(a)

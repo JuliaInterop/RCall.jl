@@ -8,7 +8,7 @@ x = 1:10
 @test all(x .== 1:10)
 
 y = "foo"
-@rput x y::StrSxp
+@rput x y
 @rget x y::Array{String}
 @test isa(y,Vector{String})
 @test y[1] == "foo"

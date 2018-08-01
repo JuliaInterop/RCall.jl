@@ -10,7 +10,7 @@ macro rput(args...)
         elseif isa(a,Expr) && a.head == :(::)
             v = a.args[1]
             S = a.args[2]
-            push!(blk.args,:(Const.GlobalEnv[$(QuoteNode(v))] = sexp($S,$(esc(v)))))
+            push!(blk.args,:(Const.GlobalEnv[$(QuoteNode(v))] = robject($S, $(esc(v)))))
         else
             error("Incorrect usage of @rput")
         end

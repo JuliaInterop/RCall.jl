@@ -24,13 +24,13 @@ end
 
 ## Array{Union{T, Missing}} to sexp conversion.
 
-for (J,S) in ((:Integer, :IntSxp),
-                 (:AbstractFloat, :RealSxp),
-                 (:Complex, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:AbstractString, :StrSxp))
+for (J, S, C) in ((:Integer, :IntSxp, :integer),
+                 (:AbstractFloat, :RealSxp, :numeric),
+                 (:Complex, :CplxSxp, :complex),
+                 (:Bool, :LglSxp, :logical),
+                 (:AbstractString, :StrSxp, :character))
     @eval begin
-        function sexp(::Type{$S}, v::AbstractArray{Union{T, Missing}}) where T <: $J
+        function sexp(::Type{RClass{$(QuoteNode(C))}}, v::AbstractArray{Union{T, Missing}}) where T <: $J
             rv = protect(allocArray($S, size(v)...))
             try
                 for (i, x) in enumerate(v)
