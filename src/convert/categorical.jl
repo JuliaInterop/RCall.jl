@@ -14,8 +14,8 @@ end
 
 ## CategoricalArray to sexp conversion.
 
-function sexp(::Type{IntSxp}, v::CategoricalArray)
-    rv = protect(sexp(IntSxp, v.refs))
+function sexp(::Type{RClass{:factor}}, v::CategoricalArray)
+    rv = protect(sexp(RClass{:integer}, v.refs))
     try
         for (i,ref) = enumerate(v.refs)
             if ref == 0
@@ -33,7 +33,3 @@ function sexp(::Type{IntSxp}, v::CategoricalArray)
     end
     rv
 end
-
-# default
-
-sexp(v::CategoricalArray) = sexp(IntSxp, v)

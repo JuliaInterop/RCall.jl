@@ -220,6 +220,13 @@ end
 RObject(p::Ptr{S}) where S<:Sxp = RObject{S}(p)
 RObject(x::RObject) = x
 
+
+"""
+R Class
+"""
+struct RClass{Symbol} end
+
+
 """
 Element types of R vectors.
 """

@@ -43,19 +43,19 @@ end
 
 # Julia -> R
 
-function sexp(RealSxp, d::Date)
-    res = protect(sexp(RealSxp, Float64(Dates.value(d)) - 719163))
+function sexp(::Type{RClass{:Date}}, d::Date)
+    res = protect(sexp(RClass{:numeric}, Float64(Dates.value(d)) - 719163))
     setclass!(res, sexp("Date"))
     unprotect(1)
     res
 end
-function sexp(RealSxp, a::Array{Date})
-    res = protect(sexp(RealSxp, map((x) -> Float64(Dates.value(x)) - 719163, a)))
+function sexp(::Type{RClass{:Date}}, a::Array{Date})
+    res = protect(sexp(RClass{:numeric}, map((x) -> Float64(Dates.value(x)) - 719163, a)))
     setclass!(res, sexp("Date"))
     unprotect(1)
     res
 end
-function sexp(RealSxp, a::Array{Union{Date, Missing}})
+function sexp(::Type{RClass{:Date}}, a::Array{Union{Date, Missing}})
     rv = protect(allocArray(RealSxp, size(a)...))
     try
         for (i, x) in enumerate(a)
@@ -71,21 +71,21 @@ function sexp(RealSxp, a::Array{Union{Date, Missing}})
     end
     rv
 end
-function sexp(RealSxp, d::DateTime)
-    res = protect(sexp(RealSxp, Float64(Dates.value(d) / 1000) - 62135683200))
+function sexp(::Type{RClass{:POSIXct}}, d::DateTime)
+    res = protect(sexp(RClass{:numeric}, Float64(Dates.value(d) / 1000) - 62135683200))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", sexp("UTC"))
     unprotect(1)
     res
 end
-function sexp(RealSxp, a::Array{DateTime})
-    res = protect(sexp(RealSxp, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a)))
+function sexp(::Type{RClass{:POSIXct}}, a::Array{DateTime})
+    res = protect(sexp(RClass{:numeric}, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a)))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", sexp("UTC"))
     unprotect(1)
     res
 end
-function sexp(RealSxp, a::Array{Union{DateTime, Missing}})
+function sexp(::Type{RClass{:POSIXct}}, a::Array{Union{DateTime, Missing}})
     rv = protect(allocArray(RealSxp, size(a)...))
     try
         for (i, x) in enumerate(a)
@@ -102,15 +102,3 @@ function sexp(RealSxp, a::Array{Union{DateTime, Missing}})
     end
     rv
 end
-
-# default
-
-# Date
-sexp(d::Date) = sexp(RealSxp, d)
-sexp(d::Array{Union{Date, Missing}}) = sexp(RealSxp, d)
-sexp(d::AbstractArray{Date}) = sexp(RealSxp, d)
-
-# DateTime
-sexp(d::DateTime) = sexp(RealSxp, d)
-sexp(d::Array{Union{DateTime, Missing}}) = sexp(RealSxp, d)
-sexp(d::AbstractArray{DateTime}) = sexp(RealSxp, d)

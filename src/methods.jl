@@ -406,7 +406,7 @@ allocArray(::Type{S}, n1::Integer, n2::Integer, n3::Integer) where S<:Sxp =
     ccall((:Rf_alloc3DArray,libR),Ptr{S},(Cint,Cint,Cint,Cint),sexpnum(S),n1,n2,n3)
 
 function allocArray(::Type{S}, dims::Integer...) where S<:Sxp
-    sdims = sexp(IntSxp,[dims...])
+    sdims = sexp(RClass{:integer},[dims...])
     ccall((:Rf_allocArray,libR),Ptr{S},(Cint,Ptr{IntSxp}),sexpnum(S),sdims)
 end
 
@@ -418,14 +418,20 @@ Check if values correspond to R's NULL object.
 isnull(r::RObject) = isnull(r.p)
 
 """
-NA element for each type
+NA element for each R base class
 """
 naeltype(::Type{LglSxp}) = Const.NaInt
 naeltype(::Type{IntSxp}) = Const.NaInt
 naeltype(::Type{RealSxp}) = Const.NaReal
-naeltype(::Type{CplxSxp}) = complex(Const.NaReal,Const.NaReal)
+naeltype(::Type{CplxSxp}) = complex(Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 # naeltype(::Type{S}) where S<:Sxp = sexp(Const.NilValue)
+
+naeltype(::Type{RClass{:logical}}) = Const.NaInt
+naeltype(::Type{RClass{:integer}}) = Const.NaInt
+naeltype(::Type{RClass{:numeric}}) = Const.NaReal
+naeltype(::Type{RClass{:complex}}) = complex(Const.NaReal,Const.NaReal)
+naeltype(::Type{RClass{:character}}) = sexp(Const.NaString)
 
 """
 Check if a value corresponds to R's sentinel NA values.
@@ -529,7 +535,7 @@ function setindex!(e::Ptr{EnvSxp},v,s)
     try
         sv = protect(sexp(v))
         nprotect += 1
-        ss = protect(sexp(StrSxp,s))
+        ss = protect(sexp(RClass{:character},s))
         nprotect += 1
         setindex!(e,sv,ss)
     finally

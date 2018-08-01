@@ -10,7 +10,7 @@ function rcopy(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true) where T<:Abstract
 end
 
 ## DataFrame to sexp conversion.
-function sexp(::Type{VecSxp}, d::AbstractDataFrame)
+function sexp(::Type{RClass{:list}}, d::AbstractDataFrame)
     nr,nc = size(d)
     nv = names(d)
     rd = protect(allocArray(VecSxp, nc))

@@ -14,7 +14,7 @@ function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
     AxisArray(rcopy(AbstractArray, r), as...)
 end
 
-function sexp(aa::AxisArray)
+function sexp(::Type{RClass{:array}}, aa::AxisArray)
     rv = protect(sexp(aa.data))
     try
         d = OrderedDict(

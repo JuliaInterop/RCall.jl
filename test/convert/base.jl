@@ -30,7 +30,7 @@ r = RObject(v)
 @test rcopy(Vector, r)[1] == v[1]
 @test rcopy(Array{String}, r)[2] == v[2]
 @test rcopy(Array{Symbol}, r)[2] == Symbol(v[2])
-@test isa(RCall.sexp(StrSxp, :a), Ptr{StrSxp})
+@test isa(RCall.sexp(RCall.RClass{:character}, :a), Ptr{StrSxp})
 
 s = SubString{String}["a","b"]
 r = RObject(s)

@@ -1,6 +1,6 @@
 # Custom Conversion
 
-RCall supports an API for implicitly converting between R and Julia objects by means of `rcopy` and `RObject`.
+RCall supports an API for implicitly converting between R and Julia objects by means of `rcopy` and `robject`.
 
 To illustrate the idea, we consider the following Julia type
 
@@ -20,27 +20,6 @@ foo = Foo(1.0, "hello")
 nothing # hide
 ```
 
-## Julia to R direction
-
-The function [`RCall.sexp`](@ref) has to be overwritten to allow Julia to R
-conversion. `sexp` function takes a julia object and returns an SEXP object
-(pointer to [`Sxp`]).
-
-```@example 2
-import RCall.sexp
-
-function sexp(f::Foo)
-    r = protect(sexp(Dict(:x => f.x, :y => f.y)))
-    setclass!(r, sexp("Bar"))
-    unprotect(1)
-    r
-end
-
-roo = RObject(foo)
-nothing # hide
-```
-
-Remark: [`RCall.protect`](@ref) and [`RCall.unprotect`](@ref) should be used to protect SEXP from being garbage collected.
 
 ## R to Julia direction
 
@@ -72,6 +51,41 @@ import RCall: RClass, rcopytype
 
 rcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo
 boo = rcopy(roo)
+nothing # hide
+```
+
+
+## Julia to R direction
+
+The function [`RCall.sexp`](@ref) has to be overwritten to allow Julia to R
+conversion. `sexp` function takes a julia object and returns an SEXP object
+(pointer to [`Sxp`]).
+
+First we define an explicit converter from Julia type `Foo` to R class `Bar`
+
+```@example 2
+import RCall: sexp, RClass
+
+function sexp(::Type{RClass{:Bar}}, f::Foo)
+    r = protect(sexp(Dict(:x => f.x, :y => f.y)))
+    setclass!(r, sexp("Bar"))
+    unprotect(1)
+    r
+end
+
+roo = robject(:Bar, foo)
+nothing # hide
+```
+
+Remark: [`RCall.protect`](@ref) and [`RCall.unprotect`](@ref) should be used to protect SEXP from being garbage collected.
+
+To register the default conversion via `robject(foo)`, we need to define `sexpclass`
+
+```@example 2
+import RCall.sexpclass
+
+sexpclass(f::Foo) = RClass{:Bar}
+roo = robject(foo)
 nothing # hide
 ```
 

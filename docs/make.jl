@@ -17,7 +17,7 @@ makedocs(
 deploydocs(
     repo = "github.com/JuliaInterop/RCall.jl.git",
     target = "build",
-    julia  = "0.6",
+    julia  = "0.7",
     deps = nothing,
     make = nothing
 )

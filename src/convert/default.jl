@@ -60,7 +60,7 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
                 for class in rcopy(Array{Symbol}, getclass(s))
                     T = rcopytype(RClass{class}, s)
                     if T != RObject
-                        return rcopy(Vector{eltype(RClass{class}, s)}, s)
+                        return rcopy(Array{eltype(RClass{class}, s)}, s)
                     end
                 end
                 return rcopy(Array{eltype(RClass{:default}, s)}, s)
@@ -186,7 +186,7 @@ function rcopytype(::Type{RClass{:default}}, s::Ptr{VecSxp})
 end
 
 # FunctionSxp
-rcopy(s::Ptr{S}) where S<:FunctionSxp = rcopy(Function,s)
+rcopytype(::Type{RClass{:function}}, s::Ptr{S}) where S<:FunctionSxp = Function
 
 # LangSxp
 rcopytype(::Type{RClass{:call}}, l::Ptr{LangSxp}) = Expr
@@ -202,45 +202,68 @@ rcopy(r) = r
 # logic of default sexp
 
 """
-`sexp(x)` converts a Julia object `x` to a pointer to a corresponding Sxp Object.
+`robject(x)` converts a Julia object `x` to a corresponding RObject implictly. Explict conversions
+could be called with `robject(<R Class>, x)`.
 """
+robject(s) = RObject(s)
 RObject(s) = RObject(sexp(s))
 
-# nothing
-sexp(::Nothing) = sexp(Const.NilValue)
+"""
+`sexp(x)` converts a Julia object `x` to a pointer to a corresponding Sxp Object.
+"""
+sexp(s) = sexp(sexpclass(s), s)
 
-# Missing
-sexp(::Missing) = sexp(LglSxp, Const.NaInt)
+
+# Nothing / Missing
+sexpclass(::Nothing) = NilSxp
+sexpclass(::Missing) = RClass{:logical}
 
 # Symbol
-sexp(s::Symbol) = sexp(SymSxp,s)
+sexpclass(s::Symbol) = SymSxp
 
 # DataFrame
-sexp(d::AbstractDataFrame) = sexp(VecSxp, d)
+sexpclass(d::AbstractDataFrame) = RClass{:list}
 
 
 # Number, Array
-for (J,S) in ((:Integer,:IntSxp),
-                 (:AbstractFloat, :RealSxp),
-                 (:Complex, :CplxSxp),
-                 (:Bool, :LglSxp),
-                 (:AbstractString, :StrSxp),
-                 (:UInt8, :RawSxp))
+for (J, C) in ((:Integer,:integer),
+                 (:AbstractFloat, :numeric),
+                 (:Complex, :complex),
+                 (:Bool, :logical),
+                 (:AbstractString, :character),
+                 (:UInt8, :raw))
     @eval begin
-        sexp(v::$J) = sexp($S,v)
-        sexp(a::Array{Union{T, Missing}}) where T<:$J = sexp($S,a)
-        sexp(a::AbstractArray{T}) where T<:$J = sexp($S,a)
+        sexpclass(v::$J) = RClass{$(QuoteNode(C))}
+        sexpclass(a::Array{Union{T, Missing}}) where T<:$J = RClass{$(QuoteNode(C))}
+        sexpclass(a::AbstractArray{T}) where T<:$J = RClass{$(QuoteNode(C))}
     end
 end
 
 # Fallback: convert AbstractArray to VecSxp (R list)
-sexp(a::AbstractArray) = sexp(VecSxp,a)
+sexpclass(a::AbstractArray) = RClass{:list}
 
 # AbstractDict
-sexp(d::AbstractDict) = sexp(VecSxp,d)
+sexpclass(d::AbstractDict) = RClass{:list}
 
 # Function
-sexp(f::Function) = sexp(ClosSxp, f)
+sexpclass(f::Function) = RClass{:function}
 
 # LangSxp
-sexp(f::Formula) = sexp(LangSxp, f)
+sexpclass(f::Formula) = RClass{:formula}
+
+
+# Date
+sexpclass(d::Date) = RClass{:Date}
+sexpclass(d::Array{Union{Date, Missing}}) = RClass{:Date}
+sexpclass(d::AbstractArray{Date}) = RClass{:Date}
+
+# DateTime
+sexpclass(d::DateTime) = RClass{:POSIXct}
+sexpclass(d::Array{Union{DateTime, Missing}}) = RClass{:POSIXct}
+sexpclass(d::AbstractArray{DateTime}) = RClass{:POSIXct}
+
+# CategoricalArray
+sexpclass(v::CategoricalArray) = RClass{:factor}
+
+# AxisArray
+sexpclass(v::AxisArray) = RClass{:array}

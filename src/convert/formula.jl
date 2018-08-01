@@ -60,12 +60,12 @@ function sexp_formula(e::Expr)
     end
 end
 sexp_formula(e::Symbol) = sexp(SymSxp, e)
-sexp_formula(n::Integer) = sexp(RealSxp, Float64(n))
+sexp_formula(n::Integer) = sexp(RClass{:numeric}, Float64(n))
 sexp_formula(n::Number) = sexp(n)
 
 
 # R formula objects
-function sexp(::Type{LangSxp}, f::Formula)
+function sexp(::Type{RClass{:formula}}, f::Formula)
     s = protect(sexp_formula(f.ex_orig == :() ? f.ex : f.ex_orig))
     try
         setattrib!(s, Const.ClassSymbol, sexp("formula"))
