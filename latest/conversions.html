@@ -58,14 +58,14 @@ rcopy(r)</code></pre><pre><code class="language-none">3×1 DataFrames.DataFrame
 aa = AxisArray([1,2,3], Axis{:id}([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))
 r = robject(aa)</code></pre><pre><code class="language-none">┌ Warning: `indices(a)` is deprecated, use `axes(a)` instead.
 │   caller = Type at core.jl:562 [inlined]
-└ @ Core ~/.julia/packages/AxisArrays/uZ7J/src/core.jl:562
+└ @ Core ~/.julia/packages/AxisArrays/uZ7JS/src/core.jl:562
 RObject{IntSxp}
 id
 a b c
 1 2 3</code></pre></div><div><pre><code class="language-julia"># R -&gt; Julia
 rcopy(AxisArray, r)</code></pre><pre><code class="language-none">┌ Warning: `indices(a)` is deprecated, use `axes(a)` instead.
 │   caller = Type at core.jl:562 [inlined]
-└ @ Core ~/.julia/packages/AxisArrays/uZ7J/src/core.jl:562
+└ @ Core ~/.julia/packages/AxisArrays/uZ7JS/src/core.jl:562
 3-element AxisArrays.AxisArray{Int64,1,Array{Int64,1},Tuple{AxisArrays.Axis{:id,Array{String,1}}}}:
  1
  2

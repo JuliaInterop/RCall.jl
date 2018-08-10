@@ -85,7 +85,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Installation",
     "title": "Other methods",
     "category": "section",
-    "text": "If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set R_HOME or your PATH as described above before running Pkg.build(\"RCall\") in order for the build script to find your R installation.For some environments, you might also need to specify LD_LIBRARY_PATHexport LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:`R RHOME`/lib\""
+    "text": "If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set R_HOME or your PATH as described above before running Pkg.build(\"RCall\") in order for the build script to find your R installation. RCall requries R to be installed with its shared library. It could be done with the flag --enable-R-shlib, consult your server administrator if see if it was the caase.For some environments, you might also need to specify LD_LIBRARY_PATHexport LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:`R RHOME`/lib\""
 },
 
 {
@@ -545,7 +545,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.getattrib-Union{Tuple{S}, Tuple{Ptr{S},Ptr{RCall.SymSxp}}} where S<:Sxp",
+    "location": "internal.html#RCall.getattrib-Union{Tuple{S}, Tuple{Ptr{S},Ptr{SymSxp}}} where S<:Sxp",
     "page": "Internal",
     "title": "RCall.getattrib",
     "category": "method",
@@ -657,7 +657,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#RCall.setattrib!-Union{Tuple{T}, Tuple{S}, Tuple{Ptr{S},Ptr{RCall.SymSxp},Ptr{T}}} where T<:Sxp where S<:Sxp",
+    "location": "internal.html#RCall.setattrib!-Union{Tuple{T}, Tuple{S}, Tuple{Ptr{S},Ptr{SymSxp},Ptr{T}}} where T<:Sxp where S<:Sxp",
     "page": "Internal",
     "title": "RCall.setattrib!",
     "category": "method",
@@ -761,7 +761,7 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "internal.html#Base.setindex!-Union{Tuple{T}, Tuple{Ptr{S4Sxp},Ptr{T},Ptr{RCall.SymSxp}}} where T<:Sxp",
+    "location": "internal.html#Base.setindex!-Union{Tuple{T}, Tuple{Ptr{S4Sxp},Ptr{T},Ptr{SymSxp}}} where T<:Sxp",
     "page": "Internal",
     "title": "Base.setindex!",
     "category": "method",
