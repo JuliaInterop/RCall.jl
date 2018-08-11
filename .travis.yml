@@ -4,10 +4,12 @@ os:
   - osx
 julia:
   - 0.7
+  - 1.0
   - nightly
 
 matrix:
   allow_failures:
+    - julia: 1.0
     - julia: nightly
 
 notifications:
@@ -25,10 +27,6 @@ before_install:
   # but no permalink to release download
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget "https://cran.rstudio.com/bin/macosx/$(wget -qO- https://cran.rstudio.com/bin/macosx/ | sed -n 's/.*href="\(R-[^"]*.pkg\)".*/\1/p' | head -n 1)"; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo installer -pkg R-*.pkg -target /; fi
-
-script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --color=yes -e 'using Pkg; Pkg.clone(pwd()); Pkg.build("RCall"); Pkg.test("RCall"; coverage=true)';
 
 after_success:
   - julia --color=yes -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
