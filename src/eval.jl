@@ -1,32 +1,28 @@
-function make_error_handler(err)
-    function error_handler(condition, a)
-        protect(condition)
-        ret = err(condition, unsafe_pointer_to_objref(a)...)
-        unprotect(1)
-        convert(Ptr{UnknownSxp}, ret)
-    end
-end
-
-"""
-A wrapper of R_tryCatchError. It evaluates a given function with the given argument.
-It also catches possible R's `stop` calls which may cause longjmp in c. The error handler is
-evaluate when such an exception is caught.
-"""
-function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
-    fptr = @cfunction(
-        $((a) -> convert(Ptr{UnknownSxp}, f(unsafe_pointer_to_objref(a)...))),
-        Ptr{UnknownSxp}, (Ptr{Cvoid}, )).ptr
-    eptr = @cfunction($(make_error_handler(err)), Ptr{UnknownSxp}, (Ptr{UnknownSxp}, Ptr{Cvoid})).ptr
+"R_ParseVector wrapped by R_tryCatchError. It catches possible R's `stop` calls
+which may cause longjmp in c."
+function safe_parseVector(st::Ptr{StrSxp}, status::Ref{Cint}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
+    protect(st)
+    protect(sf)
+    fcfunction = @cfunction(
+        $((_) -> convert(
+            Ptr{UnknownSxp},
+            ccall((:R_ParseVector,libR),Ptr{UnknownSxp}, (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}), st,-1,status,sf))),
+        Ptr{UnknownSxp},
+        (Ptr{Cvoid}, ))
+    ecfunction = @cfunction(
+        $((c, _) -> convert(Ptr{UnknownSxp}, c)),
+        Ptr{UnknownSxp},
+        (Ptr{UnknownSxp}, Ptr{Cvoid}))
     ret = ccall((:R_tryCatchError, libR), Ptr{UnknownSxp},
           (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
-          fptr, ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), fargs),
-          eptr, ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), eargs))
+          fcfunction.ptr,
+          C_NULL,
+          ecfunction.ptr,
+          C_NULL)
+    unprotect(2)
     sexp(ret)
 end
 
-function tryCatchError(f::Function, fargs::Tuple)
-    tryCatchError(f, fargs, (c, a) -> (c), (C_NULL,))
-end
 
 "A pure julia wrapper of R_ParseVector"
 function parseVector(st::Ptr{StrSxp}, status::Ref{Cint}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
@@ -49,8 +45,8 @@ function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sx
     protect(st)
     protect(sf)
     status = Ref{Cint}()
-    # use toplevelExec to evaluate parseVector as parseVector may longjmp
-    result = protect(tryCatchError(parseVector, (st, status, sf)))
+    # use R_tryCatchError to evaluate parseVector as parseVector may longjmp
+    result = protect(safe_parseVector(st, status, sf))
 
     try
         if "error" in rcopy(Array, getclass(result))
