@@ -1,32 +1,35 @@
-function make_error_handler(err)
-    function error_handler(condition, a)
-        protect(condition)
-        ret = err(condition, unsafe_pointer_to_objref(a)...)
-        unprotect(1)
-        convert(Ptr{UnknownSxp}, ret)
+mutable struct ProtectedEvalData
+    f::Function
+    args::Any
+    ret::Ref{Any}
+end
+
+
+function protectedEval(pdata_t::Ptr{ProtectedEvalData})
+    pdata = unsafe_pointer_to_objref(pdata_t)
+    try
+        pdata.ret[] = pdata.f(pdata.args...)
+    catch e
+        ccall((:Rf_error, libR), Cvoid, (Cstring,), string(e))
     end
+    nothing
 end
 
 """
-A wrapper of R_tryCatchError. It evaluates a given function with the given argument.
-It also catches possible R's `stop` calls which may cause longjmp in c. The error handler is
-evaluate when such an exception is caught.
+A wrapper of R_ToplevelExec. It evaluates a given function with the given argument
+within top level context, which will not result in a longjmp upon evaluation error.
 """
-function tryCatchError(f::Function, fargs::Tuple, err::Function, eargs::Tuple)
-    fptr = @cfunction(
-        $((a) -> convert(Ptr{UnknownSxp}, f(unsafe_pointer_to_objref(a)...))),
-        Ptr{UnknownSxp}, (Ptr{Cvoid}, )).ptr
-    eptr = @cfunction($(make_error_handler(err)), Ptr{UnknownSxp}, (Ptr{UnknownSxp}, Ptr{Cvoid})).ptr
-    ret = ccall((:R_tryCatchError, libR), Ptr{UnknownSxp},
-          (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
-          fptr, ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), fargs),
-          eptr, ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), eargs))
-    sexp(ret)
+function rexec_p(f::Function, args...)
+    ret = Ref{Any}()
+    pdata = ProtectedEvalData(f, args, ret)
+    protectedEval_t = @cfunction($protectedEval, Cvoid, (Ptr{ProtectedEvalData}, )).ptr
+    status = ccall((:R_ToplevelExec, libR), Cint, (Ptr{Cvoid}, Ptr{Cvoid}), protectedEval_t, pointer_from_objref(pdata))
+    if status == 0
+        throw(ErrorException("rexec encountered an error"))
+    end
+    sexp(ret[])
 end
 
-function tryCatchError(f::Function, fargs::Tuple)
-    tryCatchError(f, fargs, (c, a) -> (c), (C_NULL,))
-end
 
 "A pure julia wrapper of R_ParseVector"
 function parseVector(st::Ptr{StrSxp}, status::Ref{Cint}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
@@ -50,7 +53,7 @@ function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sx
     protect(sf)
     status = Ref{Cint}()
     # use toplevelExec to evaluate parseVector as parseVector may longjmp
-    result = protect(tryCatchError(parseVector, (st, status, sf)))
+    result = protect(rexec_p(parseVector, st, status, sf))
 
     try
         if "error" in rcopy(Array, getclass(result))
