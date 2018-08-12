@@ -1025,6 +1025,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.safe_parseVector-Union{Tuple{S}, Tuple{Ptr{StrSxp},Ref{Int32}}, Tuple{Ptr{StrSxp},Ref{Int32},Ptr{S}}} where S<:Sxp",
+    "page": "Internal",
+    "title": "RCall.safe_parseVector",
+    "category": "method",
+    "text": "RParseVector wrapped by RtryCatchError. It catches possible R\'s stop calls which may cause longjmp in c.\n\n\n\n\n\n"
+},
+
+{
     "location": "internal.html#RCall.set_last_value-Union{Tuple{Ptr{S}}, Tuple{S}} where S<:Sxp",
     "page": "Internal",
     "title": "RCall.set_last_value",
@@ -1078,14 +1086,6 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.sexpnum",
     "category": "method",
     "text": "The SEXPTYPE number of a Sxp\n\nDetermined from the trailing 5 bits of the first 32-bit word. Is a 0-based index into the info field of a SxpHead.\n\n\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.tryCatchError-Tuple{Function,Tuple,Function,Tuple}",
-    "page": "Internal",
-    "title": "RCall.tryCatchError",
-    "category": "method",
-    "text": "A wrapper of R_tryCatchError. It evaluates a given function with the given argument. It also catches possible R\'s stop calls which may cause longjmp in c. The error handler is evaluate when such an exception is caught.\n\n\n\n\n\n"
 },
 
 {
@@ -1149,7 +1149,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Internal",
     "title": "RCall.@R_str",
     "category": "macro",
-    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(getfield(RCall, Symbol(\"##44#45\"))())\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n\n\n"
+    "text": "R\"...\"\n\nAn inline R expression, the result of which is evaluated and returned as an RObject.\n\nIt supports substitution of Julia variables and expressions via prefix with $ whenever not valid R syntax (i.e. when not immediately following another completed R expression):\n\nR\"glm(Sepal.Length ~ Sepal.Width, data=$iris)\"\n\nIt is also possible to pass Julia expressions:\n\nR\"plot(getfield(RCall, Symbol(\"##43#44\"))())\"\n\nAll such Julia expressions are evaluated once, before the R expression is evaluated.\n\nThe expression does not support assigning to Julia variables, so the only way retrieve values from R via the return value.\n\n\n\n\n\n"
 },
 
 {
