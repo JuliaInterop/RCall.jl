@@ -1,0 +1,5 @@
+@deprecate sexp(::Type{IntSxp}, x) sexp(RClass{:integer}, x)
+@deprecate sexp(::Type{RealSxp}, x) sexp(RClass{:numeric}, x)
+@deprecate sexp(::Type{StrSxp}, x) sexp(RClass{:character}, x)
+@deprecate sexp(::Type{RawSxp}, x) sexp(RClass{:raw}, x)
+@deprecate sexp(::Type{VecSxp}, x) sexp(RClass{:list}, x)
