@@ -681,6 +681,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "internal.html#RCall.sexp-Tuple{Any}",
+    "page": "Internal",
+    "title": "RCall.sexp",
+    "category": "method",
+    "text": "sexp(x) converts a Julia object x to a pointer to a corresponding Sxp Object.\n\n\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.sexp-Tuple{Ptr{RCall.SxpHead}}",
+    "page": "Internal",
+    "title": "RCall.sexp",
+    "category": "method",
+    "text": "Convert a Ptr{UnknownSxp} to an approptiate Ptr{S<:Sxp}.\n\n\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.RClass{:externalptr}},Any}",
+    "page": "Internal",
+    "title": "RCall.sexp",
+    "category": "method",
+    "text": "Wrap a Julia object an a R Ptr{ExtPtrSxp}.\n\nWe store the pointer and the object in a const Dict to prevent it being removed by the Julia GC.\n\n\n\n\n\n"
+},
+
+{
+    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.RClass{:function}},Any}",
+    "page": "Internal",
+    "title": "RCall.sexp",
+    "category": "method",
+    "text": "Wrap a callable Julia object f an a R ClosSxpPtr.\n\nConstructs the following R code\n\nfunction(...) .External(juliaCallback, fExPtr, ...)\n\n\n\n\n\n"
+},
+
+{
     "location": "internal.html#Base.eltype-Tuple{Type{LglSxp}}",
     "page": "Internal",
     "title": "Base.eltype",
@@ -1038,38 +1070,6 @@ var documenterSearchIndex = {"docs": [
     "title": "RCall.set_last_value",
     "category": "method",
     "text": "Set the variable .Last.value to a given value\n\n\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Any}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "method",
-    "text": "sexp(x) converts a Julia object x to a pointer to a corresponding Sxp Object.\n\n\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Ptr{RCall.SxpHead}}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "method",
-    "text": "Convert a Ptr{UnknownSxp} to an approptiate Ptr{S<:Sxp}.\n\n\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.RClass{:externalptr}},Any}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "method",
-    "text": "Wrap a Julia object an a R Ptr{ExtPtrSxp}.\n\nWe store the pointer and the object in a const Dict to prevent it being removed by the Julia GC.\n\n\n\n\n\n"
-},
-
-{
-    "location": "internal.html#RCall.sexp-Tuple{Type{RCall.RClass{:function}},Any}",
-    "page": "Internal",
-    "title": "RCall.sexp",
-    "category": "method",
-    "text": "Wrap a callable Julia object f an a R ClosSxpPtr.\n\nConstructs the following R code\n\nfunction(...) .External(juliaCallback, fExPtr, ...)\n\n\n\n\n\n"
 },
 
 {
