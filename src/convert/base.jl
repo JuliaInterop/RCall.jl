@@ -19,8 +19,7 @@ rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, r.p; kwargs...)
 # convert Ptr{S} to Any would use the default conversions to allow
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
 rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T<:Any} = rcopy(s)
-rcopy(::Type{RObject}, s::Ptr{S}) where S<:LangSxp = RObject(s)
-rcopy(::Type{RObject}, s::Ptr{S}) where S<:S4Sxp = RObject(s)
+rcopy(::Type{RObject}, s::Ptr{S}) where S<:Sxp = RObject(s)
 
 
 # Missing
