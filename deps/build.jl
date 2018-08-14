@@ -52,6 +52,8 @@ try
         end
     end
 catch
-    rm(depfile, force=true) # delete on error
+    if isfile(depfile)
+        rm(depfile, force=true) # delete on error
+    end
     rethrow()
 end
