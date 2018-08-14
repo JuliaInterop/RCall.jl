@@ -21,7 +21,7 @@ globalEnv[:y] = RObject([4,5,6])
 @test rcopy(rcall(Symbol("+"),:x,:y)) == [5,7,9]
 
 @test sprint(io -> rprint(io, RObject([1,2,3]))) == "[1] 1 2 3\n"
-@test_warn "hello" reval("warning('hello')")
+@test_logs (:warn, "RCall.jl: Warning: hello\n") reval("warning('hello')")
 @test_throws RCall.REvalError reval("stop('hello')")
 
 
@@ -121,7 +121,7 @@ end
    bar
 """))))
 
-@test_warn "hello" rprint(reval("""
+@test_logs (:warn, "RCall.jl: Warning in print.Bar(x) : hello\n") rprint(reval("""
    print.Bar <- function(x) warning("hello")
    bar <- 1
    class(bar) <- "Bar"

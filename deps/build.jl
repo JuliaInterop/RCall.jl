@@ -16,7 +16,7 @@ try
 
     if !haskey(ENV,"R_HOME") && isdir(DepFile.Rhome) && validate_libR(DepFile.libR, false)
         Rhome, libR = DepFile.Rhome, DepFile.libR
-        info("Using previously configured R at $Rhome with libR in $libR.")
+        @info "Using previously configured R at $Rhome with libR in $libR."
     else
         Rhome = get(ENV, "R_HOME", "")
         if isempty(Rhome)
@@ -32,7 +32,7 @@ try
         if isempty(libR)
             if get(ENV, "R_HOME", "") == "*"
                 different = "  To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\")."
-                info("Installing R via Conda.$different")
+                @info "Installing R via Conda.$different"
                 Conda.add_channel("r")
                 Conda.add("r-base")
                 Rhome = joinpath(Conda.LIBDIR, "R")
@@ -43,7 +43,7 @@ try
             end
         end
 
-        info("Using R at $Rhome and libR at $libR.")
+        @info "Using R at $Rhome and libR at $libR."
         if DepFile.Rhome != Rhome || DepFile.libR != libR
             open(depfile, "w") do f
                 println(f, "const Rhome = \"", escape_string(Rhome), '"')
@@ -52,6 +52,8 @@ try
         end
     end
 catch
-    rm(depfile, force=true) # delete on error
+    if isfile(depfile)
+        rm(depfile, force=true) # delete on error
+    end
     rethrow()
 end
