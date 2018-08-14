@@ -36,7 +36,7 @@ function validate_libR(libR, raise=true)
         if raise
             error(msg)
         else
-            info(msg)
+            @info msg
             return false
         end
     end
