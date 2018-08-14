@@ -26,3 +26,6 @@ function sexp(::Type{RClass{:array}}, aa::AxisArray)
     end
     rv
 end
+
+# AxisArray
+sexpclass(v::AxisArray) = RClass{:array}

@@ -9,7 +9,7 @@ v = CategoricalArray(repeat(["a", "b"], inner = 5), ordered=true)
 @test CategoricalArrays.isordered(rcopy(CategoricalArray,R"ordered(c('a','a','c'))"))
 
 a = Array{Union{String, Missing}}(repeat(["a", "b"], inner = 5))
-a[repeat([true, false], outer = 5)] = missing
+a[repeat([true, false], outer = 5)] .= missing
 v = CategoricalArray(a)
 @test isequal(rcopy(CategoricalArray,RObject(v)), v)
 v = CategoricalArray(a, ordered=true)

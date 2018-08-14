@@ -107,7 +107,7 @@ function handle_eval_stderr(;as_warning::Bool=false)
     if bytesavailable(error_buffer) != 0
         s = String(take!(error_buffer))
         if as_warning
-            warn("RCall.jl: ", s)
+            @warn "RCall.jl: " * s
         else
             throw(REvalError(s))
         end

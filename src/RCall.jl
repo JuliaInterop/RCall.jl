@@ -1,6 +1,7 @@
 __precompile__()
 module RCall
 
+using Requires
 using Dates
 using Libdl
 using Random
@@ -8,7 +9,7 @@ using REPL
 using Missings
 using CategoricalArrays
 using DataFrames
-using AxisArrays
+# using AxisArrays
 import StatsModels: Formula, parse!
 import DataStructures: OrderedDict
 
@@ -43,7 +44,7 @@ include("convert/categorical.jl")
 include("convert/datetime.jl")
 include("convert/dataframe.jl")
 include("convert/formula.jl")
-include("convert/axisarray.jl")
+# include("convert/axisarray.jl")
 include("convert/default.jl")
 include("eventloop.jl")
 include("eval.jl")
