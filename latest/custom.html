@@ -11,7 +11,7 @@ bar = R&quot;&quot;&quot;
 
 function rcopy(::Type{Foo}, s::Ptr{VecSxp})
     Foo(rcopy(Float64, s[:x]), rcopy(String, s[:y]))
-end</code></pre><pre><code class="language-none">rcopy (generic function with 92 methods)</code></pre></div><p>The <code>convert</code> function will dispatch the corresponding <code>rcopy</code> function when it is found.</p><div><pre><code class="language-julia">rcopy(Foo, bar)
+end</code></pre><pre><code class="language-none">rcopy (generic function with 93 methods)</code></pre></div><p>The <code>convert</code> function will dispatch the corresponding <code>rcopy</code> function when it is found.</p><div><pre><code class="language-julia">rcopy(Foo, bar)
 convert(Foo, bar) # calls `rcopy`</code></pre></div><p>To allow the automatic conversion via <code>rcopy(bar)</code>, the R class <code>Bar</code> has to be registered.</p><div><pre><code class="language-julia">import RCall: RClass, rcopytype
 
 rcopytype(::Type{RClass{:Bar}}, s::Ptr{VecSxp}) = Foo
