@@ -1,3 +1,6 @@
+using AxisArrays
+import RCall: rcopy, sexp, sexpclass
+
 function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
     dnames = getattrib(r, Const.DimNamesSymbol)
     isnull(dnames) && error("r has no dimnames")

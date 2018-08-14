@@ -175,7 +175,7 @@ function __init__()
         isinteractive() && rgui_init()
     end
 
-    @require JSON="39de3d68-74b9-583c-8d2d-e117c070f3a9" begin
+    @require AxisArrays="39de3d68-74b9-583c-8d2d-e117c070f3a9" begin
         include("convert/axisarray.jl")
     end
 
