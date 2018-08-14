@@ -1,3 +1,5 @@
+using Libdl
+
 """
     validate_libR(libR, raise=true)
 
