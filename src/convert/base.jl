@@ -20,6 +20,7 @@ rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, r.p; kwargs...)
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
 rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T<:Any} = rcopy(s)
 rcopy(::Type{RObject}, s::Ptr{S}) where S<:LangSxp = RObject(s)
+rcopy(::Type{RObject}, s::Ptr{S}) where S<:S4Sxp = RObject(s)
 
 
 # Missing
