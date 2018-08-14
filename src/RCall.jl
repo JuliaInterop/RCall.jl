@@ -9,7 +9,9 @@ using REPL
 using Missings
 using CategoricalArrays
 using DataFrames
-# using AxisArrays
+if VERSION < v"1.0"
+  using AxisArrays
+end
 import StatsModels: Formula, parse!
 import DataStructures: OrderedDict
 
@@ -44,7 +46,9 @@ include("convert/categorical.jl")
 include("convert/datetime.jl")
 include("convert/dataframe.jl")
 include("convert/formula.jl")
-# include("convert/axisarray.jl")
+if VERSION < v"1.0"
+  include("convert/axisarray.jl")
+end
 include("convert/default.jl")
 include("eventloop.jl")
 include("eval.jl")
