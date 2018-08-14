@@ -303,3 +303,11 @@ b = RObject(true)
 # convert to Any
 @test isa(rcopy(Any, R"1"), Float64)
 @test isa(convert(Any, R"1"), RObject)
+
+
+# s4
+
+@test isa(rcopy(reval("""
+   setClass("Foo", representation(x = "numeric"))
+   foo <- new("Foo", x = 20)
+""")), RObject)
