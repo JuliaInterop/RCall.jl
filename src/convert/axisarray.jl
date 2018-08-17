@@ -1,5 +1,4 @@
 using AxisArrays
-import RCall: rcopy, sexp, sexpclass
 
 function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
     dnames = getattrib(r, Const.DimNamesSymbol)
