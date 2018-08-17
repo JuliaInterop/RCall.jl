@@ -74,7 +74,7 @@ function ijulia_cleanup()
 end
 
 
-const ijulia_file_dir = ""
+ijulia_file_dir = ""
 
 function ijulia_init()
     global ijulia_file_dir
