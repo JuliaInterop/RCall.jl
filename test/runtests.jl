@@ -37,15 +37,11 @@ tests = ["basic",
          "convert/dataframe",
          "convert/categorical",
          "convert/formula",
-         # "convert/axisarray",
+         "convert/axisarray",
          "macros",
          "namespaces",
          "repl",
          ]
-
-if VERSION < v"1.0"
-    insert!(tests, 8, "convert/axisarray")
-end
 
 println("Running tests:")
 
