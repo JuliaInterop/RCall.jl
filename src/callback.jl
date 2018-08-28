@@ -37,7 +37,7 @@ function julia_extptr_callback(p::Ptr{ListSxp})
         # julia function pointer
         f_sxp = car(l)::Ptr{ExtPtrSxp}
         ptr = ccall((:R_ExternalPtrAddr, libR), Ptr{Cvoid}, (Ptr{ExtPtrSxp},), f_sxp)
-        f = unsafe_pointer_to_objref(ptr)
+        f = unsafe_pointer_to_objref(ptr)[]
         l = cdr(l)
 
         # # extract arguments
@@ -111,9 +111,11 @@ We store the pointer and the object in a const Dict to prevent it being
 removed by the Julia GC.
 """
 function sexp(::Type{RClass{:externalptr}}, j)
-    jptr = ccall(:jl_value_ptr, Ptr{Cvoid}, (Any,), j)
+    # wrap in a `Ref`
+    refj = Ref(j)
+    jptr = pointer_from_objref(refj)
     s = makeExternalPtr(jptr)
-    jtypExtPtrs[s] = j
+    jtypExtPtrs[s] = refj
     registerCFinalizerEx(s)
     s
 end
