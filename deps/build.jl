@@ -32,6 +32,7 @@ try
                 error("R_HOME is not a directory.")
             end
         end
+        Rhome = Rhome == "*" ? "" else Rhome
         libR = isempty(Rhome) ? "" : locate_libR(Rhome, false)
         if isempty(libR)
             if get(ENV, "R_HOME", "") == "*"
