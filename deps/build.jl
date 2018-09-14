@@ -27,8 +27,12 @@ try
                 try Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE,
                                             "Software\\R-Core\\R", "InstallPath"); catch; end
             end
+        else
+            if !isdir(Rhome)
+                error("R_HOME is not a directory.")
+            end
         end
-        libR = isempty(Rhome) || !isdir(Rhome) ? "" : locate_libR(Rhome, false)
+        libR = isempty(Rhome) ? "" : locate_libR(Rhome, false)
         if isempty(libR)
             if get(ENV, "R_HOME", "") == "*"
                 different = "  To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\")."
