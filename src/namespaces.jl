@@ -11,23 +11,32 @@ cached_namespaces = Dict{String, Module}()
 
 """
 Import an R package as a julia module.
+Sanitizes the imported symbols by default, because otherwise certain symbols cannot be used.
+Eg: PerformanceAnalytics::charts.Bar in R becomes PerformanceAnalytics.charts_Bar in Julia
 ```
 gg = rimport("ggplot2")
 ```
 """
-function rimport(pkg::String, s::Symbol=:__anonymous__)
+function rimport(pkg::String, s::Symbol=:__anonymous__; sanitize=true)
     if pkg in keys(cached_namespaces)
         m = cached_namespaces[pkg]
     else
         ns = rcall(:asNamespace, pkg)
         members = rcopy(Vector{String}, rcall(:getNamespaceExports, ns))
-        filter!(x -> !(x in reserved), members)
+
         m = Module(s, false)
         id = Expr(:const, Expr(:(=), :__package__, pkg))
+        if sanitize
+            exports = [Symbol(replace(x, '.' => '_')) for x in members]
+        else
+            exports = [Symbol(x) for x in members]
+        end
+
+        filtered_indices = filter!(i -> !(string(exports[i]) in reserved),
+                                   collect(eachindex(exports)))
         consts = [Expr(:const, Expr(:(=),
-                       Symbol(x),
-                       rcall(Symbol("::"), pkg, x))) for x in members]
-        exports = [Symbol(x) for x in members]
+                       exports[i],
+                       rcall(Symbol("::"), pkg, members[i]))) for i in filtered_indices ]
         Core.eval(m, Expr(:toplevel, id, consts..., Expr(:export, exports...), :(rmember(x) = ($getindex)($ns, x))))
         cached_namespaces[pkg] = m
     end
