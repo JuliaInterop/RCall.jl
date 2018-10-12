@@ -12,7 +12,8 @@ cached_namespaces = Dict{String, Module}()
 """
 Import an R package as a julia module.
 Sanitizes the imported symbols by default, because otherwise certain symbols cannot be used.
-Eg: PerformanceAnalytics::charts.Bar in R becomes PerformanceAnalytics.charts_Bar in Julia
+
+E.g.: `PerformanceAnalytics::charts.Bar` in R becomes `PerformanceAnalytics.charts_Bar` in Julia
 ```
 gg = rimport("ggplot2")
 ```
