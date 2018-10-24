@@ -162,13 +162,14 @@ end
 # VecSxp
 rcopy(::Type{Array}, s::Ptr{VecSxp}) = rcopy(Array{Any}, s)
 rcopy(::Type{Vector}, s::Ptr{VecSxp}) = rcopy(Vector{Any}, s)
-function rcopy(::Type{A}, s::Ptr{VecSxp}; sanitize::Bool=true) where A<:AbstractDict
+function rcopy(::Type{A}, s::Ptr{VecSxp};
+               normalizenames::Bool=true) where A<:AbstractDict
     protect(s)
     a = A()
     try
         K = keytype(a)
         V = valtype(a)
-        if sanitize && (K <: AbstractString || K <: Symbol)
+        if normalizenames && (K <: AbstractString || K <: Symbol)
             for k in rcopy(Array{String}, getnames(s))
                 a[K(replace(k, "." => "_"))] = rcopy(V, s[k])
             end

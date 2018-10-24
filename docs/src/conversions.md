@@ -87,16 +87,16 @@ r = robject(d)
 rcopy(r)
 ```
 
-In default, the column names of R data frames are sanitized such that `foo.bar`
+In default, the column names of R data frames are normalized such that `foo.bar`
 would be replaced by `foo_bar`.
 
 ```@example 1
 rcopy(R"data.frame(a.b = 1:3)")
 ```
 
-To avoid the sanitization, use `sanitize` option.
+To avoid the normalization, use `normalizenames` option.
 ```@example 1
-rcopy(R"data.frame(a.b = 1:10)"; sanitize = false)
+rcopy(R"data.frame(a.b = 1:10)"; normalizenames = false)
 ```
 
 ## AxisArrays

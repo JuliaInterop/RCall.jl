@@ -1,9 +1,15 @@
 # conversion methods for DataFrames
 
-function rcopy(::Type{T}, s::Ptr{VecSxp}; sanitize::Bool=true) where T<:AbstractDataFrame
+function rcopy(::Type{T}, s::Ptr{VecSxp};
+               normalizenames::Bool=true, 
+               sanitize=nothing) where T<:AbstractDataFrame
+    if sanitize != nothing
+        Base.depwarn("The `sanitize` keyword argument is deprecated. Use `normalizenames` instead.", :rcopy)
+        normalizenames = sanitize
+    end
     isFrame(s) || error("s is not an R data frame")
     vnames = rcopy(Array{Symbol},getnames(s))
-    if sanitize
+    if normalizenames
         vnames = [Symbol(replace(string(v), '.' => '_')) for v in vnames]
     end
     DataFrame([rcopy(AbstractArray, c) for c in s], vnames)
