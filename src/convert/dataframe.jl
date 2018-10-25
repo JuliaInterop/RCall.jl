@@ -3,7 +3,7 @@
 function rcopy(::Type{T}, s::Ptr{VecSxp};
                normalizenames::Bool=true, 
                sanitize=nothing) where T<:AbstractDataFrame
-    if sanitize != nothing
+    if sanitize !== nothing
         Base.depwarn("The `sanitize` keyword argument is deprecated. Use `normalizenames` instead.", :rcopy)
         normalizenames = sanitize
     end
