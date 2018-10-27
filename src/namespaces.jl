@@ -18,7 +18,7 @@ E.g.: `PerformanceAnalytics::charts.Bar` in R becomes `PerformanceAnalytics.char
 gg = rimport("ggplot2")
 ```
 """
-function rimport(pkg::String, s::Symbol=:__anonymous__; normalizenames=true)
+function rimport(pkg::String, s::Symbol=:__anonymous__; normalizenames::Bool=true)
     if pkg in keys(cached_namespaces)
         m = cached_namespaces[pkg]
     else
