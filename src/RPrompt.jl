@@ -77,7 +77,7 @@ function bracketed_paste_callback(s, o...)
     sbuffer = LineEdit.buffer(s)
     curspos = position(sbuffer)
     seek(sbuffer, 0)
-    shouldeval = (bytesavailable(sbuffer) == curspos && search(sbuffer, UInt8('\n')) == 0)
+    shouldeval = (bytesavailable(sbuffer) == curspos && !occursin(UInt8('\n'), sbuffer))
     seek(sbuffer, curspos)
     if curspos == 0
         # if pasting at the beginning, strip leading whitespace
@@ -92,24 +92,27 @@ function bracketed_paste_callback(s, o...)
     LineEdit.edit_insert(sbuffer, input)
     input = String(take!(sbuffer))
 
-    oldpos = start(input)
+    m = sizeof(input)
+    oldpos = 1
     nextpos = 0
     # parse the input line by line
-    while !done(input, oldpos)
-        nextpos = search(input, '\n', nextpos+1)
-        if nextpos == 0
-            nextpos = endof(input)
+    while nextpos < m
+        next_result = findnext("\n", input, nextpos + 1)
+        if next_result == nothing
+            nextpos = m
+        else
+            nextpos = next_result[1]
         end
         block = input[oldpos:nextpos]
         status = parse_status(block)
 
-        if status == :error  || (status == :incomplete && done(input, nextpos+1)) ||
-                (done(input, nextpos+1) && !endswith(input, '\n'))
-            # error / continue but not the end / at the end but no new line
+        if status == :error  || (status == :incomplete && nextpos == m) ||
+                (nextpos == m && !endswith(input, '\n'))
+            # error / continue and the end / at the end but no new line
             LineEdit.replace_line(s, input[oldpos:end])
             LineEdit.refresh_line(s)
             break
-        elseif status == :incomplete && !done(input, nextpos+1)
+        elseif status == :incomplete && nextpos < m
             continue
         end
 
