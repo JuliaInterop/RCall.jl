@@ -26,8 +26,6 @@ try
             Conda.add_channel("r")
             Conda.add("r-base")
             Rhome = joinpath(Conda.LIBDIR, "R")
-            libR = locate_libR(Rhome, false)
-            isempty(libR) && error("Conda R installation failed.$different")
         else
             if isempty(Rhome)
                 try Rhome = readchomp(`R RHOME`); catch; end
@@ -43,20 +41,9 @@ try
                 end
             end
         end
-        # libR = isempty(Rhome) ? "" : locate_libR(Rhome, false)
-        # if isempty(libR)
-        #     if get(ENV, "R_HOME", "") == "*"
-        #         different = "  To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\")."
-        #         @info "Installing R via Conda.$different"
-        #         Conda.add_channel("r")
-        #         Conda.add("r-base")
-        #         Rhome = joinpath(Conda.LIBDIR, "R")
-        #         libR = locate_libR(Rhome, false)
-        #         isempty(libR) && error("Conda R installation failed.$different")
-        #     else
-        #         error("Fail to use R at $Rhome.")
-        #     end
-        # end
+
+        libR = locate_libR(Rhome, false)
+        isempty(libR) && error("Conda R installation failed.$different")
 
         @info "Using R at $Rhome and libR at $libR."
         if DepFile.Rhome != Rhome || DepFile.libR != libR
