@@ -27,10 +27,8 @@ try
                 try Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE,
                                             "Software\\R-Core\\R", "InstallPath"); catch; end
             end
-        else
-            if !isdir(Rhome)
-                error("R_HOME is not a directory.")
-            end
+        elseif Rhome != "*" && !isdir(Rhome)
+            error("R_HOME is not a directory.")
         end
         Rhome = Rhome == "*" ? "" : Rhome
         libR = isempty(Rhome) ? "" : locate_libR(Rhome, false)
