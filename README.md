@@ -1,8 +1,7 @@
 # RCall.jl
 
 #### Most recent release
-* [![RCall](http://pkg.julialang.org/badges/RCall_0.6.svg)](http://pkg.julialang.org/?pkg=RCall&ver=0.6)
-* [![RCall](http://pkg.julialang.org/badges/RCall_0.7.svg)](http://pkg.julialang.org/?pkg=RCall&ver=0.7)
+* [![RCall](http://pkg.julialang.org/badges/RCall_1.0.svg)](http://pkg.julialang.org/?pkg=RCall&ver=1.0)
 
 
 #### Development version
