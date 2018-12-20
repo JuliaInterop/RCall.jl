@@ -8,6 +8,9 @@ const error_buffer = PipeBuffer()
 "Print the value of an Sxp using R's printing mechanism"
 function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     global _output_is_locked
+    if s == C_NULL
+        return
+    end
     protect(s)
     # Rf_PrintValue can cause segfault if a S3/S4 object has custom
     # print function as it doesn't use R_tryEval
