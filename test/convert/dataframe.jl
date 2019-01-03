@@ -7,7 +7,7 @@ attenu = rcopy(DataFrame,reval(:attenu))
 @test size(attenu) == (182,5)
 @test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
 @test rcopy(rcall(:dim, RObject(attenu[1:2, :]))) == [2, 5]
-@test rcopy(rcall(:dim, RObject(view(attenu, 1:2)))) == [2, 5]
+@test rcopy(rcall(:dim, RObject(view(attenu, 1:2, :)))) == [2, 5]
 dist = attenu[:dist]
 @test isa(dist,Array{Float64})
 station = attenu[:station]
