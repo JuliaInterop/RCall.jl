@@ -12,7 +12,7 @@ function rcopy(::Type{T}, s::Ptr{VecSxp};
     if normalizenames
         vnames = [Symbol(replace(string(v), '.' => '_')) for v in vnames]
     end
-    DataFrame([rcopy(AbstractArray, c) for c in s], vnames)
+    DataFrame([vec(rcopy(AbstractArray, c)) for c in s], vnames)
 end
 
 ## DataFrame to sexp conversion.
