@@ -79,10 +79,7 @@ function initEmbeddedR()
         end
 
         argv = ["REmbeddedJulia","--silent","--no-save"]
-        i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
-        if i == 0
-            error("Could not start embedded R session.")
-        end
+        ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
         rs = RStart()
         ccall((:R_DefParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
@@ -109,10 +106,7 @@ function initEmbeddedR()
 
         # initialize library
         argv = ["REmbeddedJulia","--silent","--no-save"]
-        i = ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
-        if i == 0
-            error("Could not start embedded R session.")
-        end
+        ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
         ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Cvoid}), C_NULL)
@@ -122,6 +116,12 @@ function initEmbeddedR()
         ptr_polled_events = @cfunction($polled_events,Nothing,()).ptr
         unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Cvoid}), ptr_polled_events)
     end
+
+    # Julia 1.1+ no longer loads libraries in the main thread
+    # TODO: this needs to be set correctly
+    # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Threading-issues
+    unsafe_store!(cglobal((:R_CStackLimit,libR),Csize_t), typemax(Csize_t))
+    ccall((:setup_Rmainloop,libR),Cvoid,())
 
     Rembedded[] = true
     atexit(endEmbeddedR)
