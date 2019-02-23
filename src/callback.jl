@@ -52,15 +52,14 @@ function julia_extptr_callback(p::Ptr{ListSxp})
                 push!(kwargs, (rcopy(Symbol,k), rcopy(a)))
             end
         end
-
         # call function
         y = f(args...;kwargs...)
 
         # return appropriate sexp
         return p = convert(Ptr{UnknownSxp}, sexp(y))::Ptr{UnknownSxp}
     catch e
-        ccall((:Rf_error,libR),Ptr{Cvoid},(Ptr{Cchar},),string(e))
-        return convert(Ptr{UnknownSxp}, sexp(Const.NilValue))::Ptr{UnknownSxp}
+        err = rcall(reval("base::simpleError"), string(e))
+        return convert(Ptr{UnknownSxp}, sexp(err))::Ptr{UnknownSxp}
     finally
         unprotect(1)
     end
