@@ -21,11 +21,13 @@ try
         Rhome = get(ENV, "R_HOME", "")
         if Rhome == "*"
             # install with Conda
-            different = "  To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\")."
             @info "Installing R via Conda.$different"
             Conda.add_channel("r")
             Conda.add("r-base")
             Rhome = joinpath(Conda.LIBDIR, "R")
+
+            libR = locate_libR(Rhome, false)
+            isempty(libR) && error("Conda R installation failed. To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\").")
         else
             if isempty(Rhome)
                 try Rhome = readchomp(`R RHOME`); catch; end
@@ -40,10 +42,10 @@ try
                     error("R_HOME is not a directory.")
                 end
             end
-        end
 
-        libR = locate_libR(Rhome, false)
-        isempty(libR) && error("Conda R installation failed.$different")
+            libR = locate_libR(Rhome, false)
+            isempty(libR) && error("R cannot be found. Set the \"R_HOME\" environment variable to re-run Pkg.build(\"RCall\").")
+        end
 
         @info "Using R at $Rhome and libR at $libR."
         if DepFile.Rhome != Rhome || DepFile.libR != libR
