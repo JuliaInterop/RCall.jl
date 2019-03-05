@@ -1,4 +1,4 @@
-using AxisArrays
+using .AxisArrays
 
 function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
     dnames = getattrib(r, Const.DimNamesSymbol)
