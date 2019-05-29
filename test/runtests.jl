@@ -2,18 +2,12 @@ using Test
 
 hd = homedir()
 
-if Sys.iswindows()
-    Rhome = if haskey(ENV,"R_HOME")
-        ENV["R_HOME"]
-    else
-        using WinReg
-        WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
-    end
-    Rscript = joinpath(Rhome,"bin",Sys.WORD_SIZE==64 ? "x64" : "i386", "Rscript")
-else
-    Rscript = "Rscript"
-end
+include("../deps/deps.jl")
 
+Rscript = joinpath(Rhome, "Rscript")
+if !isfile(Rscript)
+    Rscript = joinpath(Rhome, "bin", "Rscript")
+end    
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 
 using RCall

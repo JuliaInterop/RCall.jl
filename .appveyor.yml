@@ -1,6 +1,8 @@
 environment:
   matrix:
   - julia_version: 1.0
+  - julia_version: 1.0
+    R_HOME: "*" # test Conda
   - julia_version: 1.1
   - julia_version: nightly
 
@@ -27,9 +29,11 @@ install:
   - ps: iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/JuliaCI/Appveyor.jl/version-1/bin/install.ps1"))
 # Download and install R binary
   - ps: |
-      (new-object net.webclient).DownloadString("http://cran.rstudio.com/bin/windows/base/") -match 'href="(R-[0-9.]*[a-zA-Z]*-win.exe)"';
-      (new-object net.webclient).DownloadFile($("http://cran.rstudio.com/bin/windows/base/"+$matches[1]),"C:\projects\R-binary.exe")
-  - C:\projects\R-binary.exe /VERYSILENT /DIR=C:\projects\R
+      if( Test-Path env:R_HOME ) {
+        (new-object net.webclient).DownloadString("http://cran.rstudio.com/bin/windows/base/") -match 'href="(R-[0-9.]*[a-zA-Z]*-win.exe)"';
+        (new-object net.webclient).DownloadFile($("http://cran.rstudio.com/bin/windows/base/"+$matches[1]),"C:\projects\R-binary.exe")
+      }
+  - IF DEFINED R_HOME (C:\projects\R-binary.exe /VERYSILENT /DIR=C:\projects\R)
 
 build_script:
   - echo "%JL_BUILD_SCRIPT%"
