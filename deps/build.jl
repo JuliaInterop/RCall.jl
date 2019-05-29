@@ -21,7 +21,9 @@ try
         Rhome = get(ENV, "R_HOME", "")
         if Rhome == "*"
             # install with Conda
-            @info "Installing R via Conda.$different"
+            @info "Installing R via Conda.  To use a different R installation,"*
+                " set the \"R_HOME\" environment variable and re-run "*
+                "Pkg.build(\"RCall\")."
             Conda.add_channel("r")
             Conda.add("r-base")
             Rhome = joinpath(Conda.LIBDIR, "R")
