@@ -4,10 +4,11 @@ hd = homedir()
 
 include("../deps/deps.jl")
 
-Rscript = joinpath(Rhome, "Rscript")
-if !isfile(Rscript)
+if Sys.iswindows()
+    Rscript = joinpath(dirname(libR), "Rscript")
+else
     Rscript = joinpath(Rhome, "bin", "Rscript")
-end    
+end   
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 
 using RCall

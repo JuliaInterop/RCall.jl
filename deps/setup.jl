@@ -1,14 +1,14 @@
 using Libdl
 
 """
-    validate_libR(libR, raise=true)
+    validate_libR(libR; raise=true)
 
 Checks that the R library `libR` can be loaded and is satisfies version requirements.
 
 If `raise` is set to `false`, then returns a boolean indicating success rather
 than throwing exceptions.
 """
-function validate_libR(libR, raise=true)
+function validate_libR(libR; raise=true)
     if !isfile(libR)
         raise || return false
         error("Could not find library $libR. Make sure that R shared library exists.")
@@ -44,11 +44,11 @@ function validate_libR(libR, raise=true)
     return true
 end
 
-function locate_libR(Rhome, raise=true)
+function locate_libR(Rhome; raise=true)
     @static if Sys.iswindows()
         libR = joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386", "R.dll")
     else
         libR = joinpath(Rhome, "lib", "libR.$(Libdl.dlext)")
     end
-    return validate_libR(libR, raise) ? libR : ""
+    return validate_libR(libR; raise=raise) ? libR : ""
 end
