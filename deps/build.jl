@@ -10,7 +10,7 @@ if uppercase(get(ENV, "R_CONDA", "FALSE")) == "TRUE"
     @info "Installing R via Conda.jl"
     using Conda
     Conda.add_channel("r")
-    Conda.add("r-base")
+    Conda.add("r")
 
     if Sys.iswindows()
         Rhome = joinpath(Conda.ROOTENV, "Lib", "R")
@@ -46,6 +46,9 @@ else
         catch
         end
     end
+end
+if Rhome == ""
+    error("No R installation found")
 end
 
 libR = locate_libR(Rhome)
