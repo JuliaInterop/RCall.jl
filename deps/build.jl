@@ -1,14 +1,9 @@
-import Conda
-@static if Sys.iswindows()
-    import WinReg
-end
-
 include("setup.jl")
 
 # 1) Try Conda
 if uppercase(get(ENV, "R_CONDA", "FALSE")) == "TRUE"
     @info "Installing R via Conda.jl"
-    using Conda
+    import Conda
     Conda.add_channel("r")
     Conda.add("r")
 
@@ -37,7 +32,7 @@ else
 
     # 4) Look up Windows registry
     if Rhome == "" && Sys.iswindows()
-        using WinReg
+        import WinReg
         try
             global Rhome
             Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE,
