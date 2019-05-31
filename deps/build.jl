@@ -5,13 +5,7 @@ if uppercase(get(ENV, "R_CONDA", "FALSE")) == "TRUE"
     @info "Installing R via Conda.jl"
     import Conda
     Conda.add_channel("r")
-    if Sys.WORD_SIZE==32
-        withenv("CONDA_FORCE_32BIT"=>"1") do
-            Conda.add("r")
-        end
-    else
-        Conda.add("r")
-    end
+    Conda.add("r")
 
     if Sys.iswindows()
         Rhome = joinpath(Conda.ROOTENV, "Lib", "R")

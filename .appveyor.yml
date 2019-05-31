@@ -2,7 +2,7 @@ environment:
   matrix:
   - julia_version: 1.0
   - julia_version: 1.0
-    R_CONDA: "TRUE" # test Conda
+    R_CONDA: TRUE # test Conda
   - julia_version: 1.1
   - julia_version: nightly
 
@@ -11,6 +11,9 @@ platform:
   - x64 # 64-bit
 
 matrix:
+  exclude:
+    - platform: x86
+      R_CONDA: TRUE
   allow_failures:
     - julia_version: nightly
 
