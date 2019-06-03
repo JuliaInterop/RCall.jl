@@ -9,8 +9,9 @@ using REPL
 using Missings
 using CategoricalArrays
 using DataFrames
+using StatsModels
 
-import StatsModels: Formula, parse!
+#import StatsModels: FormulaTerm
 import DataStructures: OrderedDict
 
 import Base: eltype, convert, isascii,

@@ -1,6 +1,6 @@
 name = "RCall"
 uuid = "6f49c342-dc21-5d91-9882-a32aef131414"
-authors = ["Douglas Bates", "Randy Lai", "Simon Byrne <simonbyrne@gmail.com>"]
+authors = ["Douglas Bates <dmbates@gmail.com>", "Randy Lai", "Simon Byrne <simonbyrne@gmail.com>"]
 version = "0.13.2"
 
 [deps]
@@ -24,7 +24,7 @@ DataFrames = "≥ 0.11.0"
 DataStructures = "≥ 0.5.0"
 Missings = "≥ 0.2.0"
 Requires = "≥ 0.5.2"
-StatsModels = "≥ 0.2.4"
+StatsModels = "≥ 0.5.0"
 WinReg = "≥ 0.2.0"
 julia = "1"
 

@@ -36,11 +36,9 @@ function rcopy(::Type{Expr}, l::Ptr{LangSxp})
     f
 end
 
-function rcopy(::Type{Formula}, l::Ptr{LangSxp})
-    ex_orig = rcopy(Expr, l)
-    ex = parse!(copy(ex_orig))
-    lhs, rhs = ex.args[2:3]
-    Formula(ex_orig, ex, lhs, rhs)
+function rcopy(::Type{FormulaTerm}, l::Ptr{LangSxp})
+    expr = rcopy(Expr, l)
+    @eval StatsModels.@formula($expr)
 end
 
 
@@ -65,7 +63,7 @@ sexp_formula(n::Number) = sexp(n)
 
 
 # R formula objects
-function sexp(::Type{RClass{:formula}}, f::Formula)
+function sexp(::Type{RClass{:formula}}, f::FormulaTerm)
     s = protect(sexp_formula(f.ex_orig == :() ? f.ex : f.ex_orig))
     try
         setattrib!(s, Const.ClassSymbol, "formula")

@@ -191,7 +191,7 @@ rcopytype(::Type{RClass{:function}}, s::Ptr{S}) where S<:FunctionSxp = Function
 # LangSxp
 rcopytype(::Type{RClass{:call}}, l::Ptr{LangSxp}) = Expr
 rcopytype(::Type{RClass{Symbol("(")}}, l::Ptr{LangSxp}) = Expr
-rcopytype(::Type{RClass{:formula}}, l::Ptr{LangSxp}) = Formula
+rcopytype(::Type{RClass{:formula}}, l::Ptr{LangSxp}) = FormulaTerm
 
 # Fallback
 rcopytype(::T, s::Ptr{S}) where {T, S<:Sxp} = RObject
@@ -249,7 +249,7 @@ sexpclass(d::AbstractDict) = RClass{:list}
 sexpclass(f::Function) = RClass{:function}
 
 # LangSxp
-sexpclass(f::Formula) = RClass{:formula}
+sexpclass(f::FormulaTerm) = RClass{:formula}
 
 
 # Date
