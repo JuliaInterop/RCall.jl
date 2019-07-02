@@ -1,7 +1,7 @@
 include("setup.jl")
 
 # 1) Try Conda
-if uppercase(get(ENV, "R_CONDA", "FALSE")) == "TRUE"
+if uppercase(get(ENV, "RCALL_CONDA", "FALSE")) == "TRUE"
     @info "Installing R via Conda.jl"
     import Conda
     Conda.add_channel("r")
