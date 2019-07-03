@@ -4,12 +4,14 @@ hd = homedir()
 
 include("../deps/deps.jl")
 
-if Sys.iswindows()
-    Rscript = joinpath(dirname(libR), "Rscript")
+if Sys.iswindows()    
+    libpaths = withenv("PATH" => join(vcat(ENV["PATH"], PATH_append), ';')) do
+        readlines(`Rscript -e "writeLines(.libPaths())"`)
+    end
 else
     Rscript = joinpath(Rhome, "bin", "Rscript")
+    libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 end   
-libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 
 using RCall
 using Missings
