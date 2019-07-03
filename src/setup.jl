@@ -70,7 +70,7 @@ function initEmbeddedR()
 
         # Need to use POSIX interface (instead of Win32 interface used by ENV)
         # https://bugs.r-project.org/bugzilla/show_bug.cgi?id=16382
-        ccall(:_wputenv,Cint,(Cwstring,),"PATH=$(ENV["PATH"]);$(dirname(libR))")
+        ccall(:_wputenv,Cint,(Cwstring,),"PATH=$(ENV["PATH"]);$(join(PATH_append,';'))")
         ccall(:_wputenv,Cint,(Cwstring,),"R_HOME=$Rhome")
         ccall(:_wputenv,Cint,(Cwstring,),"R_USER=$Ruser")
 
