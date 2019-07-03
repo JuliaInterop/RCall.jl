@@ -16,7 +16,9 @@ function validate_libR(libR; raise=true)
     # Issue #143
     # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
     libptr = try
-        Libdl.dlopen(libR)
+        withenv("PATH" => join(vcat(ENV["PATH"], PATH_append), ';')) do
+            Libdl.dlopen(libR)
+        end
     catch er
         raise || return false
         Base.with_output_color(:red, stderr) do io
