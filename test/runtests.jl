@@ -46,4 +46,4 @@ for t in tests
     include(tfile)
 end
 
-@test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
+@test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Cint)) == 0
