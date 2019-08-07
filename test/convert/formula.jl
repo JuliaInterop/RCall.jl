@@ -14,11 +14,11 @@ using StatsModels
 
 @test rcopy(rcall(Symbol("=="), R"y ~ x + (1 | g)", RObject(@formula y ~ x + (1 | g))))
 @test rcopy(rcall(Symbol("=="), R"y ~ x + (1 | g) + (1 | d)", RObject(@formula y ~ x + (1 | g) + (1 | d))))
-@test_broken rcopy(rcall(Symbol("=="), R"y ~ (a + b) * c", RObject(@formula y ~ (a + b) * c)))
-@test_broken rcopy(rcall(Symbol("=="), R"y ~ c * (a + b)", RObject(@formula y ~ c * (a + b))))
+@test rcopy(rcall(Symbol("=="), R"y ~ a + b + c + a:c + b:c", RObject(@formula y ~ (a + b) * c)))
+@test rcopy(rcall(Symbol("=="), R"y ~ c + a + b + c:a + c:b", RObject(@formula y ~ c * (a + b))))
 
 # testing association
 @test rcopy(rcall(Symbol("=="), R"y ~ a + b + c", RObject(@formula y ~ a + b + c)))
-@test_broken rcopy(rcall(Symbol("=="), R"y ~ a + b * c * d", RObject(@formula y ~ a + b * c * d)))
+@test rcopy(rcall(Symbol("=="), R"y ~ a + b + c + d + b:c + b:d + c:d + b:c:d", RObject(@formula y ~ a + b * c * d)))
 @test rcopy(rcall(Symbol("=="), R"y ~ a : b : c", RObject(@formula y ~ a & b & c)))
 @test rcopy(rcall(Symbol("=="), R"y ~ d + a : b : c", RObject(@formula y ~ d + a & b & c)))
