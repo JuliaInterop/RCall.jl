@@ -29,18 +29,16 @@ function rcopy(::Type{Expr}, l::Ptr{LangSxp})
         end
         f = Expr(:call, op, cargs...)
     end
-    # unwind these opeators
+    # unwind these operators
     if op in (:+, :*, :&) && isa(f.args[2], Expr) && f.args[2].args[1] == op
         f = Expr(:call, op, f.args[2].args[2:end]..., f.args[3])
     end
     f
 end
 
-function rcopy(::Type{Formula}, l::Ptr{LangSxp})
-    ex_orig = rcopy(Expr, l)
-    ex = parse!(copy(ex_orig))
-    lhs, rhs = ex.args[2:3]
-    Formula(ex_orig, ex, lhs, rhs)
+function rcopy(::Type{FormulaTerm}, l::Ptr{LangSxp})
+    expr = rcopy(Expr, l)
+    @eval StatsModels.@formula($expr)
 end
 
 
@@ -59,14 +57,19 @@ function sexp_formula(e::Expr)
         rlang_p(op, map(sexp_formula, e.args[2:end])...)
     end
 end
+sexp_formula(t::StatsModels.TupleTerm) = sexp_formula(Expr(:call, :+, t...))
 sexp_formula(e::Symbol) = sexp(SymSxp, e)
 sexp_formula(n::Integer) = sexp(RClass{:numeric}, Float64(n))
 sexp_formula(n::Number) = sexp(n)
+sexp_formula(t::ConstantTerm) = sexp(float(t.n))
+sexp_formula(t::FunctionTerm) = sexp_formula(t.exorig)
+sexp_formula(i::InteractionTerm) = sexp_formula(Expr(:call, :(:), i.terms...))
+sexp_formula(t::Term) = sexp(SymSxp, t.sym)
 
 
 # R formula objects
-function sexp(::Type{RClass{:formula}}, f::Formula)
-    s = protect(sexp_formula(f.ex_orig == :() ? f.ex : f.ex_orig))
+function sexp(::Type{RClass{:formula}}, f::FormulaTerm)
+    s = protect(rlang_p(:~, sexp_formula(f.lhs), sexp_formula(f.rhs)))
     try
         setattrib!(s, Const.ClassSymbol, "formula")
         setattrib!(s, ".Environment", Const.GlobalEnv)

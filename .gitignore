@@ -2,3 +2,4 @@ deps/deps.jl
 docs/build
 docs/gh-pages
 docs/site
+deps/build.log
