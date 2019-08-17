@@ -22,7 +22,7 @@ function sexp(::Type{RClass{:list}}, d::AbstractDataFrame)
     rd = protect(allocArray(VecSxp, nc))
     try
         for i in 1:nc
-            rd[i] = sexp(d[nv[i]])
+            rd[i] = sexp(d[!, nv[i]])
         end
         setattrib!(rd,Const.NamesSymbol, [string(n) for n in nv])
         setattrib!(rd,Const.ClassSymbol, "data.frame")
