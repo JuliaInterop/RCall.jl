@@ -17,7 +17,9 @@ end
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 
 using RCall
-using Missings
+if VERSION ≤ v"1.1.1"
+    using Missings
+end
 using Dates
 
 println(R"sessionInfo()")

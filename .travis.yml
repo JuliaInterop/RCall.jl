@@ -1,15 +1,18 @@
+# Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
 os:
   - linux
   - osx
 julia:
-  - 1.0
+  - 1.0.4
   - 1.1
+  - 1.2
   - nightly
 
 matrix:
   allow_failures:
     - julia: nightly
+  fast_finish: true
 
 notifications:
   email: false
@@ -28,6 +31,14 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then sudo installer -pkg R-*.pkg -target /; fi
 
 after_success:
-  - julia --color=yes -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
-  - julia --color=yes -e 'using Pkg; ps=Pkg.PackageSpec(name="Documenter", version="0.19"); Pkg.add(ps); Pkg.pin(ps)'
-  - julia --color=yes -e 'include("docs/make.jl")'
+  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+jobs:
+  include:
+    - stage: Documentation
+      julia: 1.0
+      script: julia --project=docs -e '
+          using Pkg;
+          Pkg.develop(PackageSpec(path=pwd()));
+          Pkg.instantiate();
+          include("docs/make.jl");'
+      after_success: skip

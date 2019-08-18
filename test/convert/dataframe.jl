@@ -8,9 +8,9 @@ attenu = rcopy(DataFrame,reval(:attenu))
 @test rcopy(rcall(:dim,RObject(attenu))) == [182,5]
 @test rcopy(rcall(:dim, RObject(attenu[1:2, :]))) == [2, 5]
 @test rcopy(rcall(:dim, RObject(view(attenu, 1:2, :)))) == [2, 5]
-dist = attenu[:dist]
+dist = attenu[!, :dist]
 @test isa(dist,Array{Float64})
-station = attenu[:station]
+station = attenu[!, :station]
 @test isa(station, CategoricalArray)
 
 # single row dataframe
@@ -18,7 +18,7 @@ station = attenu[:station]
 
 # issue #186
 df = R"""data.frame(dates = as.Date(c("2017-04-14", "2014-04-17")))"""
-@test eltype(rcopy(df)[:dates]) == Date
+@test eltype(rcopy(df)[!, :dates]) == Date
 
 # issue #290
 R"a = data.frame(a1 = rep(1,3)); a$a2 = matrix(2,3,1)"

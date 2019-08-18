@@ -148,9 +148,9 @@ b = reval("b=c(4,5,6)")
 iris = rcopy(reval(:iris))
 model =  R"lm(Sepal_Length ~ Sepal_Width,data=$iris)"
 @test rcopy(RCall.getclass(model)) == "lm"
-@test isapprox(rcopy(R"sum($iris$Sepal_Length)"), sum(iris[:Sepal_Length]), rtol=4*eps())
+@test isapprox(rcopy(R"sum($iris$Sepal_Length)"), sum(iris[!, :Sepal_Length]), rtol=4*eps())
 @test rcopy(R"factor(rep(1,10))") == fill("1",10)
-@test rcopy(R"data.frame(a=rep('test',10), stringsAsFactors = TRUE)")[:a] == fill("test",10)
+@test rcopy(R"data.frame(a=rep('test',10), stringsAsFactors = TRUE)")[!, :a] == fill("test",10)
 
 
 R"""
