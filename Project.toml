@@ -20,7 +20,7 @@ WinReg = "1b915085-20d7-51cf-bf83-8f477d6f5128"
 [compat]
 AxisArrays = "≥ 0.0.6"
 CategoricalArrays = "≥ 0.3.0"
-DataFrames = "0.19"
+DataFrames = "≥ 0.19"
 DataStructures = "≥ 0.5.0"
 Missings = "≥ 0.2.0"
 Requires = "≥ 0.5.2"
