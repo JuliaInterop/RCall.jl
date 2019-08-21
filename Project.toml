@@ -1,7 +1,7 @@
 name = "RCall"
 uuid = "6f49c342-dc21-5d91-9882-a32aef131414"
 authors = ["Douglas Bates <dmbates@gmail.com>", "Randy Lai", "Simon Byrne <simonbyrne@gmail.com>"]
-version = "0.13.2"
+version = "0.13.4"
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
