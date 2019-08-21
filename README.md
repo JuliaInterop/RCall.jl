@@ -18,6 +18,6 @@
 
 [Getting Started](http://juliainterop.github.io/RCall.jl/stable/gettingstarted).
 
-#### ggplot2 demostration
+#### ggplot2 demonstration
 
 ![](ggplot.png)
