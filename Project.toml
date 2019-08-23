@@ -18,7 +18,6 @@ StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 WinReg = "1b915085-20d7-51cf-bf83-8f477d6f5128"
 
 [compat]
-AxisArrays = "≥ 0.0.6"
 CategoricalArrays = "≥ 0.3.0"
 DataFrames = "≥ 0.19"
 DataStructures = "≥ 0.5.0"
