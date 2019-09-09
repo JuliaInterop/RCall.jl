@@ -16,7 +16,7 @@ end
 
 function sexp(::Type{RClass{:factor}}, v::CategoricalArray)
     rv = protect(sexp(RClass{:integer}, v.refs))
-    order = CategoricalArrays.order(x.pool)
+    order = CategoricalArrays.order(v.pool)
     @inbounds for (i,ref) = enumerate(v.refs)
         if ref == 0
             rv[i] = naeltype(IntSxp)
