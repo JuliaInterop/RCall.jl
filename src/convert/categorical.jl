@@ -16,17 +16,20 @@ end
 
 function sexp(::Type{RClass{:factor}}, v::CategoricalArray)
     rv = protect(sexp(RClass{:integer}, v.refs))
-    try
-        for (i,ref) = enumerate(v.refs)
-            if ref == 0
-                rv[i] = naeltype(IntSxp)
-            end
+    order = CategoricalArrays.order(v.pool)
+    @inbounds for (i,ref) = enumerate(v.refs)
+        if ref == 0
+            rv[i] = naeltype(IntSxp)
+        else
+            rv[i] = order[ref]
         end
-        # due to a bug of CategoricalArrays, we use index(v.pool) instead of index(v)
-        setattrib!(rv, Const.LevelsSymbol, CategoricalArrays.index(v.pool))
-        setattrib!(rv, Const.ClassSymbol, "factor")
+    end
+    try
+        setattrib!(rv, Const.LevelsSymbol, CategoricalArrays.levels(v))
         if CategoricalArrays.isordered(v)
-            rv = rcall(:ordered, rv, CategoricalArrays.levels(v))
+            setattrib!(rv, Const.ClassSymbol, "factor")
+        else
+            setattrib!(rv, Const.ClassSymbol, ["ordered", "factor"])
         end
     finally
         unprotect(1)
