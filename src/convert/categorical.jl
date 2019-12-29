@@ -25,7 +25,7 @@ function sexp(::Type{RClass{:factor}}, v::CategoricalArray)
         end
     end
     try
-        setattrib!(rv, Const.LevelsSymbol, CategoricalArrays.levels(v))
+        setattrib!(rv, Const.LevelsSymbol, string.(CategoricalArrays.levels(v)))
         if CategoricalArrays.isordered(v)
             setattrib!(rv, Const.ClassSymbol, "factor")
         else
