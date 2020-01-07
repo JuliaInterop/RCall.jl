@@ -57,6 +57,19 @@ The following will update R on recent versions of Ubuntu:
     sudo add-apt-repository -y "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -s -c)/"
     sudo apt-get update -y
     sudo apt-get install -y r-base r-base-dev
+    
+### Failure on recent Linux distributions
+The version of `libstdc++` shipped by Julia might be outdated if you are using a recent Linux distribution (e.g. Ubuntu 19.10) and make use of certain R packages (e.g. `Rcpp`). In this case RCall will fail with an error message looking similar to this:
+
+    Error: package or namespace load failed for ‘package’ in dyn.load(file, DLLpath = DLLpath, ...):
+    unable to load shared object '/home/user/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/libs/Rcpp.so':
+    /home/user/julia-1.3.1/bin/../lib/julia/libstdc++.so.6: version `GLIBCXX_3.4.26' not found 
+    (required by /home/user/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/libs/Rcpp.so)
+    
+Until this issue is fixed in Julia (see https://github.com/JuliaLang/julia/issues/34276) a workaround is to replace Julias `libstdc++` with the one of your OS:
+
+    # works for Ubuntu 19.10 64bit - match your locations accordingly!
+    cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 $JULIA_HOME/lib/julia/
 
 ### Other methods
 
