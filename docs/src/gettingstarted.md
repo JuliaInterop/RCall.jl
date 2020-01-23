@@ -169,7 +169,7 @@ robject(Dict(:a => 1, :b = 2))
 
 ## `@rlibrary` and `@rimport` macros
 
-This micro loads all exported functions/objects of an R package to the current module.
+This macro loads all exported functions/objects of an R package to the current module.
 
 ```@repl 1
 @rlibrary boot
