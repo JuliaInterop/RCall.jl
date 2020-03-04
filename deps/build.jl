@@ -39,6 +39,10 @@ try
                     try Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE,
                                                 "Software\\R-Core\\R", "InstallPath"); catch; end
                 end
+                if isempty(Rhome)
+                    try Rhome = WinReg.querykey(WinReg.HKEY_CURRENT_USER,
+                                                "Software\\R-Core\\R", "InstallPath"); catch; end
+                end
             else
                 if !isdir(Rhome)
                     error("R_HOME is not a directory.")
