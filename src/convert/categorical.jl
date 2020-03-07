@@ -27,9 +27,9 @@ function sexp(::Type{RClass{:factor}}, v::CategoricalArray)
     try
         setattrib!(rv, Const.LevelsSymbol, string.(CategoricalArrays.levels(v)))
         if CategoricalArrays.isordered(v)
-            setattrib!(rv, Const.ClassSymbol, "factor")
-        else
             setattrib!(rv, Const.ClassSymbol, ["ordered", "factor"])
+        else
+            setattrib!(rv, Const.ClassSymbol, "factor")
         end
     finally
         unprotect(1)
