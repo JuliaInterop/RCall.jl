@@ -21,7 +21,7 @@ for ord in (true, false)
     @test isequal(v2, v)
     @test v2 isa CategoricalVector{Union{String,Missing}}
     @test levels(v2) == levels(v)
-    v = CategoricalArray(a, ordered=true)
+    @test isordered(v2) === ord
 end
 @test levels(rcopy(CategoricalArray, R"factor(c('c',NA,'a'))")) == ["a","c"]
 @test !isordered(rcopy(CategoricalArray, R"factor(c('c',NA,'a'))"))
