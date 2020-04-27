@@ -30,7 +30,9 @@ println(R"l10n_info()")
 @test hd == homedir()
 
 # https://github.com/JuliaInterop/RCall.jl/issues/206
-@test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
+if strip(read(`R RHOME`, String)) == RCall.Rhome
+    @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
+end
 
 tests = ["basic",
          "convert/base",

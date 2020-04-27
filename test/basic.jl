@@ -164,7 +164,11 @@ model = rcopy(R"model")
 @test rcopy(getclass(reval("1"))) == "numeric"
 @test rcopy(getclass(reval("1L"))) == "integer"
 @test rcopy(getclass(reval("complex(1,2)"))) == "complex"
-@test rcopy(getclass(reval("matrix(1)"))) == "matrix"
+if rcopy(String, R"as.character(getRversion())")[1] < '4'
+  @test rcopy(getclass(reval("matrix(1)"))) == "matrix"
+else
+  @test rcopy(getclass(reval("matrix(1)"))) == ["matrix", "array"]
+end
 @test rcopy(getclass(reval("function(x) x"))) == "function"
 @test rcopy(getclass(reval("data.frame(x=1)"))) == "data.frame"
 @test rcopy(getclass(reval("quote(zzz)"))) == "name"
