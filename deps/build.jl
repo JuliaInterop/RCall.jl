@@ -29,8 +29,7 @@ try
             Conda.add("r-base")
             Rhome = joinpath(Conda.LIBDIR, "R")
 
-            libR = locate_libR(Rhome, false)
-            isempty(libR) && error("Conda R installation failed. To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\").")
+            libR = locate_libR(Rhome)
         else
             if isempty(Rhome)
                 try Rhome = readchomp(`R RHOME`); catch; end
@@ -50,8 +49,8 @@ try
                 end
             end
 
-            libR = locate_libR(Rhome, false)
-            isempty(libR) && error("R cannot be found. Set the \"R_HOME\" environment variable to re-run Pkg.build(\"RCall\").")
+            isempty(Rhome) && error("R cannot be found. Set the \"R_HOME\" environment variable to re-run Pkg.build(\"RCall\").")
+            libR = locate_libR(Rhome)
         end
 
         @info "Using R at $Rhome and libR at $libR."

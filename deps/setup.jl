@@ -10,8 +10,12 @@ than throwing exceptions.
 """
 function validate_libR(libR, raise=true)
     if !isfile(libR)
+        msg = "Could not find library $libR. Make sure that R shared library exists."
+        if raise
+            error(msg)
+        else
+            @info msg
         raise || return false
-        error("Could not find library $libR. Make sure that R shared library exists.")
     end
     # Issue #143
     # On linux, sometimes libraries linked from libR (e.g. libRblas.so) won't open unless LD_LIBRARY_PATH is set correctly.
