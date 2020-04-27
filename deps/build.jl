@@ -15,7 +15,7 @@ try
         @eval module DepFile; Rhome=libR=""; end
     end
 
-    if !haskey(ENV,"R_HOME") && isdir(DepFile.Rhome) && validate_libR(DepFile.libR, false)
+    if !haskey(ENV,"R_HOME") && isdir(DepFile.Rhome) && validate_libR(DepFile.libR)
         Rhome, libR = DepFile.Rhome, DepFile.libR
         @info "Using previously configured R at $Rhome with libR in $libR."
     else
