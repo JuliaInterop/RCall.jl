@@ -174,7 +174,7 @@ This macro loads all exported functions/objects of an R package to the current m
 ```@repl 1
 @rlibrary boot
 city = rcopy(R"boot::city")  # get some data
-ratio(d, w) = sum(d[:x] .* w)/sum(d[:u] .* w)
+ratio(d, w) = sum(d[!, :x] .* w)/sum(d[!, :u] .* w)
 b = boot(city, ratio, R = 100, stype = "w");
 rcall(:summary, b[:t])
 ```

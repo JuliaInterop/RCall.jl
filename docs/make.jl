@@ -1,8 +1,6 @@
 using Documenter, RCall
 
 makedocs(
-    modules = [RCall],
-    format   = :html,
     sitename = "RCall.jl",
     pages    = [
         "Introduction" => "index.md",
@@ -17,8 +15,6 @@ makedocs(
 
 deploydocs(
     repo = "github.com/JuliaInterop/RCall.jl.git",
-    target = "build",
-    julia  = "0.7",
     deps = nothing,
     make = nothing
 )
