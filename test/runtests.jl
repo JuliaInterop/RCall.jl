@@ -21,6 +21,9 @@ if VERSION ≤ v"1.1.1"
     using Missings
 end
 using Dates
+import Base.VersionNumber
+
+Rversion = VersionNumber(rcopy(R"as.character(getRversion())"))
 
 println(R"sessionInfo()")
 
