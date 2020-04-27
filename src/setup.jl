@@ -78,7 +78,7 @@ function initEmbeddedR()
             ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
         end
 
-        argv = ["REmbeddedJulia","--silent","--no-save"]
+        argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
         ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
         rs = RStart()
@@ -105,7 +105,7 @@ function initEmbeddedR()
         ENV["R_SHARE_DIR"] = joinpath(Rhome,"share")
 
         # initialize library
-        argv = ["REmbeddedJulia","--silent","--no-save"]
+        argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
         ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
         ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
