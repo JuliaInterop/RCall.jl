@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@master
       - uses: julia-actions/setup-julia@latest
         with:
           version: 1.3
-      - uses: r-lib/actions/setup-r@master
       - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
