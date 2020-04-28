@@ -100,9 +100,41 @@ function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
+
+function rconsole2str1_at(s::String)
+    pos = findfirst("\x02\xff\xfe", s)
+    if pos != nothing
+        endpos = findfirst("\x03\xff\xfe", s[pos[end]+1:end])
+        if endpos != nothing
+            return (pos[end] + 1):(pos[end] + endpos[1] - 1)
+        end
+    end
+end
+
+function native_decode(s::String)
+    s
+end
+
+function rconsole2str(s::String)
+    ret = ""
+    m = rconsole2str1_at(s)
+    while m != nothing
+        a = s[1:(m[1] - 1 - 3)]
+        ret *= native_decode(a) * s[m]
+        s = s[m[end] + 1 + 3: end]
+        m = rconsole2str1_at(s)
+    end
+    ret *= native_decode(s)
+end
+
+
 function handle_eval_stdout(;io::IO=stdout, force::Bool=false)
     if (!_output_is_locked || force) && bytesavailable(output_buffer) != 0
-        write(io, String(take!(output_buffer)))
+        buf = String(take!(output_buffer))
+        @static if Sys.iswindows()
+            s = rconsole2str(s)
+        end
+        write(io, buf)
     end
 end
 

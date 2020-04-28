@@ -49,7 +49,7 @@ const Rembedded = Ref{Bool}(false)
                       0,0,0,0,0,
                       C_NULL,C_NULL,
                       C_NULL,C_NULL,C_NULL,C_NULL,
-                      C_NULL,C_NULL,2,C_NULL)
+                      C_NULL,C_NULL,0,C_NULL)
 
 end
 
@@ -78,11 +78,29 @@ function initEmbeddedR()
             ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
         end
 
-        argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
+        argv = ["REmbeddedJulia","--slave","--silent","--no-save", "--no-restore"]
         ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
+
+        SA_NORESTORE = 0
+        SA_RESTORE = 1
+        SA_DEFAULT = 2
+        SA_NOSAVE = 3
+        SA_SAVE = 4
+        SA_SAVEASK = 5
+        SA_SUICIDE = 6
 
         rs = RStart()
         ccall((:R_DefParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
+
+        rs.R_Quiet = 1
+        rs.R_Slave = 1
+        rs.R_Interactive = 1
+        rs.R_Verbose = 0
+        rs.LoadSiteFile = 1
+        rs.LoadInitFile = 1
+
+        rs.RestoreAction = SA_NORESTORE
+        rs.SaveAction = SA_NOSAVE
 
         rs.rhome          = ccall((:get_R_HOME,libR), Ptr{Cchar}, ())
         rs.home           = Ruser_ptr
@@ -93,12 +111,13 @@ function initEmbeddedR()
         rs.Busy           = cglobal((:R_Busy, libR), Nothing)
         rs.WriteConsole   = C_NULL
         rs.WriteConsoleEx = @cfunction($write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint)).ptr
+        rs.CharacterMode = 2
 
         ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
 
         # fix an unicode issue
         # cf https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17677
-        try unsafe_store!(cglobal((:EmitEmbeddedUTF8, libR),Cint), 1) catch end
+        try unsafe_store!(cglobal((:EmitEmbeddedUTF8, RCall.libR),Cint), 1) catch end
     end
 
     @static if Sys.isunix()
