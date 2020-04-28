@@ -95,6 +95,12 @@ function initEmbeddedR()
         rs.WriteConsoleEx = @cfunction($write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint)).ptr
 
         ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
+
+        # fix an unicode issue
+        # cf https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17677
+        try
+            unsafe_store!(cglobal((:EmitEmbeddedUTF8, libR),Cint), 1)
+        end
     end
 
     @static if Sys.isunix()
