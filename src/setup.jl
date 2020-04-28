@@ -104,11 +104,11 @@ function initEmbeddedR()
 
         rs.rhome          = ccall((:get_R_HOME,libR), Ptr{Cchar}, ())
         rs.home           = Ruser_ptr
-        rs.ReadConsole    = cglobal((:R_ReadConsole, libR), Nothing)
+        rs.ReadConsole    = @cfunction($read_console, Cint, (Cstring, Ptr{UInt8}, Cint, Cint)).ptr
         rs.CallBack       = @cfunction($event_callback, Nothing, ()).ptr
         rs.ShowMessage    = cglobal((:R_ShowMessage, libR), Nothing)
         rs.YesNoCancel    = @cfunction($ask_yes_no_cancel, Cint, (Ptr{Cchar},)).ptr
-        rs.Busy           = cglobal((:R_Busy, libR), Nothing)
+        rs.Busy           = cglobal((:R_Busy, libR), Ptr{Cvoid})
         rs.WriteConsole   = C_NULL
         rs.WriteConsoleEx = @cfunction($write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint)).ptr
         rs.CharacterMode = 2
@@ -131,7 +131,9 @@ function initEmbeddedR()
         argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
         ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
+        ptr_read_console = @cfunction($read_console,Cint,(Cstring,Ptr{UInt8},Cint,Cint)).ptr
         ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
+        unsafe_store!(cglobal((:ptr_R_ReadConsole,libR),Ptr{Cvoid}), ptr_read_console)
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Cvoid}), C_NULL)
         unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Cvoid}), ptr_write_console_ex)
         unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Cvoid}), C_NULL)
