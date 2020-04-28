@@ -194,6 +194,9 @@ function __init__()
         # we can't use Rf_PrintWarnings as not exported on all platforms.
         rcall_p(:options,warn=1)
 
+        # disable menu on windows
+        rcall_p(:options; Symbol("menu.graphics") => false)
+
         # R gui eventloop
         isinteractive() && rgui_init()
     end
