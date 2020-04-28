@@ -14,6 +14,10 @@
 [![Doc Stable](https://img.shields.io/badge/docs-stable-blue.svg)](http://juliainterop.github.io/RCall.jl/stable)
 [![Doc Development](https://img.shields.io/badge/docs-latest-blue.svg)](http://juliainterop.github.io/RCall.jl/latest)
  
+#### Installation
+
+[Installation](http://juliainterop.github.io/RCall.jl/stable/installation.html)
+
 #### Getting Started
 
 [Getting Started](http://juliainterop.github.io/RCall.jl/stable/gettingstarted).
