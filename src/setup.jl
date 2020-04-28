@@ -98,9 +98,7 @@ function initEmbeddedR()
 
         # fix an unicode issue
         # cf https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17677
-        try
-            unsafe_store!(cglobal((:EmitEmbeddedUTF8, libR),Cint), 1)
-        end
+        try unsafe_store!(cglobal((:EmitEmbeddedUTF8, libR),Cint), 1) catch end
     end
 
     @static if Sys.isunix()
