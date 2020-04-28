@@ -17,10 +17,10 @@ jobs:
           version: 1.3
       - name: Install R
         run: |
-          apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9; fi
-          add-apt-repository -y "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -s -c)/"; fi
-          apt-get update -qq -y; fi
-          apt-get install --allow-unauthenticated git r-base r-base-dev r-recommended -y; fi
+          apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+          add-apt-repository -y "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -s -c)/"
+          apt-get update -qq -y
+          apt-get install --allow-unauthenticated git r-base r-base-dev r-recommended -y
       - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
