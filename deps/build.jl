@@ -7,6 +7,7 @@ include("setup.jl")
 
 const depfile = joinpath(dirname(@__FILE__), "deps.jl")
 
+
 try
     if isfile(depfile)
         @eval module DepFile; include($depfile); end
@@ -14,7 +15,7 @@ try
         @eval module DepFile; Rhome=libR=""; end
     end
 
-    if !haskey(ENV,"R_HOME") && isdir(DepFile.Rhome) && validate_libR(DepFile.libR, false)
+    if !haskey(ENV,"R_HOME") && isdir(DepFile.Rhome) && validate_libR(DepFile.libR)
         Rhome, libR = DepFile.Rhome, DepFile.libR
         @info "Using previously configured R at $Rhome with libR in $libR."
     else
@@ -28,8 +29,7 @@ try
             Conda.add("r-base")
             Rhome = joinpath(Conda.LIBDIR, "R")
 
-            libR = locate_libR(Rhome, false)
-            isempty(libR) && error("Conda R installation failed. To use a different R installation, set the \"R_HOME\" environment variable and re-run Pkg.build(\"RCall\").")
+            libR = locate_libR(Rhome)
         else
             if isempty(Rhome)
                 try Rhome = readchomp(`R RHOME`); catch; end
@@ -39,14 +39,18 @@ try
                     try Rhome = WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE,
                                                 "Software\\R-Core\\R", "InstallPath"); catch; end
                 end
+                if isempty(Rhome)
+                    try Rhome = WinReg.querykey(WinReg.HKEY_CURRENT_USER,
+                                                "Software\\R-Core\\R", "InstallPath"); catch; end
+                end
             else
                 if !isdir(Rhome)
                     error("R_HOME is not a directory.")
                 end
             end
 
-            libR = locate_libR(Rhome, false)
-            isempty(libR) && error("R cannot be found. Set the \"R_HOME\" environment variable to re-run Pkg.build(\"RCall\").")
+            isempty(Rhome) && error("R cannot be found. Set the \"R_HOME\" environment variable to re-run Pkg.build(\"RCall\").")
+            libR = locate_libR(Rhome)
         end
 
         @info "Using R at $Rhome and libR at $libR."
