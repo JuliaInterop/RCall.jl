@@ -35,19 +35,19 @@ julia&gt; @rput foo bar
 R&gt; foo + bar
 [1] 6</code></pre><h2 id="@R_str-string-macro-1"><a class="docs-heading-anchor" href="#@R_str-string-macro-1">@R_str string macro</a><a class="docs-heading-anchor-permalink" href="#@R_str-string-macro-1" title="Permalink"></a></h2><p>Another way to use RCall is the <a href="../internal/#RCall.@R_str-Tuple{Any}"><code>R&quot;&quot;</code></a> string macro, it is especially useful in script files.</p><pre><code class="language-julia-repl">julia&gt; R&quot;rnorm(10)&quot;
 RObject{RealSxp}
- [1] -0.96253797  0.08201204 -1.52108499  0.34280429  0.12877127  0.75193005
- [7] -2.76120947  0.87246428 -0.04761070  0.83454676</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
+ [1]  0.29603507  1.92570425  0.34920943 -0.01411954  0.48898179  0.39412309
+ [7]  2.50318986 -1.50359926  2.97393619 -0.34623785</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
 10-element Array{Float64,1}:
-  0.08474730172073777
- -1.2325041599336877
- -1.4063010780163336
-  0.35028920438529937
-  1.0462543880203279
-  1.158311814389985
-  0.7720630600369901
- -0.9889232692071811
-  0.409470775261675
- -0.389802182294265
+  0.984904120665917
+ -1.6294361712272531
+ -1.2642893046501544
+ -1.4298483675933054
+ -1.452840438764352
+  0.7080279769918565
+ -0.523720155307669
+  0.2694480639969895
+ -0.21921171674305778
+ -1.3771259562426728
 
 julia&gt; R&quot;t.test($x)&quot;
 RObject{VecSxp}
@@ -55,13 +55,13 @@ RObject{VecSxp}
 	One Sample t-test
 
 data:  `#JL`$x
-t = -0.066068, df = 9, p-value = 0.9488
+t = -1.9141, df = 9, p-value = 0.08788
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.6920907  0.6528119
+ -1.2947230  0.1079046
 sample estimates:
-  mean of x
--0.01963941</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
+ mean of x
+-0.5934092</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
 RObject{VecSxp}
 $par
 [1] -1.56343
@@ -165,13 +165,13 @@ julia&gt; b = boot(city, ratio, R = 100, stype = &quot;w&quot;);
 julia&gt; rcall(:summary, b[:t])
 RObject{StrSxp}
        V1
- Min.   :1.189
- 1st Qu.:1.414
- Median :1.527
- Mean   :1.561
- 3rd Qu.:1.647
- Max.   :2.552</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-julia-repl">julia&gt; @rimport base as rbase
+ Min.   :1.153
+ 1st Qu.:1.428
+ Median :1.535
+ Mean   :1.588
+ 3rd Qu.:1.669
+ Max.   :2.498</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-julia-repl">julia&gt; @rimport base as rbase
 
 julia&gt; rbase.sum([1, 2, 3], var&quot;rm.na&quot; = true)
 RObject{IntSxp}
-[1] 7</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../conversions/">Supported Conversions »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 28 April 2020 08:39">Tuesday 28 April 2020</span>. Using Julia version 1.4.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+[1] 7</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../conversions/">Supported Conversions »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 28 April 2020 08:45">Tuesday 28 April 2020</span>. Using Julia version 1.4.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
