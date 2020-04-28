@@ -132,7 +132,7 @@ function handle_eval_stdout(;io::IO=stdout, force::Bool=false)
     if (!_output_is_locked || force) && bytesavailable(output_buffer) != 0
         buf = String(take!(output_buffer))
         @static if Sys.iswindows()
-            s = rconsole2str(s)
+            buf = rconsole2str(buf)
         end
         write(io, buf)
     end
