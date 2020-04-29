@@ -88,6 +88,21 @@ end
 showerror(io::IO, e::REvalError) = print(io, "REvalError: " * e.msg)
 
 
+function read_console(p::Cstring, buf::Ptr{UInt8}, buflen::Cint, add_history::Cint)
+    print(unsafe_string(p))
+    linebuf = reenable_sigint() do
+            Vector{UInt8}(readline())
+        end
+
+    m = min(length(linebuf), buflen - 2)
+    for i in 1:m
+        unsafe_store!(buf, linebuf[i], i)
+    end
+    unsafe_store!(buf, '\n', m + 1)
+    unsafe_store!(buf, 0, m + 2)
+    return Cint(1)
+end
+
 """
 R API callback to write console output.
 """

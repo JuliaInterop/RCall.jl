@@ -434,11 +434,9 @@ naeltype(::Type{RClass{:complex}}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{RClass{:character}}) = sexp(Const.NaString)
 
 
-LITTLEENDIAN = reinterpret(UInt32,UInt64[1])[1] == 1
-
 # mirror src/main/arithmetic.c
 function is_ieee_na(x::Float64)
-    @static if LITTLEENDIAN
+    @static if reinterpret(UInt32,UInt64[1])[1] == 1  # little endian
         isnan(x) && reinterpret(UInt32,[x])[1] == 0x7a2
     else
         isnan(x) && reinterpret(UInt32,[x])[2] == 0x7a2
