@@ -88,6 +88,21 @@ end
 showerror(io::IO, e::REvalError) = print(io, "REvalError: " * e.msg)
 
 
+function read_console(p::Cstring, buf::Ptr{UInt8}, buflen::Cint, add_history::Cint)
+    print(unsafe_string(p))
+    linebuf = reenable_sigint() do
+            Vector{UInt8}(readline())
+        end
+
+    m = min(length(linebuf), buflen - 2)
+    for i in 1:m
+        unsafe_store!(buf, linebuf[i], i)
+    end
+    unsafe_store!(buf, '\n', m + 1)
+    unsafe_store!(buf, 0, m + 2)
+    return Cint(1)
+end
+
 """
 R API callback to write console output.
 """
@@ -100,9 +115,41 @@ function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
     return nothing
 end
 
+
+function rconsole2str1_at(s::String)
+    pos = findfirst("\x02\xff\xfe", s)
+    if pos != nothing
+        endpos = findfirst("\x03\xff\xfe", s[pos[end]+1:end])
+        if endpos != nothing
+            return (pos[end] + 1):(pos[end] + endpos[1] - 1)
+        end
+    end
+end
+
+function native_decode(s::String)
+    s
+end
+
+function rconsole2str(s::String)
+    ret = ""
+    m = rconsole2str1_at(s)
+    while m != nothing
+        a = s[1:(m[1] - 1 - 3)]
+        ret *= native_decode(a) * s[m]
+        s = s[m[end] + 1 + 3: end]
+        m = rconsole2str1_at(s)
+    end
+    ret *= native_decode(s)
+end
+
+
 function handle_eval_stdout(;io::IO=stdout, force::Bool=false)
     if (!_output_is_locked || force) && bytesavailable(output_buffer) != 0
-        write(io, String(take!(output_buffer)))
+        buf = String(take!(output_buffer))
+        @static if Sys.iswindows()
+            buf = rconsole2str(buf)
+        end
+        write(io, buf)
     end
 end
 

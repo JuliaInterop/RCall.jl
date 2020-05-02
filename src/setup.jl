@@ -49,7 +49,7 @@ const Rembedded = Ref{Bool}(false)
                       0,0,0,0,0,
                       C_NULL,C_NULL,
                       C_NULL,C_NULL,C_NULL,C_NULL,
-                      C_NULL,C_NULL,2,C_NULL)
+                      C_NULL,C_NULL,0,C_NULL)
 
 end
 
@@ -78,23 +78,46 @@ function initEmbeddedR()
             ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
         end
 
-        argv = ["REmbeddedJulia","--silent","--no-save"]
+        argv = ["REmbeddedJulia","--slave","--silent","--no-save", "--no-restore"]
         ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
+
+        SA_NORESTORE = 0
+        SA_RESTORE = 1
+        SA_DEFAULT = 2
+        SA_NOSAVE = 3
+        SA_SAVE = 4
+        SA_SAVEASK = 5
+        SA_SUICIDE = 6
 
         rs = RStart()
         ccall((:R_DefParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
 
+        rs.R_Quiet = 1
+        rs.R_Slave = 1
+        rs.R_Interactive = 1
+        rs.R_Verbose = 0
+        rs.LoadSiteFile = 1
+        rs.LoadInitFile = 1
+
+        rs.RestoreAction = SA_NORESTORE
+        rs.SaveAction = SA_NOSAVE
+
         rs.rhome          = ccall((:get_R_HOME,libR), Ptr{Cchar}, ())
         rs.home           = Ruser_ptr
-        rs.ReadConsole    = cglobal((:R_ReadConsole, libR), Nothing)
+        rs.ReadConsole    = @cfunction($read_console, Cint, (Cstring, Ptr{UInt8}, Cint, Cint)).ptr
         rs.CallBack       = @cfunction($event_callback, Nothing, ()).ptr
         rs.ShowMessage    = cglobal((:R_ShowMessage, libR), Nothing)
         rs.YesNoCancel    = @cfunction($ask_yes_no_cancel, Cint, (Ptr{Cchar},)).ptr
-        rs.Busy           = cglobal((:R_Busy, libR), Nothing)
+        rs.Busy           = cglobal((:R_Busy, libR), Ptr{Cvoid})
         rs.WriteConsole   = C_NULL
         rs.WriteConsoleEx = @cfunction($write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint)).ptr
+        rs.CharacterMode = 2
 
         ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
+
+        # fix an unicode issue
+        # cf https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17677
+        try unsafe_store!(cglobal((:EmitEmbeddedUTF8, RCall.libR),Cint), 1) catch end
     end
 
     @static if Sys.isunix()
@@ -105,10 +128,12 @@ function initEmbeddedR()
         ENV["R_SHARE_DIR"] = joinpath(Rhome,"share")
 
         # initialize library
-        argv = ["REmbeddedJulia","--silent","--no-save"]
+        argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
         ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
+        ptr_read_console = @cfunction($read_console,Cint,(Cstring,Ptr{UInt8},Cint,Cint)).ptr
         ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
+        unsafe_store!(cglobal((:ptr_R_ReadConsole,libR),Ptr{Cvoid}), ptr_read_console)
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Cvoid}), C_NULL)
         unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Cvoid}), ptr_write_console_ex)
         unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Cvoid}), C_NULL)
@@ -170,6 +195,9 @@ function __init__()
         # print warnings as they arise
         # we can't use Rf_PrintWarnings as not exported on all platforms.
         rcall_p(:options,warn=1)
+
+        # disable menu on windows
+        rcall_p(:options; Symbol("menu.graphics") => false)
 
         # R gui eventloop
         isinteractive() && rgui_init()

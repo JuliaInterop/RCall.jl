@@ -433,12 +433,22 @@ naeltype(::Type{RClass{:numeric}}) = Const.NaReal
 naeltype(::Type{RClass{:complex}}) = complex(Const.NaReal,Const.NaReal)
 naeltype(::Type{RClass{:character}}) = sexp(Const.NaString)
 
+
+# mirror src/main/arithmetic.c
+function is_ieee_na(x::Float64)
+    @static if reinterpret(UInt32,UInt64[1])[1] == 1  # little endian
+        isnan(x) && reinterpret(UInt32,[x])[1] == 0x7a2
+    else
+        isnan(x) && reinterpret(UInt32,[x])[2] == 0x7a2
+    end
+end
+
 """
 Check if a value corresponds to R's sentinel NA values.
 These function should not be exported.
 """
-isNA(x::ComplexF64) = real(x) === Const.NaReal && imag(x) === Const.NaReal
-isNA(x::Float64) = x === Const.NaReal
+isNA(x::ComplexF64) = is_ieee_na(real(x)) && is_ieee_na(imag(x))
+isNA(x::Float64) = is_ieee_na(x)
 isNA(x::Int32) = x == Const.NaInt
 isNA(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
 isNA(s::Ptr{S}) where S<:VectorSxp = length(s) == 1 ? isNA(s[1]) : false
