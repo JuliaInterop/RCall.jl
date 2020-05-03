@@ -1,7 +1,8 @@
 const Rembedded = Ref{Bool}(false)
-
 @static if Sys.iswindows()
     import WinReg
+
+    const libRgraphapp = joinpath(dirname(libR), "Rgraphapp.dll")
 
     function ask_yes_no_cancel(prompt::Ptr{Cchar})
         println(String(prompt))
@@ -78,8 +79,7 @@ function initEmbeddedR()
             ccall(:_wputenv,Cint,(Cwstring,),"HOME="*homedir())
         end
 
-        argv = ["REmbeddedJulia","--slave","--silent","--no-save", "--no-restore"]
-        ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
+        argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
 
         SA_NORESTORE = 0
         SA_RESTORE = 1
@@ -114,6 +114,11 @@ function initEmbeddedR()
         rs.CharacterMode = 2
 
         ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
+
+        # Rf_initialize_R sets signal handler for SIGINT
+        # we need to work around it
+        ccall((:R_set_command_line_arguments,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
+        ccall((:GA_initapp,libRgraphapp),Cint,(Cint,Ptr{Nothing}),0,C_NULL)
 
         # fix an unicode issue
         # cf https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17677
