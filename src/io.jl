@@ -134,9 +134,9 @@ function rconsole2str(s::String)
     ret = ""
     m = rconsole2str1_at(s)
     while m != nothing
-        a = s[1:(m[1] - 1 - 3)]
+        a = s[1:(first(m) - 1 - 3)]
         ret *= native_decode(a) * s[m]
-        s = s[m[end] + 1 + 3: end]
+        s = s[last(m) + 1 + 3: end]
         m = rconsole2str1_at(s)
     end
     ret *= native_decode(s)
