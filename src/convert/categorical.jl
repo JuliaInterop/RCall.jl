@@ -14,15 +14,12 @@ end
 
 ## CategoricalArray to sexp conversion.
 
-function sexp(::Type{RClass{:factor}}, v::CategoricalArray)
-    rv = protect(sexp(RClass{:integer}, v.refs))
-    order = CategoricalArrays.order(v.pool)
-    @inbounds for (i,ref) = enumerate(v.refs)
-        if ref == 0
-            rv[i] = naeltype(IntSxp)
-        else
-            rv[i] = order[ref]
-        end
+function sexp(::Type{RClass{:factor}},
+              v::Union{CategoricalArray, SubArray{<:Any, <:Any, <:CategoricalArray}})
+    refs = v isa SubArray ? parent(v).refs : v.refs
+    rv = protect(sexp(RClass{:integer}, refs))
+    @inbounds for (i,ref) = enumerate(refs)
+        rv[i] = ref == 0 ? naeltype(IntSxp) : ref
     end
     try
         setattrib!(rv, Const.LevelsSymbol, string.(CategoricalArrays.levels(v)))

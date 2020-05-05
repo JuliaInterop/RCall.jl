@@ -264,3 +264,4 @@ sexpclass(d::AbstractArray{DateTime}) = RClass{:POSIXct}
 
 # CategoricalArray
 sexpclass(v::CategoricalArray) = RClass{:factor}
+sexpclass(v::SubArray{<:Any, <:Any, <:CategoricalArray}) = RClass{:factor}
