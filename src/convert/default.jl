@@ -234,7 +234,7 @@ for (J, C) in ((:Integer,:integer),
                  (:UInt8, :raw))
     @eval begin
         sexpclass(v::$J) = RClass{$(QuoteNode(C))}
-        sexpclass(a::Array{Union{T, Missing}}) where T<:$J = RClass{$(QuoteNode(C))}
+        sexpclass(a::AbstractArray{Union{T, Missing}}) where T<:$J = RClass{$(QuoteNode(C))}
         sexpclass(a::AbstractArray{T}) where T<:$J = RClass{$(QuoteNode(C))}
     end
 end
@@ -254,12 +254,12 @@ sexpclass(f::FormulaTerm) = RClass{:formula}
 
 # Date
 sexpclass(d::Date) = RClass{:Date}
-sexpclass(d::Array{Union{Date, Missing}}) = RClass{:Date}
+sexpclass(d::AbstractArray{Union{Date, Missing}}) = RClass{:Date}
 sexpclass(d::AbstractArray{Date}) = RClass{:Date}
 
 # DateTime
 sexpclass(d::DateTime) = RClass{:POSIXct}
-sexpclass(d::Array{Union{DateTime, Missing}}) = RClass{:POSIXct}
+sexpclass(d::AbstractArray{Union{DateTime, Missing}}) = RClass{:POSIXct}
 sexpclass(d::AbstractArray{DateTime}) = RClass{:POSIXct}
 
 # CategoricalArray

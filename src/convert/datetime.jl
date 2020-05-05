@@ -49,13 +49,13 @@ function sexp(::Type{RClass{:Date}}, d::Date)
     unprotect(1)
     res
 end
-function sexp(::Type{RClass{:Date}}, a::Array{Date})
+function sexp(::Type{RClass{:Date}}, a::AbstractArray{Date})
     res = protect(sexp(RClass{:numeric}, map((x) -> Float64(Dates.value(x)) - 719163, a)))
     setclass!(res, sexp("Date"))
     unprotect(1)
     res
 end
-function sexp(::Type{RClass{:Date}}, a::Array{Union{Date, Missing}})
+function sexp(::Type{RClass{:Date}}, a::AbstractArray{Union{Date, Missing}})
     rv = protect(allocArray(RealSxp, size(a)...))
     try
         for (i, x) in enumerate(a)
@@ -78,14 +78,14 @@ function sexp(::Type{RClass{:POSIXct}}, d::DateTime)
     unprotect(1)
     res
 end
-function sexp(::Type{RClass{:POSIXct}}, a::Array{DateTime})
+function sexp(::Type{RClass{:POSIXct}}, a::AbstractArray{DateTime})
     res = protect(sexp(RClass{:numeric}, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a)))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", "UTC")
     unprotect(1)
     res
 end
-function sexp(::Type{RClass{:POSIXct}}, a::Array{Union{DateTime, Missing}})
+function sexp(::Type{RClass{:POSIXct}}, a::AbstractArray{Union{DateTime, Missing}})
     rv = protect(allocArray(RealSxp, size(a)...))
     try
         for (i, x) in enumerate(a)
