@@ -5,34 +5,29 @@ RCall.jl can simply be installed with
 Pkg.add("RCall")
 ```
 
-RCall.jl will automatically install R for you using [Conda](https://github.com/JuliaPy/Conda.jl)
-if it doesn't detect that you have R 3.4.0 or later installed already.
 
 ## Customizing the R installation
 
-Before installing its own copy of R, the RCall build script (run by `Pkg.add`)
+The RCall build script (run by `Pkg.add`)
 will check for an existing R installation by looking in the following locations,
 in order.
 
 * The `R_HOME` environment variable, if set, should be the location of the
-  [R home directory](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Rhome.html).
-* Otherwise, it runs the `R HOME` command, assuming `R` is located in your [`PATH`](https://en.wikipedia.org/wiki/PATH_(variable)).
+  [R home directory](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Rhome.html). You could run
+  `R.home()` in `R` to determine its location.
+* Otherwise, it runs the `R RHOME` command, assuming `R` is located in your [`PATH`](https://en.wikipedia.org/wiki/PATH_(variable)).
 * Otherwise, on Windows, it looks in the [Windows registry](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#Does-R-use-the-Registry_003f).
 
 To change which R installation is used for RCall, set the `R_HOME` environment variable
 and run `Pkg.build("RCall")`.   Once this is configured, RCall remembers the location
 of R in future updates, so you don't need to set `R_HOME` permanently.
 
-You can set `R_HOME` to the empty string `""` to force `Pkg.build` to re-run the
-`R HOME` command, e.g. if you change your PATH:
 ```julia
-ENV["R_HOME"]=""
-ENV["PATH"]="....directory of R executable..."
+ENV["R_HOME"] = "....directory of R home...."
 Pkg.build("RCall")
 ```
 
-When `R_HOME` is set to `"*"`, RCall will use its own Conda installation of R.
-
+When `R_HOME` is set to `"*"`, RCall.jl will automatically install R for you using [Conda](https://github.com/JuliaPy/Conda.jl).
 
 Should you experience problems with any of these methods, please [open an issue](https://github.com/JuliaStats/RCall.jl/issues/new).
 
