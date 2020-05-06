@@ -16,7 +16,7 @@
  
 #### Installation
 
-[Installation](http://juliainterop.github.io/RCall.jl/stable/installation.html)
+[Installation](http://juliainterop.github.io/RCall.jl/stable/installation)
 
 #### Getting Started
 
