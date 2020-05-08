@@ -34,8 +34,8 @@ const Rembedded = Ref{Bool}(false)
         max_nsize::Csize_t
         ppsize::Csize_t
         NoRenviron::Cint
-        rhome::Ptr{Cchar}
-        home::Ptr{Cchar}
+        rhome::Ptr{UInt8}
+        home::Ptr{UInt8}
         ReadConsole::Ptr{Cvoid}
         WriteConsole::Ptr{Cvoid}
         CallBack::Ptr{Cvoid}
@@ -68,7 +68,7 @@ function initEmbeddedR()
         # TODO: Use direct Windows interface, see §8.2.2 "Calling R.dll directly"
         # of "Writing R Extensions" (aka R-exts)
 
-        Ruser_ptr = ccall((:getRUser,libR),Ptr{Cchar},())
+        Ruser_ptr = ccall((:getRUser,libR),Ptr{UInt8},())
         Ruser = unsafe_string(Ruser_ptr)
 
         ccall(:_wputenv,Cint,(Cwstring,),"PATH="*ENV["PATH"]*";"*dirname(libR))
@@ -102,8 +102,8 @@ function initEmbeddedR()
         rs.RestoreAction = SA_NORESTORE
         rs.SaveAction = SA_NOSAVE
 
-        rs.rhome          = ccall((:get_R_HOME,libR), Ptr{Cchar}, ())
-        rs.home           = Ruser_ptr
+        rs.rhome          = pointer(Rhome)
+        rs.home           = pointer(Ruser)
         rs.ReadConsole    = @cfunction($read_console, Cint, (Cstring, Ptr{UInt8}, Cint, Cint)).ptr
         rs.CallBack       = @cfunction($event_callback, Nothing, ()).ptr
         rs.ShowMessage    = cglobal((:R_ShowMessage, libR), Nothing)
