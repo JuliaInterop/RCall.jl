@@ -24,3 +24,12 @@ df = R"""data.frame(dates = as.Date(c("2017-04-14", "2014-04-17")))"""
 R"a = data.frame(a1 = rep(1,3)); a$a2 = matrix(2,3,1)"
 R"b = data.frame(a1 = rep(1,3)); b$a2 = rep(2,3)"
 @test rcopy(R"a") == rcopy(R"b")
+
+# issue 355
+R"naframe = data.frame(x=rep(NA,10))"
+@test all(ismissing.(rcopy(R"db")[!,:x]))
+@test typeof(rcopy(R"db")[!,:x]) == Array{Union{Missing, Bool},1}
+db = DataFrame(x = [missing,missing,missing]);
+db = RObject(db);
+@test rcopy(R"class($(db)[,1])") == "logical"
+
