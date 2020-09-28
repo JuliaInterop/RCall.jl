@@ -241,7 +241,6 @@ end
 
 # Fallback: entire column of missing to NA
 # R assigns these to logical by default, although if it's all missing, it doesn't matter much
-sexpclass(v::Missing) = RClass{:logical}
 sexpclass(a::AbstractArray{Missing}) = RClass{:logical}
 
 # Fallback: convert AbstractArray to VecSxp (R list)
