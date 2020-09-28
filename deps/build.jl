@@ -19,7 +19,7 @@ try
 
     if !haskey(ENV,"R_HOME") && isdir(DepFile.Rhome) && validate_libR(DepFile.libR)
         Rhome, libR = DepFile.Rhome, DepFile.libR
-        if hasfield(DepFile, :conda_provided_r)
+        if isdefined(DepFile, :conda_provided_r)
             conda_provided_r = DepFile.conda_provided_r
         end
         @info "Using previously configured R at $Rhome with libR in $libR."
