@@ -1,3 +1,4 @@
+using RCall
 using Test
 
 hd = homedir()
@@ -11,12 +12,11 @@ if Sys.iswindows()
     end
     Rscript = joinpath(Rhome,"bin",Sys.WORD_SIZE==64 ? "x64" : "i386", "Rscript")
 else
-    Rscript = "Rscript"
+    Rscript = joinpath(RCall.Rhome, "bin", "Rscript")
 end
 
 libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
 
-using RCall
 if VERSION ≤ v"1.1.1"
     using Missings
 end
@@ -33,7 +33,7 @@ println(R"l10n_info()")
 @test hd == homedir()
 
 # https://github.com/JuliaInterop/RCall.jl/issues/206
-if strip(read(`R RHOME`, String)) == RCall.Rhome
+if (Sys.which("R") !== nothing) && (strip(read(`R RHOME`, String)) == RCall.Rhome)
     @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
 end
 
@@ -58,4 +58,8 @@ for t in tests
     include(tfile)
 end
 
-@test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
+@info "" RCall.conda_provided_r
+
+if !RCall.conda_provided_r # this test will fail for the Conda-provided R
+    @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == 0
+end

@@ -9,6 +9,8 @@ const depfile = joinpath(dirname(@__FILE__), "deps.jl")
 
 
 try
+    conda_provided_r = false
+
     if isfile(depfile)
         @eval module DepFile; include($depfile); end
     else
@@ -17,6 +19,9 @@ try
 
     if !haskey(ENV,"R_HOME") && isdir(DepFile.Rhome) && validate_libR(DepFile.libR)
         Rhome, libR = DepFile.Rhome, DepFile.libR
+        if hasfield(DepFile, :conda_provided_r)
+            conda_provided_r = DepFile.conda_provided_r
+        end
         @info "Using previously configured R at $Rhome with libR in $libR."
     else
         Rhome = get(ENV, "R_HOME", "")
@@ -25,10 +30,10 @@ try
             @info "Installing R via Conda.  To use a different R installation,"*
                 " set the \"R_HOME\" environment variable and re-run "*
                 "Pkg.build(\"RCall\")."
+            conda_provided_r = true
             Conda.add_channel("r")
-            Conda.add("r-base")
+            Conda.add("r-base>=3.4.0,<4") # greater than or equal to 3.4.0 AND strictly less than 4.0
             Rhome = joinpath(Conda.LIBDIR, "R")
-
             libR = locate_libR(Rhome)
         else
             if isempty(Rhome)
@@ -58,6 +63,7 @@ try
             open(depfile, "w") do f
                 println(f, "const Rhome = \"", escape_string(Rhome), '"')
                 println(f, "const libR = \"", escape_string(libR), '"')
+                println(f, "const conda_provided_r = $(conda_provided_r)")
             end
         end
     end
