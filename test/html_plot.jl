@@ -16,6 +16,6 @@ end
 
 let svg_plot = @html_plot R"plot(1, 2)" svg
     @test isa(svg_plot, HTML)
-    @test contains(svg_plot.content, "<svg ")
-    @test contains(svg_plot.content, "</svg>")
+    @test occursin("<svg ", svg_plot.content)
+    @test occursin("</svg>", svg_plot.content)
 end
