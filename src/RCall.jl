@@ -27,8 +27,7 @@ export RObject,
    globalEnv,
    isnull, isna, anyna,
    robject, rcopy, rparse, rprint, reval, rcall, rlang,
-   rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str,
-   @html_plot
+   rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str, @html_plot
 
 const depfile = joinpath(dirname(@__FILE__),"..","deps","deps.jl")
 if isfile(depfile)
