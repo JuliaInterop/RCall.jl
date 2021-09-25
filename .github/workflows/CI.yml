@@ -23,14 +23,14 @@ jobs:
         julia-arch:
           - 'x64'
           - 'x86'
+        r-version:
+          - '4.1.1'
         julia-version:
           - '1.4'
           - '1.5'
           - '1.6'
           - '~1.7.0-0'
           - 'nightly'
-        r-version:
-          - '4.1.1'
         exclude:
           - os: macOS-latest
             julia-arch: x86
@@ -39,6 +39,10 @@ jobs:
       - uses: r-lib/actions/setup-r@v1
         with:
           r-version: ${{ matrix.r-version }}
+      - run: Rscript -e 'print(\"hello\")'
+        if: ${{ matrix.os }} == 'windows-latest'
+      - run: Rscript -e 'print("hello")'
+        if: ${{ matrix.os }} != 'windows-latest'
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
