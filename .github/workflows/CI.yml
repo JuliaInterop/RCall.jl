@@ -1,0 +1,48 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - '*'
+defaults:
+  run:
+    shell: bash
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macOS-latest
+          - windows-latest
+        julia-arch:
+          - 'x64'
+          - 'x86'
+        julia-version:
+          - '1.4'
+          - '1.5'
+          - '1.6'
+          - '~1.7.0-0'
+          - 'nightly'
+        r-version:
+          - '4.1.1'
+        exclude:
+          - os: macOS-latest
+            julia-arch: x86
+    steps:
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: ${{ matrix.r-version }}
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: ${{ matrix.julia-version }}
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
+        env:
+          JULIA_NUM_THREADS: 2
