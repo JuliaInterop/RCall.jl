@@ -123,6 +123,12 @@ function initEmbeddedR()
         # fix an unicode issue
         # cf https://bugs.r-project.org/bugzilla/show_bug.cgi?id=17677
         try unsafe_store!(cglobal((:EmitEmbeddedUTF8, RCall.libR),Cint), 1) catch end
+
+            # Julia 1.1+ no longer loads libraries in the main thread
+            # TODO: this needs to be set correctly
+            # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Threading-issues
+            unsafe_store!(cglobal((:R_CStackLimit,libR),Csize_t), typemax(Csize_t))
+        ccall((:setup_Rmainloop,libR),Cvoid,())
     end
 
     @static if Sys.isunix()
@@ -133,8 +139,8 @@ function initEmbeddedR()
         ENV["R_SHARE_DIR"] = joinpath(Rhome,"share")
 
         # initialize library
-        argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
-        ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
+        argv = ["REmbeddedJulia","--silent"]
+        ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
         ptr_read_console = @cfunction($read_console,Cint,(Cstring,Ptr{UInt8},Cint,Cint)).ptr
         ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
@@ -146,12 +152,6 @@ function initEmbeddedR()
         ptr_polled_events = @cfunction($polled_events,Nothing,()).ptr
         unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Cvoid}), ptr_polled_events)
     end
-
-    # Julia 1.1+ no longer loads libraries in the main thread
-    # TODO: this needs to be set correctly
-    # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Threading-issues
-    unsafe_store!(cglobal((:R_CStackLimit,libR),Csize_t), typemax(Csize_t))
-    ccall((:setup_Rmainloop,libR),Cvoid,())
 
     Rembedded[] = true
     atexit(endEmbeddedR)
