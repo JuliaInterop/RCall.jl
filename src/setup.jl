@@ -134,7 +134,7 @@ function initEmbeddedR()
 
         # initialize library
         argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
-        ccall((:Rf_initEmbeddedR,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
+        ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
         ptr_read_console = @cfunction($read_console,Cint,(Cstring,Ptr{UInt8},Cint,Cint)).ptr
         ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
