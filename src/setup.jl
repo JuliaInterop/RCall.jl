@@ -150,7 +150,7 @@ function initEmbeddedR()
     # Julia 1.1+ no longer loads libraries in the main thread
     # TODO: this needs to be set correctly
     # https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Threading-issues
-    # unsafe_store!(cglobal((:R_CStackLimit,libR),Csize_t), typemax(Csize_t))
+    unsafe_store!(cglobal((:R_CStackLimit,libR),Csize_t), typemax(Csize_t))
     ccall((:setup_Rmainloop,libR),Cvoid,())
 
     Rembedded[] = true
