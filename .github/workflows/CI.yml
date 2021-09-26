@@ -40,9 +40,9 @@ jobs:
         with:
           r-version: ${{ matrix.r-version }}
       - run: Rscript -e 'print(\"hello\")'
-        if: ${{ matrix.os }} == 'windows-latest'
+        if: matrix.os == 'windows-latest'
       - run: Rscript -e 'print("hello")'
-        if: ${{ matrix.os }} != 'windows-latest'
+        if: matrix.os != 'windows-latest'
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
