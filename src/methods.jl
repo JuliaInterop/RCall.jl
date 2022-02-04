@@ -229,7 +229,7 @@ end
 # iterator for PairListSxp
 IteratorSize(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
 IteratorEltype(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
-@inline iterate(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data)
+@inline iterate(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, values(x))
 @inline function iterate(x::Pairs{K, V, I, Ptr{S}}, state) where {K, V, I, S<:PairListSxp}
     state == sexp(Const.NilValue) && return nothing
     (tag(state), car(state)), cdr(state)
@@ -237,7 +237,7 @@ end
 
 IteratorSize(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
 IteratorEltype(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
-@inline iterate(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data.p)
+@inline iterate(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, values(x).p)
 @inline function iterate(x::Pairs{K, V, I, RObject{S}}, state) where {K, V, I, S<:PairListSxp}
     state == sexp(Const.NilValue) && return nothing
     (RObject(tag(state)), RObject(car(state))), cdr(state)
