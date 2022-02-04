@@ -8,6 +8,7 @@ jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -15,22 +16,23 @@ jobs:
           - '1.0'
           - '1' # automatically expands to the latest stable 1.x release of Julia
           - nightly
-        os:
-          - ubuntu-latest
-        arch:
-          - x64
-          - x86
+        os: [ubuntu-latest]
+        arch: [x64]
+        experimental: [false]
         include:
           # test macOS and Windows with latest Julia only
           - os: macOS-latest
             arch: x64
             version: 1
+            experimental: false
           - os: windows-latest
             arch: x64
             version: 1
+            experimental: false
           - os: windows-latest
             arch: x86
             version: 1
+            experimental: true
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
