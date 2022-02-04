@@ -35,19 +35,19 @@ julia&gt; @rput foo bar
 R&gt; foo + bar
 [1] 6</code></pre><h2 id="@R_str-string-macro-1"><a class="docs-heading-anchor" href="#@R_str-string-macro-1">@R_str string macro</a><a class="docs-heading-anchor-permalink" href="#@R_str-string-macro-1" title="Permalink"></a></h2><p>Another way to use RCall is the <a href="../internal/#RCall.@R_str-Tuple{Any}"><code>R&quot;&quot;</code></a> string macro, it is especially useful in script files.</p><pre><code class="language-julia-repl">julia&gt; R&quot;rnorm(10)&quot;
 RObject{RealSxp}
- [1] -2.07218587 -1.45850641 -0.59255363 -0.37403686 -1.09316234 -1.11171664
- [7] -0.58721210 -0.19590772 -0.34711271 -0.07483809</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
+ [1] -0.3892398 -2.3911240 -0.1757430  0.5689743 -2.2367275  1.0845531
+ [7] -1.0449705 -1.0395578  0.5756282  0.3931605</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl">julia&gt; x = randn(10)
 10-element Vector{Float64}:
-  0.8287992167229152
-  2.052725120438256
-  0.038598073180720956
-  0.7630386389125443
-  2.2911298822816097
-  1.5832022766154106
- -1.1466587992074004
-  0.47567660173548726
-  0.6222487509090936
- -0.09838524600962184
+ -0.10799282716467554
+ -1.0923443212501684
+  1.8537791174655853
+ -0.964681352164409
+  0.8351547946535662
+ -1.7187912096736242
+  1.2694860848575829
+ -1.9211264735118614
+ -0.5506482411315583
+  2.2759070168991875
 
 julia&gt; R&quot;t.test($x)&quot;
 RObject{VecSxp}
@@ -55,16 +55,13 @@ RObject{VecSxp}
 	One Sample t-test
 
 data:  `#JL`$x
-t = 2.2588, df = 9, p-value = 0.05028
+t = -0.025718, df = 9, p-value = 0.98
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -0.00110927  1.48318417
+ -1.078718  1.054466
 sample estimates:
-mean of x
-0.7410375</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
-┌ Warning: use values(kwargs) and keys(kwargs) instead of kwargs.data and kwargs.itr
-│   caller = iterate(x::Base.Pairs{Int64, ListSxp, Base.OneTo{Int64}, Ptr{ListSxp}}) at methods.jl:232
-└ @ RCall ~/work/RCall.jl/RCall.jl/src/methods.jl:232
+  mean of x
+-0.01212574</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;
 RObject{VecSxp}
 $par
 [1] -1.56343
@@ -164,20 +161,17 @@ julia&gt; ratio(d, w) = sum(d[!, :x] .* w)/sum(d[!, :u] .* w)
 ratio (generic function with 1 method)
 
 julia&gt; b = boot(city, ratio, R = 100, stype = &quot;w&quot;);
-┌ Warning: use values(kwargs) and keys(kwargs) instead of kwargs.data and kwargs.itr
-│   caller = iterate(x::Base.Pairs{Int64, ListSxp, Base.OneTo{Int64}, Ptr{ListSxp}}) at methods.jl:232
-└ @ RCall ~/work/RCall.jl/RCall.jl/src/methods.jl:232
 
 julia&gt; rcall(:summary, b[:t])
 RObject{StrSxp}
        V1
- Min.   :1.174
- 1st Qu.:1.413
- Median :1.545
- Mean   :1.577
- 3rd Qu.:1.681
- Max.   :2.552</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-julia-repl">julia&gt; @rimport base as rbase
+ Min.   :1.203
+ 1st Qu.:1.417
+ Median :1.474
+ Mean   :1.545
+ 3rd Qu.:1.618
+ Max.   :2.436</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-julia-repl">julia&gt; @rimport base as rbase
 
 julia&gt; rbase.sum([1, 2, 3], var&quot;rm.na&quot; = true)
 RObject{IntSxp}
-[1] 7</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../conversions/">Supported Conversions »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 4 February 2022 22:01">Friday 4 February 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+[1] 7</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../conversions/">Supported Conversions »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 4 February 2022 23:29">Friday 4 February 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
