@@ -1,24 +1,28 @@
-"R_ParseVector wrapped by R_tryCatchError. It catches possible R's `stop` calls
-which may cause longjmp in c."
+# callback used by safe_parseVector
+function safe_parseVector_callback(@nospecialize(args::Any))::Ptr{UnknownSxp}
+    (st,status,sf) = args
+    return ccall((:R_ParseVector,libR),Ptr{UnknownSxp},
+        (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}),
+        st,-1,status,sf)
+end
+function safe_parseVector_handler(c::Ptr{UnknownSxp}, @nospecialize(_::Any))::Ptr{UnknownSxp}
+    return c
+end
+
+"""
+R_ParseVector wrapped by R_tryCatchError. It catches possible R's `stop` calls which may cause longjmp in C.
+
+See [Writing R Extensions: Condition handling and cleanup code](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Condition-handling-and-cleanup-code)
+"""
 function safe_parseVector(st::Ptr{StrSxp}, status::Ref{Cint}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
     protect(st)
     protect(sf)
-    fcfunction = @cfunction(
-        $((_) -> convert(
-            Ptr{UnknownSxp},
-            ccall((:R_ParseVector,libR),Ptr{UnknownSxp}, (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}), st,-1,status,sf))),
-        Ptr{UnknownSxp},
-        (Ptr{Cvoid}, ))
-    ecfunction = @cfunction(
-        $((c, _) -> convert(Ptr{UnknownSxp}, c)),
-        Ptr{UnknownSxp},
-        (Ptr{UnknownSxp}, Ptr{Cvoid}))
     ret = ccall((:R_tryCatchError, libR), Ptr{UnknownSxp},
-          (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
-          fcfunction.ptr,
-          C_NULL,
-          ecfunction.ptr,
-          C_NULL)
+          (Ptr{Cvoid}, Any, Ptr{Cvoid}, Any),
+          @cfunction(safe_parseVector_callback, Ptr{UnknownSxp},(Any,)),
+          (st,status,sf),
+          @cfunction(safe_parseVector_handler, Ptr{UnknownSxp},(Ptr{UnknownSxp},Any)),
+          nothing)
     unprotect(2)
     sexp(ret)
 end
