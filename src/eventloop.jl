@@ -1,14 +1,12 @@
-if Sys.isunix()
-    "R eventloop hook on Unix system"
-    function polled_events()
-        event_callback()
-        nothing
-    end
-end
+"""
+    polled_events()::Cvoid
 
-"Event Callback: allows R to process Julia events when R is busy.
-For example, writing output to stdout while running an expensive R command."
-function event_callback()
+Event Callback: allows R to process Julia events when R is busy. For example, writing output to stdout while running an expensive R command.
+
+See [Writing R Extensions: Calling R.dll directly](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Calling-R_002edll-directly)
+and [Writing R Extensions: Meshing Event Loops](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Meshing-event-loops)
+"""
+function polled_events()::Cvoid
     # dump output buffer to stdout when available
     handle_eval_stdout()
     nothing

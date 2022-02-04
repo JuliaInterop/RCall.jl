@@ -36,7 +36,6 @@ else
     error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
 end
 
-include("setup.jl")
 include("types.jl")
 include("Const.jl")
 include("methods.jl")
@@ -59,6 +58,7 @@ include("macros.jl")
 include("operators.jl")
 include("RPrompt.jl")
 include("ijulia.jl")
+include("setup.jl")
 include("deprecated.jl")
 
 end # module
