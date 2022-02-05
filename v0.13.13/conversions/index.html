@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Supported Conversions · RCall.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">RCall.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><a class="tocitem" href="../installation/">Installation</a></li><li><a class="tocitem" href="../gettingstarted/">Getting Started</a></li><li class="is-active"><a class="tocitem" href>Supported Conversions</a><ul class="internal"><li><a class="tocitem" href="#Base-Julia-Types-1"><span>Base Julia Types</span></a></li><li><a class="tocitem" href="#Dictionaries-1"><span>Dictionaries</span></a></li><li><a class="tocitem" href="#Date-1"><span>Date</span></a></li><li><a class="tocitem" href="#DateTime-1"><span>DateTime</span></a></li><li><a class="tocitem" href="#DataFrames-1"><span>DataFrames</span></a></li><li><a class="tocitem" href="#AxisArrays-1"><span>AxisArrays</span></a></li></ul></li><li><a class="tocitem" href="../custom/">Custom Conversion</a></li><li><a class="tocitem" href="../eventloop/">Eventloop</a></li><li><a class="tocitem" href="../internal/">Internal</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Supported Conversions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Supported Conversions</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaInterop/RCall.jl/blob/master/docs/src/conversions.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Supported-Conversions-1"><a class="docs-heading-anchor" href="#Supported-Conversions-1">Supported Conversions</a><a class="docs-heading-anchor-permalink" href="#Supported-Conversions-1" title="Permalink"></a></h1><p>RCall supports conversions to and from most base Julia types and popular Statistics packages, e.g., <code>DataFrames</code>, <code>CategoricalArrays</code> and <code>AxisArrays</code>.</p><h2 id="Base-Julia-Types-1"><a class="docs-heading-anchor" href="#Base-Julia-Types-1">Base Julia Types</a><a class="docs-heading-anchor-permalink" href="#Base-Julia-Types-1" title="Permalink"></a></h2><pre><code class="language-julia"># Julia -&gt; R
+a = robject(1)</code></pre><pre><code class="language-none">RObject{IntSxp}
+[1] 1
+</code></pre><pre><code class="language-julia"># R -&gt; Julia
+rcopy(a)</code></pre><pre><code class="language-none">1</code></pre><pre><code class="language-julia"># Julia -&gt; R
+a = robject([1.0, 2.0])</code></pre><pre><code class="language-none">RObject{RealSxp}
+[1] 1 2
+</code></pre><pre><code class="language-julia"># R -&gt; Julia
+rcopy(a)</code></pre><pre><code class="language-none">2-element Vector{Float64}:
+ 1.0
+ 2.0</code></pre><h2 id="Dictionaries-1"><a class="docs-heading-anchor" href="#Dictionaries-1">Dictionaries</a><a class="docs-heading-anchor-permalink" href="#Dictionaries-1" title="Permalink"></a></h2><pre><code class="language-julia"># Julia -&gt; R
+d = Dict(:a =&gt; 1, :b =&gt; [4, 5, 3])
+r = robject(d)</code></pre><pre><code class="language-none">RObject{VecSxp}
+$a
+[1] 1
+
+$b
+[1] 4 5 3
+
+</code></pre><pre><code class="language-julia"># R -&gt; Julia
+rcopy(r)</code></pre><pre><code class="language-none">OrderedCollections.OrderedDict{Symbol, Any} with 2 entries:
+  :a =&gt; 1
+  :b =&gt; [4, 5, 3]</code></pre><h2 id="Date-1"><a class="docs-heading-anchor" href="#Date-1">Date</a><a class="docs-heading-anchor-permalink" href="#Date-1" title="Permalink"></a></h2><pre><code class="language-julia"># Julia -&gt; R
+d = Date(2012, 12, 12)
+r = robject(d)</code></pre><pre><code class="language-none">RObject{RealSxp}
+[1] &quot;2012-12-12&quot;
+</code></pre><pre><code class="language-julia"># R -&gt; Julia
+rcopy(r)</code></pre><pre><code class="language-none">2012-12-12</code></pre><h2 id="DateTime-1"><a class="docs-heading-anchor" href="#DateTime-1">DateTime</a><a class="docs-heading-anchor-permalink" href="#DateTime-1" title="Permalink"></a></h2><pre><code class="language-julia"># julia -&gt; R
+d = DateTime(2012, 12, 12, 12, 12, 12)
+r = robject(d)</code></pre><pre><code class="language-none">RObject{RealSxp}
+[1] &quot;2012-12-12 12:12:12 UTC&quot;
+</code></pre><pre><code class="language-julia"># R -&gt; Julia
+rcopy(r)</code></pre><pre><code class="language-none">2012-12-12T12:12:12</code></pre><h2 id="DataFrames-1"><a class="docs-heading-anchor" href="#DataFrames-1">DataFrames</a><a class="docs-heading-anchor-permalink" href="#DataFrames-1" title="Permalink"></a></h2><pre><code class="language-julia">d = DataFrame([[1.0, 4.5, 7.0]], [:x])
+# Julia -&gt; R
+r = robject(d)</code></pre><pre><code class="language-none">RObject{VecSxp}
+    x
+1 1.0
+2 4.5
+3 7.0
+</code></pre><pre><code class="language-julia"># R -&gt; Julia
+rcopy(r)</code></pre><div class="data-frame"><p>3 rows × 1 columns</p><table class="data-frame"><thead><tr><th></th><th>x</th></tr><tr><th></th><th title="Float64">Float64</th></tr></thead><tbody><tr><th>1</th><td>1.0</td></tr><tr><th>2</th><td>4.5</td></tr><tr><th>3</th><td>7.0</td></tr></tbody></table></div><p>In default, the column names of R data frames are normalized such that <code>foo.bar</code> would be replaced by <code>foo_bar</code>.</p><pre><code class="language-julia">rcopy(R&quot;data.frame(a.b = 1:3)&quot;)</code></pre><div class="data-frame"><p>3 rows × 1 columns</p><table class="data-frame"><thead><tr><th></th><th>a_b</th></tr><tr><th></th><th title="Int64">Int64</th></tr></thead><tbody><tr><th>1</th><td>1</td></tr><tr><th>2</th><td>2</td></tr><tr><th>3</th><td>3</td></tr></tbody></table></div><p>To avoid the normalization, use <code>normalizenames</code> option.</p><pre><code class="language-julia">rcopy(R&quot;data.frame(a.b = 1:10)&quot;; normalizenames = false)</code></pre><div class="data-frame"><p>10 rows × 1 columns</p><table class="data-frame"><thead><tr><th></th><th>a.b</th></tr><tr><th></th><th title="Int64">Int64</th></tr></thead><tbody><tr><th>1</th><td>1</td></tr><tr><th>2</th><td>2</td></tr><tr><th>3</th><td>3</td></tr><tr><th>4</th><td>4</td></tr><tr><th>5</th><td>5</td></tr><tr><th>6</th><td>6</td></tr><tr><th>7</th><td>7</td></tr><tr><th>8</th><td>8</td></tr><tr><th>9</th><td>9</td></tr><tr><th>10</th><td>10</td></tr></tbody></table></div><h2 id="AxisArrays-1"><a class="docs-heading-anchor" href="#AxisArrays-1">AxisArrays</a><a class="docs-heading-anchor-permalink" href="#AxisArrays-1" title="Permalink"></a></h2><pre><code class="language-julia"># Julia -&gt; R
+aa = AxisArray([1,2,3], Axis{:id}([&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))
+r = robject(aa)</code></pre><pre><code class="language-none">RObject{IntSxp}
+id
+a b c 
+1 2 3 
+</code></pre><pre><code class="language-julia"># R -&gt; Julia
+rcopy(AxisArray, r)</code></pre><pre><code class="language-none">1-dimensional AxisArray{Int64,1,...} with axes:
+    :id, [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+And data, a 3-element Vector{Int64}:
+ 1
+ 2
+ 3</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../gettingstarted/">« Getting Started</a><a class="docs-footer-nextpage" href="../custom/">Custom Conversion »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 5 February 2022 00:43">Saturday 5 February 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
