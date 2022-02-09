@@ -152,8 +152,15 @@ function iterate(s::RObject{S}, state) where S<:VectorListSxp
     state += 1
     (RObject(s[state]), state)
 end
-getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
 
+Base.checkbounds(::Type{Bool}, r::RObject{S}, i::Integer) where S<:VectorListSxp =
+    1 <= i <= length(r)
+Base.checkbounds(r::RObject{S}, i) where S<:VectorListSxp =
+    checkbounds(Bool, r, i) ? nothing : throw(BoundsError(r, i))
+function getindex(r::RObject{S}, i::Integer) where S<:VectorListSxp
+    @boundscheck checkbounds(r, i)
+    RObject(getindex(sexp(r), i))
+end
 
 # StrSxp
 
