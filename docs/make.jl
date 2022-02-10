@@ -9,6 +9,7 @@ makedocs(
         "Supported Conversions" => "conversions.md",
         "Custom Conversion" => "custom.md",
         "Eventloop" => "eventloop.md",
+        "Known issues" => "known-issues.md",
         "Internal" => "internal.md"
     ]
 )
