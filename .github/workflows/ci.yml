@@ -13,8 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.0'
-          - '1' # automatically expands to the latest stable 1.x release of Julia
+          - '1.6'
+          - '1'
           - nightly
         os: [ubuntu-latest]
         arch: [x64]
@@ -29,10 +29,6 @@ jobs:
             arch: x64
             version: 1
             experimental: false
-          - os: windows-latest
-            arch: x86
-            version: 1
-            experimental: true
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
