@@ -33,7 +33,11 @@ try
             conda_provided_r = true
             Conda.add_channel("r")
             Conda.add("r-base>=3.4.0,<4") # greater than or equal to 3.4.0 AND strictly less than 4.0
-            Rhome = joinpath(Conda.ROOTENV, "R")
+            if Sys.iswindows()
+                Rhome = joinpath(Conda.ROOTENV, "R")
+            else
+                Rhome = joinpath(Conda.LIBDIR, "R")
+            end
             libR = locate_libR(Rhome)
         else
             if isempty(Rhome)
