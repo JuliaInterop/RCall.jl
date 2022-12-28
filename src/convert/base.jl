@@ -193,7 +193,7 @@ end
 struct RFunction{F}
     f::F
 end
-(::RFunction)(args...) = rcopy(rcall_p(r,args...))
+(rf::RFunction)(args...) = rcopy(rcall_p(rf.f,args...))
         
 # FunctionSxp
 function rcopy(::Type{Function}, s::Ptr{S}) where S<:FunctionSxp
