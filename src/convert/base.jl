@@ -189,15 +189,20 @@ function rcopy(::Type{A}, s::Ptr{VecSxp};
     a
 end
 
-
+# Function wrapper which allows for dispatch
+struct RFunction{F}
+    f::F
+end
+(rf::RFunction)(args...) = rcopy(rcall_p(rf.f,args...))
+        
 # FunctionSxp
 function rcopy(::Type{Function}, s::Ptr{S}) where S<:FunctionSxp
     # prevent s begin gc'ed
     r = RObject(s)
-    (args...) -> rcopy(rcall_p(r,args...))
+    RFunction(r)
 end
 function rcopy(::Type{Function}, r::RObject{S}) where S<:FunctionSxp
-    (args...) -> rcopy(rcall_p(r,args...))
+    RFunction(r)
 end
 
 # conversion from Base Julia types
