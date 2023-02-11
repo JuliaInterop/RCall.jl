@@ -216,7 +216,7 @@ sexp(::T, s::Ptr{S}) where {T, S<:Sxp} = s
 sexp(::T, r::RObject{S}) where {T, S<:Sxp} = r
 
 # nothing / missing
-sexp(::Type{NilSxp}, ::Nothing) where T = sexp(Const.NilValue)
+sexp(::Type{NilSxp}, ::Nothing) = sexp(Const.NilValue)
 sexp(::Type{C}, ::Missing) where C<:RClass = naeltype(C)
 
 # symbol
