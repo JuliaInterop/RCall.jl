@@ -1,6 +1,6 @@
 name: Documentation
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: docs-${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 on:
   push:
