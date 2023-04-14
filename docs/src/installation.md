@@ -48,10 +48,12 @@ Most Linux distributions allow installation of R from their package manager, how
 The following will update R on recent versions of Ubuntu:
 
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-    sudo add-apt-repository -y "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -s -c)/"
+    sudo add-apt-repository -y "deb http://cran.rstudio.com/bin/linux/ubuntu $(lsb_release -s -c)-cran40/"
     sudo apt-get update -y
     sudo apt-get install -y r-base r-base-dev
     
+See also the official documentation on [CRAN: Ubuntu Packages For R](https://cloud.r-project.org/bin/linux/ubuntu/).
+
 ### Julia ≤ 1.5: Failure on recent Linux distributions
 
 The version of `libstdc++` shipped by Julia might be outdated if you are using a recent Linux distribution (e.g. Ubuntu 19.10) and make use of certain R packages (e.g. `Rcpp`). In this case RCall will fail with an error message looking similar to this:
