@@ -1,32 +1,27 @@
 # RCall.jl
 
-<!-- #### Most recent release
-* [![RCall](http://pkg.julialang.org/badges/RCall_1.0.svg)](http://pkg.julialang.org/?pkg=RCall&ver=1.0)
- -->
+[![Docs Stable](https://img.shields.io/badge/docs-stable-blue.svg)](http://juliainterop.github.io/RCall.jl/stable)
+[![Docs Development](https://img.shields.io/badge/docs-dev-blue.svg)](http://juliainterop.github.io/RCall.jl/dev)
 
-#### Development version
-* Linux & OSX: [![Travis Build Status](https://travis-ci.org/JuliaInterop/RCall.jl.svg?branch=master)](https://travis-ci.org/JuliaInterop/RCall.jl)
-* Windows: [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/y3kxma63apcig150/branch/master?svg=true)](https://ci.appveyor.com/project/simonbyrne/rcall-jl)
-* PkgEval: [![PkgEval][pkgeval-img]][pkgeval-url]
-* Coverage: [![Coverage Status](https://coveralls.io/repos/github/JuliaInterop/RCall.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaInterop/RCall.jl?branch=master)
+[![CI status](https://github.com/JuliaInterop/RCall.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaInterop/RCall.jl/actions/workflows/ci.yml)
+[![Code coverage](https://codecov.io/gh/JuliaInterop/RCall.jl/branch/master/graph/badge.svg?token=8ED5Wdm8W9)](https://codecov.io/gh/JuliaInterop/RCall.jl)
 
-[pkgeval-img]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/R/RCall.named.svg
-[pkgeval-url]: https://juliaci.github.io/NanosoldierReports/pkgeval_badges/R/RCall.html
+R is a language for statistical computing and graphics that has been around for couple of decades and it has one of the most impressive collections of scientific and statistical packages of any environment. Recently, the Julia language has become an attractive alternative because it provides the remarkable performance of a low-level language without sacrificing the readability and ease-of-use of high-level languages. However, Julia still lacks the depth and scale of the R package environment.
 
+This package, RCall.jl, facilitates communication between these two languages and allows the user to call R packages from within Julia, providing the best of both worlds. Additionally, this is a pure Julia package so it is portable and easy to use.
 
-#### Documentation
+## Installation
 
-[![Doc Stable](https://img.shields.io/badge/docs-stable-blue.svg)](http://juliainterop.github.io/RCall.jl/stable)
-[![Doc Development](https://img.shields.io/badge/docs-dev-blue.svg)](http://juliainterop.github.io/RCall.jl/dev)
- 
-#### Installation
+See the [Installation](http://juliainterop.github.io/RCall.jl/stable/installation) section of the documentation.
 
-[Installation](http://juliainterop.github.io/RCall.jl/stable/installation)
+## Getting Started
 
-#### Getting Started
+See the [Getting Started](http://juliainterop.github.io/RCall.jl/stable/gettingstarted) section of the documentation.
 
-[Getting Started](http://juliainterop.github.io/RCall.jl/stable/gettingstarted).
-
-#### ggplot2 demonstration
+# ggplot2 demonstration
 
 ![](ggplot.png)
+
+# Calling Julia from R
+
+See the JuliaCall library to [call Julia from R](https://non-contradiction.github.io/JuliaCall//index.html).

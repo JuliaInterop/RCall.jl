@@ -152,8 +152,15 @@ function iterate(s::RObject{S}, state) where S<:VectorListSxp
     state += 1
     (RObject(s[state]), state)
 end
-getindex(r::RObject{S}, I...) where S<:VectorListSxp = RObject(getindex(sexp(r), I...))
 
+Base.checkbounds(::Type{Bool}, r::RObject{S}, i::Integer) where S<:VectorListSxp =
+    1 <= i <= length(r)
+Base.checkbounds(r::RObject{S}, i) where S<:VectorListSxp =
+    checkbounds(Bool, r, i) ? nothing : throw(BoundsError(r, i))
+function getindex(r::RObject{S}, i::Integer) where S<:VectorListSxp
+    @boundscheck checkbounds(r, i)
+    RObject(getindex(sexp(r), i))
+end
 
 # StrSxp
 
@@ -229,7 +236,7 @@ end
 # iterator for PairListSxp
 IteratorSize(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
 IteratorEltype(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
-@inline iterate(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data)
+@inline iterate(x::Pairs{K, V, I, Ptr{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, values(x))
 @inline function iterate(x::Pairs{K, V, I, Ptr{S}}, state) where {K, V, I, S<:PairListSxp}
     state == sexp(Const.NilValue) && return nothing
     (tag(state), car(state)), cdr(state)
@@ -237,7 +244,7 @@ end
 
 IteratorSize(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.SizeUnknown()
 IteratorEltype(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = Base.EltypeUnknown()
-@inline iterate(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, x.data.p)
+@inline iterate(x::Pairs{K, V, I, RObject{S}}) where {K, V, I, S<:PairListSxp} = iterate(x, values(x).p)
 @inline function iterate(x::Pairs{K, V, I, RObject{S}}, state) where {K, V, I, S<:PairListSxp}
     state == sexp(Const.NilValue) && return nothing
     (RObject(tag(state)), RObject(car(state))), cdr(state)

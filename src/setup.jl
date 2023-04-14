@@ -104,13 +104,13 @@ function initEmbeddedR()
 
         rs.rhome          = pointer(Rhome)
         rs.home           = pointer(Ruser)
-        rs.ReadConsole    = @cfunction($read_console, Cint, (Cstring, Ptr{UInt8}, Cint, Cint)).ptr
-        rs.CallBack       = @cfunction($event_callback, Nothing, ()).ptr
+        rs.ReadConsole    = @cfunction(read_console, Cint, (Cstring, Ptr{UInt8}, Cint, Cint))
+        rs.CallBack       = @cfunction(polled_events, Cvoid, ())
         rs.ShowMessage    = cglobal((:R_ShowMessage, libR), Nothing)
-        rs.YesNoCancel    = @cfunction($ask_yes_no_cancel, Cint, (Ptr{Cchar},)).ptr
+        rs.YesNoCancel    = @cfunction(ask_yes_no_cancel, Cint, (Ptr{Cchar},))
         rs.Busy           = cglobal((:R_Busy, libR), Ptr{Cvoid})
         rs.WriteConsole   = C_NULL
-        rs.WriteConsoleEx = @cfunction($write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint)).ptr
+        rs.WriteConsoleEx = @cfunction(write_console_ex, Nothing, (Ptr{UInt8}, Cint, Cint))
         rs.CharacterMode = 2
 
         ccall((:R_SetParams,libR),Nothing,(Ptr{RStart},), Ref(rs))
@@ -136,15 +136,12 @@ function initEmbeddedR()
         argv = ["REmbeddedJulia","--silent","--no-save", "--no-restore"]
         ccall((:Rf_initialize_R,libR),Cint,(Cint,Ptr{Ptr{Cchar}}),length(argv),argv)
 
-        ptr_read_console = @cfunction($read_console,Cint,(Cstring,Ptr{UInt8},Cint,Cint)).ptr
-        ptr_write_console_ex = @cfunction($write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)).ptr
-        unsafe_store!(cglobal((:ptr_R_ReadConsole,libR),Ptr{Cvoid}), ptr_read_console)
+        unsafe_store!(cglobal((:ptr_R_ReadConsole,libR),Ptr{Cvoid}), @cfunction(read_console,Cint,(Cstring,Ptr{UInt8},Cint,Cint)))
         unsafe_store!(cglobal((:ptr_R_WriteConsole,libR),Ptr{Cvoid}), C_NULL)
-        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Cvoid}), ptr_write_console_ex)
+        unsafe_store!(cglobal((:ptr_R_WriteConsoleEx,libR),Ptr{Cvoid}), @cfunction(write_console_ex,Nothing,(Ptr{UInt8},Cint,Cint)))
         unsafe_store!(cglobal((:R_Consolefile,libR),Ptr{Cvoid}), C_NULL)
         unsafe_store!(cglobal((:R_Outputfile,libR),Ptr{Cvoid}), C_NULL)
-        ptr_polled_events = @cfunction($polled_events,Nothing,()).ptr
-        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Cvoid}), ptr_polled_events)
+        unsafe_store!(cglobal((:R_PolledEvents,libR),Ptr{Cvoid}), @cfunction(polled_events,Nothing,()))
     end
 
     # Julia 1.1+ no longer loads libraries in the main thread

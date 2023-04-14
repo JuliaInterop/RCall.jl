@@ -36,7 +36,6 @@ else
     error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
 end
 
-include("setup.jl")
 include("types.jl")
 include("Const.jl")
 include("methods.jl")
@@ -46,6 +45,7 @@ include("convert/categorical.jl")
 include("convert/datetime.jl")
 include("convert/dataframe.jl")
 include("convert/formula.jl")
+include("convert/namedtuple.jl")
 
 include("convert/default.jl")
 include("eventloop.jl")
@@ -60,6 +60,7 @@ include("operators.jl")
 include("RPrompt.jl")
 include("ijulia.jl")
 include("html_plot.jl")
+include("setup.jl")
 include("deprecated.jl")
 
 end # module

@@ -87,8 +87,14 @@ struct REvalError <: RException
 end
 showerror(io::IO, e::REvalError) = print(io, "REvalError: " * e.msg)
 
+"""
+    read_console
 
-function read_console(p::Cstring, buf::Ptr{UInt8}, buflen::Cint, add_history::Cint)
+`R_ReadConsole` API callback to read input.
+
+See [Writing R extensions: Setting R callbacks](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Setting-R-callbacks)
+"""
+function read_console(p::Cstring, buf::Ptr{UInt8}, buflen::Cint, add_history::Cint)::Cint
     print(unsafe_string(p))
     linebuf = reenable_sigint() do
             Vector{UInt8}(readline())
@@ -104,9 +110,15 @@ function read_console(p::Cstring, buf::Ptr{UInt8}, buflen::Cint, add_history::Ci
 end
 
 """
-R API callback to write console output.
+    write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)::Cvoid
+
+`R_WriteConsoleEx` API callback to write console output.
+
+`otype` specifies the output type (regular output or warning/error).
+
+See [Writing R extensions: Setting R callbacks](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Setting-R-callbacks)
 """
-function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)
+function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)::Cvoid
     if otype == 0
         unsafe_write(output_buffer, buf, buflen)
     else

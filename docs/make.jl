@@ -9,12 +9,14 @@ makedocs(
         "Supported Conversions" => "conversions.md",
         "Custom Conversion" => "custom.md",
         "Eventloop" => "eventloop.md",
+        "Known issues" => "known-issues.md",
         "Internal" => "internal.md"
     ]
 )
 
 deploydocs(
     repo = "github.com/JuliaInterop/RCall.jl.git",
+    push_preview = true,
     deps = nothing,
     make = nothing
 )

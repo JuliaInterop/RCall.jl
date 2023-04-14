@@ -1,3 +1,4 @@
+Manifest.toml
 deps/deps.jl
 docs/build
 docs/gh-pages
