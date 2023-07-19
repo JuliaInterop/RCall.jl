@@ -298,7 +298,7 @@ end
 
 
 """
-Convert a `Ptr{UnknownSxp}` to an approptiate `Ptr{S<:Sxp}`.
+Convert a `Ptr{UnknownSxp}` to an appropriate `Ptr{S<:Sxp}`.
 """
 function sexp(p::Ptr{UnknownSxp})
     typ = sexpnum(p)

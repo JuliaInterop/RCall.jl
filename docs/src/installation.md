@@ -72,7 +72,7 @@ This problem doesn't affect Julia ≥ 1.6!
 
 ### Other methods
 
-If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set `R_HOME` or your `PATH` as described above before running `Pkg.build("RCall")` in order for the build script to find your R installation. RCall requries R to be installed with its shared library. It could be done with the flag `--enable-R-shlib`, consult your server administrator to see if it was the case.
+If you have installed R by some other method (e.g. building from scratch, or files copied but not installed in the usual manner), which often happens on cluster installations, then you may need to set `R_HOME` or your `PATH` as described above before running `Pkg.build("RCall")` in order for the build script to find your R installation. RCall requires R to be installed with its shared library. It could be done with the flag `--enable-R-shlib`, consult your server administrator to see if it was the case.
 
 For some environments, you might also need to specify `LD_LIBRARY_PATH`
 ```sh

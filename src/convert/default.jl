@@ -202,7 +202,7 @@ rcopy(r) = r
 # logic of default sexp
 
 """
-`robject(x)` converts a Julia object `x` to a corresponding RObject implictly. Explict conversions
+`robject(x)` converts a Julia object `x` to a corresponding RObject implicitly. Explicit conversions
 could be called with `robject(<R Class>, x)`.
 """
 robject(s) = RObject(s)
