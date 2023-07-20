@@ -1,6 +1,6 @@
 # IJulia hooks for displaying plots with RCall
 
-# TODO: create a special graphics device. This would allow us to not accidently close devices opened by users, and display plots immediately as they appear.
+# TODO: create a special graphics device. This would allow us to not accidentally close devices opened by users, and display plots immediately as they appear.
 
 ijulia_mime = nothing
 

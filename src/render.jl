@@ -98,7 +98,7 @@ function render(script::String)
 end
 
 """
-Prepare code for evaluating the julia expressions. When the code is execulated,
+Prepare code for evaluating the julia expressions. When the code is evaluated,
 the results are stored in the R environment `#JL`.
 """
 function prepare_inline_julia_code(symdict, escape::Bool=false)
