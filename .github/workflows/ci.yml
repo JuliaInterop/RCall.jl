@@ -19,7 +19,7 @@ jobs:
           - '1.6'
           - '1'
           - nightly
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
         arch: [x64]
         experimental: [false]
         include:
@@ -28,10 +28,10 @@ jobs:
             arch: x64
             version: 1
             experimental: false
-          - os: windows-latest
-            arch: x64
-            version: 1
-            experimental: false
+          # - os: windows-latest
+          #   arch: x64
+          #   version: 1
+          #   experimental: false
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
