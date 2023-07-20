@@ -19,7 +19,7 @@ function rlang_p(f, args...; kwargs...)
     l
 end
 
-"Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaulated"
+"Create a function call from a function pointer and a list of arguments and return it as an RObject, which can then be evaluated"
 rlang(f, args...; kwargs...) = RObject(rlang_p(f,args...; kwargs...))
 
 

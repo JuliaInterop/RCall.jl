@@ -459,13 +459,13 @@ isNA(x::Float64) = is_ieee_na(x)
 isNA(x::Int32) = x == Const.NaInt
 isNA(s::Ptr{CharSxp}) = s === sexp(Const.NaString)
 isNA(s::Ptr{S}) where S<:VectorSxp = length(s) == 1 ? isNA(s[1]) : false
-# all other values are consided as non-NA.
+# all other values are considered as non-NA.
 isNA(s::Any) = false
 
 isna(s::Ptr{S}, i::Integer) where S<:VectorSxp = isNA(s[i])
 isna(s::Ptr{S}) where S<:VectorSxp = reshape(BitArray([isNA(a) for a in s]), size(s))
 """
-Check if the ith member of s coorespond to R's NA values.
+Check if the ith member of s correspond to R's NA values.
 """
 isna(r::RObject, i::Integer) = isna(r.p, i)
 """
@@ -544,7 +544,7 @@ getindex(e::RObject{EnvSxp},s) = RObject(getindex(sexp(e),s))
 function setindex!(e::Ptr{EnvSxp},v::Ptr{S},s::Ptr{StrSxp}) where S<:Sxp
     # `Rf_defineVar` is unsafe to use if the binding is locked.
     # However, `setVarInFrame` is not exported. `base::assign` is
-    # an avaliable alternative.
+    # an available alternative.
     rcall_p(Const.BaseNamespace["assign"], s, v, envir = e)
 end
 function setindex!(e::Ptr{EnvSxp},v,s)
