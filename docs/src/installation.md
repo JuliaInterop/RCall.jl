@@ -8,6 +8,27 @@ Pkg.add("RCall")
 
 ## Customizing the R installation
 
+There are two ways to configure the R installation used by RCall.jl:
+
+  * [Using Julia's Preferences system](#Customizing-the-R-installation-using-Julia's-Preferences-system)
+  * [At install time, using the `R_HOME` environment variable](#Customizing-the-R-installation-at-install-time)
+
+Should you experience problems with any of these methods, please [open an issue](https://github.com/JuliaStats/RCall.jl/issues/new).
+
+### Customizing the R installation using Julia's Preferences system
+
+In this case the appropriate paths are provided with RCall's `Rhome` and `libR` preferences. You can change these in different ways using [Julia's Preferences system](https://docs.julialang.org/en/v1/manual/code-loading/#preferences). For example, you can add the following to a `LocalPreferences.toml` file in the same directory as a project's `Project.toml` file:
+
+```toml
+[RCall]
+Rhome = "/path/to/env/lib/R"
+libR = "/path/to/env/lib/R/lib/libR.so"
+```
+
+When these preferences are set, they take precedence over the R installation configured at installation time.
+
+### Customizing the R installation at install time
+
 The RCall build script (run by `Pkg.add`)
 will check for an existing R installation by looking in the following locations,
 in order.
@@ -28,8 +49,6 @@ Pkg.build("RCall")
 ```
 
 When `R_HOME` is set to `"*"`, RCall.jl will automatically install R for you using [Conda](https://github.com/JuliaPy/Conda.jl).
-
-Should you experience problems with any of these methods, please [open an issue](https://github.com/JuliaStats/RCall.jl/issues/new).
 
 ## Standard installations
 
