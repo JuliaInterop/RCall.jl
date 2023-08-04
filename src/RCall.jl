@@ -1,6 +1,7 @@
 __precompile__()
 module RCall
 
+using Preferences
 using Requires
 using Dates
 using Libdl
@@ -29,11 +30,20 @@ export RObject,
    robject, rcopy, rparse, rprint, reval, rcall, rlang,
    rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
-const depfile = joinpath(dirname(@__FILE__),"..","deps","deps.jl")
-if isfile(depfile)
-    include(depfile)
+@static if @has_preference("Rhome") || @has_preference("libR")
+    @static if !(@has_preference("Rhome") && @has_preference("libR"))
+        error("RCall: Either both Rhome and libR must be set or neither of them")
+    end
+    const Rhome = @load_preference("Rhome")
+    const libR = @load_preference("libR")
+    const conda_provided_r = false
 else
-    error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
+    const depfile = joinpath(dirname(@__FILE__),"..","deps","deps.jl")
+    if isfile(depfile)
+        include(depfile)
+    else
+        error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
+    end
 end
 
 include("types.jl")
