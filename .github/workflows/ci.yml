@@ -22,7 +22,7 @@ jobs:
         R:
           - 'release'
           - '4.0'
-          - '3.0'
+          - '3.4'
         os: [ubuntu-latest]
         arch: [x64]
         experimental: [false]
