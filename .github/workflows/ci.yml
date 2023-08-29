@@ -9,7 +9,7 @@ on:
   pull_request:
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: Julia ${{ matrix.version }} - R ${{ matrix.R }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
     strategy:
@@ -19,6 +19,10 @@ jobs:
           - '1.6'
           - '1'
           - nightly
+        R:
+          - 'release'
+          - '4.0'
+          - '3.4'
         os: [ubuntu-latest]
         arch: [x64]
         experimental: [false]
@@ -28,10 +32,12 @@ jobs:
             arch: x64
             version: 1
             experimental: false
+            R: 'release'
           - os: windows-latest
             arch: x64
             version: 1
             experimental: false
+            R: 'release'
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
@@ -42,6 +48,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
+          r-version: ${{ matrix.R }}
       - run: echo "LD_LIBRARY_PATH=$(R RHOME)/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
       - uses: julia-actions/julia-buildpkg@v1

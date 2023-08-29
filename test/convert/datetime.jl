@@ -73,7 +73,13 @@ r = RObject(d)
 @test rcopy(r) === d
 @test rcopy(DateTime, r) === d
 @test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
-@test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
+# previously the second argument to as.character.POSIXt was `format``, now it defaults
+# to `digits`. Using `format` as a named argument gives a deprecation warning
+# this changed in R 4.3.0 but is listed as a bugfix
+# > as.character(<POSIXt>) now behaves more in line with the methods for atomic vectors such as numbers,
+# > and is no longer influenced by options(). Ditto for as.character(<Date>). The as.character() method
+# > gets arguments digits and OutDec with defaults not depending on options(). Use of as.character(*, format = .) now warns.
+@test rcopy(R"identical(format($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
 
 s = ["2001-01-01T01:01:01", "1111-11-11T11:11:00", "2012-12-12T12:12:12"]
@@ -88,7 +94,7 @@ r = RObject(d)
 @test rcopy(r) == d
 @test rcopy(Array{DateTime}, r) == d
 @test rcopy(R"as.POSIXct($s, 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
-@test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s)")
+@test rcopy(R"identical(format($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
 
 # SubArray
@@ -103,7 +109,7 @@ r = RObject(d)
 @test rcopy(r) == d
 @test rcopy(Array{DateTime}, r) == d
 @test rcopy(R"as.POSIXct($s[1:2], 'UTC', '%Y-%m-%dT%H:%M:%S')") == d
-@test rcopy(R"identical(as.character($d, '%Y-%m-%dT%H:%M:%S'), $s[1:2])")
+@test rcopy(R"identical(format($d, '%Y-%m-%dT%H:%M:%S'), $s[1:2])")
 
 
 d = DateTime[]
