@@ -63,7 +63,7 @@ The version of `libstdc++` shipped by Julia might be outdated if you are using a
     /home/user/julia-1.3.1/bin/../lib/julia/libstdc++.so.6: version `GLIBCXX_3.4.26' not found 
     (required by /home/user/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/libs/Rcpp.so)
     
-This iss was fixed in Julia 1.9 (see https://github.com/JuliaLang/julia/issues/34276) but a workaround for older Julia versions is to replace Julias `libstdc++` with the one of your OS:
+This issue was fixed in Julia 1.9 (see https://github.com/JuliaLang/julia/issues/34276) but a workaround for older Julia versions is to replace Julia's `libstdc++` with the one of your OS:
 
     # works for Ubuntu 19.10 64-bit - match your locations accordingly!
     cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 $JULIA_HOME/lib/julia/
