@@ -54,7 +54,7 @@ The following will update R on recent versions of Ubuntu:
     
 See also the official documentation on [CRAN: Ubuntu Packages For R](https://cloud.r-project.org/bin/linux/ubuntu/).
 
-### Julia ≤ 1.5: Failure on recent Linux distributions
+### Julia ≤ 1.8: Failure on recent Linux distributions
 
 The version of `libstdc++` shipped by Julia might be outdated if you are using a recent Linux distribution (e.g. Ubuntu 19.10) and make use of certain R packages (e.g. `Rcpp`). In this case RCall will fail with an error message looking similar to this:
 
@@ -63,12 +63,12 @@ The version of `libstdc++` shipped by Julia might be outdated if you are using a
     /home/user/julia-1.3.1/bin/../lib/julia/libstdc++.so.6: version `GLIBCXX_3.4.26' not found 
     (required by /home/user/R/x86_64-pc-linux-gnu-library/3.6/Rcpp/libs/Rcpp.so)
     
-Until this issue is fixed in Julia (see https://github.com/JuliaLang/julia/issues/34276) a workaround is to replace Julias `libstdc++` with the one of your OS:
+This iss was fixed in Julia 1.9 (see https://github.com/JuliaLang/julia/issues/34276) but a workaround for older Julia versions is to replace Julias `libstdc++` with the one of your OS:
 
-    # works for Ubuntu 19.10 64bit - match your locations accordingly!
+    # works for Ubuntu 19.10 64-bit - match your locations accordingly!
     cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 $JULIA_HOME/lib/julia/
     
-This problem doesn't affect Julia ≥ 1.6!
+This problem doesn't affect Julia ≥ 1.9!
 
 ### Other methods
 
