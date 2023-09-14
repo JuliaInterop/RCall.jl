@@ -46,6 +46,8 @@ else
     end
 end
 
+__precompile__(Rhome != "")
+
 include("types.jl")
 include("Const.jl")
 include("methods.jl")
