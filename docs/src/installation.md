@@ -50,6 +50,10 @@ Pkg.build("RCall")
 
 When `R_HOME` is set to `"*"`, RCall.jl will automatically install R for you using [Conda](https://github.com/JuliaPy/Conda.jl).
 
+!!! note "Installation time R installation is shared"
+
+    When the R installation is configured at installation time, the absolute path to the R installation is currently hard-coded into the RCall.jl package, which can be shared between projects. This may cause problems if you are using different R installations for different projects which end up using the same RCall.jl installation. In this case, please [use the Preferences system instead](#Customizing-the-R-installation-at-install-time) which keeps different copies of the compiled RCall for different R installations.
+
 ## Standard installations
 
 If you want to install R yourself, rather than relying on the automatic Conda installation, you can use one of the following options:
