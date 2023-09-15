@@ -25,7 +25,8 @@ Rhome = "/path/to/env/lib/R"
 libR = "/path/to/env/lib/R/lib/libR.so"
 ```
 
-When these preferences are set, they take precedence over the R installation configured at installation time.
+!!! note
+    When these preferences are set, they take precedence over the R installation configured at installation time.
 
 ### Customizing the R installation at install time
 
