@@ -156,7 +156,7 @@ function LineEdit.complete_line(c::RCompletionProvider, s)
         return ret, token, true
     end
 
-    return String[], 0:-1, false
+    return String[], "", false
 end
 
 function create_r_repl(repl, main)
