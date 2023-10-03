@@ -36,6 +36,8 @@ try
             Conda.add("r-base>=3.4.0,<5") # greater than or equal to 3.4.0 AND strictly less than 5.0
             Rhome = joinpath(Conda.LIBDIR, "R")
             libR = locate_libR(Rhome)
+        elseif Rhome == "_"
+            Rhome = ""
         else
             if isempty(Rhome)
                 try Rhome = readchomp(`R RHOME`); catch; end
