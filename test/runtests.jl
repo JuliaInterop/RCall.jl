@@ -1,6 +1,8 @@
 using RCall
 using Test
 
+include("installation.jl")
+
 # before RCall does anything
 const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
 @info "" R_PPSTACKTOP_INITIAL
