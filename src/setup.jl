@@ -173,7 +173,7 @@ include(joinpath(dirname(@__FILE__),"..","deps","setup.jl"))
 function __init__()
     if Rhome == ""
         error(
-            "No R installation was detected as RCall installation time. " *
+            "No R installation was detected at RCall installation time. " *
             "Please provided the location of R by setting the Rhome and libR preferences or " *
             "else set R_HOME='*' and rerun Pkg.build(\"RCall\") to use Conda.jl."
         )
