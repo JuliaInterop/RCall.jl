@@ -53,6 +53,7 @@ tests = ["basic",
          "macros",
          "namespaces",
          "repl",
+         "html_plot"
          ]
 
 println("Running tests:")
