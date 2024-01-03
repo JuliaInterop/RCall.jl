@@ -123,6 +123,7 @@ end
 # We want to guard this with a version check so we don't run into the following
 # (non-widespread) issue on older versions of Julia:
 # https://github.com/JuliaLang/julia/issues/34276
+# (related to incompatible libstdc++ versions)
 @static if VERSION ≥ v"1.9"
   # Test whether we can install RCall with Conda, and then switch to using
   # Preferences + CondaPkg
