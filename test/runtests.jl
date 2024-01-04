@@ -1,6 +1,9 @@
 using RCall
 using Test
 
+using DataStructures: OrderedDict
+using RCall: RClass
+
 # before RCall does anything
 const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
 @info "" R_PPSTACKTOP_INITIAL
@@ -33,37 +36,39 @@ println(R"sessionInfo()")
 
 println(R"l10n_info()")
 
-# https://github.com/JuliaStats/RCall.jl/issues/68
-@test hd == homedir()
+@testset "RCall" begin
 
-# https://github.com/JuliaInterop/RCall.jl/issues/206
-if (Sys.which("R") !== nothing) && (strip(read(`R RHOME`, String)) == RCall.Rhome)
-    @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
+    # https://github.com/JuliaStats/RCall.jl/issues/68
+    @test hd == homedir()
+
+    # https://github.com/JuliaInterop/RCall.jl/issues/206
+    if (Sys.which("R") !== nothing) && (strip(read(`R RHOME`, String)) == RCall.Rhome)
+        @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
+    end
+
+    tests = ["basic",
+             "convert/base",
+             "convert/missing",
+             "convert/datetime",
+             "convert/dataframe",
+             "convert/categorical",
+             "convert/formula",
+             "convert/namedtuple",
+             "convert/tuple",
+             # "convert/axisarray",
+             "macros",
+             "namespaces",
+             "repl",
+             ]
+
+    for t in tests
+        @eval @testset $t begin
+            include(string($t, ".jl"))
+        end
+    end
+
+    @info "" RCall.conda_provided_r
+
+    # make sure we're back where we started
+    @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == R_PPSTACKTOP_INITIAL
 end
-
-tests = ["basic",
-         "convert/base",
-         "convert/missing",
-         "convert/datetime",
-         "convert/dataframe",
-         "convert/categorical",
-         "convert/formula",
-         "convert/namedtuple",
-         # "convert/axisarray",
-         "macros",
-         "namespaces",
-         "repl",
-         ]
-
-println("Running tests:")
-
-for t in tests
-    println(t)
-    tfile = string(t, ".jl")
-    include(tfile)
-end
-
-@info "" RCall.conda_provided_r
-
-# make sure we're back where we started
-@test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == R_PPSTACKTOP_INITIAL

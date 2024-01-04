@@ -46,6 +46,7 @@ include("convert/datetime.jl")
 include("convert/dataframe.jl")
 include("convert/formula.jl")
 include("convert/namedtuple.jl")
+include("convert/tuple.jl")
 
 include("convert/default.jl")
 include("eventloop.jl")
