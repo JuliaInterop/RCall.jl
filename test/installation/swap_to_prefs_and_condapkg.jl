@@ -15,6 +15,8 @@ Pkg.add("UUIDs")
 
 using CondaPkg, Libdl, Preferences, UUIDs
 
+const RCALL_UUID = UUID("6f49c342-dc21-5d91-9882-a32aef131414")
+
 function locate_libR(Rhome)
     @static if Sys.iswindows()
         libR = joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386", "R.dll")
@@ -24,14 +26,16 @@ function locate_libR(Rhome)
     return libR
 end
 
+set_preferences!(CondaPkg, "verbosity" => -1)
 CondaPkg.add("r")
 target_rhome = joinpath(CondaPkg.envdir(), "lib", "R")
-set_preferences!(CondaPkg, "verbosity" => -1)
-set_preferences!(UUID("6f49c342-dc21-5d91-9882-a32aef131414"),
+# If RCall is already present, then
+# we do NOT re-add RCall here because we're testing against the version already built with Conda
+if !haskey(Pkg.dependencies(), RCALL_UUID)
+    Pkg.add(;path=ENV["RCALL_DIR"])
+end
+set_preferences!(RCALL_UUID,
                  "Rhome" => target_rhome, "libR" => locate_libR(target_rhome))
-# We do NOT re-add RCall here because we're testing against the version already built with Conda
-# Pkg.add(;path=ENV["RCALL_DIR"])
-# Pkg.build("RCall")
 RCall = Base.require(Main, :RCall)
 if occursin("/.CondaPkg/env/lib/R", RCall.Rhome)
     exit(0)
