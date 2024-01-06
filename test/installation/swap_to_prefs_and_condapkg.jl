@@ -26,6 +26,7 @@ end
 
 CondaPkg.add("r")
 target_rhome = joinpath(CondaPkg.envdir(), "lib", "R")
+set_preferences!(CondaPkg, "verbosity" => -1)
 set_preferences!(UUID("6f49c342-dc21-5d91-9882-a32aef131414"),
                  "Rhome" => target_rhome, "libR" => locate_libR(target_rhome))
 # We do NOT re-add RCall here because we're testing against the version already built with Conda
