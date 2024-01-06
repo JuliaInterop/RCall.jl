@@ -5,6 +5,18 @@
 @debug ENV["RCALL_DIR"]
 
 using Pkg
+
+# workaround for
+# https://stackoverflow.com/questions/75489624/dockerfile-problem-with-miniconda-on-arm64-macos
+@static if Sys.isapple() && success(`md5sum $(@__FILE__)`)
+    try
+        run(`md5 $(@__FILE__)`)
+    catch ex
+        ex isa IOError || rethrow()
+        run(`ln -s "$which" md5sum /bin/md5`)
+    end
+end
+
 ENV["R_HOME"] = "*"
 Pkg.add(;path=ENV["RCALL_DIR"])
 Pkg.build("RCall")
