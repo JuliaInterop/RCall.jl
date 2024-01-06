@@ -16,27 +16,33 @@ mktempdir() do dir
   @testset "No R" begin
       test_installation("rcall_without_r.jl", dir)
   end
-  @testset "Preferences" begin
-    test_installation("swap_to_prefs_and_condapkg.jl", dir)
+  # We want to guard this with a version check so we don't run into the following
+  # (non-widespread) issue on older versions of Julia:
+  # https://github.com/JuliaLang/julia/issues/34276
+  # (related to incompatible libstdc++ versions)
+  @static if VERSION ≥ v"1.9"
+    @testset "Preferences" begin
+        test_installation("swap_to_prefs_and_condapkg.jl", dir)
+    end
   end
 end
 
-# We want to guard this with a version check so we don't run into the following
-# (non-widespread) issue on older versions of Julia:
-# https://github.com/JuliaLang/julia/issues/34276
-# (related to incompatible libstdc++ versions)
-@static if VERSION ≥ v"1.9"
-  # Test whether we can install RCall with Conda, and then switch to using
-  # Preferences + CondaPkg
-  mktempdir() do dir
-      @testset "Conda" begin
-          test_installation("install_conda.jl", dir)
-      end
-      @testset "Conda 2 Preferences" begin
-          test_installation("swap_to_prefs_and_condapkg.jl", dir)
-      end
-      @testset "Back 2 Conda" begin
-          test_installation("drop_preferences.jl", dir)
-      end
-  end
+# Test whether we can install RCall with Conda, and then switch to using
+# Preferences + CondaPkg
+mktempdir() do dir
+    @testset "Conda" begin
+        test_installation("install_conda.jl", dir)
+    end
+    # We want to guard this with a version check so we don't run into the following
+    # (non-widespread) issue on older versions of Julia:
+    # https://github.com/JuliaLang/julia/issues/34276
+    # (related to incompatible libstdc++ versions)
+    @static if VERSION ≥ v"1.9"
+        @testset "Conda 2 Preferences" begin
+            test_installation("swap_to_prefs_and_condapkg.jl", dir)
+        end
+        @testset "Back 2 Conda" begin
+            test_installation("drop_preferences.jl", dir)
+        end
+    end
 end
