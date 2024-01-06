@@ -11,8 +11,7 @@ using Pkg
 @static if Sys.isapple() && success(`md5sum $(@__FILE__)`)
     try
         run(`md5 $(@__FILE__)`)
-    catch ex
-        ex isa IOError || rethrow()
+    catch
         run(`ln -s "$which" md5sum /bin/md5`)
     end
 end
