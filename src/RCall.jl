@@ -30,8 +30,13 @@ export RObject,
    robject, rcopy, rparse, rprint, reval, rcall, rlang,
    rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
 
-@static if @has_preference("Rhome") || @has_preference("libR")
-    @static if !(@has_preference("Rhome") && @has_preference("libR"))
+# These two preference get marked as compile-time preferences by being accessed
+# here
+const Rhome_set_as_preference = @has_preference("Rhome")
+const libR_set_as_preference = @has_preference("libR")
+
+if Rhome_set_as_preference || libR_set_as_preference
+    if !(Rhome_set_as_preference && libR_set_as_preference)
         error("RCall: Either both Rhome and libR must be set or neither of them")
     end
     const Rhome = @load_preference("Rhome")
