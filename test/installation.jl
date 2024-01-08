@@ -12,8 +12,10 @@ function test_installation(file, project=mktempdir())
         # this weird stub is necessary so that all the nested conda installation processes
         # have access to the PATH
         cmd = `sh -c $(Base.julia_cmd()) --project=$(project) $(path)`
+    elseif Sys.iswindows()
+        cmd = `cmd /C $(Base.julia_cmd()) --project=$(project) $(path)`
     else
-        cmd = `$(Base.julia_cmd()) --project=$(project) $(path)`
+        error("What system are you on?!")
     end
     cmd = Cmd(cmd; env=Dict("RCALL_DIR" => RCALL_DIR))
     @test mktemp() do file, io
