@@ -28,6 +28,24 @@ libR = "/path/to/env/lib/R/lib/libR.so"
 !!! note
     When these preferences are set, they take precedence over the R installation configured using the `R_HOME` environment variable when RCall.jl was last built.
 
+Unlike [customizing the R installation using `R_HOME`](#Customizing-the-R-installation-using-R_HOME), the Preferences-based approach allows for each of your Julia projects using RCall.jl to use a different R installation. As such, it is appropriate for when you want to install and manage R with [CondaPkg](https://github.com/JuliaPy/CondaPkg.jl). Assuming that RCall and CondaPkg are installed, the following script will install a CondaPkg-managed R and set the correct Preferences so that RCall.jl will make use of it.
+
+```
+using Libdl
+using RCall
+using CondaPkg
+using Preferences
+
+CondaPkg.add("r")
+target_rhome = joinpath(CondaPkg.envdir(), "lib", "R")
+if Sys.iswindows()
+    target_libr = joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386", "R.dll")
+else
+    target_libr = joinpath(Rhome, "lib", "libR.$(Libdl.dlext)")
+end
+set_preferences!(RCall, "Rhome" => target_rhome, "libR" => target_libr)
+```
+
 ### Customizing the R installation using `R_HOME`
 
 The RCall build script (run by `Pkg.add(...)` or `Pkg.build(...)`)
