@@ -1,4 +1,3 @@
-__precompile__()
 module RCall
 
 using Preferences
@@ -51,7 +50,14 @@ else
     end
 end
 
-__precompile__(Rhome != "")
+if Rhome == ""
+    @info (
+        "No R installation found by RCall.jl. " *
+        "Precompilation of RCall and all dependent packages postponed. " *
+        "Importing RCall will fail until an R installation is configured beforehand."
+    )
+    __precompile__(false)
+end
 
 include("types.jl")
 include("Const.jl")
