@@ -181,7 +181,7 @@ function __init__()
     validate_libR(libR)
 
     # Check if R already running
-    # for some reaons, cglobal((:R_NilValue, libR)) doesn't work on rstudio/linux
+    # for some reasons, cglobal((:R_NilValue, libR)) doesn't work on rstudio/linux
     # https://github.com/Non-Contradiction/JuliaCall/issues/34
     Rinited, from_libR = try
         unsafe_load(cglobal(:R_NilValue, Ptr{Cvoid})) != C_NULL, false
