@@ -4,3 +4,4 @@ docs/build
 docs/gh-pages
 docs/site
 deps/build.log
+lcov.info
