@@ -38,9 +38,9 @@ end
 set_preferences!(RCALL_UUID,
                  "Rhome" => target_rhome, "libR" => locate_libR(target_rhome))
 RCall = nothing
-CondaPkg.withenv() do
+RCall = CondaPkg.withenv() do
     Pkg.build("RCall")
-    RCall = Base.require(Main, :RCall)
+    Base.require(Main, :RCall)
 end
 expected = joinpath("x", ".CondaPkg", "env", "lib", "R")[2:end]
 if occursin(expected, RCall.Rhome)
