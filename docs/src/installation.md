@@ -17,7 +17,7 @@ Should you experience problems with any of these methods, please [open an issue]
 
 ### Customizing the R installation using Julia's Preferences system
 
-In this case the appropriate paths are provided with RCall's `Rhome` and `libR` preferences. You can change these in different ways using [Julia's Preferences system](https://docs.julialang.org/en/v1/manual/code-loading/#preferences). For example, you can add the following to a `LocalPreferences.toml` file in the same directory as a project's `Project.toml` file:
+You can customize the R installation using [Julia's Preferences system](https://docs.julialang.org/en/v1/manual/code-loading/#preferences) by providing appropriate paths using RCall's `Rhome` and `libR` preferences. Julia's Preferences system allows these to be set in a few different ways. One possibility is to add the following to a `LocalPreferences.toml` file in the same directory as a project's `Project.toml` file:
 
 ```toml
 [RCall]
@@ -28,7 +28,9 @@ libR = "/path/to/env/lib/R/lib/libR.so"
 !!! note
     When these preferences are set, they take precedence over the R installation configured using the `R_HOME` environment variable when RCall.jl was last built.
 
-Unlike [customizing the R installation using `R_HOME`](#Customizing-the-R-installation-using-R_HOME), the Preferences-based approach allows for each of your Julia projects using RCall.jl to use a different R installation. As such, it is appropriate for when you want to install and manage R with [CondaPkg](https://github.com/JuliaPy/CondaPkg.jl). Assuming that RCall and CondaPkg are installed, the following script will install a CondaPkg-managed R and set the correct Preferences so that RCall.jl will make use of it.
+#### Usage with CondaPkg (experimental)
+
+Unlike [customizing the R installation using `R_HOME`](#Customizing-the-R-installation-using-R_HOME), the Preferences-based approach allows for each of your Julia projects using RCall.jl to use a different R installation. As such, it is appropriate for when you want to install and manage R with [CondaPkg](https://github.com/JuliaPy/CondaPkg.jl). Assuming that RCall and CondaPkg are installed, the following script will install a CondaPkg-managed R and set the correct preferences so that RCall.jl will make use of it.
 
 ```
 using Libdl
