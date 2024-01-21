@@ -50,6 +50,13 @@ end
 set_preferences!(RCALL_UUID, "Rhome" => target_rhome, "libR" => target_libr)
 ```
 
+!!! note
+    So that CondaPkg managed R finds the correct versions of its shared library dependencies, such as BLAS, you must arrange for the Conda environment to be active when `RCall` is imported so that native library loading paths are set up correctly. If you do not do so, it is still possible that things will appear to work correctly if compatible versions are available from elsewhere in your library loading path, but the resulting code can break in some environments and so is not portable.
+
+    At the moment there are two options for arranging for this:
+    1. Use `CondaPkg.activate!(ENV)` to permanently modify the environment
+    2. Use `CondaPkg.withenv()`, in which case you will have to use `Base.require(Main, :RCall)` to import RCall rather than `using`.
+
 ### Customizing the R installation using `R_HOME`
 
 The RCall build script (run by `Pkg.add(...)` or `Pkg.build(...)`)
