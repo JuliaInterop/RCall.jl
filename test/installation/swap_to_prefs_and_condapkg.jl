@@ -7,6 +7,7 @@
 @debug ENV["RCALL_DIR"]
 
 using Pkg
+using Base.Filesystem: joinpath
 
 Pkg.add("CondaPkg")
 Pkg.add("Libdl")
@@ -36,8 +37,12 @@ if !haskey(Pkg.dependencies(), RCALL_UUID)
 end
 set_preferences!(RCALL_UUID,
                  "Rhome" => target_rhome, "libR" => locate_libR(target_rhome))
-RCall = Base.require(Main, :RCall)
-if occursin("/.CondaPkg/env/lib/R", RCall.Rhome)
+RCall = nothing
+CondaPkg.withenv() do
+    RCall = Base.require(Main, :RCall)
+end
+expected = joinpath("x", ".CondaPkg", "env", "lib", "R")[2:end]
+if occursin(expected, RCall.Rhome)
     exit(0)
 end
 println(stderr, "Wrong RCall used $(RCall.Rhome)")
