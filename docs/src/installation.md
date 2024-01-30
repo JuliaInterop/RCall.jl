@@ -77,7 +77,7 @@ in order.
 * Otherwise, on Windows, it looks in the [Windows registry](https://cran.r-project.org/bin/windows/base/rw-FAQ.html#Does-R-use-the-Registry_003f).
 
 To change which R installation is used for RCall, set the `R_HOME` environment variable
-and run `Pkg.build("RCall")`.   Once this is configured, RCall remembers the location
+and run `Pkg.build("RCall")`. Once this is configured, RCall remembers the location
 of R in future updates, so you don't need to set `R_HOME` permanently.
 
 ```julia
@@ -85,12 +85,15 @@ ENV["R_HOME"] = "....directory of R home...."
 Pkg.build("RCall")
 ```
 
-When `R_HOME` is set to `"*"`, RCall.jl will automatically install R for you using [Conda](https://github.com/JuliaPy/Conda.jl).
+As well as being setting `R_HOME` to a path, it can also be set to certain special values:
 
-When `R_HOME` is set to `"_"`, you opt out of all attempts to automatically locate R. RCall.jl will not be importable until you set a location for R [using the Preferences system](#Customizing-the-R-installation-using-Julia's-Preferences-system).
+* When `R_HOME="*"`, RCall.jl will automatically install R for you using [Conda](https://github.com/JuliaPy/Conda.jl).
+* When `R_HOME=""`, or is unset, RCall will try to locate `R_HOME` by asking the copy of R in your `PATH` and then --- on Windows only --- by checking the registry.
+* When `R_HOME="_"`, you opt out of all attempts to automatically locate R.
+
+In case no R installation is found or given at build time, the build will complete with a warning, but no error. RCall.jl will not be importable until you set a location for R [using the Preferences system](#Customizing-the-R-installation-using-Julia's-Preferences-system).
 
 !!! note "R_HOME-based R installation is shared"
-
     When the R installation is configured at RCall.jl install time, the absolute path to the R installation is currently hard-coded into the RCall.jl package, which can be shared between projects. This may cause problems if you are using different R installations for different projects which end up using the same copy of RCall.jl. In this case, please [use the Preferences system instead](#Customizing-the-R-installation-using-Julia's-Preferences-system) which keeps different copies of the compiled RCall for different R installations. You do not need to rebuild RCall.jl manually for this, simply setting the relevant preferences will trigger rebuilds as necessary.
 
 ## Standard installations
