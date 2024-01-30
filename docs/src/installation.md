@@ -28,7 +28,7 @@ libR = "/path/to/env/lib/R/lib/libR.so"
 !!! note
     When these preferences are set, they take precedence over the R installation configured using the `R_HOME` environment variable when RCall.jl was last built.
 
-#### Usage with CondaPkg (experimental)
+#### (Experimental) Usage with CondaPkg
 
 Unlike [customizing the R installation using `R_HOME`](#Customizing-the-R-installation-using-R_HOME), the Preferences-based approach allows for each of your Julia projects using RCall.jl to use a different R installation. As such, it is appropriate for when you want to install and manage R with [CondaPkg](https://github.com/JuliaPy/CondaPkg.jl). Assuming that RCall and CondaPkg are installed, the following script will install a CondaPkg-managed R and set the correct preferences so that RCall.jl will make use of it.
 
@@ -50,12 +50,19 @@ end
 set_preferences!(RCALL_UUID, "Rhome" => target_rhome, "libR" => target_libr)
 ```
 
-!!! note
-    So that CondaPkg managed R finds the correct versions of its shared library dependencies, such as BLAS, you must arrange for the Conda environment to be active when `RCall` is imported so that native library loading paths are set up correctly. If you do not do so, it is still possible that things will appear to work correctly if compatible versions are available from elsewhere in your library loading path, but the resulting code can break in some environments and so is not portable.
+So that CondaPkg managed R finds the correct versions of its shared library dependencies, such as BLAS, you must arrange for the Conda environment to be active when `RCall` is imported so that native library loading paths are set up correctly. If you do not do so, it is still possible that things will appear to work correctly if compatible versions are available from elsewhere in your library loading path, but the resulting code can break in some environments and so is not portable.
 
-    At the moment there are two options for arranging for this:
-    1. Use `CondaPkg.activate!(ENV)` to permanently modify the environment
-    2. Use `CondaPkg.withenv()`, in which case you will have to use `Base.require(Main, :RCall)` to import RCall rather than `using`.
+At the moment there are two options for arranging for this:
+1. (Recommended) Use `CondaPkg.activate!(ENV)` to permanently modify the environment *before* loading RCall.
+2. (Experimental) Use `CondaPkg.withenv()` to change the environment while loading RCall/R and R libraries using native code. After the `CondaPkg.withenv()` block, the Conda environment will no longer be active. This approach may be needed if you need to return to a unmodified environment after loading R. Note this approach has not been thouroughly tested and may not work with all R packages.
+
+```julia
+RCall = CondaPkg.withenv() do
+    RCall = @eval using RCall
+    # Load all R libraries that may load native code from the Conda environment here
+    return RCall
+end
+```
 
 ### Customizing the R installation using `R_HOME`
 
