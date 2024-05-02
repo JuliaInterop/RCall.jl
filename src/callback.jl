@@ -100,6 +100,9 @@ const juliaCallback = RObject{ExtPtrSxp}()
 function setup_callbacks()
     julia_extptr_callback_ptr = @cfunction(julia_extptr_callback,Ptr{UnknownSxp},(Ptr{ListSxp},))
     juliaCallback.p = makeNativeSymbolRef(julia_extptr_callback_ptr)
+
+    # helper to throw Julia errors on R side
+    reval("...stop_if_error <- function (obj) if (inherits(obj, 'error')) stop(obj) else obj")
 end
 
 
@@ -124,24 +127,31 @@ Wrap a callable Julia object `f` an a R `ClosSxpPtr`.
 
 Constructs the following R code
 
-    function(...) .External(juliaCallback, fExPtr, ...)
+    function(...) ...stop_if_error(.External(juliaCallback, fExPtr, ...))
 
 """
 function sexp(::Type{RClass{:function}}, f)
     fptr = protect(sexp(RClass{:externalptr}, f))
-    body = protect(rlang_p(Symbol(".External"),
-                           juliaCallback,
-                           fptr,
-                           Const.DotsSymbol))
+    body = protect(
+        rlang_p(
+            Symbol("...stop_if_error"),
+            rlang_p(
+                Symbol(".External"),
+                juliaCallback,
+                fptr,
+                Const.DotsSymbol
+            )
+        )
+    )
     nprotect = 2
     local clos
     try
-        args = protect(sexp_arglist_dots())
+        args = RCall.protect(RCall.sexp_arglist_dots())
         nprotect += 1
-        lang = rlang_p(:function, args, body)
-        clos = reval_p(lang)
+        lang = RCall.rlang_p(:function, args, body)
+        clos = RCall.reval_p(lang)
     finally
-        unprotect(nprotect)
+        RCall.unprotect(nprotect)
     end
     clos
 end
