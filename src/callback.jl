@@ -146,12 +146,12 @@ function sexp(::Type{RClass{:function}}, f)
     nprotect = 2
     local clos
     try
-        args = RCall.protect(RCall.sexp_arglist_dots())
+        args = protect(sexp_arglist_dots())
         nprotect += 1
-        lang = RCall.rlang_p(:function, args, body)
-        clos = RCall.reval_p(lang)
+        lang = rlang_p(:function, args, body)
+        clos = reval_p(lang)
     finally
-        RCall.unprotect(nprotect)
+        unprotect(nprotect)
     end
     clos
 end
