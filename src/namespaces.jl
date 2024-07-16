@@ -32,7 +32,7 @@ function rimport(pkg::String, s::Symbol=gensym(:rimport);
         id = Expr(:const, Expr(:(=), :__package__, pkg))
         if normalizenames
             exports = [Symbol(replace(x, normalization...)) for x in members]
-            if length(exports) > length(unique(exports))
+            if !allunique(exports)
                 dupes = [k for (k, v) in countmap(exports) if v > 1]
                 error("Normalized names are no longer unique: " *
                        join(dupes, ", ", " and "))
