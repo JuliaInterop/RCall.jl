@@ -21,14 +21,12 @@ module NamespaceTests
         @test rcopy(rcall(ginv, RObject([1 2; 0 4]))) ≈ [1 -0.5; 0 0.25]
     end
 
-    # get these to install correctly in CI with a source build is a pain
-    # so we only do it on platforms where a binary build is available
-    if !rcopy(reval("""require("ape")""")) && (Sys.iswindows() || Sys.isapple()) # 418
+    if !rcopy(reval("""require("ape")""")) # 418
         @info "installing ape to temporary lib"
         tmp, _ = mktemp()
         reval(""".libPaths("$(tmp)")
                  lib <- .libPaths()[1L]
-                 install.packages("ape", repos="https://cloud.r-project.org", lib=lib, type="binary")
+                 install.packages("ape", repos="https://cloud.r-project.org", lib=lib)
                  library("ape")""")
     end
 
