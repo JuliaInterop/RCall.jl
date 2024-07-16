@@ -21,8 +21,12 @@ module NamespaceTests
         @test rcopy(rcall(ginv, RObject([1 2; 0 4]))) ≈ [1 -0.5; 0 0.25]
     end
 
-    if !rcopy(reval("""require("ape")"""))
-        reval("""install.packages("ape"); library("ape")""")
+    if !rcopy(reval("""require("ape")""")) # 418
+        @info "installing ape to temporary lib"
+        reval(""".libPaths("/tmp")
+                 lib <- .libPaths()[1L]
+                 install.packages("ape", repos="https://cloud.r-project.org", lib=lib)
+                 library("ape")""")
     end
 
     @test_throws ErrorException rimport("ape")
