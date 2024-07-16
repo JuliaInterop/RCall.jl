@@ -6,9 +6,7 @@ module NamespaceTests
     using RCall
     using Test
 
-    RCall.R"""
-        has_mass_package = require("MASS")
-    """
+    reval("""has_mass_package = require("MASS")""")
 
     RCall.@rget has_mass_package
 
@@ -23,4 +21,13 @@ module NamespaceTests
         @test rcopy(rcall(ginv, RObject([1 2; 0 4]))) ≈ [1 -0.5; 0 0.25]
     end
 
+    if !rcopy(reval("""require("ape")"""))
+        reval("""install.packages("ape"); library("ape")""")
+    end
+
+    @test_throws ErrorException rimport("ape")
+
+    rimport(:ape; normalization=["." => "__"])
+    # stats is always available
+    rimport(:stats; normalizenames=false)
 end

@@ -7,7 +7,7 @@ const reserved = Set{String}([
     "false", "true", "Tuple", "rmember", "__package__"])
 
 
-cached_namespaces = Dict{String, Module}()
+const cached_namespaces = Dict{String, Module}()
 
 """
 Import an R package as a julia module.
@@ -46,13 +46,12 @@ function rimport(pkg::String, s::Symbol=gensym(:rimport);
         consts = [Expr(:const, Expr(:(=),
                        exports[i],
                        rcall(Symbol("::"), pkg, members[i]))) for i in filtered_indices]
-        # @info consts
         Core.eval(m, Expr(:toplevel, id, consts..., Expr(:export, exports...), :(rmember(x) = ($getindex)($ns, x))))
         cached_namespaces[pkg] = m
     end
-    m
+    return m
 end
-rimport(pkg::Symbol, s::Symbol=:__anonymous__) = rimport(string(pkg), s)
+rimport(pkg::Symbol, args...; kwargs...) = rimport(string(pkg), args...; kwargs...)
 
 """
 Import an R Package as a Julia module. For example,
