@@ -17,8 +17,11 @@ E.g.: `PerformanceAnalytics::charts.Bar` in R becomes `PerformanceAnalytics.char
 ```
 gg = rimport("ggplot2")
 ```
+
+`normalization` is passed directly to `replace` via splatting.
 """
-function rimport(pkg::String, s::Symbol=:__anonymous__; normalizenames::Bool=true)
+function rimport(pkg::String, s::Symbol=gensym(:rimport);
+                 normalizenames::Bool=true, normalization=['.' => '_'])
     if pkg in keys(cached_namespaces)
         m = cached_namespaces[pkg]
     else
@@ -28,7 +31,12 @@ function rimport(pkg::String, s::Symbol=:__anonymous__; normalizenames::Bool=tru
         m = Module(s, false)
         id = Expr(:const, Expr(:(=), :__package__, pkg))
         if normalizenames
-            exports = [Symbol(replace(x, '.' => '_')) for x in members]
+            exports = [Symbol(replace(x, normalization...)) for x in members]
+            if length(exports) > length(unique(exports))
+                dupes = [k for (k, v) in countmap(exports) if v > 1]
+                error("Normalized names are no longer unique: " *
+                       join(dupes, ", ", " and "))
+            end
         else
             exports = [Symbol(x) for x in members]
         end
@@ -37,7 +45,8 @@ function rimport(pkg::String, s::Symbol=:__anonymous__; normalizenames::Bool=tru
                                    collect(eachindex(exports)))
         consts = [Expr(:const, Expr(:(=),
                        exports[i],
-                       rcall(Symbol("::"), pkg, members[i]))) for i in filtered_indices ]
+                       rcall(Symbol("::"), pkg, members[i]))) for i in filtered_indices]
+        # @info consts
         Core.eval(m, Expr(:toplevel, id, consts..., Expr(:export, exports...), :(rmember(x) = ($getindex)($ns, x))))
         cached_namespaces[pkg] = m
     end
