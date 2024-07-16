@@ -23,9 +23,9 @@ module NamespaceTests
 
     if !rcopy(reval("""require("ape")""")) # 418
         @info "installing ape to temporary lib"
-        tmp, _ = mktemp()
-        reval(""".libPaths("$(tmp)")
-                 lib <- .libPaths()[1L]
+        tmp = mktempdir()
+        reval("""lib <- "$(tmp)"
+                 .libPaths(lib)
                  install.packages("ape", repos="https://cloud.r-project.org", method="wget", lib=lib)
                  library("ape")""")
     end
