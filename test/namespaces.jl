@@ -26,7 +26,7 @@ module NamespaceTests
         tmp, _ = mktemp()
         reval(""".libPaths("$(tmp)")
                  lib <- .libPaths()[1L]
-                 install.packages("ape", repos="https://cloud.r-project.org", lib=lib)
+                 install.packages("ape", repos="https://cloud.r-project.org", method="wget", lib=lib)
                  library("ape")""")
     end
 
