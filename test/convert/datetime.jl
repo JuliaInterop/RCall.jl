@@ -137,5 +137,6 @@ r = RObject(d)
 @test ismissing(rcopy(Array, r)[2])
 
 # microseconds on R side #396
-@test_logs((:warn, "Precision lost in conversion to DateTime"),
-           rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234')"))
+@test_logs((:debug, "Precision lost in conversion to DateTime"),
+            min_level=Logging.Debug,
+            rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234')"))

@@ -9,7 +9,7 @@ rcopy(::Type{Date}, x::Float64) = Date(Dates.UTInstant(Dates.Day((isnan(x) ? 0 :
 function rcopy(::Type{DateTime}, x::Float64)
     ms = ((isnan(x) ? 0 : x) + 62135683200) * 1_000
     if !isinteger(ms)
-        @warn "Precision lost in conversion to DateTime"
+        @debug "Precision lost in conversion to DateTime"
     end
     ms = round(Int, ms)
     return DateTime(Dates.UTInstant(Millisecond(ms)))
