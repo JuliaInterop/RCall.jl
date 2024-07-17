@@ -26,6 +26,7 @@ function rimport(pkg::String, s::Symbol=gensym(:rimport);
         m = cached_namespaces[pkg]
     else
         ns = rcall(:asNamespace, pkg)
+        # XXX note that R is sensitive to definition order, so do not change the order!
         members = rcopy(Vector{String}, rcall(:getNamespaceExports, ns))
 
         m = Module(s, false)
@@ -52,6 +53,14 @@ function rimport(pkg::String, s::Symbol=gensym(:rimport);
     return m
 end
 rimport(pkg::Symbol, args...; kwargs...) = rimport(string(pkg), args...; kwargs...)
+
+function countmap(v::Vector{T}) where {T}
+    occurrences = Dict{Symbol,Int}()
+    for el in v
+        occurrences[el] = get(occurrences, el, 0) + 1
+    end
+    return occurrences
+end
 
 """
 Import an R Package as a Julia module. For example,

@@ -6,15 +6,11 @@ using Dates
 using Libdl
 using Random
 using REPL
-if VERSION ≤ v"1.1.1"
-   using Missings
-end
 using CategoricalArrays
 using DataFrames
 using StatsModels
 
 import DataStructures: OrderedDict
-using StatsBase: countmap
 
 import Base: eltype, convert, isascii,
     names, length, size, getindex, setindex!,
