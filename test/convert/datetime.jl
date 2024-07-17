@@ -135,3 +135,7 @@ r = RObject(d)
 @test ismissing(rcopy(r)[2])
 @test rcopy(Array, r)[[1,3]] == d[[1,3]]
 @test ismissing(rcopy(Array, r)[2])
+
+# microseconds on R side #396
+@test_logs((:warn, "Precision lost in conversion to DateTime"),
+           rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234')"))
