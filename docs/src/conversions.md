@@ -74,6 +74,16 @@ r = robject(d)
 rcopy(r)
 ```
 
+Note that R's `POSIXct` supports higher precision than DateTime:
+
+```@example 1
+r = reval("as.POSIXct('2020-10-09 12:09:46.1234')")
+```
+
+```@example 1
+d = rcopy(r)
+```
+
 ## DataFrames
 
 ```@example 1
