@@ -1,14 +1,11 @@
-__precompile__()
 module RCall
 
+using Preferences
 using Requires
 using Dates
 using Libdl
 using Random
 using REPL
-if VERSION ≤ v"1.1.1"
-   using Missings
-end
 using CategoricalArrays
 using DataFrames
 using StatsModels
@@ -29,11 +26,34 @@ export RObject,
    robject, rcopy, rparse, rprint, reval, rcall, rlang,
    rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str, @html_plot
 
-const depfile = joinpath(dirname(@__FILE__),"..","deps","deps.jl")
-if isfile(depfile)
-    include(depfile)
+# These two preference get marked as compile-time preferences by being accessed
+# here
+const Rhome_set_as_preference = @has_preference("Rhome")
+const libR_set_as_preference = @has_preference("libR")
+
+if Rhome_set_as_preference || libR_set_as_preference
+    if !(Rhome_set_as_preference && libR_set_as_preference)
+        error("RCall: Either both Rhome and libR must be set or neither of them")
+    end
+    const Rhome = @load_preference("Rhome")
+    const libR = @load_preference("libR")
+    const conda_provided_r = false
 else
-    error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
+    const depfile = joinpath(dirname(@__FILE__),"..","deps","deps.jl")
+    if isfile(depfile)
+        include(depfile)
+    else
+        error("RCall not properly installed. Please run Pkg.build(\"RCall\")")
+    end
+end
+
+if Rhome == ""
+    @info (
+        "No R installation found by RCall.jl. " *
+        "Precompilation of RCall and all dependent packages postponed. " *
+        "Importing RCall will fail until an R installation is configured beforehand."
+    )
+    __precompile__(false)
 end
 
 include("types.jl")
@@ -46,6 +66,7 @@ include("convert/datetime.jl")
 include("convert/dataframe.jl")
 include("convert/formula.jl")
 include("convert/namedtuple.jl")
+include("convert/tuple.jl")
 
 include("convert/default.jl")
 include("eventloop.jl")

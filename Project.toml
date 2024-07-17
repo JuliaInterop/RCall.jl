@@ -1,7 +1,7 @@
 name = "RCall"
 uuid = "6f49c342-dc21-5d91-9882-a32aef131414"
 authors = ["Douglas Bates <dmbates@gmail.com>", "Randy Lai <randy.cs.lai@gmail.com>", "Simon Byrne <simonbyrne@gmail.com>"]
-version = "0.13.16"
+version = "0.14.2"
 
 [deps]
 Base64 = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -11,7 +11,7 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
-Missings = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
@@ -24,18 +24,20 @@ CategoricalArrays = "0.8, 0.9, 0.10"
 Conda = "1.4"
 DataFrames = "0.21, 0.22, 1.0"
 DataStructures = "0.5, 0.6, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18"
-Missings = "0.2, 0.3, 0.4, 1.0"
+Preferences = "1"
 Requires = "0.5.2, 1"
 StatsModels = "0.6, 0.7"
 WinReg = "0.2, 0.3, 1"
-julia = "1"
+julia = "1.6"
 
 [extras]
 AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
+CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Dates", "AxisArrays", "REPL", "Test", "Random"]
+test = ["Dates", "AxisArrays", "REPL", "Test", "Random", "CondaPkg", "Pkg"]

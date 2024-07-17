@@ -2,7 +2,7 @@ using CategoricalArrays
 
 # CategoricalArrays
 for ord in (true, false)
-    v = CategoricalArray(repeat(["b", "a"], inner = 5), ordered=ord)
+    local v = CategoricalArray(repeat(["b", "a"], inner = 5), ordered=ord)
     v2 = rcopy(CategoricalArray, RObject(v))
     @test isequal(v2, v)
     @test v2 isa CategoricalVector{String}
@@ -16,7 +16,7 @@ end
 a = Array{Union{String, Missing}}(repeat(["b", "a"], inner = 5))
 a[repeat([true, false], outer = 5)] .= missing
 for ord in (true, false)
-    v = CategoricalArray(a, ordered=ord)
+    local v = CategoricalArray(a, ordered=ord)
     v2 = rcopy(CategoricalArray, RObject(v))
     @test isequal(v2, v)
     @test v2 isa CategoricalVector{Union{String,Missing}}
