@@ -140,3 +140,4 @@ r = RObject(d)
 @test_logs((:debug, "Precision lost in conversion to DateTime"),
             min_level=Logging.Debug,
             rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234')"))
+@test rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234')") == DateTime("2020-10-09T12:09:46.123")
