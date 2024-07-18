@@ -1,4 +1,5 @@
 Manifest.toml
+Manifest-v*.toml
 deps/deps.jl
 docs/build
 docs/gh-pages
@@ -6,3 +7,5 @@ docs/site
 deps/build.log
 lcov.info
 *.cov
+*.swp
+*\~
