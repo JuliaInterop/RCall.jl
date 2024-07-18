@@ -100,6 +100,9 @@ send_repl("\$x")
 send_repl("\$not_found")
 @test check_repl_stderr("UndefVarError")
 
+send_repl("(x <- 1 + 1) # inline comment")
+@test check_repl_stdout("[1] 2")
+
 # check visibility
 
 send_repl("'apple'")
