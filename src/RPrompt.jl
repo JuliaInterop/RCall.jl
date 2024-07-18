@@ -52,7 +52,8 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         if length(symdict) > 0
             Core.eval(Main, prepare_inline_julia_code(symdict))
         end
-        ret = protect(reval_p(rparse_p("withVisible({$script})"), Const.GlobalEnv.p))
+        # the newlines are important in case script has a trailing inline comment
+        ret = protect(reval_p(rparse_p("withVisible({\n$script\n})"), Const.GlobalEnv.p))
         nprotect += 1
         # print if the last expression is visible
         if rcopy(Bool, ret[:visible])
