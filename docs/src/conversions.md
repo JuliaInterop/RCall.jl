@@ -84,6 +84,10 @@ r = reval("as.POSIXct('2020-10-09 12:09:46.1234')")
 d = rcopy(r)
 ```
 
+!!! note "Conversions to `DateTime` are given in UTC!"
+    `POSIXct` stores times internally as UTC with a timezone attribute.
+    The conversion to `DateTime` necessarily strips away timezone information, resulting in UTC values.
+
 ## DataFrames
 
 ```@example 1

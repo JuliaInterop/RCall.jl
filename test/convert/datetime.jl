@@ -136,8 +136,12 @@ r = RObject(d)
 @test rcopy(Array, r)[[1,3]] == d[[1,3]]
 @test ismissing(rcopy(Array, r)[2])
 
+# note that POSIXct stores times internaly as UTC, but assumes local
+# timezone information
+@test rcopy(R"as.POSIXct('2020-10-09 12:09:46', tz='UTC')") == DateTime("2020-10-09T12:09:46")
+
 # microseconds on R side #396
 @test_logs((:debug, "Precision lost in conversion to DateTime"),
             min_level=Logging.Debug,
             rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234')"))
-@test rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234')") == DateTime("2020-10-09T12:09:46.123")
+@test rcopy(R"as.POSIXct('2020-10-09 12:09:46.1234', tz='UTC')") == DateTime("2020-10-09T12:09:46.123")
