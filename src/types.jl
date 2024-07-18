@@ -626,5 +626,11 @@ end
 sexp(s::Ptr{S}) where S<:Sxp = s
 sexp(r::RObject) = r.p
 
-sexp(::Type{S}, s::Ptr{S}) where S<:Sxp = s
+"""
+   sexp(::Type{<:Sxp}, s::RObject{<:Sxp})
+
+Return the associated `Sxp` pointer.
+"""
 sexp(::Type{S}, r::RObject{S}) where S<:Sxp = r.p
+# do we need this method?
+# sexp(::Type{S}, s::Ptr{S}) where S<:Sxp = s
