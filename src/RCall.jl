@@ -24,7 +24,7 @@ export RObject,
    globalEnv,
    isnull, isna, anyna,
    robject, rcopy, rparse, rprint, reval, rcall, rlang,
-   rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str
+   rimport, @rimport, @rlibrary, @rput, @rget, @var_str, @R_str, @html_plot
 
 # These two preference get marked as compile-time preferences by being accessed
 # here
@@ -80,6 +80,7 @@ include("macros.jl")
 include("operators.jl")
 include("RPrompt.jl")
 include("ijulia.jl")
+include("html_plot.jl")
 include("setup.jl")
 include("deprecated.jl")
 

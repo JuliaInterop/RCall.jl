@@ -64,6 +64,7 @@ println(R"l10n_info()")
              "macros",
              "namespaces",
              "repl",
+             "html_plot",
              ]
 
     for t in tests
