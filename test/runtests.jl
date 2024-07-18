@@ -1,4 +1,5 @@
 using RCall
+using Logging
 using Test
 
 using DataStructures: OrderedDict

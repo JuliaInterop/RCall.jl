@@ -6,8 +6,15 @@ rcopy(::Type{Date}, s::Ptr{RealSxp}) = rcopy(Date, s[1])
 rcopy(::Type{DateTime}, s::Ptr{RealSxp}) = rcopy(DateTime, s[1])
 
 rcopy(::Type{Date}, x::Float64) = Date(Dates.UTInstant(Dates.Day((isnan(x) ? 0 : x) + 719163)))
-rcopy(::Type{DateTime}, x::Float64) =
-    DateTime(Dates.UTInstant(Dates.Millisecond(((isnan(x) ? 0 : x) + 62135683200) * 1000)))
+function rcopy(::Type{DateTime}, x::Float64)
+    ms = ((isnan(x) ? 0 : x) + 62135683200) * 1_000
+    ms_int = round(Int, ms)
+    if ms != ms_int
+        @debug "Precision lost in conversion to DateTime"
+    end
+
+    return DateTime(Dates.UTInstant(Millisecond(ms_int)))
+end
 
 # implicit conversion `rcopy(d)`.
 function rcopytype(::Type{RClass{:Date}}, s::Ptr{RealSxp})
