@@ -1,5 +1,5 @@
 """
-Render an inline R script, substituting invalid "\$" signs for Julia symbols
+Render an inline R script, substituting invalid dollar signs (`\$`) for Julia symbols
 """
 function render(script::String)
     symdict = OrderedDict{String,Any}()
