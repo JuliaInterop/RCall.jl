@@ -114,7 +114,7 @@ end
 function rcopy(::Type{Vector{Bool}},s::Ptr{LglSxp})
     a = Array{Bool}(undef, length(s))
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -122,7 +122,7 @@ end
 function rcopy(::Type{BitVector},s::Ptr{LglSxp})
     a = BitArray(undef, length(s))
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -135,7 +135,7 @@ end
 function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
     a = Array{Bool}(undef, size(s)...)
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -143,7 +143,7 @@ end
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a = BitArray(undef, size(s)...)
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a,v)
         a[i] = v[i] != 0
     end
     a
@@ -264,8 +264,8 @@ sexp(::Type{RClass{:character}},st::AbstractString) = sexp(RClass{:character}, s
 function sexp(::Type{RClass{:character}}, a::AbstractArray{T}) where T<:AbstractString
     ra = protect(allocArray(StrSxp, size(a)...))
     try
-        for i in 1:length(a)
-            ra[i] = a[i]
+        for (i, idx) in enumerate(eachindex(a))
+            ra[i] = a[idx]
         end
     finally
         unprotect(1)
@@ -296,8 +296,8 @@ end
 function sexp(::Type{RClass{:list}}, a::AbstractArray)
     ra = protect(allocArray(VecSxp, size(a)...))
     try
-        for i in 1:length(a)
-            ra[i] = a[i]
+        for (i, idx) in enumerate(eachindex(a))
+            ra[i] = a[idx]
         end
     finally
         unprotect(1)
