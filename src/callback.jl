@@ -38,7 +38,7 @@ end
 
 The function called by R `.External` for Julia callbacks.
 
-The argument should be`Ptr{ListSxp}` containing
+The argument should be a `Ptr{ListSxp}` containing
  - a pointer to the function itself (`Ptr{ExtPtrSxp}`)
  - a pointer to the Julia function (`Ptr{ExtPtrSxp}`)
  - any arguments (as `Ptr{S<:Sxp}`)
