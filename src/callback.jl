@@ -3,11 +3,6 @@
 
 Register a function pointer as an R `NativeSymbol`.
 
-!!! note
-   `R_MakeExternalPtrFn` is not part of the official R API before
-    R 3.4 and we are supposed to use `R_registerRoutines` instead.
-    It is probably safe to such to make the external pointer, even
-    on older versions of R (although we don't officially support them.)
 """
 function makeNativeSymbolRef(fptr::Ptr{Cvoid})
     # mirror Rf_MakeNativeSymbolRef of Rdynload.c
