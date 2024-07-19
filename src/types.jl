@@ -331,7 +331,7 @@ struct DotSxp <: Sxp
 end
 
 """
-    DotSxp <: Sxp
+    AnySxp <: Sxp
 
 Representation of R "any" object (comparable to `Ref{Any}`).
 
