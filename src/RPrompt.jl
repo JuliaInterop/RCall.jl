@@ -136,12 +136,20 @@ mutable struct RCompletionProvider <: LineEdit.CompletionProvider
     r::REPL.LineEditREPL
 end
 
-function LineEdit.complete_line(c::RCompletionProvider, s)
+if VERSION >= v"1.12.0-DEV.468"  # Julia PR #54311
+    using REPL.REPLCompletions: bslash_completions
+else
+    function bslash_completions(string::String, pos::Int, hint::Bool=false)
+        return REPLCompletions.bslash_completions(string, pos)
+    end
+end
+
+function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     buf = s.input_buffer
     partial = String(buf.data[1:buf.ptr-1])
     # complete latex
     full = LineEdit.input_string(s)
-    ret, range, should_complete = REPLCompletions.bslash_completions(full, lastindex(partial))[2]
+    ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
     if length(ret) > 0 && should_complete
         return map(REPLCompletions.completion_text, ret), partial[range], should_complete
     end
