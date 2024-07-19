@@ -347,7 +347,7 @@ end
 """
     VecSxp <: VectorListSxp
 
-Represnetation of R list (i.e. Array{Any,1}).
+Representation of R list (i.e. `Array{Any,1}`).
 
 This corresponds to type tag 19.
 
@@ -599,11 +599,11 @@ Ordered collection of R `SEXP` types, so that the (index - 1)
 matches the type tag.
 """
 const SXP_TYPES = (NilSxp, SymSxp, ListSxp, ClosSxp, EnvSxp,
-              PromSxp, LangSxp, SpecialSxp, BuiltinSxp, CharSxp,
-              LglSxp, Nothing, Nothing, IntSxp, RealSxp,
-              CplxSxp, StrSxp, DotSxp, AnySxp, VecSxp,
-              ExprSxp, BcodeSxp, ExtPtrSxp, WeakRefSxp, RawSxp,
-              S4Sxp)
+                   PromSxp, LangSxp, SpecialSxp, BuiltinSxp, CharSxp,
+                   LglSxp, Nothing, Nothing, IntSxp, RealSxp,
+                   CplxSxp, StrSxp, DotSxp, AnySxp, VecSxp,
+                   ExprSxp, BcodeSxp, ExtPtrSxp, WeakRefSxp, RawSxp,
+                   S4Sxp)
 
 for (i, T) in enumerate(SXP_TYPES)
     if T != Nothing
@@ -615,7 +615,7 @@ end
 """
     sexp(p::Ptr{UnknownSxp})
 
-Return a restrictively parameterized `Ptr{<:Sxp}` pointing the same object.
+Return a restrictively parameterized `Ptr{<:Sxp}` pointing to the same object as `p`.
 """
 function sexp(p::Ptr{UnknownSxp})
     typ = sexpnum(p)
