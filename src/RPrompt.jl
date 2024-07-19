@@ -52,7 +52,8 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         if length(symdict) > 0
             Core.eval(Main, prepare_inline_julia_code(symdict))
         end
-        ret = protect(reval_p(rparse_p("withVisible({$script})"), Const.GlobalEnv.p))
+        # the newlines are important in case script has a trailing inline comment
+        ret = protect(reval_p(rparse_p("withVisible({\n$script\n})"), Const.GlobalEnv.p))
         nprotect += 1
         # print if the last expression is visible
         if rcopy(Bool, ret[:visible])
@@ -135,12 +136,21 @@ mutable struct RCompletionProvider <: LineEdit.CompletionProvider
     r::REPL.LineEditREPL
 end
 
-function LineEdit.complete_line(c::RCompletionProvider, s)
+# Julia PR #54311 (backported to 1.11) added the `hint` argument
+if v"1.11.0-beta1.46" <= VERSION < v"1.12.0-DEV.0" || VERSION >= v"1.12.0-DEV.468"
+    using REPL.REPLCompletions: bslash_completions
+else
+    function bslash_completions(string::String, pos::Int, hint::Bool=false)
+        return REPLCompletions.bslash_completions(string, pos)
+    end
+end
+
+function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     buf = s.input_buffer
     partial = String(buf.data[1:buf.ptr-1])
     # complete latex
     full = LineEdit.input_string(s)
-    ret, range, should_complete = REPLCompletions.bslash_completions(full, lastindex(partial))[2]
+    ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
     if length(ret) > 0 && should_complete
         return map(REPLCompletions.completion_text, ret), partial[range], should_complete
     end
