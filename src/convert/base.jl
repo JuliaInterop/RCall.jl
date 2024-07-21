@@ -143,7 +143,7 @@ end
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a = BitArray(undef, size(s)...)
     v = unsafe_vec(s)
-    for i in eachindex(a,v)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -264,7 +264,9 @@ sexp(::Type{RClass{:character}},st::AbstractString) = sexp(RClass{:character}, s
 function sexp(::Type{RClass{:character}}, a::AbstractArray{T}) where T<:AbstractString
     ra = protect(allocArray(StrSxp, size(a)...))
     try
-        for (i, idx) in enumerate(eachindex(a))
+        # we want this to work even if a doesn't use one-based indexing
+        # we only care about ra having the same length (which it does)
+        for (i, idx) in zip(eachindex(ra), eachindex(a))
             ra[i] = a[idx]
         end
     finally
@@ -296,7 +298,9 @@ end
 function sexp(::Type{RClass{:list}}, a::AbstractArray)
     ra = protect(allocArray(VecSxp, size(a)...))
     try
-        for (i, idx) in enumerate(eachindex(a))
+        # we want this to work even if a doesn't use one-based indexing
+        # we only care about ra having the same length (which it does)
+        for (i, idx) in zip(eachindex(ra), eachindex(a))
             ra[i] = a[idx]
         end
     finally
