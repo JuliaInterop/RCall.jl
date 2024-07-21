@@ -1,16 +1,18 @@
 """
-Copies variables from Julia to R using the same name.
+    @rput(args...)
+
+Copy variable(s) from Julia to R using the same name.
 """
 macro rput(args...)
     blk = Expr(:block)
     for a in args
-        if isa(a,Symbol)
+        if isa(a, Symbol)
             v = a
-            push!(blk.args,:(Const.GlobalEnv[$(QuoteNode(v))] = $(esc(v))))
-        elseif isa(a,Expr) && a.head == :(::)
+            push!(blk.args, :(Const.GlobalEnv[$(QuoteNode(v))] = $(esc(v))))
+        elseif isa(a, Expr) && a.head == :(::)
             v = a.args[1]
             S = a.args[2]
-            push!(blk.args,:(Const.GlobalEnv[$(QuoteNode(v))] = robject($S, $(esc(v)))))
+            push!(blk.args, :(Const.GlobalEnv[$(QuoteNode(v))] = robject($S, $(esc(v)))))
         else
             error("Incorrect usage of @rput")
         end
@@ -19,18 +21,20 @@ macro rput(args...)
 end
 
 """
-Copies variables from R to Julia using the same name.
+    @rget(args...)
+
+Copy variable(s) from R to Julia using the same name.
 """
 macro rget(args...)
     blk = Expr(:block)
     for a in args
-        if isa(a,Symbol)
+        if isa(a, Symbol)
             v = a
-            push!(blk.args,:($(esc(v)) = rcopy(Const.GlobalEnv[$(QuoteNode(v))])))
-        elseif isa(a,Expr) && a.head == :(::)
+            push!(blk.args, :($(esc(v)) = rcopy(Const.GlobalEnv[$(QuoteNode(v))])))
+        elseif isa(a, Expr) && a.head == :(::)
             v = a.args[1]
             T = a.args[2]
-            push!(blk.args,:($(esc(v)) = rcopy($(esc(T)),Const.GlobalEnv[$(QuoteNode(v))])))
+            push!(blk.args, :($(esc(v)) = rcopy($(esc(T)),Const.GlobalEnv[$(QuoteNode(v))])))
         else
             error("Incorrect usage of @rget")
         end
@@ -54,9 +58,8 @@ It is also possible to pass Julia expressions:
 
 All such Julia expressions are evaluated once, before the R expression is evaluated.
 
-The expression does not support assigning to Julia variables, so the only way retrieve
-values from R via the return value.
-
+The expression does not support assigning to Julia variables, so the only way to retrieve
+values from R is via the return value.
 """
 macro R_str(script)
     script, symdict = render(script)
@@ -74,6 +77,8 @@ macro R_str(script)
 end
 
 """
+    var"..."
+
 Returns a variable named "str". Useful for passing keyword arguments containing dots.
 """
 macro var_str(str)
