@@ -633,4 +633,4 @@ Return the associated `Sxp` pointer.
 """
 sexp(::Type{S}, r::RObject{S}) where S<:Sxp = r.p
 # do we need this method?
-# sexp(::Type{S}, s::Ptr{S}) where S<:Sxp = s
+sexp(::Type{S}, s::Ptr{S}) where S<:Sxp = s
