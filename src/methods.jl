@@ -1,10 +1,13 @@
 """
-The R NAMED property, represented by 2 bits in the info field. This can take
-values 0,1 or 2, corresponding to whether it is bound to 0,1 or 2 or more
-symbols. See
+    bound(s::Ptr{<:Sxp})
+
+Return the R `NAMED` property, represented by 2 bits in the info field.
+
+This can take values 0, 1 or 2, corresponding to whether it is bound to 0, 1 or 2+ symbols.
+See
 http://cran.r-project.org/doc/manuals/r-patched/R-exts.html#Named-objects-and-copying
 """
-function bound(s::Ptr{S}) where S<:Sxp
+function bound(s::Ptr{<:Sxp})
     u = unsafe_load(convert(Ptr{UnknownSxp},s))
     (u.info >>> 6) & 0x03
 end
