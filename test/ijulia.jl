@@ -4,7 +4,8 @@ using RCall
 using Weave
 using Test
 
-IJulia.installkernel("julia", "--project=$(abspath(dir(@__DIR__)))")
+# $(abspath(dirname(@__DIR__)))
+IJulia.installkernel("julia", "--project=@.")
 jupyter_path = joinpath(Conda.BINDIR, "jupyter")
 if !isfile(jupyter_path)
     Conda.add("jupyter")
