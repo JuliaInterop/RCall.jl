@@ -1,17 +1,42 @@
 """
-RCall.jl's type `Sxp` mirrors the R symbolic expression record `SEXPREC` in R API.
+    Sxp
+
+Representation of R symbolic expression record `SEXPREC` in R API.
+
 These are represented by a pointer `Ptr{S<:Sxp}` (which is called `SEXP` in R API).
+
+See also [R internals documentation](https://cran.r-project.org/doc/manuals/r-devel/R-ints.html)
 """
 abstract type Sxp end # SEXPREC
+
+"""
+    SxpPtrInfo
+
+Representation of `sxpinfo_struct`.
+"""
 const SxpPtrInfo = UInt32 # sxpinfo_struct
 
-"R Sxp header: a pointer to this is used for unknown types."
-struct SxpHead <: Sxp # SEXPREC_HEADER
+"""
+    SxpHead <: Sxp
+
+R Sxp header (`SEXPREC_HEADER`).
+
+A pointer to this is used for unknown types.
+
+# Fields
+- `info::SxpPtrInfo`
+- `attrib::Ptr{Cvoid}`
+- `gc_next::Ptr{Cvoid}`
+- `gc_prev::Ptr{Cvoid}`
+"""
+struct SxpHead <: Sxp
     info::SxpPtrInfo
     attrib::Ptr{Cvoid}
     gc_next::Ptr{Cvoid}
     gc_prev::Ptr{Cvoid}
 end
+
+"""$(@doc SxpHead)"""
 const UnknownSxp = SxpHead
 
 abstract type VectorSxp <: Sxp end
@@ -21,172 +46,436 @@ abstract type VectorListSxp <: VectorSxp end
 abstract type PairListSxp <: Sxp end
 abstract type FunctionSxp <: Sxp end
 
+"""
+    NilSxpR <: PairListSxp
 
-"R NULL value"
-struct NilSxp <: PairListSxp   # type tag 0
+Representation of R `NULL` value.
+
+This corresponds to R type tag 0.
+
+# Fields
+- `head::SxpHead`
+"""
+struct NilSxp <: PairListSxp
     head::SxpHead
 end
 
-"R pairs (cons) list cell"
-struct ListSxp <: PairListSxp  # type tag 2
+"""
+    ListSxp <: PairListSxp
+
+Representation of R pairs (cons) list cell.
+
+This corresponds to R type tag 2.
+
+# Fields
+- `head::SxpHead`
+- `car::Ptr{UnknownSxp}`
+- `cdr::Ptr{UnknownSxp}`
+- `tag::Ptr{UnknownSxp}`
+"""
+struct ListSxp <: PairListSxp
     head::SxpHead
     car::Ptr{UnknownSxp}
     cdr::Ptr{UnknownSxp}
     tag::Ptr{UnknownSxp}
 end
 
-"R function closure"
-struct ClosSxp <: FunctionSxp  # type tag 3
+"""
+    ClosSxp <: FunctionSxp
+
+Representation of R function closure.
+
+This corresponds to R type tag 3.
+
+# Fields
+- `head::SxpHead`
+- `formals::Ptr{ListSxp}`
+- `body::Ptr{UnknownSxp}`
+- `env::Ptr{UnknownSxp}`
+"""
+struct ClosSxp <: FunctionSxp
     head::SxpHead
     formals::Ptr{ListSxp}
     body::Ptr{UnknownSxp}
     env::Ptr{UnknownSxp}
 end
 
-"R environment"
-struct EnvSxp <: Sxp  # type tag 4
+"""
+    EnvSxp <: Sxp
+
+Representation of R environment.
+
+This corresponds to type tag 4.
+
+# Fields
+- `head::SxpHead`
+- `frame::Ptr{UnknownSxp}`
+- `enclos::Ptr{UnknownSxp}`
+- `hashtab::Ptr{UnknownSxp}`
+"""
+struct EnvSxp <: Sxp
     head::SxpHead
     frame::Ptr{UnknownSxp}
     enclos::Ptr{UnknownSxp}
     hashtab::Ptr{UnknownSxp}
 end
 
-"R promise"
-struct PromSxp <: Sxp  # type tag 5
+"""
+    PromSxp <: Sxp
+
+Representation of R promise.
+
+This corresponds to type tag 5.
+
+# Fields
+- `head::SxpHead`
+- `value::Ptr{UnknownSxp}`
+- `expr::Ptr{UnknownSxp}`
+- `env::Ptr{UnknownSxp}`
+"""
+struct PromSxp <: Sxp
     head::SxpHead
     value::Ptr{UnknownSxp}
     expr::Ptr{UnknownSxp}
     env::Ptr{UnknownSxp}
 end
 
-"R function call"
-struct LangSxp <: PairListSxp  # type tag 6
+"""
+    LangSxp <: PairListSxp
+
+Representation of R function call.
+
+This corresponds to type tag 6.
+
+# Fields
+- `head::SxpHead`
+- `car::Ptr{UnknownSxp}`
+- `cdr::Ptr{UnknownSxp}`
+- `tag::Ptr{UnknownSxp}`
+"""
+struct LangSxp <: PairListSxp
     head::SxpHead
     car::Ptr{UnknownSxp}
     cdr::Ptr{UnknownSxp}
     tag::Ptr{UnknownSxp}
 end
 
-"R special function"
-struct SpecialSxp <: FunctionSxp  # type tag 7
+"""
+    SpecialSxp <: FunctionSxp
+
+Representation of R special function.
+
+This corresponds to type tag 7.
+
+# Fields
+- `head::SxpHead`
+"""
+struct SpecialSxp <: FunctionSxp
     head::SxpHead
 end
 
-"R built-in function"
-struct BuiltinSxp <: FunctionSxp  # type tag 8
+"""
+    BuiltinSxp <: FunctionSxp
+
+Representation of R built-in function.
+
+This corresponds to type tag 8.
+
+# Fields
+- `head::SxpHead`
+"""
+struct BuiltinSxp <: FunctionSxp
     head::SxpHead
 end
 
-"R character string"
-struct CharSxp <: VectorAtomicSxp     # type tag 9
+"""
+    CharSxp <: VectorAtomicSxp
+
+Representation of R character string.
+
+This corresponds to type tag 9.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct CharSxp <: VectorAtomicSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R symbol"
-struct SymSxp <: Sxp   # type tag 1
+"""
+    SymSxp <: Sxp
+
+Representation of R symbol.
+
+This corresponds to type tag 1.
+
+# Fields
+- `head::SxpHead`
+- `name::Ptr{CharSxp}`
+- `value::Ptr{UnknownSxp}`
+- `internal::Ptr{UnknownSxp}`
+"""
+struct SymSxp <: Sxp
     head::SxpHead
     name::Ptr{CharSxp}
     value::Ptr{UnknownSxp}
     internal::Ptr{UnknownSxp}
 end
 
-"R logical vector"
-struct LglSxp <: VectorNumericSxp     # type tag 10
+"""
+    LglSxp <: VectorNumericSxp
+
+Representation of R logical vector.
+
+This corresponds to type tag 10.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct LglSxp <: VectorNumericSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R integer vector"
-struct IntSxp <: VectorNumericSxp     # type tag 13
+""""
+    IntSxp <: VectorNumericSxp
+
+Representation of R integer vector.
+
+This corresponds to type tag 13.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct IntSxp <: VectorNumericSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R real vector"
-struct RealSxp <: VectorNumericSxp    # type tag 14
+"""
+    RealSxp <: VectorNumericSxp
+
+Representation of R real (numeric) vector.
+
+This correponds to type tag 14.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct RealSxp <: VectorNumericSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R complex vector"
-struct CplxSxp <: VectorNumericSxp    # type tag 15
+"""
+    CplxSxp <: VectorNumericSxp
+
+Representation of R complex vector.
+
+This corresponds to type tag 15.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct CplxSxp <: VectorNumericSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R vector of character strings"
-struct StrSxp <: VectorListSxp     # type tag 16
+"""
+    StrSxp <: VectorListSxp
+
+Representation of R vector of character strings.
+
+This correponds to type tag 16.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct StrSxp <: VectorListSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R dot-dot-dot object"
-struct DotSxp <: Sxp     # type tag 17
+"""
+    DotSxp <: Sxp
+
+Representation of R dot-dot-dot object.
+
+This corresponds to type tag 17.
+
+# Fields
+- `head::SxpHead`
+"""
+struct DotSxp <: Sxp
     head::SxpHead
 end
 
-"R \"any\" object"
-struct AnySxp <: Sxp     # type tag 18
+"""
+    AnySxp <: Sxp
+
+Representation of R "any" object (comparable to `Ref{Any}`).
+
+This corresponds to type tag 18.
+
+# Fields
+- `head::SxpHead`
+"""
+struct AnySxp <: Sxp
     head::SxpHead
 end
 
-"R list (i.e. Array{Any,1})"
-struct VecSxp <: VectorListSxp     # type tag 19
+"""
+    VecSxp <: VectorListSxp
+
+Representation of R list (i.e. `Array{Any,1}`).
+
+This corresponds to type tag 19.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct VecSxp <: VectorListSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R expression vector"
-struct ExprSxp <: VectorListSxp    # type tag 20
+
+
+"""
+    ExprSxp <: VectorListSxp
+
+Representation of R expression vector.
+
+This corresponds to type tag 20.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct ExprSxp <: VectorListSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R byte code"
-struct BcodeSxp <: Sxp   # type tag 21
+""""
+    BcodeSxp <: Sxp
+
+Representation of R byte code.
+
+This corresponds to type tag 21.
+
+# Fields
+- `head::SxpHead`
+"""
+struct BcodeSxp <: Sxp
     head::SxpHead
 end
 
-"R external pointer"
-struct ExtPtrSxp <: Sxp  # type tag 22
+"""
+    ExtPtrSxp <: Sxp
+
+Representation of R external pointer.
+
+This corresponds to type tag 22.
+
+# Fields
+- `head::SxpHead`
+- `ptr::Ptr{Cvoid}`
+- `prot::Ptr{Cvoid}`
+- `tag::Ptr{UnknownSxp}`
+"""
+struct ExtPtrSxp <: Sxp
     head::SxpHead
     ptr::Ptr{Cvoid}
     prot::Ptr{Cvoid}
     tag::Ptr{UnknownSxp}
 end
 
-"R weak reference"
-struct WeakRefSxp <: Sxp  # type tag 23
+"""
+    WeakRefSxp <: Sxp
+
+Representation of R weak reference.
+
+This corresponds to type tag 23.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct WeakRefSxp <: Sxp
     head::SxpHead
 end
 
-"R byte vector"
-struct RawSxp <: VectorAtomicSxp      # type tag 24
+"""
+    RawSxp <: VectorAtomicSxp
+
+Representation of R byte vector.
+
+This corresponds to type tag 24.
+
+# Fields
+- `head::SxpHead`
+- `length::Cint`
+- `truelength::Cint`
+"""
+struct RawSxp <: VectorAtomicSxp
     head::SxpHead
     length::Cint
     truelength::Cint
 end
 
-"R S4 object"
-struct S4Sxp <: Sxp      # type tag 25
+"""
+    S4Sxp <: Sxp
+
+Representation of R S4 object.
+
+This corresponds to type tag 24.
+
+# Fields
+- `head::SxpHead`
+"""
+struct S4Sxp <: Sxp
     head::SxpHead
 end
 
 """
-An `RObject` is a Julia wrapper for an R object (known as an "S-expression" or "SEXP"). It is stored as a pointer which is protected from the R garbage collector, until the `RObject` itself is finalized by Julia. The parameter is the type of the S-expression.
+    RObject{S<:Sxp}
+
+An `RObject` is a Julia wrapper for an R object (known as an "S-expression", i.e. `SEXP`).
+It is stored as a pointer which is protected from the R garbage collector,
+until the `RObject` itself is finalized by Julia. The parameter is the type of the S-expression.
 
 When called with a Julia object as an argument, a corresponding R object is constructed.
 
-```julia_skip
+# Examples
+
+```jldoctest
 julia> RObject(1)
 RObject{IntSxp}
 [1] 1
@@ -199,6 +488,9 @@ julia> RObject(1.0:3.0)
 RObject{RealSxp}
 [1] 1 2 3
 ```
+
+# Fields
+- `p::Ptr{S}` Pointer to the relevant R object.
 """
 mutable struct RObject{S<:Sxp}
     p::Ptr{S}
@@ -213,23 +505,26 @@ mutable struct RObject{S<:Sxp}
         r
     end
     # SymSxps are not garbage collected, so preserve not necessary.
-    RObject{S}(p::Ptr{SymSxp}) where S = new{S}(p)
+    RObject{SymSxp}(p::Ptr{SymSxp}) = new{SymSxp}(p)
 end
-
 
 RObject(p::Ptr{S}) where S<:Sxp = RObject{S}(p)
 RObject(x::RObject) = x
 
-
 """
-R Class
+    RClass{Symbol}
+
+Representation of R Class.
+
+Examples:
+- `RCall{:logical}`
+- `RCall{:integer}`
+- `RCall{:numeric}`
+- `RCall{:character}`
 """
 struct RClass{Symbol} end
 
-
-"""
-Element types of R vectors.
-"""
+# Element types of R vectors.
 eltype(::Type{LglSxp}) = Cint
 eltype(::Type{IntSxp}) = Cint
 eltype(::Type{RealSxp}) = Float64
@@ -241,56 +536,76 @@ eltype(::Type{StrSxp}) = Ptr{CharSxp}
 eltype(::Type{VecSxp}) = Ptr{UnknownSxp}
 eltype(::Type{ExprSxp}) = Ptr{UnknownSxp}
 
-eltype(s::Ptr{S}) where S<:Sxp = eltype(S)
-eltype(s::RObject{S}) where S<:Sxp = eltype(S)
-
-
-"""
-Prevent garbage collection of an R object. Object can be released via `release`.
-
-This is slower than `protect`, as it requires searching an internal list, but
-more flexible.
-"""
-preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject,libR), Nothing, (Ptr{S},), p)
+eltype(::Ptr{S}) where S<:Sxp = eltype(S)
+eltype(::RObject{S}) where S<:Sxp = eltype(S)
 
 """
-Release object that has been gc protected by `preserve`.
+    preserve(p::Ptr{<:Sxp})
+
+Prevent garbage collection of an R object.
+
+Object can be released via [`release`](@ref).
+
+This is slower than [`protect`](@ref), as it requires searching an internal list,
+but more flexible.
 """
-release(p::Ptr{S}) where S<:Sxp = ccall((:R_ReleaseObject,libR),Nothing,(Ptr{S},),p)
+preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject, libR), Nothing, (Ptr{S},), p)
+
+"""
+    release(p::Ptr{<:Sxp})
+    release(p::RObject{<:Sxp})
+
+Release object that has been GC protected by [`preserve`](@ref).
+"""
+release(p::Ptr{S}) where S<:Sxp = ccall((:R_ReleaseObject,libR), Nothing, (Ptr{S},), p)
 release(r::RObject{S}) where S<:Sxp = release(r.p)
 
 """
-Stack-based protection of garbage collection of R objects. Objects are
-released via `unprotect`. Returns the same pointer, allowing inline use.
+    protect(p::Ptr{<:Sxp})
 
-This is faster than `preserve`, but more restrictive. Really only useful
-inside functions.
+Stack-based protection of garbage collection of R objects.
+
+Objects are released via [`unprotect`](@ref).
+Returns the same pointer, allowing inline use.
+
+This is faster than [`preserve`](@ref), but more restrictive.
+Really only useful inside functions, where you can control the `unprotect` step.
 """
 protect(p::Ptr{S}) where S<:Sxp = ccall((:Rf_protect,libR), Ptr{S}, (Ptr{S},), p)
 
 """
-Release last `n` objects gc-protected by `protect`.
+    unprotect(n)
+
+Release last `n` objects GC-protected by [`protect`](@ref).
 """
 unprotect(n::Integer) = ccall((:Rf_unprotect,libR), Nothing, (Cint,), n)
 
 """
-The SEXPTYPE number of a `Sxp`
+    sexpnum(s::Sxp)
+    sexpnum(p::Ptr{<:Sxp})
+
+Return the `SEXPTYPE` number, i.e. type tag, of a `Sxp`.
 
 Determined from the trailing 5 bits of the first 32-bit word. Is
-a 0-based index into the `info` field of a `SxpHead`.
+a 0-based index into the `info` field of a [`SxpHead`](@ref).
 """
 sexpnum(h::SxpHead) = h.info & 0x1f
 sexpnum(p::Ptr{S}) where S<:Sxp = sexpnum(unsafe_load(p))
 
-"vector of R Sxp types"
-const typs = [NilSxp,SymSxp,ListSxp,ClosSxp,EnvSxp,
-              PromSxp,LangSxp,SpecialSxp,BuiltinSxp,CharSxp,
-              LglSxp,Nothing,Nothing,IntSxp,RealSxp,
-              CplxSxp,StrSxp,DotSxp,AnySxp,VecSxp,
-              ExprSxp,BcodeSxp,ExtPtrSxp,WeakRefSxp,RawSxp,
-              S4Sxp]
+"""
+    SXP_TYPES
 
-for (i,T) in enumerate(typs)
+Ordered collection of R `SEXP` types, so that the (index - 1)
+matches the type tag.
+"""
+const SXP_TYPES = (NilSxp, SymSxp, ListSxp, ClosSxp, EnvSxp,
+                   PromSxp, LangSxp, SpecialSxp, BuiltinSxp, CharSxp,
+                   LglSxp, Nothing, Nothing, IntSxp, RealSxp,
+                   CplxSxp, StrSxp, DotSxp, AnySxp, VecSxp,
+                   ExprSxp, BcodeSxp, ExtPtrSxp, WeakRefSxp, RawSxp,
+                   S4Sxp)
+
+for (i, T) in enumerate(SXP_TYPES)
     if T != Nothing
         @eval sexpnum(::Type{$T}) = $(i-1)
     end
@@ -298,16 +613,24 @@ end
 
 
 """
-Convert a `Ptr{UnknownSxp}` to an appropriate `Ptr{S<:Sxp}`.
+    sexp(p::Ptr{UnknownSxp})
+
+Return a restrictively parameterized `Ptr{<:Sxp}` pointing to the same object as `p`.
 """
 function sexp(p::Ptr{UnknownSxp})
     typ = sexpnum(p)
     0 ≤ typ ≤ 10 || 13 ≤ typ ≤ 25 || error("Unknown SEXPTYPE $typ")
-    styp = typs[typ+1]
-    Ptr{styp}(p)
+    styp = SXP_TYPES[typ+1]
+    return Ptr{styp}(p)
 end
 sexp(s::Ptr{S}) where S<:Sxp = s
 sexp(r::RObject) = r.p
 
-sexp(::Type{S},s::Ptr{S}) where S<:Sxp = s
-sexp(::Type{S},r::RObject{S}) where S<:Sxp = r.p
+"""
+   sexp(::Type{<:Sxp}, s::RObject{<:Sxp})
+
+Return the associated `Sxp` pointer.
+"""
+sexp(::Type{S}, r::RObject{S}) where S<:Sxp = r.p
+# do we need this method?
+sexp(::Type{S}, s::Ptr{S}) where S<:Sxp = s
