@@ -23,10 +23,12 @@ CategoricalArrays = "0.8, 0.9, 0.10"
 Conda = "1.4"
 DataFrames = "0.21, 0.22, 1.0"
 DataStructures = "0.5, 0.6, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18"
+IJulia = "1.25"
 Logging = "0, 1"
 Preferences = "1"
 Requires = "0.5.2, 1"
 StatsModels = "0.6, 0.7"
+Weave = "0.10"
 WinReg = "0.2, 0.3, 1"
 julia = "1.6"
 
@@ -34,11 +36,13 @@ julia = "1.6"
 AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
 CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [targets]
-test = ["Dates", "AxisArrays", "REPL", "Test", "Random", "CondaPkg", "Pkg", "Logging"]
+test = ["Dates", "AxisArrays", "REPL", "Test", "Random", "CondaPkg", "Pkg", "Logging", "IJulia", "Weave"]

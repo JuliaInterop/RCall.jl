@@ -72,6 +72,15 @@ println(R"l10n_info()")
         end
     end
 
+    if Sys.islinux()
+        # the IJulia tests depend on the R graphics device being set up correctly,
+        # which is non trivial on non-linux headless devices (e.g. CI)
+        # it also uses the assumed path to Jupyter on unix
+        @testset "IJulia" begin
+            include("ijulia.jl")
+        end
+    end
+
     @info "" RCall.conda_provided_r
 
     # make sure we're back where we started
