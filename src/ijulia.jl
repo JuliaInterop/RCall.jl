@@ -47,7 +47,7 @@ rdevicename(m::MIME) = throw(ArgumentError(string("Unsupported MIME type: ", m))
 
 Display a graphics file in IJulia.
 
-This function generally should not be called by the user, but is instead by 
+This function generally should not be called by the user, but instead by 
 the appropriate display hook.
 
 See also [`ijulia_setdevice`](@ref).
