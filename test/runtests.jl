@@ -64,12 +64,20 @@ println(R"l10n_info()")
              "macros",
              "namespaces",
              "repl",
-             "ijulia",
              ]
 
     for t in tests
         @eval @testset $t begin
             include(string($t, ".jl"))
+        end
+    end
+
+    if Sys.islinux()
+        # the IJulia tests depend on the R graphics device being set up correctly,
+        # which is non trivial on non-linux headless devices (e.g. CI)
+        # it also uses the assumed path to Jupyter on unix
+        @testset "IJulia" begin
+            include("ijulia.jl")
         end
     end
 
