@@ -26,11 +26,14 @@ html = read(testpath("ijulia.html"), String)
 # create a folder ijulia_files with the exported images -- could be useful if we ever set up percy
 # run(`$(jupyter_path) nbconvert $(testpath("ijulia.ipynb")) --to markdown`)
 
-# these are the tests to get code coverage 
+# these are the tests to get code coverage
+# nothing like a little piracy when testing in a headless setup
 RCall.ijulia_init()
 R"plot(1:10, 1:10)"
-RCall.ijulia_displayplots()   
+# throws a method error when running headless !
+@test_throws(MethodError, RCall.ijulia_displayplots())
 RCall.ijulia_setdevice(MIME("image/svg+xml"))
 R"plot(-1 * 1:10, -1 * 1:10)"
-RCall.ijulia_displayplots()   
+# throws a method error when running headless !
+@test_throws(MethodError, RCall.ijulia_displayplots())
 RCall.ijulia_cleanup()
