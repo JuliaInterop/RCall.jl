@@ -21,11 +21,16 @@ html = read(testpath("ijulia.html"), String)
 @test occursin(PNG,  html)
 @test occursin(SVG,  html)
 
+@test_throws ArgumentError("Unsupported MIME type: lulz") RCall.rdevicename(MIME("lulz"))
+
 # create a folder ijulia_files with the exported images -- could be useful if we ever set up percy
 # run(`$(jupyter_path) nbconvert $(testpath("ijulia.ipynb")) --to markdown`)
 
 # these are the tests to get code coverage 
 RCall.ijulia_init()
 R"plot(1:10, 1:10)"
+RCall.ijulia_displayplots()   
 RCall.ijulia_setdevice(MIME("image/svg+xml"))
 R"plot(-1 * 1:10, -1 * 1:10)"
+RCall.ijulia_displayplots()   
+RCall.ijulia_cleanup()

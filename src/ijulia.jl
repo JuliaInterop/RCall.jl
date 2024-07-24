@@ -40,7 +40,7 @@ See also [`ijulia_setdevice`](@ref).
 """
 rdevicename(::MIME"image/png") = :png
 rdevicename(::MIME"image/svg+xml") = :svg
-redicename(m::MIME) = throw(ArgumentError(string("Unsupported MIME type: ", m)))
+rdevicename(m::MIME) = throw(ArgumentError(string("Unsupported MIME type: ", m)))
 
 """
     ijulia_displayfile(m::MIME, f)
