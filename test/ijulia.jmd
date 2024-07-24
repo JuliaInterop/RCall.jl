@@ -1,0 +1,10 @@
+```julia
+using RCall
+RCall.ijulia_init()
+R"plot(1:10, 1:10)"
+```
+
+```julia
+RCall.ijulia_setdevice(MIME("image/svg+xml"))
+R"plot(-1 * 1:10, -1 * 1:10)"
+```
