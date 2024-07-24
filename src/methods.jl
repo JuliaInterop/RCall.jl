@@ -99,6 +99,7 @@ function iterate(s::Ptr{S}, state) where S<:VectorSxp
     (s[state], state)
 end
 
+Base.eachindex(s::Ptr{<:VectorSxp}) = Base.OneTo(length(s))
 
 """
 Set element of a VectorSxp by a label.
