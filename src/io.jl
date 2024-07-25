@@ -43,7 +43,7 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
     nothing
 end
-rprint(io::IO, r::RObject) = rprint(io::IO, r.p)
+rprint(io::IO, r::RObject) = rprint(io::IO, sexp(r))
 rprint(r::Ptr{S}) where S<:Sxp = rprint(stdout, r)
 rprint(r::RObject) = rprint(stdout, r)
 

@@ -558,7 +558,7 @@ preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject, libR), Nothing, (Pt
 Release object that has been GC protected by [`preserve`](@ref).
 """
 release(p::Ptr{S}) where S<:Sxp = ccall((:R_ReleaseObject,libR), Nothing, (Ptr{S},), p)
-release(r::RObject{S}) where S<:Sxp = release(r.p)
+release(r::RObject{S}) where S<:Sxp = release(sexp(r))
 
 """
     protect(p::Ptr{<:Sxp})

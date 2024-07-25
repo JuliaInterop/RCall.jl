@@ -1,4 +1,4 @@
-convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, r.p)
+convert(::Type{T}, r::RObject{S}) where {T, S<:Sxp} = rcopy(T, sexp(r))
 convert(::Type{Any}, r::RObject{S}) where S<:Sxp = r
 convert(::Type{RObject}, r::RObject{S}) where S<:Sxp = r
 convert(::Type{RObject{S}}, r::RObject{S}) where S<:Sxp = r
@@ -15,7 +15,7 @@ function rcopy(::Type{T}, x::R) where {T<:Number, R<:Number}
 end
 
 # conversion to Base Julia types
-rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, r.p; kwargs...)
+rcopy(::Type{T},r::RObject; kwargs...) where T = rcopy(T, sexp(r); kwargs...)
 # convert Ptr{S} to Any would use the default conversions to allow
 # automatic conversion of VecSxp objects, e.g., convert(Array{Any}, R"list(a=1, b=2)")
 rcopy(::Type{T}, s::Ptr{S}) where {S<:Sxp, T<:Any} = rcopy(s)

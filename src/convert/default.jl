@@ -3,7 +3,7 @@
 """
 `rcopy(r)` copies the contents of an R object into a corresponding canonical Julia type.
 """
-rcopy(r::RObject{S}; kwargs...) where S<:Sxp = rcopy(r.p; kwargs...)
+rcopy(r::RObject{S}; kwargs...) where S<:Sxp = rcopy(sexp(r); kwargs...)
 
 function rcopy(s::Ptr{S}; kwargs...) where S<:Sxp
     protect(s)
