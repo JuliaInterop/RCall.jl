@@ -101,7 +101,7 @@ iterate(::Ptr{NilSxp}, ::Any) = nothing
 getindex(r::RObject{<:VectorSxp}, I...) = getindex(sexp(r), I...)
 getindex(r::RObject{<:VectorSxp}, I::AbstractArray) = getindex(sexp(r), I)
 setindex!(r::RObject{<:VectorSxp}, value, keys...) = setindex!(sexp(r), value, keys...)
-setindex!(r::RObject{<:VectorSxp}, ::Missing, keys...) = setindex!(sexp(r), naeltype(S), keys...)
+setindex!(r::RObject{<:VectorSxp}, ::Missing, keys...) = setindex!(sexp(r), naeltype(r), keys...)
 
 IteratorSize(x::Ptr{S}) where S<:VectorSxp = Base.HasLength()
 IteratorEltype(x::Ptr{S}) where S<:VectorSxp = Base.HasEltype()
@@ -447,6 +447,7 @@ naeltype(::Type{RealSxp}) = Const.NaReal
 naeltype(::Type{CplxSxp}) = complex(Const.NaReal)
 naeltype(::Type{StrSxp}) = sexp(Const.NaString)
 # naeltype(::Type{S}) where S<:Sxp = sexp(Const.NilValue)
+naeltype(r::RObject{S}) where {S <: VectorSxp}= naeltype(S)
 
 naeltype(::Type{RClass{:logical}}) = Const.NaInt
 naeltype(::Type{RClass{:integer}}) = Const.NaInt
