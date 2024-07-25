@@ -14,13 +14,16 @@ end
 
 
 """
+    length(s::Ptr{<:Sxp})
+    length(r::RObject)
+
 Sxp methods for `length` return the R length.
 
 `Rf_xlength` handles Sxps that are not vector-like and R's
 "long vectors", which have a negative value for the `length` member.
 """
 length(s::Ptr{S}) where S<:Sxp = Int(ccall((:Rf_xlength,libR),Cptrdiff_t,(Ptr{S},),s))
-length(r::RObject) = length(r.p)
+length(r::RObject) = length(sexp(r))
 
 ## Predicates applied to an Sxp
 ##
@@ -34,7 +37,7 @@ for sym in (:isArray,:isComplex,:isEnvironment,:isExpression,:isFactor,
             :isVectorAtomic,:isVectorizable,:isVectorList)
     @eval begin
         $sym(s::Ptr{S}) where S<:Sxp = ccall(($(string("Rf_",sym)),libR),Bool,(Ptr{SxpPtrInfo},),s)
-        $sym(r::RObject) = $sym(r.p)
+        $sym(r::RObject) = $sym(sexp(r))
     end
 end
 
@@ -44,54 +47,61 @@ for (S, J) in ((:LglSxp, "LOGICAL"), (:IntSxp, "INTEGER"),
 end
 
 """
-Represent the contents of a VectorSxp type as a `Vector`.
+    unsafe_vec(s::Ptr{<:VectorSxp})
+    unsafe_vec(r::RObject{<:VectorSxp})
+
+Represent the contents of a `VectorSxp`` type as a `Vector`.
 
 This does __not__ copy the contents.  If the argument is not named (in R) or
 otherwise protected from R's garbage collection (e.g. by keeping the
 containing RObject in scope) the contents of this vector can be modified or
 could cause a memory error when accessed.
 
-The contents are as stored in R.  Missing values (NA's) are represented
-in R by sentinels.  Missing data values in RealSxp and CplxSxp show
+The contents are as stored in R.  Missing values (`NA`'s) are represented
+in R by sentinels.  Missing data values in `RealSxp` and `CplxSxp` show
 up as `NaN` and `NaN + NaNim`, respectively.  Missing data in IntSxp show up
 as `-2147483648`, the minimum 32-bit integer value.  Internally a `LglSxp` is
 represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 `-2147483648` is `NA` and all other values represent `true`.
 """
-unsafe_vec(s::Ptr{S}) where S<:VectorSxp = unsafe_wrap(Array, dataptr(s), length(s))
-unsafe_vec(r::RObject{S}) where S<:VectorSxp = unsafe_vec(r.p)
+unsafe_vec(s::Ptr{<:VectorSxp}) = unsafe_wrap(Array, dataptr(s), length(s))
+unsafe_vec(r::RObject{<:VectorSxp}) = unsafe_vec(sexp(r))
 
 """
-The same as `unsafe_vec`, except returns an appropriately sized array.
-"""
-unsafe_array(s::Ptr{S}) where S<:VectorSxp =  unsafe_wrap(Array, dataptr(s), size(s))
-unsafe_array(r::RObject{S}) where S<:VectorSxp = unsafe_array(r.p)
+    unsafe_array(s::Ptr{<:VectorSxp})
+    unsafe_array(r::RObject{<:VectorSxp})
 
+The same as [`unsafe_vec`](@ref), except returns an appropriately sized array.
+"""
+unsafe_array(s::Ptr{<:VectorSxp}) =  unsafe_wrap(Array, dataptr(s), size(s))
+unsafe_array(r::RObject{<:VectorSxp}) = unsafe_array(sexp(r))
+
+#####
+##### Iterator interfaces
+#####
 
 # Sxp iterator
-IteratorSize(x::Ptr{S}) where S<:Sxp = Base.SizeUnknown()
-IteratorEltype(x::Ptr{S}) where S<:Sxp = Base.EltypeUnknown()
-pairs(s::Ptr{S}) where S<:Sxp = Pairs(s, Base.OneTo(length(s)))
+IteratorSize(::Ptr{<:Sxp}) = Base.SizeUnknown()
+IteratorEltype(::Ptr{<:Sxp}) = Base.EltypeUnknown()
+pairs(s::Ptr{<:Sxp}) = Pairs(s, Base.OneTo(length(s)))
 
 # RObject iterator
-@inline iterate(x::RObject) = iterate(x.p)
-@inline iterate(x::RObject, state) = iterate(x.p, state)
-IteratorSize(x::RObject) = IteratorSize(x.p)
-IteratorEltype(x::RObject) = IteratorEltype(x.p)
-pairs(r::RObject{S}) where S<:Sxp = Pairs(r, Base.OneTo(length(r)))
+@inline iterate(x::RObject) = iterate(sexp(x))
+@inline iterate(x::RObject, state) = iterate(sexp(x), state)
+IteratorSize(x::RObject) = IteratorSize(sexp(x))
+IteratorEltype(x::RObject) = IteratorEltype(sexp(x))
+pairs(r::RObject{<:Sxp}) = Pairs(r, Base.OneTo(length(r)))
 
 # NilSxp
-
-IteratorSize(x::Ptr{NilSxp}) = Base.HasLength()
-iterate(s::Ptr{NilSxp}) = nothing
-iterate(s::Ptr{NilSxp}, state) = nothing
+IteratorSize(::Ptr{NilSxp}) = Base.HasLength()
+iterate(::Ptr{NilSxp}) = nothing
+iterate(::Ptr{NilSxp}, ::Any) = nothing
 
 # VectorSxp
-
-getindex(r::RObject{S}, I...) where S<:VectorSxp = getindex(sexp(r), I...)
-getindex(r::RObject{S}, I::AbstractArray) where S<:VectorSxp = getindex(sexp(r), I)
-setindex!(r::RObject{S}, value, keys...) where S<:VectorSxp = setindex!(sexp(r), value, keys...)
-setindex!(r::RObject{S}, ::Missing, keys...) where S<:VectorSxp = setindex!(sexp(r), naeltype(S), keys...)
+getindex(r::RObject{<:VectorSxp}, I...) = getindex(sexp(r), I...)
+getindex(r::RObject{<:VectorSxp}, I::AbstractArray) = getindex(sexp(r), I)
+setindex!(r::RObject{<:VectorSxp}, value, keys...) = setindex!(sexp(r), value, keys...)
+setindex!(r::RObject{<:VectorSxp}, ::Missing, keys...) = setindex!(sexp(r), naeltype(S), keys...)
 
 IteratorSize(x::Ptr{S}) where S<:VectorSxp = Base.HasLength()
 IteratorEltype(x::Ptr{S}) where S<:VectorSxp = Base.HasEltype()
