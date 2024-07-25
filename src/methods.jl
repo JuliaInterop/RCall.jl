@@ -83,7 +83,7 @@ unsafe_array(r::RObject{<:VectorSxp}) = unsafe_array(sexp(r))
 # Sxp iterator
 IteratorSize(::Ptr{<:Sxp}) = Base.SizeUnknown()
 IteratorEltype(::Ptr{<:Sxp}) = Base.EltypeUnknown()
-pairs(s::Ptr{<:Sxp}) = Pairs(s, Base.OneTo(length(s)))
+pairs(s::Ptr{<:Sxp}) = (i .=> s[i] for i in eachindex(s))
 
 # RObject iterator
 @inline iterate(x::RObject) = iterate(sexp(x))
@@ -98,10 +98,10 @@ iterate(::Ptr{NilSxp}) = nothing
 iterate(::Ptr{NilSxp}, ::Any) = nothing
 
 # VectorSxp
-getindex(r::RObject{<:VectorSxp}, I...) = getindex(sexp(r), I...)
-getindex(r::RObject{<:VectorSxp}, I::AbstractArray) = getindex(sexp(r), I)
-setindex!(r::RObject{<:VectorSxp}, value, keys...) = setindex!(sexp(r), value, keys...)
-setindex!(r::RObject{<:VectorSxp}, ::Missing, keys...) = setindex!(sexp(r), naeltype(r), keys...)
+getindex(r::RObject{<:VectorSxp}, I...) = RObject(getindex(sexp(r), I...))
+getindex(r::RObject{<:VectorSxp}, I::AbstractArray) = RObject(getindex(sexp(r), I))
+setindex!(r::RObject{<:VectorSxp}, value, keys...) = RObject(setindex!(sexp(r), value, keys...))
+setindex!(r::RObject{<:VectorSxp}, ::Missing, keys...) = RObject(setindex!(sexp(r), naeltype(r), keys...))
 
 IteratorSize(::Ptr{<:VectorSxp}) = Base.HasLength()
 IteratorEltype(::Ptr{<:VectorSxp}) = Base.HasEltype()
@@ -115,29 +115,24 @@ Base.eachindex(s::Ptr{<:VectorSxp}) = Base.OneTo(length(s))
 
 function getindex(s::Ptr{<:VectorSxp}, label::AbstractString)
     ls = getnames(s)
-    for (i, l) in enumerate(ls)
-        if rcopy(String, l) == label
-            return s[i]
-        end
+    i = findfirst(ls) do l
+        return rcopy(String, l) == label
     end
-    # !isnothing(i) && return s[i]
-    
+    !isnothing(i) && return s[i]
+
     throw(BoundsError(s, label))
 end
 getindex(s::Ptr{<:VectorSxp}, label::Symbol) = getindex(s, string(label))
-
-"""
-Set element of a VectorSxp by a label.
-"""
-function setindex!(s::Ptr{S}, value::Ptr{T}, label::AbstractString) where {S<:VectorSxp, T<:Sxp}
+function setindex!(s::Ptr{<:VectorSxp}, value::Ptr{<:Sxp}, label::AbstractString)
     ls = getnames(s)
-    for (i,l) in enumerate(ls)
-        if rcopy(String, l) == label
-            return s[i] = value
-        end
+    i = findfirst(ls) do l
+        return rcopy(String, l) == label
     end
-    throw(BoundsError())
+    !isnothing(i) && return s[i] = value
+
+    throw(BoundsError(s, label))
 end
+
 setindex!(s::Ptr{<:VectorSxp}, value, label) = setindex!(s, sexp(value), string(label))
 
 # VectorAtomicSxp
@@ -173,8 +168,11 @@ function getindex(r::RObject{S}, i::Integer) where S<:VectorListSxp
 end
 
 # StrSxp
-IteratorEltype(::RObject{<:StrSxp}) = Base.HasEltype()
-Base.eltype(::RObject{<:StrSxp}) = RObject{CharSxp}
+IteratorEltype(::RObject{StrSxp}) = Base.HasEltype()
+Base.eltype(::RObject{StrSxp}) = RObject{CharSxp}
+IteratorEltype(::Ptr{StrSxp}) = Base.HasEltype()
+Base.eltype(::Ptr{StrSxp}) = CharSxp
+
 function getindex(s::Ptr{StrSxp}, key::Integer)
     return ccall((:STRING_ELT, libR), Ptr{CharSxp}, (Ptr{StrSxp}, Cint), s, key-1)
 end
