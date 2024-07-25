@@ -537,7 +537,7 @@ eltype(::Type{VecSxp}) = Ptr{UnknownSxp}
 eltype(::Type{ExprSxp}) = Ptr{UnknownSxp}
 
 eltype(::Ptr{S}) where S<:Sxp = eltype(S)
-eltype(::RObject{S}) where S<:Sxp = eltype(S)
+eltype(::RObject{S}) where S<:Sxp = RObject(eltype(S))
 
 """
     preserve(p::Ptr{<:Sxp})
