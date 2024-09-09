@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'
+          - 'min'
           - '1'
           - nightly
         R:
