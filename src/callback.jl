@@ -86,6 +86,13 @@ stored here to prevent garbage collection by Julia.
 const JULIA_TYPES_EXT_PTRS = Dict{Ptr{ExtPtrSxp}, Any}()
 
 """
+    jtypExtPtrs
+
+Deprecated alias for [`JULIA_TYPES_EXT_PTRS`](@ref)
+"""
+const jtypExtPtrs = JULIA_TYPES_EXT_PTRS
+
+"""
     decref_extptr(p::Ptr{ExtPtrSxp})
 
 Called by the R finalizer to remove `p` from [`JULIA_TYPES_EXT_PTRS`](@ref)
