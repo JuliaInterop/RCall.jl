@@ -30,7 +30,7 @@ Requires = "0.5.2, 1"
 StatsModels = "0.6, 0.7"
 Weave = "0.10"
 WinReg = "0.2, 0.3, 1"
-julia = "1.6"
+julia = "1.10"
 
 [extras]
 AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
