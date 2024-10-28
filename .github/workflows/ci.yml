@@ -18,7 +18,7 @@ jobs:
         version:
           - 'min'
           - '1'
-          - nightly
+          - 'nightly'
         R:
           - 'release'
           - '4.0'
@@ -45,6 +45,9 @@ jobs:
         with:
           use-public-rspm: true
           r-version: ${{ matrix.R }}
+      # necessary for ape and GLIBCXX_3.4.29
+      - run: sudo apt install -y libstdc++6
+        if: matrix.os == 'ubuntu-latest'
       - run: echo "LD_LIBRARY_PATH=$(R RHOME)/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
       - uses: julia-actions/julia-buildpkg@v1
