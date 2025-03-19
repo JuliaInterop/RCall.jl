@@ -42,8 +42,9 @@ RCall = CondaPkg.withenv() do
     Pkg.build("RCall")
     Base.require(Main, :RCall)
 end
-expected = joinpath("x", ".CondaPkg", "env", "lib", "R")[2:end]
-if occursin(expected, RCall.Rhome)
+expected_condapkg = joinpath("x", ".CondaPkg", "x")[2:end-1]
+expected_env_lib_r = joinpath("x", "env", "lib", "R", "x")[2:end-1]
+if occursin(expected_condapkg, RCall.Rhome) && occursin(expected_env_lib_r, RCall.Rhome)
     exit(0)
 end
 println(stderr, "Wrong RCall used $(RCall.Rhome)")
