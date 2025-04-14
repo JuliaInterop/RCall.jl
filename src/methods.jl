@@ -586,6 +586,6 @@ getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"
 
 "Set the variable .Last.value to a given value"
 function set_last_value(s::Ptr{S}) where S<:Sxp
-    ccall((:SET_SYMVALUE,libR),Nothing,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
+    globalEnv[Symbol(".Last.value")] = RObject(s)
     nothing
 end
