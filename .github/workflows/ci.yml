@@ -20,7 +20,7 @@ jobs:
           - '1'
           - 'nightly'
         R:
-          - 'release'
+          - '4.4'
           - '4.0'
           - '3.4'
         os: [ubuntu-latest]
@@ -30,11 +30,11 @@ jobs:
           - os: macOS-latest
             version: 1
             experimental: false
-            R: 'release'
+            R: '4.4'
           - os: windows-latest
             version: 1
             experimental: false
-            R: 'release'
+            R: '4.4'
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
