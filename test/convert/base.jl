@@ -304,6 +304,8 @@ b = RObject(true)
 @test isa(rcopy(Any, R"1"), Float64)
 @test isa(convert(Any, R"1"), RObject)
 
+# empty R vector
+@test rcopy(reval("numeric(0)")) == Float64[]
 
 # s4
 
