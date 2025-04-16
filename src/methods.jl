@@ -584,8 +584,17 @@ end
 getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"], str))
 
 
-"Set the variable .Last.value to a given value"
-function set_last_value(s::Ptr{S}) where S<:Sxp
-    ccall((:SET_SYMVALUE,libR),Nothing,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
-    nothing
+"""
+    set_last_value(s::Ptr{<:Sxp})
+
+Set the variable `.Last.value` to a given value
+"""
+function set_last_value(s::Ptr{<:Sxp})
+    # we use Rf_defineVar and not Rf_setValue because .Last.value
+    # may not exist in the non-interactive R session that we create.
+    ccall((:Rf_defineVar, libR),
+           Nothing,
+          (Ptr{SymSxp}, Ptr{UnknownSxp}, Ptr{EnvSxp}),
+          sexp(Const.LastvalueSymbol), s, Const.GlobalEnv.p)
+    return nothing
 end
