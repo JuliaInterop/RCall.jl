@@ -54,7 +54,6 @@ end
 
 
 abstract type RException <: Exception end
-showerror(io::IO, e::RException, bt; backtrace=false) = showerror(io ,e)
 
 # status = 2
 struct RParseIncomplete <: RException
