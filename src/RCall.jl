@@ -1,7 +1,6 @@
 module RCall
 
 using Preferences
-using Requires
 using Dates
 using Libdl
 using Random
