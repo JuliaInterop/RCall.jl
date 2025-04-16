@@ -194,7 +194,7 @@ struct RFunction{F}
     f::F
 end
 (rf::RFunction)(args...) = rcopy(rcall_p(rf.f,args...))
-        
+
 # FunctionSxp
 function rcopy(::Type{Function}, s::Ptr{S}) where S<:FunctionSxp
     # prevent s begin gc'ed
@@ -240,7 +240,7 @@ for (J, S, C) in ((:Integer, :IntSxp, :integer),
         end
         function sexp(::Type{RClass{$(QuoteNode(C))}}, a::AbstractArray{T}) where T<:$J
             ra = allocArray($S, size(a)...)
-            copyto!(unsafe_vec(ra),a)
+            copyto!(unsafe_vec(ra), a)
             ra
         end
     end
