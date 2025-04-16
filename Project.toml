@@ -13,9 +13,14 @@ Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 Preferences = "21216c6a-2e73-6563-6e65-726566657250"
 REPL = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 WinReg = "1b915085-20d7-51cf-bf83-8f477d6f5128"
+
+[weakdeps]
+AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
+
+[extensions]
+RCallAxisArraysExt = ["AxisArrays"]
 
 [compat]
 AxisArrays = "0.3, 0.4"
@@ -26,7 +31,6 @@ DataStructures = "0.5, 0.6, 0.7, 0.8, 0.9, 0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0
 IJulia = "1.25"
 Logging = "0, 1"
 Preferences = "1"
-Requires = "0.5.2, 1"
 StatsModels = "0.6, 0.7"
 Weave = "0.10"
 WinReg = "0.2, 0.3, 1"

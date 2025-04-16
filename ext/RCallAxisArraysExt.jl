@@ -1,6 +1,11 @@
-using .AxisArrays
+module RCallAxisArraysExt
 
-function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
+using AxisArrays
+using RCall
+
+using RCall: Const, RClass, OrderedDict, VectorSxp, protect, sexp, unprotect
+
+function RCall.rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
     dnames = getattrib(r, Const.DimNamesSymbol)
     isnull(dnames) && error("r has no dimnames")
     dsym = rcopy(Array{Symbol}, getnames(dnames))
@@ -16,7 +21,7 @@ function rcopy(::Type{AxisArray}, r::Ptr{S}) where {S<:VectorSxp}
     AxisArray(rcopy(AbstractArray, r), as...)
 end
 
-function sexp(::Type{RClass{:array}}, aa::AxisArray)
+function RCall.sexp(::Type{RClass{:array}}, aa::AxisArray)
     rv = protect(sexp(aa.data))
     try
         d = OrderedDict(
@@ -29,5 +34,6 @@ function sexp(::Type{RClass{:array}}, aa::AxisArray)
     rv
 end
 
-# AxisArray
-sexpclass(v::AxisArray) = RClass{:array}
+RCall.sexpclass(v::AxisArray) = RClass{:array}
+
+end  # module
