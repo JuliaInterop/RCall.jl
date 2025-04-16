@@ -1,11 +1,12 @@
 using RCall
 using Logging
 using Test
+using TestSetExtensions
 
 using DataStructures: OrderedDict
 using RCall: RClass
 
-@testset "installation" begin
+@testset ExtendedTestSet "installation" begin
     include("installation.jl")
 end
 
@@ -41,7 +42,7 @@ println(R"sessionInfo()")
 
 println(R"l10n_info()")
 
-@testset "RCall" begin
+@testset ExtendedTestSet "RCall" begin
 
     # https://github.com/JuliaStats/RCall.jl/issues/68
     @test hd == homedir()
