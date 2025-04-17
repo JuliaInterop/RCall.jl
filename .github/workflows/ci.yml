@@ -21,20 +21,15 @@ jobs:
           - 'nightly'
         R:
           - 'release'
+          - '4.4'
           - '4.0'
           - '3.4'
-        os: [ubuntu-latest]
+        os: 
+          - windows-latest
+          - windows-2025
+          - windows-2022
+          - windows-2019
         experimental: [false]
-        include:
-          # test macOS and Windows with latest Julia only
-          - os: macOS-latest
-            version: 1
-            experimental: false
-            R: 'release'
-          - os: windows-2025
-            version: 1
-            experimental: false
-            R: '4.4' # as of writing, R release CI is intractably slow on Windows 
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
