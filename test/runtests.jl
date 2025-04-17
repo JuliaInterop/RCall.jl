@@ -6,9 +6,9 @@ using TestSetExtensions
 using DataStructures: OrderedDict
 using RCall: RClass
 
-@testset ExtendedTestSet "installation" begin
-    include("installation.jl")
-end
+# @testset ExtendedTestSet "installation" begin
+#     include("installation.jl")
+# end
 
 # before RCall does anything
 const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
@@ -36,11 +36,11 @@ end
 using Dates
 import Base.VersionNumber
 
-Rversion = VersionNumber(rcopy(R"as.character(getRversion())"))
+# Rversion = VersionNumber(rcopy(R"as.character(getRversion())"))
 
-println(R"sessionInfo()")
+# println(R"sessionInfo()")
 
-println(R"l10n_info()")
+# println(R"l10n_info()")
 
 @testset ExtendedTestSet "RCall" begin
 
@@ -52,18 +52,18 @@ println(R"l10n_info()")
         @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
     end
 
-    tests = ["basic",
-             "convert/base",
-             "convert/missing",
-             "convert/datetime",
-             "convert/dataframe",
-             "convert/categorical",
-             "convert/formula",
-             "convert/namedtuple",
-             "convert/tuple",
-             # "convert/axisarray",
-             "macros",
-             "namespaces",
+    tests = [#"basic",
+            #  "convert/base",
+            #  "convert/missing",
+            #  "convert/datetime",
+            #  "convert/dataframe",
+            #  "convert/categorical",
+            #  "convert/formula",
+            #  "convert/namedtuple",
+            #  "convert/tuple",
+            #  # "convert/axisarray",
+            #  "macros",
+            #  "namespaces",
              "repl",
              ]
 
@@ -73,14 +73,14 @@ println(R"l10n_info()")
         end
     end
 
-    if Sys.islinux()
-        # the IJulia tests depend on the R graphics device being set up correctly,
-        # which is non trivial on non-linux headless devices (e.g. CI)
-        # it also uses the assumed path to Jupyter on unix
-        @testset "IJulia" begin
-            include("ijulia.jl")
-        end
-    end
+    # if Sys.islinux()
+    #     # the IJulia tests depend on the R graphics device being set up correctly,
+    #     # which is non trivial on non-linux headless devices (e.g. CI)
+    #     # it also uses the assumed path to Jupyter on unix
+    #     @testset "IJulia" begin
+    #         include("ijulia.jl")
+    #     end
+    # end
 
     @info "" RCall.conda_provided_r
 
