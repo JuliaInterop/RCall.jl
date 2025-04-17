@@ -31,7 +31,7 @@ jobs:
             version: 1
             experimental: false
             R: 'release'
-          - os: windows-latest
+          - os: windows-2025
             version: 1
             experimental: false
             R: '4.4' # as of writing, R release CI is intractably slow on Windows 
