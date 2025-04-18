@@ -22,7 +22,6 @@ import ..RCall:
     REvalError,
     RParseEOF
 
-
 function simple_showerror(io::IO, er)
     Base.with_output_color(:red, io) do io
         print(io, "ERROR: ")
@@ -137,11 +136,20 @@ mutable struct RCompletionProvider <: LineEdit.CompletionProvider
 end
 
 # Julia PR #54311 (backported to 1.11) added the `hint` argument
-if v"1.11.0-beta1.46" <= VERSION < v"1.12.0-DEV.0" || VERSION >= v"1.12.0-DEV.468"
+@static if v"1.11.0-beta1.46" <= VERSION < v"1.12.0-DEV.0" || VERSION >= v"1.12.0-DEV.468"
     using REPL.REPLCompletions: bslash_completions
 else
     function bslash_completions(string::String, pos::Int, hint::Bool=false)
         return REPLCompletions.bslash_completions(string, pos)
+    end
+end
+
+# Julia PR 54800 messed up REPL completion, fix adapted from https://github.com/JuliaLang/IJulia.jl/pull/1147 
+@static if VERSION < v"1.12.0-DEV.1716"
+    completion_text_ = REPLCompletions.completion_text
+else
+    function completion_text_(c)::String
+        return REPLCompletions.named_completion(c).completion
     end
 end
 
@@ -152,7 +160,7 @@ function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     full = LineEdit.input_string(s)
     ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
     if length(ret) > 0 && should_complete
-        return map(REPLCompletions.completion_text, ret), partial[range], should_complete
+        return map(completion_text_, ret), partial[range], should_complete
     end
 
     # complete r
