@@ -145,6 +145,14 @@ else
     end
 end
 
+if isdefined(REPLCompletions, :named_completion)
+    # julia#54800 (julia 1.12)
+    repl_completion_text(c) = REPLCompletions.named_completion(c).completion::String
+else
+    # julia#26930
+    repl_completion_text(c) = REPLCompletions.completion_text(c)
+end
+
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     buf = s.input_buffer
     partial = String(buf.data[1:buf.ptr-1])
@@ -152,7 +160,7 @@ function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     full = LineEdit.input_string(s)
     ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
     if length(ret) > 0 && should_complete
-        return map(REPLCompletions.completion_text, ret), partial[range], should_complete
+        return map(repl_completion_text, ret), partial[range], should_complete
     end
 
     # complete r
