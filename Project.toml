@@ -51,4 +51,4 @@ TestSetExtensions = "98d24dd4-01ad-11ea-1b02-c9a08f80db04"
 Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [targets]
-test = ["Dates", "AxisArrays", "REPL", "Test", "Random", "CondaPkg", "Pkg", "Logging", "IJulia", "Weave", "TestSetExtensions"]
+test = ["Dates", "REPL", "Test", "Random", "Logging", "TestSetExtensions"]
