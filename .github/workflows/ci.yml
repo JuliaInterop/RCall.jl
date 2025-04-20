@@ -18,6 +18,7 @@ jobs:
         version:
           - 'min'
           - '1'
+          - 'beta'
           - 'nightly'
         R:
           - 'release'
