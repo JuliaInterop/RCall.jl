@@ -144,12 +144,11 @@ else
     end
 end
 
-@static if VERSION < v"1.12.0-DEV.1716"
-    completion_text_ = REPLCompletions.completion_text
+# Julia PR 54800 messed up REPL completion, fix adapted from https://github.com/JuliaLang/IJulia.jl/pull/1147 
+if isdefined(REPLCompletions, :named_completion) # julia#54800 (julia 1.12)
+    completion_text_(c) = REPLCompletions.named_completion(c).completion::String
 else
-    function completion_text_(c)::String
-        return REPLCompletions.named_completion(c).completion
-    end
+    completion_text_(c) = REPLCompletions.completion_text(c)
 end
 
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
