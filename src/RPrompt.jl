@@ -75,9 +75,9 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
 end
 
 @static if isdefined(LineEdit, :check_show_hints)
-    refresh_line_(s) = LineEdit.refresh_line(s)
-else
     refresh_line_(s) = LineEdit.check_show_hint(s)
+else
+    refresh_line_(s) = LineEdit.refresh_line(s)
 end
 
 function bracketed_paste_callback(s, o...)
@@ -139,12 +139,12 @@ function bracketed_paste_callback(s, o...)
     refresh_line_(s)
 end
 
-mutable struct RCompletionProvider <: LineEdit.CompletionProvider
+struct RCompletionProvider <: LineEdit.CompletionProvider
     repl::REPL.LineEditREPL
     line_modify_lock::ReentrantLock
     hint_generation_lock::ReentrantLock
     function RCompletionProvider(repl::REPL.LineEditREPL)
-        mistate = repl.mistate
+        repl.mistate = @something(repl.mistate, LineEdit.init_state(REPL.terminal(repl), interface))
         @static if hasfield(LineEdit.MIState, :hint_generation_lock)
             hint_generation_lock = repl.mistate.hint_generation_lock
         else
@@ -258,14 +258,13 @@ function create_r_repl(repl, main)
 end
 
 function repl_init(repl)
-    mirepl = isdefined(repl,:mi) ? repl.mi : repl
     if !isdefined(repl, :interface)
-        mirepl.interface = REPL.setup_interface(repl)
+        repl.interface = REPL.setup_interface(repl)
     end
-    interface = mirepl.interface
+    interface = repl.interface
     main_mode = interface.modes[1]
-    r_mode = create_r_repl(mirepl, main_mode)
-    push!(mirepl.interface.modes,r_mode)
+    r_mode = create_r_repl(repl, main_mode)
+    push!(repl.interface.modes,r_mode)
 
     r_prompt_keymap = Dict{Any,Any}(
         '$' => function (s, args...)
@@ -285,8 +284,7 @@ function repl_init(repl)
 end
 
 function repl_inited(repl)
-    mirepl = isdefined(repl,:mi) ? repl.mi : repl
-    interface = mirepl.interface
+    interface = repl.interface
 
     return any(:prompt in fieldnames(typeof(m)) && m.prompt == "R> " for m in interface.modes)
 end
