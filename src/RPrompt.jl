@@ -144,7 +144,7 @@ struct RCompletionProvider <: LineEdit.CompletionProvider
     line_modify_lock::ReentrantLock
     hint_generation_lock::ReentrantLock
     function RCompletionProvider(repl::REPL.LineEditREPL)
-        repl.mistate = @something(repl.mistate, LineEdit.init_state(REPL.terminal(repl), interface))
+        repl.mistate = @something(repl.mistate, LineEdit.init_state(REPL.terminal(repl), repl.interface))
         @static if hasfield(LineEdit.MIState, :hint_generation_lock)
             hint_generation_lock = repl.mistate.hint_generation_lock
         else
