@@ -27,7 +27,9 @@ Base.link_pipe!(err, reader_supports_async=true, writer_supports_async=true)
 
 repl = REPL.LineEditREPL(FakeTerminal(input.out, output.in, err.in), true)
 
-@async REPL.run_repl(repl; backend_on_current_task=false)
+@info "Starting REPL...."
+Threads.@spawn REPL.run_repl(repl)
+@info "REPL spawned"
 
 send_repl(x, enter=true) = write(input, enter ? "$x\n" : x)
 
