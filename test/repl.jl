@@ -37,7 +37,7 @@ function read_repl(io::IO, x)
     cache = Ref{Any}("")
     read_task = @task cache[] = readuntil(io, x)
     t = Base.Timer((_) -> Base.throwto(read_task,
-                ErrorException("Expect \"$x\", but wait too long.")), 5)
+                ErrorException("Expect \"$x\", but wait too long.")), 2)
     schedule(read_task)
     fetch(read_task)
     close(t)
