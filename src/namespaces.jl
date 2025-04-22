@@ -100,16 +100,20 @@ macro rimport(x, args...)
 end
 
 """
-Load all exported functions/objects of an R package to the current module. Almost equivalent to
+    @rlibrary(package)
+
+Load an R package as if it were a Julia package, bringing all exported bindings into scope.
+
+More or less equivalent to:
 ```
 __temp__ = rimport("ggplot2")
 using .__temp__
 ```
 """
 macro rlibrary(x)
-    m = gensym("RCall")
-    quote
-        $(esc(m)) = rimport($(QuoteNode(x)))
-        Core.eval(@__MODULE__, Expr(:using, Expr(:., :., $(QuoteNode(m)))))
-    end
+    tmp = gensym("RCall")
+    ex = Expr(:block,
+              Expr(:(=), esc(tmp), Expr(:call, GlobalRef(@__MODULE__, :rimport), QuoteNode(x))),
+              Expr(:using, Expr(:., :., tmp)))
+    return Expr(:toplevel, ex)
 end
