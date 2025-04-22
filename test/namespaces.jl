@@ -17,7 +17,8 @@ module NamespaceTests
         @test rcopy(rcall(MASS.ginv, RObject([1 2; 0 4]))) ≈ [1 -0.5; 0 0.25]
         @rimport MASS as mass
         @test rcopy(rcall(mass.ginv, RObject([1 2; 0 4]))) ≈ [1 -0.5; 0 0.25]
-        @rlibrary MASS
+        # explicit eval necessary as of Julia 1.12 because we're nested under an `if`
+        @eval(@rlibrary MASS)
         @test rcopy(rcall(ginv, RObject([1 2; 0 4]))) ≈ [1 -0.5; 0 0.25]
     end
 
