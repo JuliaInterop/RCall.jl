@@ -139,12 +139,12 @@ function bracketed_paste_callback(s, o...)
     refresh_line_(s)
 end
 
-mutable struct RCompletionProvider <: LineEdit.CompletionProvider
+struct RCompletionProvider <: LineEdit.CompletionProvider
     repl::REPL.LineEditREPL
     line_modify_lock::ReentrantLock
     hint_generation_lock::ReentrantLock
     function RCompletionProvider(repl::REPL.LineEditREPL)
-        mistate = repl.mistate
+        repl.mistate = @something(repl.mistate, LineEdit.init_state(REPL.terminal(repl), interface))
         @static if hasfield(LineEdit.MIState, :hint_generation_lock)
             hint_generation_lock = repl.mistate.hint_generation_lock
         else
@@ -262,7 +262,6 @@ function repl_init(repl)
         repl.interface = REPL.setup_interface(repl)
     end
     interface = repl.interface
-    repl.mistate = @something(repl.mistate, LineEdit.init_state(REPL.terminal(repl), interface))
     main_mode = interface.modes[1]
     r_mode = create_r_repl(repl, main_mode)
     push!(repl.interface.modes,r_mode)
