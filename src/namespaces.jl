@@ -112,7 +112,7 @@ using .__temp__
 """
 macro rlibrary(x)
     tmp = gensym("RCall")
-    ex = Expr(:block,
+    ex = Expr(:block, __source__,
               Expr(:(=), esc(tmp), Expr(:call, GlobalRef(@__MODULE__, :rimport), QuoteNode(x))),
               Expr(:using, Expr(:., :., tmp)))
     return Expr(:toplevel, ex)
