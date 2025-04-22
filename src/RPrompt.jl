@@ -258,14 +258,13 @@ function create_r_repl(repl, main)
 end
 
 function repl_init(repl)
-    mirepl = isdefined(repl,:mi) ? repl.mi : repl
     if !isdefined(repl, :interface)
-        mirepl.interface = REPL.setup_interface(repl)
+        repl.interface = REPL.setup_interface(repl)
     end
-    interface = mirepl.interface
+    interface = repl.interface
     main_mode = interface.modes[1]
-    r_mode = create_r_repl(mirepl, main_mode)
-    push!(mirepl.interface.modes,r_mode)
+    r_mode = create_r_repl(repl, main_mode)
+    push!(repl.interface.modes,r_mode)
 
     r_prompt_keymap = Dict{Any,Any}(
         '$' => function (s, args...)
@@ -285,8 +284,7 @@ function repl_init(repl)
 end
 
 function repl_inited(repl)
-    mirepl = isdefined(repl,:mi) ? repl.mi : repl
-    interface = mirepl.interface
+    interface = repl.interface
 
     return any(:prompt in fieldnames(typeof(m)) && m.prompt == "R> " for m in interface.modes)
 end
