@@ -75,9 +75,9 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
 end
 
 @static if isdefined(LineEdit, :check_show_hints)
-    refresh_line_(s) = LineEdit.refresh_line(s)
-else
     refresh_line_(s) = LineEdit.check_show_hint(s)
+else
+    refresh_line_(s) = LineEdit.refresh_line(s)
 end
 
 function bracketed_paste_callback(s, o...)
