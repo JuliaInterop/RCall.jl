@@ -262,6 +262,7 @@ function repl_init(repl)
         repl.interface = REPL.setup_interface(repl)
     end
     interface = repl.interface
+    repl.mistate = @something(repl.mistate, LineEdit.init_state(REPL.terminal(repl), interface))
     main_mode = interface.modes[1]
     r_mode = create_r_repl(repl, main_mode)
     push!(repl.interface.modes,r_mode)
