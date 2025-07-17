@@ -5,7 +5,7 @@ concurrency:
 on:
   push:
     branches:
-      - master
+      - main
     tags: '*'
   pull_request:
 
@@ -17,6 +17,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
+          r-version: '4.4'
       - run: echo "LD_LIBRARY_PATH=$(R RHOME)/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-docdeploy@v1

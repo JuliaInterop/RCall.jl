@@ -100,6 +100,9 @@ send_repl("\$x")
 send_repl("\$not_found")
 @test check_repl_stderr("UndefVarError")
 
+send_repl("(x <- 1 + 1) # inline comment")
+@test check_repl_stdout("[1] 2")
+
 # check visibility
 
 send_repl("'apple'")
@@ -109,3 +112,14 @@ send_repl("paste0('check', 'point')")
 send_repl("invisible('apple')")
 send_repl("paste0('check', 'point')")
 @test !occursin("\"apple\"", read_repl(output, "checkpoint"))
+
+# bracked paste callback
+send_repl("\e[200~1 + 1\n\n2 + 2\n3 + 3\e[201~\n")
+@test check_repl_stdout("[1] 6")
+
+send_repl("\e[200~1 + \n 1\n\e[201~")
+@test check_repl_stdout("[1] 2")
+
+send_repl("\e[200~1 + 1\e[201~ +")
+
+@test RCall.RPrompt.repl_inited(repl)

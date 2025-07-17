@@ -114,7 +114,7 @@ end
 function rcopy(::Type{Vector{Bool}},s::Ptr{LglSxp})
     a = Array{Bool}(undef, length(s))
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -122,7 +122,7 @@ end
 function rcopy(::Type{BitVector},s::Ptr{LglSxp})
     a = BitArray(undef, length(s))
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -135,7 +135,7 @@ end
 function rcopy(::Type{Array{Bool}},s::Ptr{LglSxp})
     a = Array{Bool}(undef, size(s)...)
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -143,7 +143,7 @@ end
 function rcopy(::Type{BitArray},s::Ptr{LglSxp})
     a = BitArray(undef, size(s)...)
     v = unsafe_vec(s)
-    for i = 1:length(a)
+    for i in eachindex(a, v)
         a[i] = v[i] != 0
     end
     a
@@ -194,7 +194,7 @@ struct RFunction{F}
     f::F
 end
 (rf::RFunction)(args...) = rcopy(rcall_p(rf.f,args...))
-        
+
 # FunctionSxp
 function rcopy(::Type{Function}, s::Ptr{S}) where S<:FunctionSxp
     # prevent s begin gc'ed
@@ -240,7 +240,7 @@ for (J, S, C) in ((:Integer, :IntSxp, :integer),
         end
         function sexp(::Type{RClass{$(QuoteNode(C))}}, a::AbstractArray{T}) where T<:$J
             ra = allocArray($S, size(a)...)
-            copyto!(unsafe_vec(ra),a)
+            copyto!(unsafe_vec(ra), a)
             ra
         end
     end
@@ -264,8 +264,10 @@ sexp(::Type{RClass{:character}},st::AbstractString) = sexp(RClass{:character}, s
 function sexp(::Type{RClass{:character}}, a::AbstractArray{T}) where T<:AbstractString
     ra = protect(allocArray(StrSxp, size(a)...))
     try
-        for i in 1:length(a)
-            ra[i] = a[i]
+        # we want this to work even if a doesn't use one-based indexing
+        # we only care about ra having the same length (which it does)
+        for (i, idx) in zip(eachindex(ra), eachindex(a))
+            ra[i] = a[idx]
         end
     finally
         unprotect(1)
@@ -296,8 +298,10 @@ end
 function sexp(::Type{RClass{:list}}, a::AbstractArray)
     ra = protect(allocArray(VecSxp, size(a)...))
     try
-        for i in 1:length(a)
-            ra[i] = a[i]
+        # we want this to work even if a doesn't use one-based indexing
+        # we only care about ra having the same length (which it does)
+        for (i, idx) in zip(eachindex(ra), eachindex(a))
+            ra[i] = a[idx]
         end
     finally
         unprotect(1)

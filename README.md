@@ -4,7 +4,10 @@
 [![Docs Development](https://img.shields.io/badge/docs-dev-blue.svg)](http://juliainterop.github.io/RCall.jl/dev)
 
 [![CI status](https://github.com/JuliaInterop/RCall.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaInterop/RCall.jl/actions/workflows/ci.yml)
-[![Code coverage](https://codecov.io/gh/JuliaInterop/RCall.jl/branch/master/graph/badge.svg?token=8ED5Wdm8W9)](https://codecov.io/gh/JuliaInterop/RCall.jl)
+[![Code coverage](https://codecov.io/gh/JuliaInterop/RCall.jl/branch/main/graph/badge.svg?token=8ED5Wdm8W9)](https://codecov.io/gh/JuliaInterop/RCall.jl)
+
+
+[![DOI](https://zenodo.org/badge/28725415.svg)](https://zenodo.org/doi/10.5281/zenodo.12771368)
 
 R is a language for statistical computing and graphics that has been around for couple of decades and it has one of the most impressive collections of scientific and statistical packages of any environment. Recently, the Julia language has become an attractive alternative because it provides the remarkable performance of a low-level language without sacrificing the readability and ease-of-use of high-level languages. However, Julia still lacks the depth and scale of the R package environment.
 

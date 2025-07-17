@@ -1,11 +1,12 @@
 using RCall
 using Logging
 using Test
+using TestSetExtensions
 
 using DataStructures: OrderedDict
 using RCall: RClass
 
-@testset "installation" begin
+@testset ExtendedTestSet "installation" begin
     include("installation.jl")
 end
 
@@ -41,7 +42,7 @@ println(R"sessionInfo()")
 
 println(R"l10n_info()")
 
-@testset "RCall" begin
+@testset ExtendedTestSet "RCall" begin
 
     # https://github.com/JuliaStats/RCall.jl/issues/68
     @test hd == homedir()
@@ -69,6 +70,15 @@ println(R"l10n_info()")
     for t in tests
         @eval @testset $t begin
             include(string($t, ".jl"))
+        end
+    end
+
+    if Sys.islinux()
+        # the IJulia tests depend on the R graphics device being set up correctly,
+        # which is non trivial on non-linux headless devices (e.g. CI)
+        # it also uses the assumed path to Jupyter on unix
+        @testset "IJulia" begin
+            include("ijulia.jl")
         end
     end
 

@@ -41,12 +41,19 @@ for (S, J) in ((:LglSxp, "LOGICAL"), (:IntSxp, "INTEGER"),
 end
 
 """
+    unsafe_vec(r::RObject{<:VectorSxp})
+    unsafe_vec(s::Ptr{S})
+
 Represent the contents of a VectorSxp type as a `Vector`.
 
 This does __not__ copy the contents.  If the argument is not named (in R) or
 otherwise protected from R's garbage collection (e.g. by keeping the
 containing RObject in scope) the contents of this vector can be modified or
 could cause a memory error when accessed.
+
+In the special case that the R vector is empty, then an empty vector is
+allocated on the Julia end. This is necessary as of R 4.5 to avoid issues
+with pointer alignment and an optimization for empty vectors on the R end.
 
 The contents are as stored in R.  Missing values (NA's) are represented
 in R by sentinels.  Missing data values in RealSxp and CplxSxp show
@@ -55,10 +62,17 @@ as `-2147483648`, the minimum 32-bit integer value.  Internally a `LglSxp` is
 represented as `Vector{Int32}`.  The convention is that `0` is `false`,
 `-2147483648` is `NA` and all other values represent `true`.
 """
-unsafe_vec(s::Ptr{S}) where S<:VectorSxp = unsafe_wrap(Array, dataptr(s), length(s))
-unsafe_vec(r::RObject{S}) where S<:VectorSxp = unsafe_vec(r.p)
+unsafe_vec(r::RObject{<:VectorSxp}) = unsafe_vec(r.p)
+
+function unsafe_vec(s::Ptr{S}) where S <: VectorSxp
+    length(s) == 0 && return Vector{eltype(S)}(undef, 0)
+    return unsafe_wrap(Array, dataptr(s), length(s))
+end
 
 """
+    unsafe_array(r::RObject{S})
+    unsafe_array(s::Ptr{S})
+
 The same as `unsafe_vec`, except returns an appropriately sized array.
 """
 unsafe_array(s::Ptr{S}) where S<:VectorSxp =  unsafe_wrap(Array, dataptr(s), size(s))
@@ -99,6 +113,7 @@ function iterate(s::Ptr{S}, state) where S<:VectorSxp
     (s[state], state)
 end
 
+Base.eachindex(s::Ptr{<:VectorSxp}) = Base.OneTo(length(s))
 
 """
 Set element of a VectorSxp by a label.
@@ -583,8 +598,17 @@ end
 getNamespace(str::String) = reval(rlang(RCall.Const.BaseNamespace["getNamespace"], str))
 
 
-"Set the variable .Last.value to a given value"
-function set_last_value(s::Ptr{S}) where S<:Sxp
-    ccall((:SET_SYMVALUE,libR),Nothing,(Ptr{SymSxp},Ptr{UnknownSxp}),sexp(Const.LastvalueSymbol),s)
-    nothing
+"""
+    set_last_value(s::Ptr{<:Sxp})
+
+Set the variable `.Last.value` to a given value
+"""
+function set_last_value(s::Ptr{<:Sxp})
+    # we use Rf_defineVar and not Rf_setValue because .Last.value
+    # may not exist in the non-interactive R session that we create.
+    ccall((:Rf_defineVar, libR),
+           Nothing,
+          (Ptr{SymSxp}, Ptr{UnknownSxp}, Ptr{EnvSxp}),
+          sexp(Const.LastvalueSymbol), s, Const.GlobalEnv.p)
+    return nothing
 end
