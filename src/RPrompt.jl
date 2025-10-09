@@ -8,11 +8,17 @@ import ..RCall:
     libR,
     rparse_p,
     reval_p,
+    reval,
     findNamespace,
+    getNamespace,
+    rcall,
+    rlang,
+    rlang_p,
     rcall_p,
     rprint,
     rcopy,
     render,
+    sexp,
     protect,
     unprotect,
     prepare_inline_julia_code,
@@ -177,9 +183,10 @@ else
 end
 
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
+    reval("library(utils)")
     @lock c.hint_generation_lock begin
         buf = s.input_buffer
-        partial = String(buf.data[1:buf.ptr-1])
+        partial = String(take!(copy(buf))) # String(buf.data[1:buf.ptr-1])
         # complete latex
         full = LineEdit.input_string(s)
         ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
@@ -188,12 +195,23 @@ function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
         end
 
         # complete r
-        utils = findNamespace("utils")
-        rcall_p(utils[".assignLinebuffer"], partial)
-        rcall_p(utils[".assignEnd"], length(partial))
-        token = rcopy(rcall_p(utils[".guessTokenFromLine"]))
-        rcall_p(utils[".completeToken"])
-        ret = rcopy(Array, rcall_p(utils[".retrieveCompletions"]))
+        # XXX As of Julia 1.12, this happens on a background thread
+        # and findNamespace + function pointers seems to be unsafe in that context, so we must
+        # use the slightly slower explicit language
+
+        rcall_p(reval("utils:::.assignLinebuffer"), partial)
+        rcall_p(reval("utils:::.assignEnd"), length(partial))
+        token = rcopy(reval("utils:::.guessTokenFromLine()"))
+        reval("utils:::.completeToken()")
+        ret = rcopy(Vector{String}, reval("utils:::.retrieveCompletions()"))::Vector{String}
+
+        # faster way that doesn't seem to play nice with testing on Julia 1.12
+        # utils = findNamespace("utils")
+        # rcall_p(utils[".assignLinebuffer"], partial)
+        # rcall_p(utils[".assignEnd"], length(partial))
+        # token = rcopy(rcall_p(utils[".guessTokenFromLine"]))
+        # rcall_p(utils[".completeToken"])
+        # ret = rcopy(Array, rcall_p(utils[".retrieveCompletions"]))
 
         if length(ret) > 0
             return ret, token, true

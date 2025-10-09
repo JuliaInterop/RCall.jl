@@ -36,9 +36,9 @@ send_repl(x, enter=true) = write(input, enter ? "$x\n" : x)
 function read_repl(io::IO, x)
     cache = Ref{Any}("")
     read_task = @task cache[] = readuntil(io, x)
+    schedule(read_task)
     t = Base.Timer((_) -> Base.throwto(read_task,
                 ErrorException("Expect \"$x\", but wait too long.")), 2)
-    schedule(read_task)
     fetch(read_task)
     close(t)
     cache[]
@@ -73,12 +73,15 @@ send_repl("\\alp\t", false)
 send_repl("\t", false)
 @test check_repl_stdout("α")
 
+@info "linebreak"
 send_repl("")
 @test check_repl_stdout("\n")
 
+@info "foo"
 send_repl("foo]")
 @test check_repl_stderr("unexpected")
 
+@info "stop"
 send_repl("stop('something is wrong')")
 @test check_repl_stderr("something is wrong")
 
