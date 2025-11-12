@@ -32,7 +32,7 @@ jobs:
             experimental: false
             R: 'release'
           - os: windows-latest
-            version: 1
+            version: lts
             experimental: false
             R: 'release'
     steps:
