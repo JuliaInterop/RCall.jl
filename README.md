@@ -27,4 +27,4 @@ See the [Getting Started](http://juliainterop.github.io/RCall.jl/stable/gettings
 
 # Calling Julia from R
 
-See the JuliaCall library to [call Julia from R](https://non-contradiction.github.io/JuliaCall//index.html).
+See the JuliaCall library to [call Julia from R](https://juliainterop.github.io/JuliaCall/index.html).

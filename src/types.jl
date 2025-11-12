@@ -517,10 +517,10 @@ RObject(x::RObject) = x
 Representation of R Class.
 
 Examples:
-- `RCall{:logical}`
-- `RCall{:integer}`
-- `RCall{:numeric}`
-- `RCall{:character}`
+- `RCall.RClass{:logical}`
+- `RCall.RClass{:integer}`
+- `RCall.RClass{:numeric}`
+- `RCall.RClass{:character}`
 """
 struct RClass{Symbol} end
 
