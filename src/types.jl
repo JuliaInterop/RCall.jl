@@ -14,7 +14,7 @@ abstract type Sxp end # SEXPREC
 
 Representation of `sxpinfo_struct`.
 """
-const SxpPtrInfo = UInt32 # sxpinfo_struct
+const SxpPtrInfo = UInt64 # sxpinfo_struct as per recent "R Internals" manual
 
 """
     SxpHead <: Sxp
