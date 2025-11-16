@@ -33,11 +33,11 @@ jobs:
             experimental: false
             R: 'release'
           - os: windows-latest
-            version: 1
+            version: lts
             experimental: false
-            R: '4.4' # as of writing, R release CI is intractably slow on Windows 
+            R: 'release'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}

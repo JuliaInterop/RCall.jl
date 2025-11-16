@@ -14,7 +14,7 @@ abstract type Sxp end # SEXPREC
 
 Representation of `sxpinfo_struct`.
 """
-const SxpPtrInfo = UInt32 # sxpinfo_struct
+const SxpPtrInfo = UInt64 # sxpinfo_struct as per recent "R Internals" manual
 
 """
     SxpHead <: Sxp
@@ -517,10 +517,10 @@ RObject(x::RObject) = x
 Representation of R Class.
 
 Examples:
-- `RCall{:logical}`
-- `RCall{:integer}`
-- `RCall{:numeric}`
-- `RCall{:character}`
+- `RCall.RClass{:logical}`
+- `RCall.RClass{:integer}`
+- `RCall.RClass{:numeric}`
+- `RCall.RClass{:character}`
 """
 struct RClass{Symbol} end
 
