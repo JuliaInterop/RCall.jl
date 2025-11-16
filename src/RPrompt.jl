@@ -199,19 +199,19 @@ function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
         # and findNamespace + function pointers seems to be unsafe in that context, so we must
         # use the slightly slower explicit language
 
-        rcall_p(reval("utils:::.assignLinebuffer"), partial)
-        rcall_p(reval("utils:::.assignEnd"), length(partial))
-        token = rcopy(reval("utils:::.guessTokenFromLine()"))
-        reval("utils:::.completeToken()")
-        ret = rcopy(Vector{String}, reval("utils:::.retrieveCompletions()"))::Vector{String}
+        # rcall_p(reval("utils:::.assignLinebuffer"), partial)
+        # rcall_p(reval("utils:::.assignEnd"), length(partial))
+        # token = rcopy(reval("utils:::.guessTokenFromLine()"))
+        # reval("utils:::.completeToken()")
+        # ret = rcopy(Vector{String}, reval("utils:::.retrieveCompletions()"))::Vector{String}
 
         # faster way that doesn't seem to play nice with testing on Julia 1.12
-        # utils = findNamespace("utils")
-        # rcall_p(utils[".assignLinebuffer"], partial)
-        # rcall_p(utils[".assignEnd"], length(partial))
-        # token = rcopy(rcall_p(utils[".guessTokenFromLine"]))
-        # rcall_p(utils[".completeToken"])
-        # ret = rcopy(Array, rcall_p(utils[".retrieveCompletions"]))
+        utils = findNamespace("utils")
+        rcall_p(utils[".assignLinebuffer"], partial)
+        rcall_p(utils[".assignEnd"], length(partial))
+        token = rcopy(rcall_p(utils[".guessTokenFromLine"]))
+        rcall_p(utils[".completeToken"])
+        ret = rcopy(Array, rcall_p(utils[".retrieveCompletions"]))
 
         if length(ret) > 0
             return ret, token, true
