@@ -167,7 +167,7 @@ struct RCompletionProvider <: LineEdit.CompletionProvider
 end
 
 # Julia PR #54311 (backported to 1.11) added the `hint` argument
-@static if v"1.11.0-beta1.46" <= VERSION < v"1.12.0-DEV.0" || VERSION >= v"1.12.0-DEV.468"
+if v"1.11.0-beta1.46" <= VERSION < v"1.12.0-DEV.0" || VERSION >= v"1.12.0-DEV.468"
     using REPL.REPLCompletions: bslash_completions
 else
     function bslash_completions(string::String, pos::Int, hint::Bool=false)
