@@ -27,9 +27,9 @@ Base.link_pipe!(err, reader_supports_async=true, writer_supports_async=true)
 
 repl = REPL.LineEditREPL(FakeTerminal(input.out, output.in, err.in), true)
 
-repltask = @async begin
-    REPL.run_repl(repl)
-end
+@info "Starting REPL...."
+Threads.@spawn REPL.run_repl(repl)
+@info "REPL spawned"
 
 send_repl(x, enter=true) = write(input, enter ? "$x\n" : x)
 
@@ -37,7 +37,7 @@ function read_repl(io::IO, x)
     cache = Ref{Any}("")
     read_task = @task cache[] = readuntil(io, x)
     t = Base.Timer((_) -> Base.throwto(read_task,
-                ErrorException("Expect \"$x\", but wait too long.")), 5)
+                ErrorException("Expect \"$x\", but wait too long.")), 2)
     schedule(read_task)
     fetch(read_task)
     close(t)
