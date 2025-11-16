@@ -8,17 +8,11 @@ import ..RCall:
     libR,
     rparse_p,
     reval_p,
-    reval,
     findNamespace,
-    getNamespace,
-    rcall,
-    rlang,
-    rlang_p,
     rcall_p,
     rprint,
     rcopy,
     render,
-    sexp,
     protect,
     unprotect,
     prepare_inline_julia_code,
@@ -183,10 +177,9 @@ else
 end
 
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
-    reval("library(utils)")
     @lock c.hint_generation_lock begin
         buf = s.input_buffer
-        partial = String(take!(copy(buf))) # String(buf.data[1:buf.ptr-1])
+        partial = String(buf.data[1:buf.ptr-1])
         # complete latex
         full = LineEdit.input_string(s)
         ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]

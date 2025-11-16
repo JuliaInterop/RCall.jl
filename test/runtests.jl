@@ -6,9 +6,9 @@ using TestSetExtensions
 using DataStructures: OrderedDict
 using RCall: RClass
 
-# @testset ExtendedTestSet "installation" begin
-#     include("installation.jl")
-# end
+@testset ExtendedTestSet "installation" begin
+    include("installation.jl")
+end
 
 # before RCall does anything
 const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
@@ -52,21 +52,20 @@ println(R"l10n_info()")
         @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
     end
 
-    # tests = ["basic",
-    #          "convert/base",
-    #          "convert/missing",
-    #          "convert/datetime",
-    #          "convert/dataframe",
-    #          "convert/categorical",
-    #          "convert/formula",
-    #          "convert/namedtuple",
-    #          "convert/tuple",
-    #          # "convert/axisarray",
-    #          "macros",
-    #          "namespaces",
-    #          "repl",
-    #          ]
-    tests = ["repl"]
+    tests = ["basic",
+             "convert/base",
+             "convert/missing",
+             "convert/datetime",
+             "convert/dataframe",
+             "convert/categorical",
+             "convert/formula",
+             "convert/namedtuple",
+             "convert/tuple",
+             # "convert/axisarray",
+             "macros",
+             "namespaces",
+             "repl",
+             ]
 
     for t in tests
         if VERSION >= v"1.12" && t == "repl"
@@ -80,16 +79,16 @@ println(R"l10n_info()")
         end
     end
 
-    # if Sys.islinux()
-    #     # the IJulia tests depend on the R graphics device being set up correctly,
-    #     # which is non trivial on non-linux headless devices (e.g. CI)
-    #     # it also uses the assumed path to Jupyter on unix
-    #     @testset "IJulia" begin
-    #         include("ijulia.jl")
-    #     end
-    # end
+    if Sys.islinux()
+        # the IJulia tests depend on the R graphics device being set up correctly,
+        # which is non trivial on non-linux headless devices (e.g. CI)
+        # it also uses the assumed path to Jupyter on unix
+        @testset "IJulia" begin
+            include("ijulia.jl")
+        end
+    end
 
-    # @info "" RCall.conda_provided_r
+    @info "" RCall.conda_provided_r
 
     # make sure we're back where we started
     @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == R_PPSTACKTOP_INITIAL
