@@ -18,8 +18,7 @@ const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), In
         @testset "Formula" include("convert/formula.jl")
         @testset "Namedtuple" include("convert/namedtuple.jl")
         @testset "Tuple" include("convert/tuple.jl")
-
-          # "convert/axisarray",
+        @testset "AxisArray" include("convert/axisarray.jl")
     end
 
     @testset "Macros" include("macros.jl")
