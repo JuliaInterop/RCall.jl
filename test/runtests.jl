@@ -1,98 +1,49 @@
-using RCall
-using Logging
-using Test
-using TestSetExtensions
+include("set_up_tests.jl")
 
-using DataStructures: OrderedDict
-using RCall: RClass
-
-const TEST_REPL = Ref(parse(Bool, get(ENV, "TEST_REPL", "true")))
-
-@testset ExtendedTestSet "installation" begin
-    include("installation.jl")
-end
+@testset ExtendedTestSet "installation" include("installation.jl")
 
 # before RCall does anything
 const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
-@info "" R_PPSTACKTOP_INITIAL
-
-hd = homedir()
-
-if Sys.iswindows()
-    Rhome = if haskey(ENV,"R_HOME")
-        ENV["R_HOME"]
-    else
-        using WinReg
-        WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
-    end
-    Rscript = joinpath(Rhome,"bin",Sys.WORD_SIZE==64 ? "x64" : "i386", "Rscript")
-else
-    Rscript = joinpath(RCall.Rhome, "bin", "Rscript")
-end
-
-libpaths = readlines(`$Rscript -e "writeLines(.libPaths())"`)
-
-if VERSION ≤ v"1.1.1"
-    using Missings
-end
-using Dates
-import Base.VersionNumber
-
-Rversion = VersionNumber(rcopy(R"as.character(getRversion())"))
-
-println(R"sessionInfo()")
-
-println(R"l10n_info()")
+@testset include("system_configuration.jl")
 
 @testset ExtendedTestSet "RCall" begin
+    @testset "Basic" include("basic.jl")
 
-    # https://github.com/JuliaStats/RCall.jl/issues/68
-    @test hd == homedir()
+    @testset "Conversion" begin
+        @testset "Base" include("convert/base.jl")
+        @testset "Missing" include("convert/missing.jl")
+        @testset "Datetime" include("convert/datetime.jl")
+        @testset "Dataframe" include("convert/dataframe.jl")
+        @testset "Categorical" include("convert/categorical.jl")
+        @testset "Formula" include("convert/formula.jl")
+        @testset "Namedtuple" include("convert/namedtuple.jl")
+        @testset "Tuple" include("convert/tuple.jl")
 
-    # https://github.com/JuliaInterop/RCall.jl/issues/206
-    if (Sys.which("R") !== nothing) && (strip(read(`R RHOME`, String)) == RCall.Rhome)
-        @test rcopy(Vector{String}, reval(".libPaths()")) == libpaths
+          # "convert/axisarray",
     end
 
-    tests = ["basic",
-             "convert/base",
-             "convert/missing",
-             "convert/datetime",
-             "convert/dataframe",
-             "convert/categorical",
-             "convert/formula",
-             "convert/namedtuple",
-             "convert/tuple",
-             # "convert/axisarray",
-             "macros",
-             "namespaces",
-             "repl",
-             ]
+    @testset "Macros" include("macros.jl")
 
-    for t in tests
-        if t == "repl" && !TEST_REPL[]
-            @warn "skipping REPL test"
-            @testset "repl" begin
-                @test_broken false
-            end
-            continue
-        end
-        @eval @testset $t begin
-            include(string($t, ".jl"))
+    @testset "Namespaces" include("namespaces.jl")
+
+    if TEST_REPL[]
+        @testset "REPL" include("repl.jl")
+    else
+        @warn "Skipping REPL tests"
+        @testset "REPL" begin
+            @test_broken false
         end
     end
 
-    if Sys.islinux()
+    @testset "IJulia" begin
         # the IJulia tests depend on the R graphics device being set up correctly,
         # which is non trivial on non-linux headless devices (e.g. CI)
         # it also uses the assumed path to Jupyter on unix
-        @testset "IJulia" begin
+        if Sys.islinux()
             include("ijulia.jl")
         end
     end
 
-    @info "" RCall.conda_provided_r
-
     # make sure we're back where we started
-    @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == R_PPSTACKTOP_INITIAL
+@test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == R_PPSTACKTOP_INITIAL
 end

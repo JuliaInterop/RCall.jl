@@ -82,7 +82,7 @@ r = RObject(d)
 @test rcopy(R"identical(format($d, '%Y-%m-%dT%H:%M:%S'), $s)")
 
 
-s = ["2001-01-01T01:01:01", "1111-11-11T11:11:00", "2012-12-12T12:12:12"]
+s = ["2001-01-01T01:01:01", "1911-11-11T11:11:00", "2012-12-12T12:12:12"]
 d = DateTime.(s)
 r = RObject(d)
 @test isa(r,RObject{RealSxp})
