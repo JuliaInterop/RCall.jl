@@ -6,7 +6,7 @@ using TestSetExtensions
 using DataStructures: OrderedDict
 using RCall: RClass
 
-const TEST_REPL = get(ENV, "TEST_REPL", "true") === "true"
+const TEST_REPL = parse(Bool, get(ENV, "TEST_REPL", "true"))
 
 @testset ExtendedTestSet "installation" begin
     include("installation.jl")
