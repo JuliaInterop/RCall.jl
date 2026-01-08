@@ -6,6 +6,8 @@ using TestSetExtensions
 using DataStructures: OrderedDict
 using RCall: RClass
 
+const TEST_REPL = get(ENV, "TEST_REPL", "true") === "true"
+
 @testset ExtendedTestSet "installation" begin
     include("installation.jl")
 end
@@ -68,7 +70,8 @@ println(R"l10n_info()")
              ]
 
     for t in tests
-        if VERSION >= v"1.12" && t == "repl"
+        if t == "repl" && !TEST_REPL[]
+            @warn "skipping REPL test"
             @testset "repl" begin
                 @test_broken false
             end
