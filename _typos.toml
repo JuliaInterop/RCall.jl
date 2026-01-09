@@ -1,0 +1,10 @@
+[default]
+
+[default.extend-identifiers]
+rcall = "rcall"
+clos = "clos"
+ClosSxp = "ClosSxp"
+ClosSxpPtr = "ClosSxpPtr"
+
+[default.extend-words]
+rcall = "rcall"

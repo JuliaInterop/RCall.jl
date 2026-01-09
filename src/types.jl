@@ -267,7 +267,7 @@ end
 
 Representation of R real (numeric) vector.
 
-This correponds to type tag 14.
+This corresponds to type tag 14.
 
 # Fields
 - `head::SxpHead`
@@ -303,7 +303,7 @@ end
 
 Representation of R vector of character strings.
 
-This correponds to type tag 16.
+This corresponds to type tag 16.
 
 # Fields
 - `head::SxpHead`

@@ -1,6 +1,6 @@
 # Test using Rhome set in Preferences.
 #
-# If run after `install_conda.jl` in the same enviroment, then it will also test
+# If run after `install_conda.jl` in the same environment, then it will also test
 # dynamically overriding the Rhome variable from the build step via preferences.
 #
 # This file is meant to be run in an embedded process spawned by installation.jl.
