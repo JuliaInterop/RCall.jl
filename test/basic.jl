@@ -167,7 +167,7 @@ model = rcopy(R"model")
 @test rcopy(getclass(reval("1"))) == "numeric"
 @test rcopy(getclass(reval("1L"))) == "integer"
 @test rcopy(getclass(reval("complex(1,2)"))) == "complex"
-if Rversion < v"4"
+if VersionNumber(rcopy(R"as.character(getRversion())")) < v"4"
   @test rcopy(getclass(reval("matrix(1)"))) == "matrix"
 else
   @test rcopy(getclass(reval("matrix(1)"))) == ["matrix", "array"]

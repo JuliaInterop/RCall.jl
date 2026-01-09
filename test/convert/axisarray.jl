@@ -1,5 +1,3 @@
-using AxisArrays
-
 # AxisArray
 aa = rcopy(AxisArray, R"Titanic")
 @test size(aa) == (4, 2, 2, 2)
@@ -17,7 +15,7 @@ r = RObject(aa)
 r[2] = missing
 ab = rcopy(AxisArray, r)
 @test eltype(ab) == Union{Date, Missing}
-@test isa(ab.data, Array{Union{Date, Missing}})
+@test isa(ab.data, AbstractArray{Union{Date, Missing}})
 
 
 a = R"""
