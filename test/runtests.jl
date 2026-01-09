@@ -4,7 +4,7 @@ include("set_up_tests.jl")
 
 # before RCall does anything
 const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
-@testset include("system_configuration.jl")
+@testset "System configuration" include("system_configuration.jl")
 
 @testset ExtendedTestSet "RCall" begin
     @testset "Basic" include("basic.jl")
