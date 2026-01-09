@@ -240,7 +240,11 @@ function create_r_repl(repl, main)
         "\e[200~" => bracketed_paste_callback
     )
 
-    search_prompt, skeymap = LineEdit.setup_search_keymap(hp)
+    @static if isdefined(LineEdit, :history_keymap)
+        skeymap = LineEdit.history_keymap
+    else
+        skeymap = LineEdit.setup_search_keymap(hp)[2]
+    end
     prefix_prompt, prefix_keymap = LineEdit.setup_prefix_keymap(hp, r_mode)
 
     mk = REPL.mode_keymap(main)
