@@ -1,12 +1,12 @@
 # These are tests making sure that we don't change the system configuration during our build and configuration process.
 if Sys.iswindows()
-    Rhome = if haskey(ENV,"R_HOME")
+    Rhome = if haskey(ENV, "R_HOME")
         ENV["R_HOME"]
     else
         using WinReg
-        WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R","InstallPath")
+        WinReg.querykey(WinReg.HKEY_LOCAL_MACHINE, "Software\\R-Core\\R", "InstallPath")
     end
-    const Rscript = joinpath(Rhome,"bin",Sys.WORD_SIZE==64 ? "x64" : "i386", "Rscript")
+    const Rscript = joinpath(Rhome, "bin", Sys.WORD_SIZE == 64 ? "x64" : "i386", "Rscript")
 else
     const Rscript = joinpath(RCall.Rhome, "bin", "Rscript")
 end

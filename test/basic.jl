@@ -15,15 +15,14 @@ langsexp[1] = RObject(:det)
 langsexp[2] = RObject([1 2; 0 0])
 @test rcopy(reval(langsexp))[1] == 0
 
-globalEnv[:x] = RObject([1,2,3])
-@test rcopy(globalEnv[:x]) == [1,2,3]
-globalEnv[:y] = RObject([4,5,6])
-@test rcopy(rcall(Symbol("+"),:x,:y)) == [5,7,9]
+globalEnv[:x] = RObject([1, 2, 3])
+@test rcopy(globalEnv[:x]) == [1, 2, 3]
+globalEnv[:y] = RObject([4, 5, 6])
+@test rcopy(rcall(Symbol("+"), :x, :y)) == [5, 7, 9]
 
-@test sprint(io -> rprint(io, RObject([1,2,3]))) == "[1] 1 2 3\n"
+@test sprint(io -> rprint(io, RObject([1, 2, 3]))) == "[1] 1 2 3\n"
 @test_logs (:warn, "RCall.jl: Warning: hello\n") reval("warning('hello')")
 @test_throws RCall.REvalError reval("stop('hello')")
-
 
 # @test rcopy(rcall(:besselI, 1.0, 2.0)) ≈ besseli(2.0,1.0)
 # @test rcopy(rcall(:besselI, 1.0, 2.0, var"expon.scaled"=true)) ≈ besselix(2.0,1.0)
@@ -59,28 +58,27 @@ env[:x] = 1
 env[:x] = nothing
 @test isnull(env[:x])
 
-
 # rparse
 @test_throws RCall.RParseError rparse(raw"'\g'")
 @test_throws RCall.RParseError rparse("``")
 
 # callbacks
-function testfn(x,y;a=3,b=4)
-    [x;y;a;b]
+function testfn(x, y; a=3, b=4)
+    return [x; y; a; b]
 end
 
 r = rcall(testfn, 1, 2)
-@test isa(r,RObject{IntSxp})
-@test rcopy(r) == [1,2,3,4]
+@test isa(r, RObject{IntSxp})
+@test rcopy(r) == [1, 2, 3, 4]
 
-r = rcall(testfn, 1, 2,b=6)
-@test isa(r,RObject{IntSxp})
-@test rcopy(r) == [1,2,3,6]
+r = rcall(testfn, 1, 2; b=6)
+@test isa(r, RObject{IntSxp})
+@test rcopy(r) == [1, 2, 3, 6]
 
-r = rcall(:optimize,sin,[-2,0])
-@test isapprox(r[:minimum][1], -pi/2, atol=eps()^0.25)
-r = rcall(:optimize,sin,[0,2],maximum=true)
-@test isapprox(r[:maximum][1], pi/2, atol=eps()^0.25)
+r = rcall(:optimize, sin, [-2, 0])
+@test isapprox(r[:minimum][1], -pi / 2, atol=eps()^0.25)
+r = rcall(:optimize, sin, [0, 2]; maximum=true)
+@test isapprox(r[:maximum][1], pi / 2, atol=eps()^0.25)
 
 nullfn() = nothing
 @test isa(rcall(nullfn), RObject{NilSxp})
@@ -98,31 +96,31 @@ t1[:x] = 2:11
 # graphics
 RCall.rgui_init()
 let f = tempname()
-  rcall(:png,f)
-  rcall(:plot,1:10)
-  rcall(Symbol("dev.off"))
-  @test isfile(f)
-  rm(f)
-  @test !RCall.rgui_start(true)
-  @test_throws ErrorException RCall.rgui_start()
-  @test RCall.rgui_stop()
+    rcall(:png, f)
+    rcall(:plot, 1:10)
+    rcall(Symbol("dev.off"))
+    @test isfile(f)
+    rm(f)
+    @test !RCall.rgui_start(true)
+    @test_throws ErrorException RCall.rgui_start()
+    @test RCall.rgui_stop()
 end
 
 # S4 rprint
 @test occursin("An object of class",
-  sprint(io -> rprint(io, reval("""
-   setClass("Foo", representation(x = "numeric"))
-   foo <- new("Foo", x = 20)
-"""))))
+               sprint(io -> rprint(io, reval("""
+                setClass("Foo", representation(x = "numeric"))
+                foo <- new("Foo", x = 20)
+             """))))
 
 # S3 rprint
 @test occursin("hello",
-  sprint(io -> rprint(io, reval("""
-   print.Bar <- function(x) print("hello")
-   bar <- 1
-   class(bar) <- "Bar"
-   bar
-"""))))
+               sprint(io -> rprint(io, reval("""
+                print.Bar <- function(x) print("hello")
+                bar <- 1
+                class(bar) <- "Bar"
+                bar
+             """))))
 
 @test_logs (:warn, "RCall.jl: Warning in print.Bar(x) : hello\n") rprint(reval("""
    print.Bar <- function(x) warning("hello")
@@ -141,20 +139,21 @@ end
 # operators
 a = reval("a=c(1,2,3)")
 b = reval("b=c(4,5,6)")
-@test rcopy(a+b)==rcopy(R"a+b")
-@test rcopy(a-b)==rcopy(R"a-b")
-@test rcopy(a*b)==rcopy(R"a*b")
-@test rcopy(a/b)==rcopy(R"a/b")
-@test rcopy(a^b)==rcopy(R"a^b")
+@test rcopy(a + b) == rcopy(R"a+b")
+@test rcopy(a - b) == rcopy(R"a-b")
+@test rcopy(a * b) == rcopy(R"a*b")
+@test rcopy(a / b) == rcopy(R"a/b")
+@test rcopy(a^b) == rcopy(R"a^b")
 
 # misc
 iris = rcopy(reval(:iris))
-model =  R"lm(Sepal_Length ~ Sepal_Width,data=$iris)"
+model = R"lm(Sepal_Length ~ Sepal_Width,data=$iris)"
 @test rcopy(RCall.getclass(model)) == "lm"
-@test isapprox(rcopy(R"sum($iris$Sepal_Length)"), sum(iris[!, :Sepal_Length]), rtol=4*eps())
-@test rcopy(R"factor(rep(1,10))") == fill("1",10)
-@test rcopy(R"data.frame(a=rep('test',10), stringsAsFactors = TRUE)")[!, :a] == fill("test",10)
-
+@test isapprox(rcopy(R"sum($iris$Sepal_Length)"), sum(iris[!, :Sepal_Length]),
+               rtol=4 * eps())
+@test rcopy(R"factor(rep(1,10))") == fill("1", 10)
+@test rcopy(R"data.frame(a=rep('test',10), stringsAsFactors = TRUE)")[!, :a] ==
+      fill("test", 10)
 
 R"""
 data(iris)
@@ -168,9 +167,9 @@ model = rcopy(R"model")
 @test rcopy(getclass(reval("1L"))) == "integer"
 @test rcopy(getclass(reval("complex(1,2)"))) == "complex"
 if VersionNumber(rcopy(R"as.character(getRversion())")) < v"4"
-  @test rcopy(getclass(reval("matrix(1)"))) == "matrix"
+    @test rcopy(getclass(reval("matrix(1)"))) == "matrix"
 else
-  @test rcopy(getclass(reval("matrix(1)"))) == ["matrix", "array"]
+    @test rcopy(getclass(reval("matrix(1)"))) == ["matrix", "array"]
 end
 @test rcopy(getclass(reval("function(x) x"))) == "function"
 @test rcopy(getclass(reval("data.frame(x=1)"))) == "data.frame"

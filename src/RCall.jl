@@ -12,18 +12,18 @@ using StatsModels
 import DataStructures: OrderedDict
 
 import Base: eltype, convert, isascii,
-    names, length, size, getindex, setindex!,
-    show, showerror, write
+             names, length, size, getindex, setindex!,
+             show, showerror, write
 import Base.Iterators: iterate, IteratorSize, IteratorEltype, Pairs, pairs
 
 export RObject,
-   Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
-   ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
-   getattrib, setattrib!, getnames, setnames!, getclass, setclass!, attributes,
-   globalEnv,
-   isnull, isna, anyna,
-   robject, rcopy, rparse, rprint, reval, rcall, rlang,
-   rimport, @rimport, @rlibrary, @rput, @rget, @R_str
+       Sxp, NilSxp, StrSxp, CharSxp, LglSxp, IntSxp, RealSxp, CplxSxp,
+       ListSxp, VecSxp, EnvSxp, LangSxp, ClosSxp, S4Sxp,
+       getattrib, setattrib!, getnames, setnames!, getclass, setclass!, attributes,
+       globalEnv,
+       isnull, isna, anyna,
+       robject, rcopy, rparse, rprint, reval, rcall, rlang,
+       rimport, @rimport, @rlibrary, @rput, @rget, @R_str
 
 # These two preference get marked as compile-time preferences by being accessed
 # here
@@ -38,7 +38,7 @@ if Rhome_set_as_preference || libR_set_as_preference
     const libR = @load_preference("libR")
     const conda_provided_r = false
 else
-    const depfile = joinpath(dirname(@__FILE__),"..","deps","deps.jl")
+    const depfile = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
     if isfile(depfile)
         include(depfile)
     else
@@ -47,11 +47,9 @@ else
 end
 
 if Rhome == ""
-    @info (
-        "No R installation found by RCall.jl. " *
-        "Precompilation of RCall and all dependent packages postponed. " *
-        "Importing RCall will fail until an R installation is configured beforehand."
-    )
+    @info ("No R installation found by RCall.jl. " *
+           "Precompilation of RCall and all dependent packages postponed. " *
+           "Importing RCall will fail until an R installation is configured beforehand.")
     __precompile__(false)
 end
 

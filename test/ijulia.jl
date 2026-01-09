@@ -19,8 +19,8 @@ const SVG = """<img alt="No description has been provided for this image" src="d
 html = read(testpath("ijulia.html"), String)
 
 # these are the tests to show that things actually work
-@test occursin(PNG,  html)
-@test occursin(SVG,  html)
+@test occursin(PNG, html)
+@test occursin(SVG, html)
 
 @test_throws ArgumentError("Unsupported MIME type: lulz") RCall.rdevicename(MIME("lulz"))
 

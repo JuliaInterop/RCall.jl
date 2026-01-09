@@ -4,9 +4,8 @@ _output_is_locked = false
 const output_buffer = PipeBuffer()
 const error_buffer = PipeBuffer()
 
-
 "Print the value of an Sxp using R's printing mechanism"
-function rprint(io::IO, s::Ptr{S}) where S<:Sxp
+function rprint(io::IO, s::Ptr{S}) where {S<:Sxp}
     global _output_is_locked
     if s == C_NULL
         return
@@ -32,8 +31,8 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     end
     defineVar(:x, Const.NilValue, env)
     try
-        handle_eval_stdout(io=io, force=true)
-        handle_eval_stderr(as_warning=(status[] == 0))
+        handle_eval_stdout(; io=io, force=true)
+        handle_eval_stderr(; as_warning=(status[] == 0))
     finally
         _output_is_locked = false
         unprotect(2)
@@ -41,17 +40,16 @@ function rprint(io::IO, s::Ptr{S}) where S<:Sxp
     # ggplot2's plot is displayed after `print` function is invoked,
     # so we have to clear any displayed plots.
     isdefined(Main, :IJulia) && Main.IJulia.inited && ijulia_displayplots()
-    nothing
+    return nothing
 end
 rprint(io::IO, r::RObject) = rprint(io::IO, r.p)
-rprint(r::Ptr{S}) where S<:Sxp = rprint(stdout, r)
+rprint(r::Ptr{S}) where {S<:Sxp} = rprint(stdout, r)
 rprint(r::RObject) = rprint(stdout, r)
 
-function show(io::IO,r::RObject)
+function show(io::IO, r::RObject)
     println(io, typeof(r))
-    rprint(io, r)
+    return rprint(io, r)
 end
-
 
 abstract type RException <: Exception end
 
@@ -78,7 +76,6 @@ struct RParseEOF <: RException
 end
 showerror(io::IO, e::RParseEOF) = print(io, "RParseEOF: " * e.msg)
 
-
 struct REvalError <: RException
     msg::AbstractString
     REvalError() = new("")
@@ -96,8 +93,8 @@ See [Writing R extensions: Setting R callbacks](https://cran.r-project.org/doc/m
 function read_console(p::Cstring, buf::Ptr{UInt8}, buflen::Cint, add_history::Cint)::Cint
     print(unsafe_string(p))
     linebuf = reenable_sigint() do
-            Vector{UInt8}(readline())
-        end
+        return Vector{UInt8}(readline())
+    end
 
     m = min(length(linebuf), buflen - 2)
     for i in 1:m
@@ -117,7 +114,7 @@ end
 
 See [Writing R extensions: Setting R callbacks](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Setting-R-callbacks)
 """
-function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)::Cvoid
+function write_console_ex(buf::Ptr{UInt8}, buflen::Cint, otype::Cint)::Cvoid
     if otype == 0
         unsafe_write(output_buffer, buf, buflen)
     else
@@ -126,11 +123,10 @@ function write_console_ex(buf::Ptr{UInt8},buflen::Cint,otype::Cint)::Cvoid
     return nothing
 end
 
-
 function rconsole2str1_at(s::String)
     pos = findfirst("\x02\xff\xfe", s)
     if pos != nothing
-        endpos = findfirst("\x03\xff\xfe", s[pos[end]+1:end])
+        endpos = findfirst("\x03\xff\xfe", s[(pos[end] + 1):end])
         if endpos != nothing
             return (pos[end] + 1):(pos[end] + endpos[1] - 1)
         end
@@ -138,7 +134,7 @@ function rconsole2str1_at(s::String)
 end
 
 function native_decode(s::String)
-    s
+    return s
 end
 
 function rconsole2str(s::String)
@@ -147,14 +143,13 @@ function rconsole2str(s::String)
     while m != nothing
         a = s[1:(first(m) - 1 - 3)]
         ret *= native_decode(a) * s[m]
-        s = s[last(m) + 1 + 3: end]
+        s = s[(last(m) + 1 + 3):end]
         m = rconsole2str1_at(s)
     end
-    ret *= native_decode(s)
+    return ret *= native_decode(s)
 end
 
-
-function handle_eval_stdout(;io::IO=stdout, force::Bool=false)
+function handle_eval_stdout(; io::IO=stdout, force::Bool=false)
     if (!_output_is_locked || force) && bytesavailable(output_buffer) != 0
         buf = String(take!(output_buffer))
         @static if Sys.iswindows()
@@ -164,7 +159,7 @@ function handle_eval_stdout(;io::IO=stdout, force::Bool=false)
     end
 end
 
-function handle_eval_stderr(;as_warning::Bool=false)
+function handle_eval_stderr(; as_warning::Bool=false)
     if bytesavailable(error_buffer) != 0
         s = String(take!(error_buffer))
         if as_warning

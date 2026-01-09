@@ -20,7 +20,7 @@ const RCALL_UUID = UUID("6f49c342-dc21-5d91-9882-a32aef131414")
 
 function locate_libR(Rhome)
     @static if Sys.iswindows()
-        libR = joinpath(Rhome, "bin", Sys.WORD_SIZE==64 ? "x64" : "i386", "R.dll")
+        libR = joinpath(Rhome, "bin", Sys.WORD_SIZE == 64 ? "x64" : "i386", "R.dll")
     else
         libR = joinpath(Rhome, "lib", "libR.$(Libdl.dlext)")
     end
@@ -33,16 +33,16 @@ target_rhome = joinpath(CondaPkg.envdir(), "lib", "R")
 # If RCall is already present, then
 # we do NOT re-add RCall here because we're testing against the version already built with Conda
 if !haskey(Pkg.dependencies(), RCALL_UUID)
-    Pkg.add(;path=ENV["RCALL_DIR"])
+    Pkg.add(; path=ENV["RCALL_DIR"])
 end
 set_preferences!(RCALL_UUID,
                  "Rhome" => target_rhome, "libR" => locate_libR(target_rhome))
 RCall = nothing
 RCall = CondaPkg.withenv() do
     Pkg.build("RCall")
-    Base.require(Main, :RCall)
+    return Base.require(Main, :RCall)
 end
-expected_condapkg = joinpath("x", ".CondaPkg", "x")[2:(end-1)]
+expected_condapkg = joinpath("x", ".CondaPkg", "x")[2:(end - 1)]
 expected_env_lib_r = joinpath("x", "lib", "R")[2:end]
 if occursin(expected_condapkg, RCall.Rhome) && occursin(expected_env_lib_r, RCall.Rhome)
     exit(0)

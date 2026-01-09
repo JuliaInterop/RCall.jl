@@ -3,9 +3,9 @@
 """
 `rcopy(r)` copies the contents of an R object into a corresponding canonical Julia type.
 """
-rcopy(r::RObject{S}; kwargs...) where S<:Sxp = rcopy(r.p; kwargs...)
+rcopy(r::RObject{S}; kwargs...) where {S<:Sxp} = rcopy(r.p; kwargs...)
 
-function rcopy(s::Ptr{S}; kwargs...) where S<:Sxp
+function rcopy(s::Ptr{S}; kwargs...) where {S<:Sxp}
     protect(s)
     try
         for class in rcopy(Array{Symbol}, getclass(s))
@@ -23,7 +23,7 @@ end
 
 # Default behaviors of copying R vectors to AbstractArray
 
-function rcopy(::Type{AbstractArray}, s::Ptr{S}) where S<:Sxp
+function rcopy(::Type{AbstractArray}, s::Ptr{S}) where {S<:Sxp}
     protect(s)
     try
         if isFactor(s)
@@ -40,7 +40,7 @@ end
 
 for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
     @eval begin
-        function rcopy(::Type{Vector},s::Ptr{$S})
+        function rcopy(::Type{Vector}, s::Ptr{$S})
             protect(s)
             try
                 for class in rcopy(Array{Symbol}, getclass(s))
@@ -54,7 +54,7 @@ for S in (:IntSxp, :RealSxp, :CplxSxp, :LglSxp, :StrSxp, :RawSxp)
                 unprotect(1)
             end
         end
-        function rcopy(::Type{Array},s::Ptr{$S})
+        function rcopy(::Type{Array}, s::Ptr{$S})
             protect(s)
             try
                 for class in rcopy(Array{Symbol}, getclass(s))
@@ -75,20 +75,20 @@ end
 rcopy(::Ptr{NilSxp}) = nothing
 
 # SymSxp and CharSxp
-rcopy(s::Ptr{SymSxp}) = rcopy(Symbol,s)
-rcopy(s::Ptr{CharSxp}) = rcopy(String,s)
+rcopy(s::Ptr{SymSxp}) = rcopy(Symbol, s)
+rcopy(s::Ptr{CharSxp}) = rcopy(String, s)
 
 # StrSxp
 function rcopytype(::Type{RClass{:default}}, s::Ptr{StrSxp})
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{String, Missing}}
+        length(s) == 1 ? Missing : Array{Union{String,Missing}}
     else
         length(s) == 1 ? String : Array{String}
     end
 end
 function eltype(::Type{RClass{:default}}, s::Ptr{StrSxp})
     if anyna(s)
-        Union{String, Missing}
+        Union{String,Missing}
     else
         String
     end
@@ -99,7 +99,7 @@ function rcopytype(::Type{RClass{:default}}, s::Ptr{IntSxp})
         CategoricalArray
     else
         if anyna(s)
-            length(s) == 1 ? Missing : Array{Union{Int, Missing}}
+            length(s) == 1 ? Missing : Array{Union{Int,Missing}}
         else
             length(s) == 1 ? Int : Array{Int}
         end
@@ -108,7 +108,7 @@ end
 
 function eltype(::Type{RClass{:default}}, s::Ptr{IntSxp})
     if anyna(s)
-        Union{Int, Missing}
+        Union{Int,Missing}
     else
         Int
     end
@@ -116,14 +116,14 @@ end
 
 function rcopytype(::Type{RClass{:default}}, s::Ptr{RealSxp})
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{Float64, Missing}}
+        length(s) == 1 ? Missing : Array{Union{Float64,Missing}}
     else
         length(s) == 1 ? Float64 : Array{Float64}
     end
 end
 function eltype(::Type{RClass{:default}}, s::Ptr{RealSxp})
     if anyna(s)
-        Union{Float64, Missing}
+        Union{Float64,Missing}
     else
         Float64
     end
@@ -131,14 +131,14 @@ end
 
 function rcopytype(::Type{RClass{:default}}, s::Ptr{CplxSxp})
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{ComplexF64, Missing}}
+        length(s) == 1 ? Missing : Array{Union{ComplexF64,Missing}}
     else
         length(s) == 1 ? ComplexF64 : Array{ComplexF64}
     end
 end
 function eltype(::Type{RClass{:default}}, s::Ptr{CplxSxp})
     if anyna(s)
-        Union{ComplexF64, Missing}
+        Union{ComplexF64,Missing}
     else
         ComplexF64
     end
@@ -146,14 +146,14 @@ end
 
 function rcopytype(::Type{RClass{:default}}, s::Ptr{LglSxp})
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{Bool, Missing}}
+        length(s) == 1 ? Missing : Array{Union{Bool,Missing}}
     else
         length(s) == 1 ? Bool : BitArray
     end
 end
 function eltype(::Type{RClass{:default}}, s::Ptr{LglSxp})
     if anyna(s)
-        Union{Bool, Missing}
+        Union{Bool,Missing}
     else
         Bool
     end
@@ -161,14 +161,14 @@ end
 
 function rcopytype(::Type{RClass{:default}}, s::Ptr{RawSxp})
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{UInt8, Missing}}
+        length(s) == 1 ? Missing : Array{Union{UInt8,Missing}}
     else
         length(s) == 1 ? UInt8 : Array{UInt8}
     end
 end
 function eltype(::Type{RClass{:default}}, s::Ptr{RawSxp})
     if anyna(s)
-        Union{UInt8, Missing}
+        Union{UInt8,Missing}
     else
         UInt8
     end
@@ -186,7 +186,7 @@ function rcopytype(::Type{RClass{:default}}, s::Ptr{VecSxp})
 end
 
 # FunctionSxp
-rcopytype(::Type{RClass{:function}}, s::Ptr{S}) where S<:FunctionSxp = Function
+rcopytype(::Type{RClass{:function}}, s::Ptr{S}) where {S<:FunctionSxp} = Function
 
 # LangSxp
 rcopytype(::Type{RClass{:call}}, l::Ptr{LangSxp}) = Expr
@@ -194,7 +194,7 @@ rcopytype(::Type{RClass{Symbol("(")}}, l::Ptr{LangSxp}) = Expr
 rcopytype(::Type{RClass{:formula}}, l::Ptr{LangSxp}) = FormulaTerm
 
 # Fallback
-rcopytype(::T, s::Ptr{S}) where {T, S<:Sxp} = RObject
+rcopytype(::T, s::Ptr{S}) where {T,S<:Sxp} = RObject
 
 # Fallback for non SEXP
 rcopy(r) = r
@@ -213,7 +213,6 @@ RObject(s) = RObject(sexp(s))
 """
 sexp(s) = sexp(sexpclass(s), s)
 
-
 # Nothing / Missing
 sexpclass(::Nothing) = NilSxp
 sexpclass(::Missing) = RClass{:logical}
@@ -224,18 +223,17 @@ sexpclass(s::Symbol) = SymSxp
 # DataFrame
 sexpclass(d::AbstractDataFrame) = RClass{:list}
 
-
 # Number, Array
-for (J, C) in ((:Integer,:integer),
-                 (:AbstractFloat, :numeric),
-                 (:Complex, :complex),
-                 (:Bool, :logical),
-                 (:AbstractString, :character),
-                 (:UInt8, :raw))
+for (J, C) in ((:Integer, :integer),
+               (:AbstractFloat, :numeric),
+               (:Complex, :complex),
+               (:Bool, :logical),
+               (:AbstractString, :character),
+               (:UInt8, :raw))
     @eval begin
         sexpclass(v::$J) = RClass{$(QuoteNode(C))}
-        sexpclass(a::AbstractArray{Union{T, Missing}}) where T<:$J = RClass{$(QuoteNode(C))}
-        sexpclass(a::AbstractArray{T}) where T<:$J = RClass{$(QuoteNode(C))}
+        sexpclass(a::AbstractArray{Union{T,Missing}}) where {T<:$J} = RClass{$(QuoteNode(C))}
+        sexpclass(a::AbstractArray{T}) where {T<:$J} = RClass{$(QuoteNode(C))}
     end
 end
 
@@ -255,17 +253,16 @@ sexpclass(f::Function) = RClass{:function}
 # LangSxp
 sexpclass(f::FormulaTerm) = RClass{:formula}
 
-
 # Date
 sexpclass(d::Date) = RClass{:Date}
-sexpclass(d::AbstractArray{Union{Date, Missing}}) = RClass{:Date}
+sexpclass(d::AbstractArray{Union{Date,Missing}}) = RClass{:Date}
 sexpclass(d::AbstractArray{Date}) = RClass{:Date}
 
 # DateTime
 sexpclass(d::DateTime) = RClass{:POSIXct}
-sexpclass(d::AbstractArray{Union{DateTime, Missing}}) = RClass{:POSIXct}
+sexpclass(d::AbstractArray{Union{DateTime,Missing}}) = RClass{:POSIXct}
 sexpclass(d::AbstractArray{DateTime}) = RClass{:POSIXct}
 
 # CategoricalArray
 sexpclass(v::CategoricalArray) = RClass{:factor}
-sexpclass(v::SubArray{<:Any, <:Any, <:CategoricalArray}) = RClass{:factor}
+sexpclass(v::SubArray{<:Any,<:Any,<:CategoricalArray}) = RClass{:factor}

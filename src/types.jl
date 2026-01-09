@@ -362,8 +362,6 @@ struct VecSxp <: VectorListSxp
     truelength::Cint
 end
 
-
-
 """
     ExprSxp <: VectorListSxp
 
@@ -495,20 +493,20 @@ RObject{RealSxp}
 mutable struct RObject{S<:Sxp}
     p::Ptr{S}
     # used for pre-defined constants
-    function RObject{S}() where S
-        new{S}(C_NULL)
+    function RObject{S}() where {S}
+        return new{S}(C_NULL)
     end
-    function RObject{S}(p::Ptr{S}) where S
+    function RObject{S}(p::Ptr{S}) where {S}
         preserve(p)
         r = new{S}(p)
         finalizer(release, r)
-        r
+        return r
     end
     # SymSxps are not garbage collected, so preserve not necessary.
     RObject{SymSxp}(p::Ptr{SymSxp}) = new{SymSxp}(p)
 end
 
-RObject(p::Ptr{S}) where S<:Sxp = RObject{S}(p)
+RObject(p::Ptr{S}) where {S<:Sxp} = RObject{S}(p)
 RObject(x::RObject) = x
 
 """
@@ -536,8 +534,8 @@ eltype(::Type{StrSxp}) = Ptr{CharSxp}
 eltype(::Type{VecSxp}) = Ptr{UnknownSxp}
 eltype(::Type{ExprSxp}) = Ptr{UnknownSxp}
 
-eltype(::Ptr{S}) where S<:Sxp = eltype(S)
-eltype(::RObject{S}) where S<:Sxp = eltype(S)
+eltype(::Ptr{S}) where {S<:Sxp} = eltype(S)
+eltype(::RObject{S}) where {S<:Sxp} = eltype(S)
 
 """
     preserve(p::Ptr{<:Sxp})
@@ -549,7 +547,7 @@ Object can be released via [`release`](@ref).
 This is slower than [`protect`](@ref), as it requires searching an internal list,
 but more flexible.
 """
-preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject, libR), Nothing, (Ptr{S},), p)
+preserve(p::Ptr{S}) where {S<:Sxp} = ccall((:R_PreserveObject, libR), Nothing, (Ptr{S},), p)
 
 """
     release(p::Ptr{<:Sxp})
@@ -557,8 +555,8 @@ preserve(p::Ptr{S}) where S<:Sxp = ccall((:R_PreserveObject, libR), Nothing, (Pt
 
 Release object that has been GC protected by [`preserve`](@ref).
 """
-release(p::Ptr{S}) where S<:Sxp = ccall((:R_ReleaseObject,libR), Nothing, (Ptr{S},), p)
-release(r::RObject{S}) where S<:Sxp = release(r.p)
+release(p::Ptr{S}) where {S<:Sxp} = ccall((:R_ReleaseObject, libR), Nothing, (Ptr{S},), p)
+release(r::RObject{S}) where {S<:Sxp} = release(r.p)
 
 """
     protect(p::Ptr{<:Sxp})
@@ -571,14 +569,14 @@ Returns the same pointer, allowing inline use.
 This is faster than [`preserve`](@ref), but more restrictive.
 Really only useful inside functions, where you can control the `unprotect` step.
 """
-protect(p::Ptr{S}) where S<:Sxp = ccall((:Rf_protect,libR), Ptr{S}, (Ptr{S},), p)
+protect(p::Ptr{S}) where {S<:Sxp} = ccall((:Rf_protect, libR), Ptr{S}, (Ptr{S},), p)
 
 """
     unprotect(n)
 
 Release last `n` objects GC-protected by [`protect`](@ref).
 """
-unprotect(n::Integer) = ccall((:Rf_unprotect,libR), Nothing, (Cint,), n)
+unprotect(n::Integer) = ccall((:Rf_unprotect, libR), Nothing, (Cint,), n)
 
 """
     sexpnum(s::Sxp)
@@ -590,7 +588,7 @@ Determined from the trailing 5 bits of the first 32-bit word. Is
 a 0-based index into the `info` field of a [`SxpHead`](@ref).
 """
 sexpnum(h::SxpHead) = h.info & 0x1f
-sexpnum(p::Ptr{S}) where S<:Sxp = sexpnum(unsafe_load(p))
+sexpnum(p::Ptr{S}) where {S<:Sxp} = sexpnum(unsafe_load(p))
 
 """
     SXP_TYPES
@@ -607,10 +605,9 @@ const SXP_TYPES = (NilSxp, SymSxp, ListSxp, ClosSxp, EnvSxp,
 
 for (i, T) in enumerate(SXP_TYPES)
     if T != Nothing
-        @eval sexpnum(::Type{$T}) = $(i-1)
+        @eval sexpnum(::Type{$T}) = $(i - 1)
     end
 end
-
 
 """
     sexp(p::Ptr{UnknownSxp})
@@ -620,10 +617,10 @@ Return a restrictively parameterized `Ptr{<:Sxp}` pointing to the same object as
 function sexp(p::Ptr{UnknownSxp})
     typ = sexpnum(p)
     0 ≤ typ ≤ 10 || 13 ≤ typ ≤ 25 || error("Unknown SEXPTYPE $typ")
-    styp = SXP_TYPES[typ+1]
+    styp = SXP_TYPES[typ + 1]
     return Ptr{styp}(p)
 end
-sexp(s::Ptr{S}) where S<:Sxp = s
+sexp(s::Ptr{S}) where {S<:Sxp} = s
 sexp(r::RObject) = r.p
 
 """
@@ -631,6 +628,6 @@ sexp(r::RObject) = r.p
 
 Return the associated `Sxp` pointer.
 """
-sexp(::Type{S}, r::RObject{S}) where S<:Sxp = r.p
+sexp(::Type{S}, r::RObject{S}) where {S<:Sxp} = r.p
 # do we need this method?
-sexp(::Type{S}, s::Ptr{S}) where S<:Sxp = s
+sexp(::Type{S}, s::Ptr{S}) where {S<:Sxp} = s
