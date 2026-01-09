@@ -17,7 +17,7 @@ macro rput(args...)
             error("Incorrect usage of @rput")
         end
     end
-    blk
+    return blk
 end
 
 """
@@ -34,12 +34,13 @@ macro rget(args...)
         elseif isa(a, Expr) && a.head == :(::)
             v = a.args[1]
             T = a.args[2]
-            push!(blk.args, :($(esc(v)) = rcopy($(esc(T)),Const.GlobalEnv[$(QuoteNode(v))])))
+            push!(blk.args,
+                  :($(esc(v)) = rcopy($(esc(T)), Const.GlobalEnv[$(QuoteNode(v))])))
         else
             error("Incorrect usage of @rget")
         end
     end
-    blk
+    return blk
 end
 
 """

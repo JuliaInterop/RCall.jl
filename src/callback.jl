@@ -6,14 +6,13 @@ Register a function pointer as an R `NativeSymbol`.
 """
 function makeNativeSymbolRef(fptr::Ptr{Cvoid})
     # mirror Rf_MakeNativeSymbolRef of Rdynload.c
-    rexfn = ccall((:R_MakeExternalPtrFn,libR), Ptr{ExtPtrSxp},
-                     (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
-                     fptr, sexp(Symbol("native symbol")), sexp(Const.NilValue))
+    rexfn = ccall((:R_MakeExternalPtrFn, libR), Ptr{ExtPtrSxp},
+                  (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}),
+                  fptr, sexp(Symbol("native symbol")), sexp(Const.NilValue))
     setattrib!(rexfn, Const.ClassSymbol, "NativeSymbol")
     preserve(rexfn)
-    rexfn
+    return rexfn
 end
-
 
 """
     makeExternalPtr(ptr::Ptr{Cvoid},
@@ -23,7 +22,7 @@ end
 Create an Ptr{ExtPtrSxp} object.
 """
 function makeExternalPtr(ptr::Ptr{Cvoid}, tag=Const.NilValue, prot=Const.NilValue)
-    return ccall((:R_MakeExternalPtr,libR), Ptr{ExtPtrSxp},
+    return ccall((:R_MakeExternalPtr, libR), Ptr{ExtPtrSxp},
                  (Ptr{Cvoid}, Ptr{UnknownSxp}, Ptr{UnknownSxp}),
                  ptr, sexp(tag), sexp(prot))
 end
@@ -54,17 +53,17 @@ function julia_extptr_callback(p::Ptr{ListSxp})
         # # extract arguments
         args = Any[]
         kwargs = Any[]
-        for (k,a) in pairs(l)
+        for (k, a) in pairs(l)
             # TODO: provide a mechanism for users to specify their own
             # conversion routines
             if k == sexp(Const.NilValue)
                 push!(args, rcopy(a))
             else
-                push!(kwargs, (rcopy(Symbol,k), rcopy(a)))
+                push!(kwargs, (rcopy(Symbol, k), rcopy(a)))
             end
         end
         # call function
-        y = f(args...;kwargs...)
+        y = f(args...; kwargs...)
 
         # return appropriate sexp
         return p = convert(Ptr{UnknownSxp}, sexp(y))::Ptr{UnknownSxp}
@@ -76,14 +75,13 @@ function julia_extptr_callback(p::Ptr{ListSxp})
     end
 end
 
-
 """
     JULIA_TYPES_EXT_PTRS
 
 Julia types (typically functions) which are wrapped in `Ptr{ExtPtrSxp}` are
 stored here to prevent garbage collection by Julia.
 """
-const JULIA_TYPES_EXT_PTRS = Dict{Ptr{ExtPtrSxp}, Any}()
+const JULIA_TYPES_EXT_PTRS = Dict{Ptr{ExtPtrSxp},Any}()
 
 """
     jtypExtPtrs
@@ -109,14 +107,13 @@ Register finalizer to be called by the R GC.
 """
 function registerCFinalizerEx(s::Ptr{ExtPtrSxp})
     protect(s)
-    decref_extptr_ptr = @cfunction(decref_extptr,Nothing,(Ptr{ExtPtrSxp},))
-    ccall((:R_RegisterCFinalizerEx,libR),Nothing,
+    decref_extptr_ptr = @cfunction(decref_extptr, Nothing, (Ptr{ExtPtrSxp},))
+    ccall((:R_RegisterCFinalizerEx, libR), Nothing,
           (Ptr{ExtPtrSxp}, Ptr{Cvoid}, Cint),
-          s,decref_extptr_ptr,0)
+          s, decref_extptr_ptr, 0)
     unprotect(1)
     return nothing
 end
-
 
 """
     JULIA_CALLBACK
@@ -125,18 +122,17 @@ end
 """
 const JULIA_CALLBACK = RObject{ExtPtrSxp}()
 
-
 """
     setup_callbacks()
 
 Initialize [`JULIA_CALLBACK`](@ref)
 """
 function setup_callbacks()
-    julia_extptr_callback_ptr = @cfunction(julia_extptr_callback,Ptr{UnknownSxp},(Ptr{ListSxp},))
+    julia_extptr_callback_ptr = @cfunction(julia_extptr_callback, Ptr{UnknownSxp},
+                                           (Ptr{ListSxp},))
     JULIA_CALLBACK.p = makeNativeSymbolRef(julia_extptr_callback_ptr)
     return nothing
 end
-
 
 """
     sexp(::Type{RClass{:externalptr}}, j::Any)
@@ -153,7 +149,7 @@ function sexp(::Type{RClass{:externalptr}}, j)
     s = makeExternalPtr(jptr)
     JULIA_TYPES_EXT_PTRS[s] = refj
     registerCFinalizerEx(s)
-    s
+    return s
 end
 
 """
@@ -182,9 +178,8 @@ function sexp(::Type{RClass{:function}}, f)
     finally
         unprotect(nprotect)
     end
-    clos
+    return clos
 end
-
 
 """
     sexp_arglist_dots(args...; kwargs...)
@@ -192,7 +187,7 @@ end
 Create an argument list for an R function call, with a varargs "dots" at the end.
 """
 function sexp_arglist_dots(args...; kwargs...)
-    rarglist = protect(allocList(length(args)+length(kwargs)+1))
+    rarglist = protect(allocList(length(args) + length(kwargs) + 1))
     try
         rr = rarglist
         for var in args
@@ -200,7 +195,7 @@ function sexp_arglist_dots(args...; kwargs...)
             setcar!(rr, Const.MissingArg)
             rr = cdr(rr)
         end
-        for (var,val) in kwargs
+        for (var, val) in kwargs
             settag!(rr, sexp(var))
             setcar!(rr, sexp(val))
             rr = cdr(rr)
@@ -210,5 +205,5 @@ function sexp_arglist_dots(args...; kwargs...)
     finally
         unprotect(1)
     end
-    rarglist
+    return rarglist
 end

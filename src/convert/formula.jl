@@ -1,7 +1,7 @@
 # R formula to julia Formula
 
 # a special wrapper for rcopy specialized for formulas
-function rcopy_formula(s::Ptr{S}) where S<:Sxp
+function rcopy_formula(s::Ptr{S}) where {S<:Sxp}
     r = rcopy(s)
     if isa(r, Number) && isinteger(r)
         Int(r)
@@ -33,14 +33,13 @@ function rcopy(::Type{Expr}, l::Ptr{LangSxp})
     if op in (:+, :*, :&) && isa(f.args[2], Expr) && f.args[2].args[1] == op
         f = Expr(:call, op, f.args[2].args[2:end]..., f.args[3])
     end
-    f
+    return f
 end
 
 function rcopy(::Type{FormulaTerm}, l::Ptr{LangSxp})
     expr = rcopy(Expr, l)
     @eval StatsModels.@formula($expr)
 end
-
 
 # julia Formula to R formula
 
@@ -52,7 +51,8 @@ function sexp_formula(e::Expr)
         op = :(:)
     end
     if length(e.args) > 3 && op in (:+, :*, :(:))
-        rlang_p(op, sexp_formula(Expr(e.head, e.args[1:end-1]...)), sexp_formula(e.args[end]))
+        rlang_p(op, sexp_formula(Expr(e.head, e.args[1:(end - 1)]...)),
+                sexp_formula(e.args[end]))
     else
         rlang_p(op, map(sexp_formula, e.args[2:end])...)
     end
@@ -66,7 +66,6 @@ sexp_formula(t::FunctionTerm) = sexp_formula(t.exorig)
 sexp_formula(i::InteractionTerm) = sexp_formula(Expr(:call, :(:), i.terms...))
 sexp_formula(t::Term) = sexp(SymSxp, t.sym)
 
-
 # R formula objects
 function sexp(::Type{RClass{:formula}}, f::FormulaTerm)
     s = protect(rlang_p(:~, sexp_formula(f.lhs), sexp_formula(f.rhs)))
@@ -76,5 +75,5 @@ function sexp(::Type{RClass{:formula}}, f::FormulaTerm)
     finally
         unprotect(1)
     end
-    s
+    return s
 end

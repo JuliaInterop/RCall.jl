@@ -1,13 +1,14 @@
 ## a list of reserved names from PyCall.jl
-const reserved = Set{String}([
-    "while", "if", "for", "try", "return", "break", "continue",
-    "function", "macro", "quote", "let", "local", "global", "const",
-    "abstract", "typealias", "type", "bitstype", "immutable", "ccall",
-    "do", "module", "baremodule", "using", "import", "export", "importall",
-    "false", "true", "Tuple", "rmember", "__package__"])
+const reserved = Set{String}(["while", "if", "for", "try", "return", "break", "continue",
+                              "function", "macro", "quote", "let", "local", "global",
+                              "const",
+                              "abstract", "typealias", "type", "bitstype", "immutable",
+                              "ccall",
+                              "do", "module", "baremodule", "using", "import", "export",
+                              "importall",
+                              "false", "true", "Tuple", "rmember", "__package__"])
 
-
-const cached_namespaces = Dict{String, Module}()
+const cached_namespaces = Dict{String,Module}()
 
 """
 Import an R package as a julia module.
@@ -36,7 +37,7 @@ function rimport(pkg::String, s::Symbol=gensym(:rimport);
             dupes = [k for (k, v) in countmap(exports) if v > 1]
             if !isempty(dupes)
                 error("Normalized names are no longer unique: " *
-                       join(dupes, ", ", " and "))
+                      join(dupes, ", ", " and "))
             end
         else
             exports = [Symbol(x) for x in members]
@@ -44,10 +45,14 @@ function rimport(pkg::String, s::Symbol=gensym(:rimport);
 
         filtered_indices = filter!(i -> !(string(exports[i]) in reserved),
                                    collect(eachindex(exports)))
-        consts = [Expr(:const, Expr(:(=),
-                       exports[i],
-                       rcall(Symbol("::"), pkg, members[i]))) for i in filtered_indices]
-        Core.eval(m, Expr(:toplevel, id, consts..., Expr(:export, exports...), :(rmember(x) = ($getindex)($ns, x))))
+        consts = [Expr(:const,
+                       Expr(:(=),
+                            exports[i],
+                            rcall(Symbol("::"), pkg, members[i])))
+                  for i in filtered_indices]
+        Core.eval(m,
+                  Expr(:toplevel, id, consts..., Expr(:export, exports...),
+                       :(rmember(x) = ($getindex)($ns, x))))
         cached_namespaces[pkg] = m
     end
     return m
@@ -76,9 +81,9 @@ You can also use classic Python syntax to make an alias: `@rimport *package-name
 which is equivalent to `gg = rimport("ggplot2")`.
 """
 macro rimport(x, args...)
-    if length(args)==2 && args[1] == :as
+    if length(args) == 2 && args[1] == :as
         m = Symbol(args[2])
-    elseif length(args)==0
+    elseif length(args) == 0
         m = Symbol(x)
     else
         throw(ArgumentError("invalid import syntax."))
@@ -89,11 +94,12 @@ macro rimport(x, args...)
             const $(esc(m)) = rimport($pkg)
             nothing
         elseif typeof($(esc(m))) <: Module &&
-                    :__package__ in names($(esc(m)), all = true) &&
-                    $(esc(m)).__package__ == $pkg
+               :__package__ in names($(esc(m)); all=true) &&
+               $(esc(m)).__package__ == $pkg
             nothing
         else
-            error($pkg * " already exists! Use the syntax `@rimport " * $pkg *" as *shorthand*`.")
+            error($pkg * " already exists! Use the syntax `@rimport " * $pkg *
+                  " as *shorthand*`.")
             nothing
         end
     end
@@ -113,7 +119,8 @@ using .__temp__
 macro rlibrary(x)
     tmp = gensym("RCall")
     ex = Expr(:block, __source__,
-              Expr(:(=), esc(tmp), Expr(:call, GlobalRef(@__MODULE__, :rimport), QuoteNode(x))),
+              Expr(:(=), esc(tmp),
+                   Expr(:call, GlobalRef(@__MODULE__, :rimport), QuoteNode(x))),
               Expr(:using, Expr(:., :., tmp)))
     return Expr(:toplevel, ex)
 end

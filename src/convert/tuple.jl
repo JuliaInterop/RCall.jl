@@ -6,12 +6,12 @@ function sexp(::Type{RClass{:JuliaTuple}}, t::Tuple)
     # because of the way S3 classes work, this doesn't break anything on the R side
     # and strictly adds more information that we can take advantage of
     setattrib!(vs, :class, sexp("JuliaTuple"))
-    vs
+    return vs
 end
 
 function sexp(::Type{RClass{:list}}, t::Tuple)
     n = length(t)
-    vs = protect(allocArray(VecSxp,n))
+    vs = protect(allocArray(VecSxp, n))
     try
         for (i, v) in enumerate(t)
             vs[i] = v
@@ -19,14 +19,14 @@ function sexp(::Type{RClass{:list}}, t::Tuple)
     finally
         unprotect(1)
     end
-    vs
+    return vs
 end
 
-sexpclass(::Tuple) = RClass{:JuliaTuple}  
+sexpclass(::Tuple) = RClass{:JuliaTuple}
 
 rcopytype(::Type{RClass{:JuliaTuple}}, x::Ptr{VecSxp}) = Tuple
 
-function rcopy(::Type{T}, s::Ptr{VecSxp}) where {T <: Tuple}
+function rcopy(::Type{T}, s::Ptr{VecSxp}) where {T<:Tuple}
     protect(s)
     try
         T(rcopy(el) for el in s)

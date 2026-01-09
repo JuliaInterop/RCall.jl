@@ -27,7 +27,7 @@ function ijulia_setdevice(m::MIME; kwargs...)
     IJULIA_MIME[] = m
     return nothing
 end
-ijulia_setdevice(m::MIME"image/png") = ijulia_setdevice(m; width=6*72, height=5*72)
+ijulia_setdevice(m::MIME"image/png") = ijulia_setdevice(m; width=6 * 72, height=5 * 72)
 ijulia_setdevice(m::MIME"image/svg+xml") = ijulia_setdevice(m; width=6, height=5)
 
 """
@@ -55,7 +55,7 @@ See also [`ijulia_setdevice`](@ref).
 function ijulia_displayfile(m::MIME"image/png", f)
     open(f) do f
         d = read(f)
-        display(m, d)
+        return display(m, d)
     end
 end
 
@@ -68,7 +68,7 @@ function ijulia_displayfile(m::MIME"image/svg+xml", f)
         d = read(f, String)
         d = replace(d, "id=\"glyph" => "id=\"glyph" * r)
         d = replace(d, "href=\"#glyph" => "href=\"#glyph" * r)
-        display(m, d)
+        return display(m, d)
     end
 end
 
@@ -81,11 +81,11 @@ This is a postexecution hook called by IJulia after cell evaluation
 and should generally not be called by the user.
 """
 function ijulia_displayplots()
-    if rcopy(Int,rcall_p(Symbol("dev.cur"))) != 1
+    if rcopy(Int, rcall_p(Symbol("dev.cur"))) != 1
         rcall_p(Symbol("dev.off"))
         for fn in sort(readdir(IJULIA_FILE_DIR[]))
-            ffn = joinpath(IJULIA_FILE_DIR[],fn)
-            ijulia_displayfile(IJULIA_MIME[],ffn)
+            ffn = joinpath(IJULIA_FILE_DIR[], fn)
+            ijulia_displayfile(IJULIA_MIME[], ffn)
             rm(ffn)
         end
     end
@@ -114,7 +114,7 @@ Initialize RCall's IJulia support.
 function ijulia_init()
     # TODO: use scratchspace?
     IJULIA_FILE_DIR[] = mktempdir()
-    ijulia_file_fmt = joinpath(IJULIA_FILE_DIR[],"rij_%03d")
+    ijulia_file_fmt = joinpath(IJULIA_FILE_DIR[], "rij_%03d")
     rcall_p(:options; rcalljl_filename=ijulia_file_fmt)
 
     reval_p(rparse_p("""
@@ -128,5 +128,5 @@ function ijulia_init()
     # and be explicit via package extensions
     Main.IJulia.push_postexecute_hook(ijulia_displayplots)
     Main.IJulia.push_posterror_hook(ijulia_cleanup)
-    ijulia_setdevice(MIME"image/png"())
+    return ijulia_setdevice(MIME"image/png"())
 end

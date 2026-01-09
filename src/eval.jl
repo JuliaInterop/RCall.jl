@@ -1,11 +1,12 @@
 # callback used by safe_parseVector
 function safe_parseVector_callback(@nospecialize(args::Any))::Ptr{UnknownSxp}
-    (st,status,sf) = args
-    return ccall((:R_ParseVector,libR),Ptr{UnknownSxp},
-        (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}),
-        st,-1,status,sf)
+    (st, status, sf) = args
+    return ccall((:R_ParseVector, libR), Ptr{UnknownSxp},
+                 (Ptr{StrSxp}, Cint, Ptr{Cint}, Ptr{UnknownSxp}),
+                 st, -1, status, sf)
 end
-function safe_parseVector_handler(c::Ptr{UnknownSxp}, @nospecialize(_::Any))::Ptr{UnknownSxp}
+function safe_parseVector_handler(c::Ptr{UnknownSxp},
+                                  @nospecialize(_::Any))::Ptr{UnknownSxp}
     return c
 end
 
@@ -14,38 +15,40 @@ R_ParseVector wrapped by R_tryCatchError. It catches possible R's `stop` calls w
 
 See [Writing R Extensions: Condition handling and cleanup code](https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Condition-handling-and-cleanup-code)
 """
-function safe_parseVector(st::Ptr{StrSxp}, status::Ref{Cint}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
+function safe_parseVector(st::Ptr{StrSxp}, status::Ref{Cint},
+                          sf::Ptr{S}=sexp(Const.NilValue)) where {S<:Sxp}
     protect(st)
     protect(sf)
     ret = ccall((:R_tryCatchError, libR), Ptr{UnknownSxp},
-          (Ptr{Cvoid}, Any, Ptr{Cvoid}, Any),
-          @cfunction(safe_parseVector_callback, Ptr{UnknownSxp},(Any,)),
-          (st,status,sf),
-          @cfunction(safe_parseVector_handler, Ptr{UnknownSxp},(Ptr{UnknownSxp},Any)),
-          nothing)
+                (Ptr{Cvoid}, Any, Ptr{Cvoid}, Any),
+                @cfunction(safe_parseVector_callback, Ptr{UnknownSxp}, (Any,)),
+                (st, status, sf),
+                @cfunction(safe_parseVector_handler, Ptr{UnknownSxp},
+                           (Ptr{UnknownSxp}, Any)),
+                nothing)
     unprotect(2)
-    sexp(ret)
+    return sexp(ret)
 end
 
-
 "A pure julia wrapper of R_ParseVector"
-function parseVector(st::Ptr{StrSxp}, status::Ref{Cint}, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp
+function parseVector(st::Ptr{StrSxp}, status::Ref{Cint},
+                     sf::Ptr{S}=sexp(Const.NilValue)) where {S<:Sxp}
     protect(st)
     protect(sf)
-    val = ccall((:R_ParseVector,libR),Ptr{UnknownSxp},
-                (Ptr{StrSxp},Cint,Ptr{Cint},Ptr{UnknownSxp}),
-                st,-1,status,sf)
+    val = ccall((:R_ParseVector, libR), Ptr{UnknownSxp},
+                (Ptr{StrSxp}, Cint, Ptr{Cint}, Ptr{UnknownSxp}),
+                st, -1, status, sf)
     unprotect(2)
-    sexp(val)
+    return sexp(val)
 end
 
 "Get the R parser error msg for the previous parsing result."
 function getParseErrorMsg()
-    unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
+    return unsafe_string(cglobal((:R_ParseErrorMsg, libR), UInt8))
 end
 
 "Parse a string as an R expression, returning a Sxp pointer."
-function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sxp
+function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue)) where {S<:Sxp}
     protect(st)
     protect(sf)
     status = Ref{Cint}()
@@ -71,23 +74,28 @@ function rparse_p(st::Ptr{StrSxp}, sf::Ptr{S}=sexp(Const.NilValue))  where S<:Sx
         unprotect(3)
     end
 end
-rparse_p(st::AbstractString, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp = rparse_p(sexp(st), sf)
-rparse_p(s::Symbol, sf::Ptr{S}=sexp(Const.NilValue)) where S<:Sxp = rparse_p(string(s), sf)
+function rparse_p(st::AbstractString, sf::Ptr{S}=sexp(Const.NilValue)) where {S<:Sxp}
+    return rparse_p(sexp(st), sf)
+end
+function rparse_p(s::Symbol, sf::Ptr{S}=sexp(Const.NilValue)) where {S<:Sxp}
+    return rparse_p(string(s), sf)
+end
 
 "Parse a string as an R expression, returning an RObject."
 rparse(st::AbstractString) = RObject(rparse_p(st))
 
-
 """
 A pure julia wrapper of R_tryEval.
 """
-function tryEval(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv), status::Ref{Cint}=Ref{Cint}()) where S<:Sxp
+function tryEval(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv),
+                 status::Ref{Cint}=Ref{Cint}()) where {S<:Sxp}
     disable_sigint() do
         protect(expr)
         protect(env)
-        val = ccall((:R_tryEval,libR),Ptr{UnknownSxp},(Ptr{S},Ptr{EnvSxp},Ref{Cint}),expr,env,status)
+        val = ccall((:R_tryEval, libR), Ptr{UnknownSxp}, (Ptr{S}, Ptr{EnvSxp}, Ref{Cint}),
+                    expr, env, status)
         unprotect(2)
-        val
+        return val
     end
 end
 
@@ -95,15 +103,15 @@ end
 Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning a Sxp pointer.
 """
-function reval_p(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) where S<:Sxp
+function reval_p(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv)) where {S<:Sxp}
     status = Ref{Cint}()
     val = tryEval(expr, env, status)
     succeed = status[] == 0
     handle_eval_stdout()
-    handle_eval_stderr(as_warning=succeed)
+    handle_eval_stderr(; as_warning=succeed)
     # always throw an error if status is not zero
     !succeed && throw(REvalError())
-    sexp(val)
+    return sexp(val)
 end
 
 """
@@ -125,7 +133,7 @@ function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
     if env == Const.GlobalEnv.p
         set_last_value(val)
     end
-    val
+    return val
 end
 
 """
@@ -133,5 +141,6 @@ Evaluate an R symbol or language object (i.e. a function call) in an R
 try/catch block, returning an RObject.
 """
 reval(r::RObject, env=Const.GlobalEnv) = RObject(reval_p(sexp(r), sexp(env)))
-reval(str::T, env=Const.GlobalEnv) where T <: Union{AbstractString, Symbol} =
-    RObject(reval_p(rparse_p(str), sexp(env)))
+function reval(str::T, env=Const.GlobalEnv) where {T<:Union{AbstractString,Symbol}}
+    return RObject(reval_p(rparse_p(str), sexp(env)))
+end

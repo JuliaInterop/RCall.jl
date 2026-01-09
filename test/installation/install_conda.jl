@@ -7,7 +7,7 @@
 using Pkg
 
 ENV["R_HOME"] = "*"
-Pkg.add(;path=ENV["RCALL_DIR"])
+Pkg.add(; path=ENV["RCALL_DIR"])
 Pkg.build("RCall")
 
 RCall = Base.require(Main, :RCall)

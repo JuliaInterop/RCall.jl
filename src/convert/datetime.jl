@@ -5,7 +5,9 @@
 rcopy(::Type{Date}, s::Ptr{RealSxp}) = rcopy(Date, s[1])
 rcopy(::Type{DateTime}, s::Ptr{RealSxp}) = rcopy(DateTime, s[1])
 
-rcopy(::Type{Date}, x::Float64) = Date(Dates.UTInstant(Dates.Day((isnan(x) ? 0 : x) + 719163)))
+function rcopy(::Type{Date}, x::Float64)
+    return Date(Dates.UTInstant(Dates.Day((isnan(x) ? 0 : x) + 719163)))
+end
 function rcopy(::Type{DateTime}, x::Float64)
     ms = ((isnan(x) ? 0 : x) + 62135683200) * 1_000
     ms_int = round(Int, ms)
@@ -19,14 +21,14 @@ end
 # implicit conversion `rcopy(d)`.
 function rcopytype(::Type{RClass{:Date}}, s::Ptr{RealSxp})
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{Date, Missing}}
+        length(s) == 1 ? Missing : Array{Union{Date,Missing}}
     else
         length(s) == 1 ? Date : Array{Date}
     end
 end
 function rcopytype(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp})
     if anyna(s)
-        length(s) == 1 ? Missing : Array{Union{DateTime, Missing}}
+        length(s) == 1 ? Missing : Array{Union{DateTime,Missing}}
     else
         length(s) == 1 ? DateTime : Array{DateTime}
     end
@@ -35,14 +37,14 @@ end
 # implicit Array conversion `rcopy(Array, d)`.
 function eltype(::Type{RClass{:Date}}, s::Ptr{RealSxp})
     if anyna(s)
-        Union{Date, Missing}
+        Union{Date,Missing}
     else
         Date
     end
 end
 function eltype(::Type{RClass{:POSIXct}}, s::Ptr{RealSxp})
     if anyna(s)
-        Union{DateTime, Missing}
+        Union{DateTime,Missing}
     else
         DateTime
     end
@@ -54,15 +56,15 @@ function sexp(::Type{RClass{:Date}}, d::Date)
     res = protect(sexp(RClass{:numeric}, Float64(Dates.value(d)) - 719163))
     setclass!(res, sexp("Date"))
     unprotect(1)
-    res
+    return res
 end
 function sexp(::Type{RClass{:Date}}, a::AbstractArray{Date})
     res = protect(sexp(RClass{:numeric}, map((x) -> Float64(Dates.value(x)) - 719163, a)))
     setclass!(res, sexp("Date"))
     unprotect(1)
-    res
+    return res
 end
-function sexp(::Type{RClass{:Date}}, a::AbstractArray{Union{Date, Missing}})
+function sexp(::Type{RClass{:Date}}, a::AbstractArray{Union{Date,Missing}})
     rv = protect(allocArray(RealSxp, size(a)...))
     try
         for (i, x) in enumerate(a)
@@ -76,23 +78,24 @@ function sexp(::Type{RClass{:Date}}, a::AbstractArray{Union{Date, Missing}})
     finally
         unprotect(1)
     end
-    rv
+    return rv
 end
 function sexp(::Type{RClass{:POSIXct}}, d::DateTime)
     res = protect(sexp(RClass{:numeric}, Float64(Dates.value(d) / 1000) - 62135683200))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", "UTC")
     unprotect(1)
-    res
+    return res
 end
 function sexp(::Type{RClass{:POSIXct}}, a::AbstractArray{DateTime})
-    res = protect(sexp(RClass{:numeric}, map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a)))
+    res = protect(sexp(RClass{:numeric},
+                       map((x) -> Float64(Dates.value(x) / 1000) - 62135683200, a)))
     setclass!(res, sexp(["POSIXct", "POSIXt"]))
     setattrib!(res, "tzone", "UTC")
     unprotect(1)
-    res
+    return res
 end
-function sexp(::Type{RClass{:POSIXct}}, a::AbstractArray{Union{DateTime, Missing}})
+function sexp(::Type{RClass{:POSIXct}}, a::AbstractArray{Union{DateTime,Missing}})
     rv = protect(allocArray(RealSxp, size(a)...))
     try
         for (i, x) in enumerate(a)
@@ -107,5 +110,5 @@ function sexp(::Type{RClass{:POSIXct}}, a::AbstractArray{Union{DateTime, Missing
     finally
         unprotect(1)
     end
-    rv
+    return rv
 end

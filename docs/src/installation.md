@@ -54,7 +54,7 @@ So that CondaPkg managed R finds the correct versions of its shared library depe
 
 At the moment there are two options for arranging for this:
 1. (Recommended) Use `CondaPkg.activate!(ENV)` to permanently modify the environment *before* loading RCall.
-2. (Experimental) Use `CondaPkg.withenv()` to change the environment while loading RCall/R and R libraries using native code. After the `CondaPkg.withenv()` block, the Conda environment will no longer be active. This approach may be needed if you need to return to a unmodified environment after loading R. Note this approach has not been thouroughly tested and may not work with all R packages.
+2. (Experimental) Use `CondaPkg.withenv()` to change the environment while loading RCall/R and R libraries using native code. After the `CondaPkg.withenv()` block, the Conda environment will no longer be active. This approach may be needed if you need to return to a unmodified environment after loading R. Note this approach has not been thoroughly tested and may not work with all R packages.
 
 ```julia
 RCall = CondaPkg.withenv() do
