@@ -57,8 +57,8 @@ function render(script::String)
         end
 
         index = 0
-        for i in 1:(line-1)
-            index = something(findnext(isequal('\n'), script, index+1), 0)
+        for i in 1:(line - 1)
+            index = something(findnext(isequal('\n'), script, index + 1), 0)
         end
         for j in 1:col
             index = nextind(script, index)
@@ -73,11 +73,12 @@ function render(script::String)
             throw(lastex)
         end
 
-        ast, i = Meta.parse(script, index+1, greedy=false)
+        ast, i = Meta.parse(script, index + 1; greedy=false)
 
-        if isa(ast,Symbol)
+        if isa(ast, Symbol)
             sym = "$ast"
-        elseif isa(ast, Expr) && !(ast.head == :error || ast.head == :continue || ast.head == :incomplete)
+        elseif isa(ast, Expr) &&
+               !(ast.head == :error || ast.head == :continue || ast.head == :incomplete)
             sym = "($ast)"
             # if an expression has already appeared, we generate a new symbol so it will be evaluated twice (e.g. `R"$(rand(10)) == $(rand(10))"`)
             if haskey(symdict, sym)
@@ -91,7 +92,7 @@ function render(script::String)
         end
 
         symdict[sym] = ast
-        script = string(script[1:index-1], "`#JL`\$`",sym,'`', script[i:end])
+        script = string(script[1:(index - 1)], "`#JL`\$`", sym, '`', script[i:end])
     end
 
     return script, symdict
@@ -102,10 +103,11 @@ Prepare code for evaluating the julia expressions. When the code is evaluated,
 the results are stored in the R environment `#JL`.
 """
 function prepare_inline_julia_code(symdict, escape::Bool=false)
-    new_env = Expr(:(=), :env, Expr(:call, reval_p, Expr(:call, rparse_p, "`#JL` <- new.env()")))
+    new_env = Expr(:(=), :env,
+                   Expr(:call, reval_p, Expr(:call, rparse_p, "`#JL` <- new.env()")))
     blk = Expr(:block)
     for (rsym, expr) in symdict
         push!(blk.args, Expr(:(=), Expr(:ref, :env, rsym), escape ? esc(expr) : expr))
     end
-    Expr(:let, new_env, blk)
+    return Expr(:let, new_env, blk)
 end

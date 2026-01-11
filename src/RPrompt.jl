@@ -5,28 +5,28 @@ import REPL: REPL, LineEdit, REPLCompletions
 import ..REvalError
 import ..Const
 import ..RCall:
-    libR,
-    rparse_p,
-    reval_p,
-    findNamespace,
-    rcall_p,
-    rprint,
-    rcopy,
-    render,
-    protect,
-    unprotect,
-    prepare_inline_julia_code,
-    RParseIncomplete,
-    RException,
-    RParseError,
-    REvalError,
-    RParseEOF
+                libR,
+                rparse_p,
+                reval_p,
+                findNamespace,
+                rcall_p,
+                rprint,
+                rcopy,
+                render,
+                protect,
+                unprotect,
+                prepare_inline_julia_code,
+                RParseIncomplete,
+                RException,
+                RParseError,
+                REvalError,
+                RParseEOF
 
 function simple_showerror(io::IO, er)
     Base.with_output_color(:red, io) do io
         print(io, "ERROR: ")
         showerror(io, er)
-        println(io)
+        return println(io)
     end
 
     return nothing
@@ -58,12 +58,12 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
         nprotect += 1
         # print if the last expression is visible
         if rcopy(Bool, ret[:visible])
-             rprint(stdout, ret[:value])
+            rprint(stdout, ret[:value])
         end
     catch ex
         if isa(ex, REvalError)
             println(stderr, ex.msg)
-        elseif isa(ex, RParseIncomplete) || isa(ex, RParseError)  || isa(ex, RParseEOF)
+        elseif isa(ex, RParseIncomplete) || isa(ex, RParseError) || isa(ex, RParseEOF)
             println(stderr, ex.msg)
         else
             simple_showerror(stderr, ex)
@@ -114,8 +114,8 @@ function bracketed_paste_callback(s, o...)
         block = input[oldpos:nextpos]
         status = parse_status(block)
 
-        if status == :error  || (status == :incomplete && nextpos == m) ||
-                (nextpos == m && !endswith(input, '\n'))
+        if status == :error || (status == :incomplete && nextpos == m) ||
+           (nextpos == m && !endswith(input, '\n'))
             # error / continue and the end / at the end but no new line
             LineEdit.replace_line(s, input[oldpos:end])
             refresh_line_(s)
@@ -136,7 +136,7 @@ function bracketed_paste_callback(s, o...)
         end
         oldpos = nextpos + 1
     end
-    refresh_line_(s)
+    return LineEdit.refresh_line(s)
 end
 
 struct RCompletionProvider <: LineEdit.CompletionProvider
@@ -205,9 +205,9 @@ end
 
 function create_r_repl(repl, main)
     r_mode = LineEdit.Prompt("R> ";
-        prompt_prefix=Base.text_colors[:blue],
-        prompt_suffix=main.prompt_suffix,
-        sticky=true)
+                             prompt_prefix=Base.text_colors[:blue],
+                             prompt_suffix=main.prompt_suffix,
+                             sticky=true)
 
     hp = main.hist
     hp.mode_mapping[:r] = r_mode
@@ -236,9 +236,7 @@ function create_r_repl(repl, main)
         s.current_mode.sticky || REPL.transition(s, main)
     end
 
-    bracketed_paste_mode_keymap = Dict{Any,Any}(
-        "\e[200~" => bracketed_paste_callback
-    )
+    bracketed_paste_mode_keymap = Dict{Any,Any}("\e[200~" => bracketed_paste_callback)
 
     @static if isdefined(LineEdit, :history_keymap)
         skeymap = LineEdit.history_keymap
@@ -251,14 +249,12 @@ function create_r_repl(repl, main)
     # ^C should not exit prompt
     delete!(mk, "^C")
 
-    b = Dict{Any,Any}[
-        bracketed_paste_mode_keymap,
-        skeymap, mk, prefix_keymap, LineEdit.history_keymap,
-        LineEdit.default_keymap, LineEdit.escape_defaults
-    ]
+    b = Dict{Any,Any}[bracketed_paste_mode_keymap,
+                      skeymap, mk, prefix_keymap, LineEdit.history_keymap,
+                      LineEdit.default_keymap, LineEdit.escape_defaults]
     r_mode.keymap_dict = LineEdit.keymap(b)
 
-    r_mode
+    return r_mode
 end
 
 function repl_init(repl)

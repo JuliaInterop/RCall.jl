@@ -1,4 +1,4 @@
-t = ("a", 1, [1,2])
+t = ("a", 1, [1, 2])
 r = RObject(t)
 @test r isa RObject{VecSxp}
 @test length(r) == length(t)

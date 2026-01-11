@@ -5,17 +5,17 @@
 
 using Pkg
 ENV["R_HOME"] = "_"
-Pkg.add(;path=ENV["RCALL_DIR"])
+Pkg.add(; path=ENV["RCALL_DIR"])
 Pkg.build("RCall")
 
 try
-  Base.require(Main, :RCall)
+    Base.require(Main, :RCall)
 catch e
-  if !(e isa LoadError)
-    @error "Expected LoadError when running RCall but got $e"
-    exit(1)
-  end
-  exit(0)
+    if !(e isa LoadError)
+        @error "Expected LoadError when running RCall but got $e"
+        exit(1)
+    end
+    exit(0)
 end
 @error "RCall unexpectedly loaded"
 exit(1)

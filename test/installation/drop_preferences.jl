@@ -1,6 +1,6 @@
 # Test removal of Rhome from preferences.
 #
-# If run after `install_conda.jl` and `swap_to_prefs_and_condapkg.jl` in the same enviroment,
+# If run after `install_conda.jl` and `swap_to_prefs_and_condapkg.jl` in the same environment,
 # then it tests returning to the build status quo after removal of preferences.
 #
 # This file is meant to be run in an embedded process spawned by installation.jl.

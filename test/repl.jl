@@ -8,8 +8,9 @@ mutable struct FakeTerminal <: Terminals.UnixTerminal
     err_stream::Base.IO
     hascolor::Bool
     raw::Bool
-    FakeTerminal(stdin,stdout,stderr,hascolor=true) =
-        new(stdin,stdout,stderr,hascolor,false)
+    function FakeTerminal(stdin, stdout, stderr, hascolor=true)
+        return new(stdin, stdout, stderr, hascolor, false)
+    end
 end
 
 Terminals.hascolor(t::FakeTerminal) = t.hascolor
@@ -21,9 +22,9 @@ Terminals.size(t::FakeTerminal) = (24, 80)
 input = Pipe()
 output = Pipe()
 err = Pipe()
-Base.link_pipe!(input, reader_supports_async=true, writer_supports_async=true)
-Base.link_pipe!(output, reader_supports_async=true, writer_supports_async=true)
-Base.link_pipe!(err, reader_supports_async=true, writer_supports_async=true)
+Base.link_pipe!(input; reader_supports_async=true, writer_supports_async=true)
+Base.link_pipe!(output; reader_supports_async=true, writer_supports_async=true)
+Base.link_pipe!(err; reader_supports_async=true, writer_supports_async=true)
 
 repl = REPL.LineEditREPL(FakeTerminal(input.out, output.in, err.in), true)
 
@@ -41,7 +42,7 @@ function read_repl(io::IO, x)
     schedule(read_task)
     fetch(read_task)
     close(t)
-    cache[]
+    return cache[]
 end
 
 check_repl_stdout(x) = length(read_repl(output, x)) > 0

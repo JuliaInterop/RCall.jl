@@ -6,24 +6,24 @@ function sexp(::Type{RClass{:JuliaNamedTuple}}, nt::NamedTuple)
     # because of the way S3 classes work, this doesn't break anything on the R side
     # and strictly adds more information that we can take advantage of
     setattrib!(vs, :class, sexp("JuliaNamedTuple"))
-    vs
+    return vs
 end
 
 # keep this as a separate method to allow for conversion without the attribute
 function sexp(::Type{RClass{:list}}, nt::NamedTuple)
     n = length(nt)
-    vs = protect(allocArray(VecSxp,n))
-    ks = protect(allocArray(StrSxp,n))
+    vs = protect(allocArray(VecSxp, n))
+    ks = protect(allocArray(StrSxp, n))
     try
-        for (i,(k,v)) in enumerate(zip(keys(nt), nt))
+        for (i, (k, v)) in enumerate(zip(keys(nt), nt))
             ks[i] = string(k)
             vs[i] = v
         end
-        setnames!(vs,ks)
+        setnames!(vs, ks)
     finally
         unprotect(2)
     end
-    vs
+    return vs
 end
 
 sexpclass(::NamedTuple) = RClass{:JuliaNamedTuple}
@@ -32,7 +32,7 @@ rcopytype(::Type{RClass{:JuliaNamedTuple}}, x::Ptr{VecSxp}) = NamedTuple
 
 function rcopy(::Type{NamedTuple}, s::Ptr{VecSxp})
     protect(s)
-    try 
+    try
         names = Tuple(Symbol(rcopy(n)) for n in getnames(s))
         values = rcopy(Tuple, s)
         NamedTuple{names}(values)
@@ -41,7 +41,7 @@ function rcopy(::Type{NamedTuple}, s::Ptr{VecSxp})
     end
 end
 
-function rcopy(::Type{NamedTuple{names}}, s::Ptr{VecSxp}) where names
+function rcopy(::Type{NamedTuple{names}}, s::Ptr{VecSxp}) where {names}
     protect(s)
     try
         n = Tuple(Symbol(rcopy(n)) for n in getnames(s))
@@ -56,7 +56,7 @@ function rcopy(::Type{NamedTuple{names}}, s::Ptr{VecSxp}) where names
     end
 end
 
-function rcopy(::Type{NamedTuple{names, types}}, s::Ptr{VecSxp}) where {names, types}
+function rcopy(::Type{NamedTuple{names,types}}, s::Ptr{VecSxp}) where {names,types}
     protect(s)
     try
         n = Tuple(Symbol(rcopy(n)) for n in getnames(s))
@@ -65,7 +65,7 @@ function rcopy(::Type{NamedTuple{names, types}}, s::Ptr{VecSxp}) where {names, t
         end
 
         vals = rcopy(Tuple, s)
-        NamedTuple{names, types}(vals)
+        NamedTuple{names,types}(vals)
     finally
         unprotect(1)
     end

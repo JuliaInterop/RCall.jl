@@ -1,0 +1,48 @@
+---
+name: Format Check
+on:
+  push:
+    branches:
+      - main
+      - /^release-.*$/
+    tags: ["*"]
+    paths:
+      - "**/*.jl"
+      - ".github/workflows/style.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "**/*.jl"
+      - ".github/workflows/style.yml"
+jobs:
+  format-check:
+    name: Julia
+    # These permissions are needed to:
+    # - Delete old caches: https://github.com/julia-actions/cache#usage
+    # - Post formatting suggestions: https://github.com/reviewdog/action-suggester#required-permissions
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+      - uses: julia-actions/cache@v2
+      - name: Install JuliaFormatter
+        shell: julia --project=@format --color=yes {0}
+        run: |
+          using Pkg
+          Pkg.add(PackageSpec(; name="JuliaFormatter", version="1"))
+      - name: Check formatting
+        shell: julia --project=@format --color=yes {0}
+        run: |
+          using JuliaFormatter
+          format("."; verbose=true) || exit(1)
+      # Add formatting suggestions to non-draft PRs even if when "Check formatting" fails
+      - uses: reviewdog/action-suggester@185c9c06d0a28fbe43b50aca4b32777b649e7cbd # v1.12.0
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
+        with:
+          tool_name: JuliaFormatter
