@@ -144,7 +144,8 @@ struct RCompletionProvider <: LineEdit.CompletionProvider
     line_modify_lock::ReentrantLock
     hint_generation_lock::ReentrantLock
     function RCompletionProvider(repl::REPL.LineEditREPL)
-        repl.mistate = @something(repl.mistate, LineEdit.init_state(REPL.terminal(repl), repl.interface))
+        repl.mistate = @something(repl.mistate,
+                                  LineEdit.init_state(REPL.terminal(repl), repl.interface))
         @static if hasfield(LineEdit.MIState, :hint_generation_lock)
             hint_generation_lock = repl.mistate.hint_generation_lock
         else
@@ -179,7 +180,7 @@ end
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     @lock c.hint_generation_lock begin
         buf = s.input_buffer
-        partial = String(buf.data[1:buf.ptr-1])
+        partial = String(buf.data[1:(buf.ptr - 1)])
         # complete latex
         full = LineEdit.input_string(s)
         ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
@@ -264,29 +265,28 @@ function repl_init(repl)
     interface = repl.interface
     main_mode = interface.modes[1]
     r_mode = create_r_repl(repl, main_mode)
-    push!(repl.interface.modes,r_mode)
+    push!(repl.interface.modes, r_mode)
 
-    r_prompt_keymap = Dict{Any,Any}(
-        '$' => function (s, args...)
-            if isempty(s) || position(LineEdit.buffer(s)) == 0
-                buf = copy(LineEdit.buffer(s))
-                LineEdit.transition(s, r_mode) do
-                    LineEdit.state(s, r_mode).input_buffer = buf
-                end
-            else
-                LineEdit.edit_insert(s, '$')
-            end
-        end
-    )
+    r_prompt_keymap = Dict{Any,Any}('$' => function (s, args...)
+                                        if isempty(s) || position(LineEdit.buffer(s)) == 0
+                                            buf = copy(LineEdit.buffer(s))
+                                            LineEdit.transition(s, r_mode) do
+                                                return LineEdit.state(s, r_mode).input_buffer = buf
+                                            end
+                                        else
+                                            LineEdit.edit_insert(s, '$')
+                                        end
+                                    end)
 
-    main_mode.keymap_dict = LineEdit.keymap_merge(main_mode.keymap_dict, r_prompt_keymap);
+    main_mode.keymap_dict = LineEdit.keymap_merge(main_mode.keymap_dict, r_prompt_keymap)
     return nothing
 end
 
 function repl_inited(repl)
     interface = repl.interface
 
-    return any(:prompt in fieldnames(typeof(m)) && m.prompt == "R> " for m in interface.modes)
+    return any(:prompt in fieldnames(typeof(m)) && m.prompt == "R> "
+               for m in interface.modes)
 end
 
 end # module
