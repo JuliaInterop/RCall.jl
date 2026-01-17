@@ -28,6 +28,8 @@ function simple_showerror(io::IO, er)
         showerror(io, er)
         return println(io)
     end
+
+    return nothing
 end
 
 function parse_status(script::String)
@@ -72,6 +74,12 @@ function repl_eval(script::String, stdout::IO, stderr::IO)
     end
 end
 
+@static if isdefined(LineEdit, :check_show_hints)
+    refresh_line_(s) = LineEdit.check_show_hint(s)
+else
+    refresh_line_(s) = LineEdit.refresh_line(s)
+end
+
 function bracketed_paste_callback(s, o...)
     input = LineEdit.bracketed_paste(s)
     sbuffer = LineEdit.buffer(s)
@@ -98,7 +106,7 @@ function bracketed_paste_callback(s, o...)
     # parse the input line by line
     while nextpos < m
         next_result = findnext("\n", input, nextpos + 1)
-        if next_result == nothing
+        if isnothing(next_result)
             nextpos = m
         else
             nextpos = next_result[1]
@@ -110,7 +118,7 @@ function bracketed_paste_callback(s, o...)
            (nextpos == m && !endswith(input, '\n'))
             # error / continue and the end / at the end but no new line
             LineEdit.replace_line(s, input[oldpos:end])
-            LineEdit.refresh_line(s)
+            refresh_line_(s)
             break
         elseif status == :incomplete && nextpos < m
             continue
@@ -131,8 +139,26 @@ function bracketed_paste_callback(s, o...)
     return LineEdit.refresh_line(s)
 end
 
-mutable struct RCompletionProvider <: LineEdit.CompletionProvider
-    r::REPL.LineEditREPL
+struct RCompletionProvider <: LineEdit.CompletionProvider
+    repl::REPL.LineEditREPL
+    line_modify_lock::ReentrantLock
+    hint_generation_lock::ReentrantLock
+    function RCompletionProvider(repl::REPL.LineEditREPL)
+        repl.mistate = @something(repl.mistate,
+                                  LineEdit.init_state(REPL.terminal(repl), repl.interface))
+        @static if hasfield(LineEdit.MIState, :hint_generation_lock)
+            hint_generation_lock = repl.mistate.hint_generation_lock
+        else
+            hint_generation_lock = ReentrantLock()
+        end
+        @static if hasfield(LineEdit.MIState, :line_modify_lock)
+            line_modify_lock = repl.mistate.line_modify_lock
+        else
+            line_modify_lock = ReentrantLock()
+        end
+
+        return new(repl, hint_generation_lock, line_modify_lock)
+    end
 end
 
 # Julia PR #54311 (backported to 1.11) added the `hint` argument
@@ -144,28 +170,38 @@ else
     end
 end
 
+# Julia PR 54800 messed up REPL completion, fix adapted from https://github.com/JuliaLang/IJulia.jl/pull/1147
+if isdefined(REPLCompletions, :named_completion) # julia#54800 (julia 1.12)
+    completion_text_(c) = REPLCompletions.named_completion(c).completion::String
+else
+    completion_text_(c) = REPLCompletions.completion_text(c)
+end
+
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
-    buf = s.input_buffer
-    partial = String(buf.data[1:(buf.ptr - 1)])
-    # complete latex
-    full = LineEdit.input_string(s)
-    ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
-    if length(ret) > 0 && should_complete
-        return map(REPLCompletions.completion_text, ret), partial[range], should_complete
-    end
+    @lock c.hint_generation_lock begin
+        buf = s.input_buffer
+        partial = String(buf.data[1:(buf.ptr - 1)])
+        # complete latex
+        full = LineEdit.input_string(s)
+        ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
+        if length(ret) > 0 && should_complete
+            return map(completion_text_, ret), partial[range], should_complete
+        end
 
-    # complete r
-    utils = findNamespace("utils")
-    rcall_p(utils[".assignLinebuffer"], partial)
-    rcall_p(utils[".assignEnd"], length(partial))
-    token = rcopy(rcall_p(utils[".guessTokenFromLine"]))
-    rcall_p(utils[".completeToken"])
-    ret = rcopy(Array, rcall_p(utils[".retrieveCompletions"]))
-    if length(ret) > 0
-        return ret, token, true
-    end
+        # complete r
+        utils = findNamespace("utils")
+        rcall_p(utils[".assignLinebuffer"], partial)
+        rcall_p(utils[".assignEnd"], length(partial))
+        token = rcopy(rcall_p(utils[".guessTokenFromLine"]))
+        rcall_p(utils[".completeToken"])
+        ret = rcopy(Array, rcall_p(utils[".retrieveCompletions"]))
 
-    return String[], "", false
+        if length(ret) > 0
+            return ret, token, true
+        end
+
+        return String[], "", false
+    end
 end
 
 function create_r_repl(repl, main)
@@ -223,10 +259,13 @@ function create_r_repl(repl, main)
 end
 
 function repl_init(repl)
-    mirepl = isdefined(repl, :mi) ? repl.mi : repl
-    main_mode = mirepl.interface.modes[1]
-    r_mode = create_r_repl(mirepl, main_mode)
-    push!(mirepl.interface.modes, r_mode)
+    if !isdefined(repl, :interface)
+        repl.interface = REPL.setup_interface(repl)
+    end
+    interface = repl.interface
+    main_mode = interface.modes[1]
+    r_mode = create_r_repl(repl, main_mode)
+    push!(repl.interface.modes, r_mode)
 
     r_prompt_keymap = Dict{Any,Any}('$' => function (s, args...)
                                         if isempty(s) || position(LineEdit.buffer(s)) == 0
@@ -244,9 +283,10 @@ function repl_init(repl)
 end
 
 function repl_inited(repl)
-    mirepl = isdefined(repl, :mi) ? repl.mi : repl
+    interface = repl.interface
+
     return any(:prompt in fieldnames(typeof(m)) && m.prompt == "R> "
-               for m in mirepl.interface.modes)
+               for m in interface.modes)
 end
 
 end # module
