@@ -119,7 +119,7 @@ Evaluate an R expression array iteratively. If `throw_error` is `false`,
 the error message and warning will be thrown to stderr.
 """
 function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
-    local val
+    val = nothing
     protect(expr)
     protect(env)
     try
@@ -130,7 +130,7 @@ function reval_p(expr::Ptr{ExprSxp}, env::Ptr{EnvSxp})
         unprotect(2)
     end
     # set .Last.value
-    if env == Const.GlobalEnv.p
+    if val !== nothing && env == Const.GlobalEnv.p
         set_last_value(val)
     end
     return val
