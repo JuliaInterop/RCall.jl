@@ -7,20 +7,23 @@ include("setup.jl")
 
 const depfile = joinpath(dirname(@__FILE__), "deps.jl")
 
-function is_julia_rcall_use_conda()
-    var_name = "JULIA_RCALL_USE_CONDA"
+# Parses an environment variable into a `Bool`
+# If the environment variable is undefined or unparseable, default to `false`
+function parse_boolean_environment_variable(var_name)
     str = get(ENV, var_name, "")
     b_maybe = tryparse(Bool, str)
     b = b_maybe == true
     return b
 end
 
+function is_julia_rcall_use_conda()
+    var_name = "JULIA_RCALL_USE_CONDA"
+    return parse_boolean_environment_variable(var_name)
+end
+
 function is_julia_pkgeval()
     var_name = "JULIA_PKGEVAL" # https://github.com/JuliaCI/PkgEval.jl/blob/eec9d67bae9a84b761bc7961c09cbeef9524d370/src/sandbox.jl#L343
-    str = get(ENV, var_name, "")
-    b_maybe = tryparse(Bool, str)
-    b = b_maybe == true
-    return JULIA_PKGEVAL_b
+    return parse_boolean_environment_variable(var_name)
 end
 
 try
