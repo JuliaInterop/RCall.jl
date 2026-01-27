@@ -8,7 +8,7 @@ include("setup.jl")
 const depfile = joinpath(dirname(@__FILE__), "deps.jl")
 
 # Parses an environment variable into a `Bool`
-# If the environment variable is undefined or unparseable, default to `false`
+# If the environment variable is undefined or unparsable, default to `false`
 function parse_boolean_environment_variable(var_name)
     str = get(ENV, var_name, "")
     b_maybe = tryparse(Bool, str)
