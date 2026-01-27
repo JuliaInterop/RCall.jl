@@ -16,8 +16,10 @@ function is_julia_rcall_use_conda()
 end
 
 function is_julia_pkgeval()
-    JULIA_PKGEVAL_str = get(ENV, "JULIA_PKGEVAL", "") # https://github.com/JuliaCI/PkgEval.jl/blob/eec9d67bae9a84b761bc7961c09cbeef9524d370/src/sandbox.jl#L343
-    JULIA_PKGEVAL_b = tryparse(Bool, JULIA_PKGEVAL_str) == true
+    var_name = "JULIA_PKGEVAL" # https://github.com/JuliaCI/PkgEval.jl/blob/eec9d67bae9a84b761bc7961c09cbeef9524d370/src/sandbox.jl#L343
+    str = get(ENV, var_name, "")
+    b_maybe = tryparse(Bool, str)
+    b = b_maybe == true
     return JULIA_PKGEVAL_b
 end
 
