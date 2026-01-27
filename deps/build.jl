@@ -7,6 +7,12 @@ include("setup.jl")
 
 const depfile = joinpath(dirname(@__FILE__), "deps.jl")
 
+function is_julia_pkgeval()
+    JULIA_PKGEVAL_str = get(ENV, "JULIA_PKGEVAL", "") # https://github.com/JuliaCI/PkgEval.jl/blob/eec9d67bae9a84b761bc7961c09cbeef9524d370/src/sandbox.jl#L343
+    JULIA_PKGEVAL_b = tryparse(Bool, JULIA_PKGEVAL_str) == true
+    return JULIA_PKGEVAL_b
+end
+
 try
     conda_provided_r = false
 
@@ -28,9 +34,7 @@ try
         @info "Using previously configured R at $Rhome with libR in $libR."
     else
         Rhome = get(ENV, "R_HOME", "")
-        JULIA_PKGEVAL_str = get(ENV, "JULIA_PKGEVAL", "") # https://github.com/JuliaCI/PkgEval.jl/blob/eec9d67bae9a84b761bc7961c09cbeef9524d370/src/sandbox.jl#L343
-        JULIA_PKGEVAL_b = tryparse(Bool, JULIA_PKGEVAL_str) == true
-        if JULIA_PKGEVAL_b
+        if is_julia_pkgeval()
             @info "This is Julia PkgEval. We will install R via conda"
             Rhome = "*"
         end
