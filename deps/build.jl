@@ -58,7 +58,8 @@ try
                   "Pkg.build(\"RCall\")."
             conda_provided_r = true
             Conda.add_channel("r")
-            Conda.add("r-base>=3.4.0,<5") # greater than or equal to 3.4.0 AND strictly less than 5.0
+            ##### r-version limits #####
+            Conda.add("r-base>=4.0,<5") # greater than or equal to 4 AND strictly less than 5.0
             Rhome = joinpath(Conda.LIBDIR, "R")
             libR = locate_libR(Rhome)
         elseif Rhome == "_"
