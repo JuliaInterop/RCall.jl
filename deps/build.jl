@@ -32,7 +32,7 @@ try
         @info "Using previously configured R at $Rhome with libR in $libR."
     else
         Rhome = get(ENV, "R_HOME", "")
-        if is_julia_rcall_use_conda() || is_julia_pkgeval()
+        if env_use_conda || env_pkgeval
             Rhome = "*"
         end
         libR = nothing
