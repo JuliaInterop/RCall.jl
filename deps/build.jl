@@ -7,6 +7,10 @@ include("setup.jl")
 
 const depfile = joinpath(dirname(@__FILE__), "deps.jl")
 
+env_use_conda = Base.get_bool_env("JULIA_RCALL_USE_CONDA", false)
+# https://github.com/JuliaCI/PkgEval.jl/blob/eec9d67bae9a84b761bc7961c09cbeef9524d370/src/sandbox.jl#L343
+env_pkgeval = Base.get_bool_env("JULIA_PKGEVAL", false)
+
 try
     conda_provided_r = false
 
@@ -28,6 +32,9 @@ try
         @info "Using previously configured R at $Rhome with libR in $libR."
     else
         Rhome = get(ENV, "R_HOME", "")
+        if env_use_conda || env_pkgeval
+            Rhome = "*"
+        end
         libR = nothing
         if Rhome == "*"
             # install with Conda
