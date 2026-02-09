@@ -11,7 +11,7 @@ jobs:
       - name: Checkout Actions Repository
         uses: actions/checkout@v6
       - name: Check spelling
-        uses: crate-ci/typos@bb4666ad77b539a6b4ce4eda7ebb6de553704021 # v1.42.0
+        uses: crate-ci/typos@9066e9940a8a05b98fb4733c62a726f83c9e57f8 # v1.43.3
         with:
             config: _typos.toml
             write_changes: true
