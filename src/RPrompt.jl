@@ -144,6 +144,22 @@ else
     end
 end
 
+# Julia 1.12 changed BslashCompletion: renamed field `bslash` -> `completion`, added
+# `name` field, removed `_completion_text` support, and `complete_line_named` now requires
+# the partial string to be `String` (not `SubString`) in the return tuple.
+# Return NamedCompletion objects on Julia 1.12+ to use the new API properly.
+@static if hasfield(REPLCompletions.BslashCompletion, :completion)
+    function _bslash_completions_result(ret, partial, range)
+        completions = LineEdit.NamedCompletion[LineEdit.NamedCompletion(c.completion, c.name)
+                                               for c in ret]
+        return completions, String(partial[range]), true
+    end
+else
+    function _bslash_completions_result(ret, partial, range)
+        return map(REPLCompletions.completion_text, ret), partial[range], true
+    end
+end
+
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     buf = s.input_buffer
     partial = String(buf.data[1:(buf.ptr - 1)])
@@ -151,7 +167,7 @@ function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     full = LineEdit.input_string(s)
     ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
     if length(ret) > 0 && should_complete
-        return map(REPLCompletions.completion_text, ret), partial[range], should_complete
+        return _bslash_completions_result(ret, partial, range)
     end
 
     # complete r
