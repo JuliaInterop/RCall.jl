@@ -150,7 +150,8 @@ end
 # Return NamedCompletion objects on Julia 1.12+ to use the new API properly.
 @static if hasfield(REPLCompletions.BslashCompletion, :completion)
     function _bslash_completions_result(ret, partial, range)
-        completions = LineEdit.NamedCompletion[LineEdit.NamedCompletion(c.completion, c.name)
+        completions = LineEdit.NamedCompletion[LineEdit.NamedCompletion(c.completion,
+                                                                        c.name)
                                                for c in ret]
         return completions, String(partial[range]), true
     end
