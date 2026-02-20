@@ -22,7 +22,6 @@ jobs:
         R:
           - 'release'
           - '4.0'
-          - '3.4'
         os: [ubuntu-latest]
         experimental: [false]
         include:
