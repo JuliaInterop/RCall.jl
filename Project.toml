@@ -1,7 +1,7 @@
 name = "RCall"
 uuid = "6f49c342-dc21-5d91-9882-a32aef131414"
-authors = ["Douglas Bates <dmbates@gmail.com>", "Randy Lai <randy.cs.lai@gmail.com>", "Simon Byrne <simonbyrne@gmail.com>"]
 version = "0.14.12"
+authors = ["Douglas Bates <dmbates@gmail.com>", "Randy Lai <randy.cs.lai@gmail.com>", "Simon Byrne <simonbyrne@gmail.com>"]
 
 [deps]
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
@@ -32,7 +32,7 @@ IJulia = "1.25"
 Logging = "0, 1"
 Preferences = "1"
 StatsModels = "0.6, 0.7"
-TestSetExtensions = "3"
+TestSetExtensions = "3, 4"
 Weave = "0.10"
 WinReg = "0.2, 0.3, 1"
 julia = "1.10"
