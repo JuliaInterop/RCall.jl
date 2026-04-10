@@ -144,6 +144,27 @@ else
     end
 end
 
+# Julia 1.12 changed BslashCompletion: renamed field `bslash` -> `completion`, added
+# `name` field, removed `_completion_text` support, and `complete_line_named` now requires
+# the partial string to be `String` (not `SubString`) in the return tuple.
+# Return NamedCompletion objects on Julia 1.12+ to use the new API properly.
+@static if hasfield(REPLCompletions.BslashCompletion, :completion)
+    function _bslash_completions_result(ret, partial, range)
+        completions = LineEdit.NamedCompletion[LineEdit.NamedCompletion(c.completion,
+                                                                        c.name)
+                                               for c in ret]
+        # we always return true for the should_complete field because this is only
+        # called after we've checked should_complete
+        return completions, String(partial[range]), true
+    end
+else
+    function _bslash_completions_result(ret, partial, range)
+        # we always return true for the should_complete field because this is only
+        # called after we've checked should_complete
+        return map(REPLCompletions.completion_text, ret), partial[range], true
+    end
+end
+
 function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     buf = s.input_buffer
     partial = String(buf.data[1:(buf.ptr - 1)])
@@ -151,8 +172,12 @@ function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
     full = LineEdit.input_string(s)
     ret, range, should_complete = bslash_completions(full, lastindex(partial), hint)[2]
     if length(ret) > 0 && should_complete
-        return map(REPLCompletions.completion_text, ret), partial[range], should_complete
+        return _bslash_completions_result(ret, partial, range)
     end
+
+    # In Julia 1.12+, hints are generated on a background thread; calling R from there
+    # is not thread-safe and will crash. Skip R completions for hints.
+    hint && return String[], "", false
 
     # complete r
     utils = findNamespace("utils")
@@ -224,6 +249,12 @@ end
 
 function repl_init(repl)
     mirepl = isdefined(repl, :mi) ? repl.mi : repl
+    # On Julia 1.13+, active_repl is set before atreplinit hooks fire but
+    # interface is only populated later inside run_frontend. Pre-populate it
+    # here (run_frontend checks isdefined and reuses it if already set).
+    if !isdefined(mirepl, :interface)
+        mirepl.interface = REPL.setup_interface(mirepl)
+    end
     main_mode = mirepl.interface.modes[1]
     r_mode = create_r_repl(mirepl, main_mode)
     push!(mirepl.interface.modes, r_mode)

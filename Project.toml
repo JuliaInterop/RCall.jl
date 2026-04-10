@@ -1,6 +1,6 @@
 name = "RCall"
 uuid = "6f49c342-dc21-5d91-9882-a32aef131414"
-version = "0.14.12"
+version = "0.14.13"
 authors = ["Douglas Bates <dmbates@gmail.com>", "Randy Lai <randy.cs.lai@gmail.com>", "Simon Byrne <simonbyrne@gmail.com>"]
 
 [deps]
