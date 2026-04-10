@@ -249,6 +249,12 @@ end
 
 function repl_init(repl)
     mirepl = isdefined(repl, :mi) ? repl.mi : repl
+    # On Julia 1.13+, active_repl is set before atreplinit hooks fire but
+    # interface is only populated later inside run_frontend. Pre-populate it
+    # here (run_frontend checks isdefined and reuses it if already set).
+    if !isdefined(mirepl, :interface)
+        mirepl.interface = REPL.setup_interface(mirepl)
+    end
     main_mode = mirepl.interface.modes[1]
     r_mode = create_r_repl(mirepl, main_mode)
     push!(mirepl.interface.modes, r_mode)
