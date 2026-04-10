@@ -91,7 +91,10 @@ send_repl("\b", false)
 @test check_repl_stdout("julia> ")
 
 send_repl("x = \"orange\"")
-@test check_repl_stdout("x = \"orange\"")
+# Julia 1.13+ applies syntax highlighting to REPL input, so the literal
+# `x = "orange"` is not present verbatim in the output (the quotes are
+# wrapped in ANSI color codes).  Check for the evaluated result instead.
+@test check_repl_stdout("\"orange\"")
 
 send_repl("\$", false)
 @test check_repl_stdout("R> ")

@@ -18,7 +18,7 @@ jobs:
         version:
           - 'min'
           - '1'
-          - 'nightly'
+          - 'pre'
         R:
           - 'release'
           - '4.0'
@@ -49,7 +49,7 @@ jobs:
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
         env:
-            TEST_REPL: ${{ matrix.version == 'min' }}
+            TEST_REPL: true
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v5
         with:
