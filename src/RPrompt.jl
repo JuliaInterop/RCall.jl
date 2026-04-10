@@ -171,6 +171,10 @@ function LineEdit.complete_line(c::RCompletionProvider, s; hint::Bool=false)
         return _bslash_completions_result(ret, partial, range)
     end
 
+    # In Julia 1.12+, hints are generated on a background thread; calling R from there
+    # is not thread-safe and will crash. Skip R completions for hints.
+    hint && return String[], "", false
+
     # complete r
     utils = findNamespace("utils")
     rcall_p(utils[".assignLinebuffer"], partial)
