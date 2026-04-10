@@ -153,10 +153,14 @@ end
         completions = LineEdit.NamedCompletion[LineEdit.NamedCompletion(c.completion,
                                                                         c.name)
                                                for c in ret]
+        # we always return true for the should_complete field because this is only
+        # called after we've checked should_complete
         return completions, String(partial[range]), true
     end
 else
     function _bslash_completions_result(ret, partial, range)
+        # we always return true for the should_complete field because this is only
+        # called after we've checked should_complete
         return map(REPLCompletions.completion_text, ret), partial[range], true
     end
 end
