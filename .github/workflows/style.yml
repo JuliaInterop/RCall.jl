@@ -30,7 +30,7 @@ jobs:
       - uses: julia-actions/setup-julia@v2
         with:
           version: "1"
-      - uses: julia-actions/cache@v3
+      - uses: julia-actions/cache@v3.0.2
       - name: Install JuliaFormatter
         shell: julia --project=@format --color=yes {0}
         run: |
