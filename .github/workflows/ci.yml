@@ -11,6 +11,8 @@ jobs:
   test:
     name: Julia ${{ matrix.version }} - R ${{ matrix.R }} - ${{ matrix.os }} -${{ github.event_name }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
@@ -35,23 +37,25 @@ jobs:
             experimental: false
             R: 'release'
     steps:
-      - uses: actions/checkout@v6
-      - uses: julia-actions/setup-julia@v2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: julia-actions/setup-julia@4c0cb0fce8556fdb04a90347310e5db8b1f98fb9 # v2
         with:
           version: ${{ matrix.version }}
-      - uses: julia-actions/cache@v3
-      - uses: r-lib/actions/setup-r@v2
+      - uses: julia-actions/cache@a45e8fa8be21c18a06b7177052533149e61e9b38 # v3
+      - uses: r-lib/actions/setup-r@a51a8012b0aab7c32ef9d19bf54da93f3254335e # v2
         with:
           use-public-rspm: true
           r-version: ${{ matrix.R }}
       - run: echo "LD_LIBRARY_PATH=$(R RHOME)/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1
+      - uses: julia-actions/julia-buildpkg@e3eb439fad4f9aba7da2667e7510e4a46ebc46e1 # v1
+      - uses: julia-actions/julia-runtest@d60b785c6f2bdf4ebfb18b2b6f7d93b7dfb0efe3 # v1
         env:
             TEST_REPL: true
-      - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v6
+      - uses: julia-actions/julia-processcoverage@03114f09f119417c3242a9fb6e0b722676aedf38 # v1
+      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6
         with:
           file: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
