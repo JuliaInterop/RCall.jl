@@ -38,6 +38,11 @@ end
 
 function rcopy(::Type{FormulaTerm}, l::Ptr{LangSxp})
     expr = rcopy(Expr, l)
+    # special case of a simple variable, like in aes(x, y)
+    if Meta.isexpr(expr, :call) && length(expr.args) == 2 && expr.args[1] == :~
+        return expr
+    end
+    # complex formular
     @eval StatsModels.@formula($expr)
 end
 
