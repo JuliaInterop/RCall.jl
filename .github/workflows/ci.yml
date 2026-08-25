@@ -43,7 +43,7 @@ jobs:
       - uses: julia-actions/setup-julia@fa02766e078afaaf09b14210362cee14137e6a32 # v3.0.2
         with:
           version: ${{ matrix.version }}
-      - uses: julia-actions/cache@a45e8fa8be21c18a06b7177052533149e61e9b38 # v3
+      - uses: julia-actions/cache@b7788abd52452d5bc033d69796e110d9906af4ab # v3.2.0
       - uses: r-lib/actions/setup-r@d3c5be51b12e724e68f33216ca3c148b66d5f0b6 # v2.12.1
         with:
           use-public-rspm: true
