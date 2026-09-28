@@ -50,7 +50,9 @@ if Rhome == ""
     @info ("No R installation found by RCall.jl. " *
            "Precompilation of RCall and all dependent packages postponed. " *
            "Importing RCall will fail until an R installation is configured beforehand.")
-    __precompile__(false)
+    # can't use literal false here or Julia 1.13+ doesn't even attempt precompilation
+    # https://github.com/JuliaInterop/RCall.jl/issues/654
+    __precompile__(Bool(0))
 end
 
 include("types.jl")
