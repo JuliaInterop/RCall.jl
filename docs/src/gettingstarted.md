@@ -163,7 +163,7 @@ The [`robject`](@ref) function converts any julia object to an RObject.
 
 ```@repl 1
 robject(1)
-robject(Dict(:a => 1, :b = 2))
+robject(Dict(:a => 1, :b => 2))
 ```
 
 
