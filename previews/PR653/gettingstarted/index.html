@@ -34,29 +34,29 @@ julia&gt; @rput foo bar
 
 R&gt; foo + bar
 [1] 6</code></pre><h2 id="@R_str-string-macro"><a class="docs-heading-anchor" href="#@R_str-string-macro">@R_str string macro</a><a id="@R_str-string-macro-1"></a><a class="docs-heading-anchor-permalink" href="#@R_str-string-macro" title="Permalink"></a></h2><p>Another way to use RCall is the <a href="../internal/#RCall.@R_str-Tuple{Any}"><code>R&quot;&quot;</code></a> string macro, it is especially useful in script files.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; R&quot;rnorm(10)&quot;</code><code class="nohighlight hljs ansi" style="display:block;">RObject{RealSxp}
- [1] -0.22310334 -0.07355548 -0.99264318  0.45389179 -1.17640458 -1.33284729
- [7]  0.18556619 -0.93873609  0.29285719 -0.17943127</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; x = randn(10)</code><code class="nohighlight hljs ansi" style="display:block;">10-element Vector{Float64}:
-  0.4560844761613324
- -0.9062016132099687
- -0.6370590137064432
-  1.1776001883121758
-  2.1183177441353176
- -0.41306868963654425
-  0.07137411014130891
- -2.3549339476277704
- -1.3460706068191286
-  0.32786261232744635</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; R&quot;t.test($x)&quot;</code><code class="nohighlight hljs ansi" style="display:block;">RObject{VecSxp}
+ [1] -0.3445681  0.4138797 -0.3381757 -0.7072464 -1.1624773 -0.9653229
+ [7]  1.1152306  0.5877314 -1.4622807  1.0202255</code></pre><p>This evaluates the expression inside the string in R, and returns the result as an <a href="../internal/#RCall.RObject"><code>RObject</code></a>, which is a Julia wrapper type around an R object.</p><p>The <code>R&quot;&quot;</code> string macro supports variable substitution of Julia objects via the <code>$</code> symbol, whenever it is not valid R syntax (i.e. when not directly following a symbol or completed expression such as <code>aa$bb</code>):</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; x = randn(10)</code><code class="nohighlight hljs ansi" style="display:block;">10-element Vector{Float64}:
+  0.6454571401508892
+  0.14029124033856044
+  0.8090377408785686
+  0.8787790319165184
+  1.813518841931055
+ -0.22659238851016522
+ -0.7821771987678666
+  0.6993937431869531
+ -1.2878436241712503
+  1.1126085367032577</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; R&quot;t.test($x)&quot;</code><code class="nohighlight hljs ansi" style="display:block;">RObject{VecSxp}
 
 	One Sample t-test
 
 data:  `#JL`$x
-t = -0.37237, df = 9, p-value = 0.7182
+t = 1.2954, df = 9, p-value = 0.2274
 alternative hypothesis: true mean is not equal to 0
 95 percent confidence interval:
- -1.0655666  0.7643477
+ -0.2837812  1.0442759
 sample estimates:
- mean of x
--0.1506095</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;</code><code class="nohighlight hljs ansi" style="display:block;">RObject{VecSxp}
+mean of x
+0.3802473</code></pre><p>It is also possible to pass Julia expressions which are evaluated before being passed to R: these should be included in parentheses</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; R&quot;optim(0, $(x -&gt; x-cos(x)), method=&#39;BFGS&#39;)&quot;</code><code class="nohighlight hljs ansi" style="display:block;">RObject{VecSxp}
 $par
 [1] -1.56343
 
@@ -86,7 +86,7 @@ NULL</code></pre><p>A large chunk of code could be quoted between triple string 
  :vs
  :am
  :gear
- :carb</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; jmtcars[:mpg]</code><code class="nohighlight hljs ansi" style="display:block;">Ptr{RealSxp}(0x0000000003077c10)</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; typeof(jmtcars)</code><code class="nohighlight hljs ansi" style="display:block;">RObject{VecSxp}</code></pre><p>The <a href="../internal/#RCall.rcall-Tuple{Any, Vararg{Any}}"><code>rcall</code></a> function is used to construct function calls.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; rcall(:dim, jmtcars)</code><code class="nohighlight hljs ansi" style="display:block;">RObject{IntSxp}
+ :carb</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; jmtcars[:mpg]</code><code class="nohighlight hljs ansi" style="display:block;">Ptr{RealSxp}(0x000000000ce835d0)</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; typeof(jmtcars)</code><code class="nohighlight hljs ansi" style="display:block;">RObject{VecSxp}</code></pre><p>The <a href="../internal/#RCall.rcall-Tuple{Any, Vararg{Any}}"><code>rcall</code></a> function is used to construct function calls.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; rcall(:dim, jmtcars)</code><code class="nohighlight hljs ansi" style="display:block;">RObject{IntSxp}
 [1] 32 11</code></pre><p>The arguments will be implicitly converted to <code>RObject</code> upon evaluation.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; rcall(:sum, Float64[1.0, 4.0, 6.0])</code><code class="nohighlight hljs ansi" style="display:block;">RObject{RealSxp}
 [1] 11</code></pre><p>The <a href="../internal/#RCall.rcopy-Union{Tuple{RObject{S}}, Tuple{S}} where S&lt;:Sxp"><code>rcopy</code></a> function converts <code>RObject</code>s to Julia objects. It uses a variety of heuristics to pick the most appropriate Julia type:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; rcopy(R&quot;c(1)&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">1.0</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rcopy(R&quot;c(1, 2)&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">2-element Vector{Float64}:
  1.0
@@ -99,7 +99,12 @@ NULL</code></pre><p>A large chunk of code could be quoted between triple string 
  2</code></pre><p>Converter could also be used specifically to yield the desired type.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; convert(Array{Float64}, R&quot;c(1, 2)&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">2-element Vector{Float64}:
  1.0
  2.0</code></pre><p>The <a href="../internal/#RCall.robject-Tuple{Any}"><code>robject</code></a> function converts any julia object to an RObject.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; robject(1)</code><code class="nohighlight hljs ansi" style="display:block;">RObject{IntSxp}
-[1] 1</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; robject(Dict(:a =&gt; 1, :b = 2))</code><code class="nohighlight hljs ansi" style="display:block;">ERROR: syntax: invalid keyword argument name &quot;:b&quot; around REPL[2]:1</code></pre><h2 id="@rlibrary-and-@rimport-macros"><a class="docs-heading-anchor" href="#@rlibrary-and-@rimport-macros"><code>@rlibrary</code> and <code>@rimport</code> macros</a><a id="@rlibrary-and-@rimport-macros-1"></a><a class="docs-heading-anchor-permalink" href="#@rlibrary-and-@rimport-macros" title="Permalink"></a></h2><p>This macro loads all exported functions/objects of an R package to the current module.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; @rlibrary boot</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; city = rcopy(R&quot;boot::city&quot;)  # get some data</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">10×2 DataFrame</span>
+[1] 1</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; robject(Dict(:a =&gt; 1, :b =&gt; 2))</code><code class="nohighlight hljs ansi" style="display:block;">RObject{VecSxp}
+$a
+[1] 1
+
+$b
+[1] 2</code></pre><h2 id="@rlibrary-and-@rimport-macros"><a class="docs-heading-anchor" href="#@rlibrary-and-@rimport-macros"><code>@rlibrary</code> and <code>@rimport</code> macros</a><a id="@rlibrary-and-@rimport-macros-1"></a><a class="docs-heading-anchor-permalink" href="#@rlibrary-and-@rimport-macros" title="Permalink"></a></h2><p>This macro loads all exported functions/objects of an R package to the current module.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; @rlibrary boot</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; city = rcopy(R&quot;boot::city&quot;)  # get some data</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">10×2 DataFrame</span>
 <span class="sgr1"> Row </span>│<span class="sgr1"> u        x       </span>
 <span class="sgr1">     </span>│<span class="sgr90"> Float64  Float64 </span>
 ─────┼──────────────────
@@ -114,10 +119,10 @@ NULL</code></pre><p>A large chunk of code could be quoted between triple string 
    9 │    30.0    111.0
   10 │     2.0     50.0</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; ratio(d, w) = sum(d[!, :x] .* w)/sum(d[!, :u] .* w)</code><code class="nohighlight hljs ansi" style="display:block;">ratio (generic function with 1 method)</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; b = boot(city, ratio, R = 100, stype = &quot;w&quot;);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rcall(:summary, b[:t])</code><code class="nohighlight hljs ansi" style="display:block;">RObject{StrSxp}
        V1
- Min.   :1.240
- 1st Qu.:1.411
- Median :1.503
- Mean   :1.554
- 3rd Qu.:1.625
- Max.   :2.457</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; @rimport base as rbase</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rbase.sum([1, 2, 3], var&quot;rm.na&quot; = true)</code><code class="nohighlight hljs ansi" style="display:block;">RObject{IntSxp}
-[1] 7</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../conversions/">Supported Conversions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Tuesday 15 September 2026 11:37">Tuesday 15 September 2026</span>. Using Julia version 1.12.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+ Min.   :1.184
+ 1st Qu.:1.415
+ Median :1.548
+ Mean   :1.560
+ 3rd Qu.:1.676
+ Max.   :2.101</code></pre><p>Of course, it is highly inefficient, because the data are copying multiple times between R and Julia. The <code>R&quot;&quot;</code> string macro is more recommended for efficiency.</p><p>Some R functions may have keyword arguments which contain dots. RCall provides a string macro to escape those keywords, e.g,</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; @rimport base as rbase</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rbase.sum([1, 2, 3], var&quot;rm.na&quot; = true)</code><code class="nohighlight hljs ansi" style="display:block;">RObject{IntSxp}
+[1] 7</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../conversions/">Supported Conversions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Tuesday 29 September 2026 16:49">Tuesday 29 September 2026</span>. Using Julia version 1.13.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
