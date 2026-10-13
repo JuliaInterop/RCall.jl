@@ -37,25 +37,25 @@ jobs:
             experimental: false
             R: 'release'
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: julia-actions/setup-julia@v3.0.2
+      - uses: julia-actions/setup-julia@v3
         with:
           version: ${{ matrix.version }}
-      - uses: julia-actions/cache@v3.2.0
-      - uses: r-lib/actions/setup-r@v2.13.0
+      - uses: julia-actions/cache@v3
+      - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
           r-version: ${{ matrix.R }}
       - run: echo "LD_LIBRARY_PATH=$(R RHOME)/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         if: matrix.os == 'ubuntu-latest'
       - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1.12.0
+      - uses: julia-actions/julia-runtest@v1
         env:
             TEST_REPL: true
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v7.0.0
+      - uses: codecov/codecov-action@v7
         with:
           file: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
