@@ -86,7 +86,7 @@ rparse(st::AbstractString) = RObject(rparse_p(st))
 
 # Julia 1.14 replaced sigatomic regions with cancellation scopes and deprecated
 # `disable_sigint`; shield from cancellation instead.
-@static if isdefined(Base, :CANCEL_TOKEN)
+if isdefined(Base, :CANCEL_TOKEN)
     shield_sigint(f) = Base.ScopedValues.with(f, Base.CANCEL_TOKEN => nothing)
 else
     shield_sigint(f) = disable_sigint(f)
