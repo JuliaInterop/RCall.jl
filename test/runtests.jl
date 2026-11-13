@@ -3,10 +3,7 @@ include("set_up_tests.jl")
 @testset ExtendedTestSet "installation" include("installation.jl")
 
 # before RCall does anything
-# wrapped in a function because top-level `cglobal((:sym, Mod.lib), T)` fails to lower
-# on Julia 1.14.0-alpha2 ("unsupported or misplaced expression .")
-r_ppstacktop() = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
-const R_PPSTACKTOP_INITIAL = r_ppstacktop()
+const R_PPSTACKTOP_INITIAL = unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int))
 @testset "System configuration" include("system_configuration.jl")
 
 @testset ExtendedTestSet "RCall" begin
@@ -47,5 +44,5 @@ const R_PPSTACKTOP_INITIAL = r_ppstacktop()
     end
 
     # make sure we're back where we started
-    @test r_ppstacktop() == R_PPSTACKTOP_INITIAL
+    @test unsafe_load(cglobal((:R_PPStackTop, RCall.libR), Int)) == R_PPSTACKTOP_INITIAL
 end
