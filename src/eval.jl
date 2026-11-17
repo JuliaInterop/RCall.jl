@@ -84,12 +84,20 @@ end
 "Parse a string as an R expression, returning an RObject."
 rparse(st::AbstractString) = RObject(rparse_p(st))
 
+# Julia 1.14 replaced sigatomic regions with cancellation scopes and deprecated
+# `disable_sigint`; shield from cancellation instead.
+if isdefined(Base, :CANCEL_TOKEN)
+    shield_sigint(f) = Base.ScopedValues.with(f, Base.CANCEL_TOKEN => nothing)
+else
+    shield_sigint(f) = disable_sigint(f)
+end
+
 """
 A pure julia wrapper of R_tryEval.
 """
 function tryEval(expr::Ptr{S}, env::Ptr{EnvSxp}=sexp(Const.GlobalEnv),
                  status::Ref{Cint}=Ref{Cint}()) where {S<:Sxp}
-    disable_sigint() do
+    shield_sigint() do
         protect(expr)
         protect(env)
         val = ccall((:R_tryEval, libR), Ptr{UnknownSxp}, (Ptr{S}, Ptr{EnvSxp}, Ref{Cint}),
