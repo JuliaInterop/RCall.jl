@@ -55,6 +55,7 @@ if Rhome == ""
     __precompile__(Bool(0))
 end
 
+include("debuginfo.jl")
 include("types.jl")
 include("Const.jl")
 include("methods.jl")
