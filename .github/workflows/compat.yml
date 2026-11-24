@@ -11,7 +11,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: julia-actions/setup-julia@da908477b5db94c10ffce8cfea9f2b3b9d5db687 # v3.0.3
+      - uses: julia-actions/setup-julia@v3.0.3
         with:
           version: lts    
       - name: Pkg.add("CompatHelper")
